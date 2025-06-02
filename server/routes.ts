@@ -16,7 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/weather", async (req, res) => {
     try {
       const location = req.query.location as string || "San Francisco,CA";
-      const apiKey = process.env.WEATHER_API_KEY || process.env.OPENWEATHER_API_KEY || "your-weather-key";
+      const apiKey = process.env.OPENWEATHERMAP_API_KEY;
       
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`
