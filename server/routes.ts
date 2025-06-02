@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
 
@@ -10,6 +11,8 @@ const openai = new OpenAI({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  setupAuth(app);
   const DEFAULT_USER_ID = 1; // Demo user
 
   // Weather API

@@ -4,8 +4,6 @@ import {
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
   type ChatMessage, type InsertChatMessage
 } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -58,9 +56,14 @@ export class MemStorage implements IStorage {
     this.currentTaskId = 1;
     this.currentPrefsId = 1;
     this.currentMessageId = 1;
-    
-    // Create default user for demo
-    this.createUser({ username: "demo", password: "demo" });
+
+    // Create a default user for testing
+    const defaultUser: User = {
+      id: 1,
+      username: "demo",
+      password: "password"
+    };
+    this.users.set(1, defaultUser);
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -68,7 +71,12 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -87,20 +95,19 @@ export class MemStorage implements IStorage {
     const note: Note = { 
       ...noteData, 
       id, 
-      tags: noteData.tags || null,
-      createdAt: new Date()
+      createdAt: new Date() 
     };
     this.notes.set(id, note);
     return note;
   }
 
   async updateNote(id: number, noteData: Partial<InsertNote>): Promise<Note | undefined> {
-    const existing = this.notes.get(id);
-    if (!existing) return undefined;
+    const existingNote = this.notes.get(id);
+    if (!existingNote) return undefined;
     
-    const updated = { ...existing, ...noteData };
-    this.notes.set(id, updated);
-    return updated;
+    const updatedNote = { ...existingNote, ...noteData };
+    this.notes.set(id, updatedNote);
+    return updatedNote;
   }
 
   async deleteNote(id: number): Promise<boolean> {
@@ -116,23 +123,19 @@ export class MemStorage implements IStorage {
     const task: Task = { 
       ...taskData, 
       id, 
-      description: taskData.description || null,
-      priority: taskData.priority || "medium",
-      completed: taskData.completed || false,
-      dueDate: taskData.dueDate || null,
-      createdAt: new Date()
+      createdAt: new Date() 
     };
     this.tasks.set(id, task);
     return task;
   }
 
   async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    const existing = this.tasks.get(id);
-    if (!existing) return undefined;
+    const existingTask = this.tasks.get(id);
+    if (!existingTask) return undefined;
     
-    const updated = { ...existing, ...taskData };
-    this.tasks.set(id, updated);
-    return updated;
+    const updatedTask = { ...existingTask, ...taskData };
+    this.tasks.set(id, updatedTask);
+    return updatedTask;
   }
 
   async deleteTask(id: number): Promise<boolean> {
@@ -146,26 +149,21 @@ export class MemStorage implements IStorage {
   async createUserPreferences(prefsData: InsertUserPreferences & { userId: number }): Promise<UserPreferences> {
     const id = this.currentPrefsId++;
     const prefs: UserPreferences = { 
+      ...prefsData, 
       id,
-      userId: prefsData.userId,
-      agentName: prefsData.agentName || "Alex",
-      userName: prefsData.userName || "User",
-      initialized: prefsData.initialized || false,
-      paydayDate: prefsData.paydayDate || null,
-      paydayFrequency: prefsData.paydayFrequency || "bi-weekly",
-      location: prefsData.location || null
+      userId: prefsData.userId
     };
     this.userPreferences.set(id, prefs);
     return prefs;
   }
 
   async updateUserPreferences(userId: number, prefsData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
-    const existing = Array.from(this.userPreferences.values()).find(prefs => prefs.userId === userId);
-    if (!existing) return undefined;
+    const existingPrefs = Array.from(this.userPreferences.values()).find(prefs => prefs.userId === userId);
+    if (!existingPrefs) return undefined;
     
-    const updated = { ...existing, ...prefsData };
-    this.userPreferences.set(existing.id, updated);
-    return updated;
+    const updatedPrefs = { ...existingPrefs, ...prefsData };
+    this.userPreferences.set(existingPrefs.id, updatedPrefs);
+    return updatedPrefs;
   }
 
   async getChatMessagesByUserId(userId: number): Promise<ChatMessage[]> {
@@ -177,113 +175,11 @@ export class MemStorage implements IStorage {
     const message: ChatMessage = { 
       ...messageData, 
       id, 
-      createdAt: new Date()
+      createdAt: new Date() 
     };
     this.chatMessages.set(id, message);
     return message;
   }
 }
 
-export class DatabaseStorage implements IStorage {
-  // User operations (mandatory for Replit Auth)
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
-  }
-
-  // Notes operations
-  async getNotesByUserId(userId: string): Promise<Note[]> {
-    return await db.select().from(notes).where(eq(notes.userId, userId));
-  }
-
-  async createNote(noteData: InsertNote & { userId: string }): Promise<Note> {
-    const [note] = await db.insert(notes).values(noteData).returning();
-    return note;
-  }
-
-  async updateNote(id: number, noteData: Partial<InsertNote>): Promise<Note | undefined> {
-    const [note] = await db
-      .update(notes)
-      .set(noteData)
-      .where(eq(notes.id, id))
-      .returning();
-    return note;
-  }
-
-  async deleteNote(id: number): Promise<boolean> {
-    const result = await db.delete(notes).where(eq(notes.id, id));
-    return result.rowCount > 0;
-  }
-
-  // Tasks operations
-  async getTasksByUserId(userId: string): Promise<Task[]> {
-    return await db.select().from(tasks).where(eq(tasks.userId, userId));
-  }
-
-  async createTask(taskData: InsertTask & { userId: string }): Promise<Task> {
-    const [task] = await db.insert(tasks).values(taskData).returning();
-    return task;
-  }
-
-  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    const [task] = await db
-      .update(tasks)
-      .set(taskData)
-      .where(eq(tasks.id, id))
-      .returning();
-    return task;
-  }
-
-  async deleteTask(id: number): Promise<boolean> {
-    const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.rowCount > 0;
-  }
-
-  // User preferences operations
-  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
-    const [prefs] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
-    return prefs;
-  }
-
-  async createUserPreferences(prefsData: InsertUserPreferences & { userId: string }): Promise<UserPreferences> {
-    const [prefs] = await db.insert(userPreferences).values(prefsData).returning();
-    return prefs;
-  }
-
-  async updateUserPreferences(userId: string, prefsData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
-    const [prefs] = await db
-      .update(userPreferences)
-      .set(prefsData)
-      .where(eq(userPreferences.userId, userId))
-      .returning();
-    return prefs;
-  }
-
-  // Chat messages operations
-  async getChatMessagesByUserId(userId: string): Promise<ChatMessage[]> {
-    return await db.select().from(chatMessages).where(eq(chatMessages.userId, userId));
-  }
-
-  async createChatMessage(messageData: InsertChatMessage & { userId: string }): Promise<ChatMessage> {
-    const [message] = await db.insert(chatMessages).values(messageData).returning();
-    return message;
-  }
-}
-
-// Use in-memory storage for now, will be replaced with database once Supabase is configured
 export const storage = new MemStorage();
