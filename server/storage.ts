@@ -4,6 +4,8 @@ import {
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
   type ChatMessage, type InsertChatMessage
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -182,4 +184,104 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  // Notes operations
+  async getNotesByUserId(userId: number): Promise<Note[]> {
+    return await db.select().from(notes).where(eq(notes.userId, userId));
+  }
+
+  async createNote(noteData: InsertNote & { userId: number }): Promise<Note> {
+    const [note] = await db.insert(notes).values(noteData).returning();
+    return note;
+  }
+
+  async updateNote(id: number, noteData: Partial<InsertNote>): Promise<Note | undefined> {
+    const [note] = await db
+      .update(notes)
+      .set(noteData)
+      .where(eq(notes.id, id))
+      .returning();
+    return note;
+  }
+
+  async deleteNote(id: number): Promise<boolean> {
+    const result = await db.delete(notes).where(eq(notes.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // Tasks operations
+  async getTasksByUserId(userId: number): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.userId, userId));
+  }
+
+  async createTask(taskData: InsertTask & { userId: number }): Promise<Task> {
+    const [task] = await db.insert(tasks).values(taskData).returning();
+    return task;
+  }
+
+  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
+    const [task] = await db
+      .update(tasks)
+      .set(taskData)
+      .where(eq(tasks.id, id))
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // User preferences operations
+  async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
+    const [prefs] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
+    return prefs;
+  }
+
+  async createUserPreferences(prefsData: InsertUserPreferences & { userId: number }): Promise<UserPreferences> {
+    const [prefs] = await db.insert(userPreferences).values(prefsData).returning();
+    return prefs;
+  }
+
+  async updateUserPreferences(userId: number, prefsData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
+    const [prefs] = await db
+      .update(userPreferences)
+      .set(prefsData)
+      .where(eq(userPreferences.userId, userId))
+      .returning();
+    return prefs;
+  }
+
+  // Chat messages operations
+  async getChatMessagesByUserId(userId: number): Promise<ChatMessage[]> {
+    return await db.select().from(chatMessages).where(eq(chatMessages.userId, userId));
+  }
+
+  async createChatMessage(messageData: InsertChatMessage & { userId: number }): Promise<ChatMessage> {
+    const [message] = await db.insert(chatMessages).values(messageData).returning();
+    return message;
+  }
+}
+
+// Use database storage for production
+export const storage = process.env.NODE_ENV === 'production' ? new DatabaseStorage() : new MemStorage();
