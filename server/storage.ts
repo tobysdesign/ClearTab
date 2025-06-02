@@ -1,6 +1,6 @@
 import { 
   users, notes, tasks, userPreferences, chatMessages,
-  type User, type UpsertUser, type Note, type InsertNote, 
+  type User, type InsertUser, type Note, type InsertNote, 
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
   type ChatMessage, type InsertChatMessage
 } from "@shared/schema";
@@ -8,30 +8,31 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  // User methods (mandatory for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  // User methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   
   // Notes methods
-  getNotesByUserId(userId: string): Promise<Note[]>;
-  createNote(note: InsertNote & { userId: string }): Promise<Note>;
+  getNotesByUserId(userId: number): Promise<Note[]>;
+  createNote(note: InsertNote & { userId: number }): Promise<Note>;
   updateNote(id: number, note: Partial<InsertNote>): Promise<Note | undefined>;
   deleteNote(id: number): Promise<boolean>;
   
   // Tasks methods
-  getTasksByUserId(userId: string): Promise<Task[]>;
-  createTask(task: InsertTask & { userId: string }): Promise<Task>;
+  getTasksByUserId(userId: number): Promise<Task[]>;
+  createTask(task: InsertTask & { userId: number }): Promise<Task>;
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: number): Promise<boolean>;
   
   // User preferences methods
-  getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
-  createUserPreferences(prefs: InsertUserPreferences & { userId: string }): Promise<UserPreferences>;
-  updateUserPreferences(userId: string, prefs: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
+  getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
+  createUserPreferences(prefs: InsertUserPreferences & { userId: number }): Promise<UserPreferences>;
+  updateUserPreferences(userId: number, prefs: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
   
   // Chat messages methods
-  getChatMessagesByUserId(userId: string): Promise<ChatMessage[]>;
-  createChatMessage(message: InsertChatMessage & { userId: string }): Promise<ChatMessage>;
+  getChatMessagesByUserId(userId: number): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage & { userId: number }): Promise<ChatMessage>;
 }
 
 export class MemStorage implements IStorage {
@@ -284,4 +285,5 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Use in-memory storage for now, will be replaced with database once Supabase is configured
+export const storage = new MemStorage();
