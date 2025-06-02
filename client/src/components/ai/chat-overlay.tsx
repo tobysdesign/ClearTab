@@ -18,7 +18,7 @@ interface ChatOverlayProps {
 export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: ChatOverlayProps) {
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -151,7 +151,7 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
                       {userName.charAt(0).toUpperCase()}
                     </div>
                     <Card className="bg-primary text-primary-foreground p-3 max-w-md">
-                      <p className="text-sm">{msg.message}</p>
+                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                     </Card>
                   </>
                 ) : (
@@ -160,7 +160,7 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
                       <Bot className="h-3 w-3 text-dark-primary" />
                     </div>
                     <Card className="bg-secondary p-3 max-w-md">
-                      <p className="text-sm text-text-primary">{msg.message}</p>
+                      <p className="text-sm text-text-primary whitespace-pre-wrap">{msg.message}</p>
                     </Card>
                   </>
                 )}
@@ -189,21 +189,28 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
         </div>
 
         <div className="p-4 border-t border-border">
-          <div className="flex space-x-2">
-            <Input
+          <div className="flex space-x-2 items-end">
+            <textarea
               ref={inputRef}
               id="chatInput"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (try #note or #task for quick creation)"
-              className="flex-1 bg-secondary border-border text-text-primary placeholder-text-muted"
+              className="flex-1 bg-secondary border border-border rounded-md px-3 py-2 text-text-primary placeholder-text-muted resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
               disabled={chatMutation.isPending}
+              rows={1}
+              style={{ height: 'auto' }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                target.style.height = target.scrollHeight + 'px';
+              }}
             />
             <Button 
               onClick={handleSendMessage}
               disabled={!message.trim() || chatMutation.isPending}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10"
             >
               <Send className="h-4 w-4" />
             </Button>

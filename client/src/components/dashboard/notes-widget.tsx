@@ -98,21 +98,38 @@ export default function NotesWidget() {
     });
   };
 
-  const handleSaveNote = () => {
+  const generateUntitledName = () => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    const timeStr = now.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    return `Untitled ${dateStr} ${timeStr}`;
+  };
+
+  const autoSaveNote = () => {
     if (!editingNote) return;
 
-    if (isNewNote) {
+    const title = editingNote.title?.trim() || generateUntitledName();
+    const content = editingNote.content?.trim() || "";
+
+    if (isNewNote && (content || editingNote.title?.trim())) {
       createNoteMutation.mutate({
-        title: editingNote.title || "Untitled Note",
-        content: editingNote.content || "",
+        title,
+        content,
         tags: editingNote.tags || []
       });
     } else if (selectedNoteId) {
       updateNoteMutation.mutate({
         id: selectedNoteId,
         data: {
-          title: editingNote.title,
-          content: editingNote.content,
+          title,
+          content,
           tags: editingNote.tags
         }
       });
@@ -227,31 +244,28 @@ export default function NotesWidget() {
         {editingNote ? (
           <>
             {/* Header */}
-            <div className="p-3 border-b border-border flex items-center justify-between">
-              <Input
+            <div className="p-3 border-b border-border">
+              <input
                 value={editingNote.title || ""}
-                onChange={(e) => setEditingNote(prev => prev ? {...prev, title: e.target.value} : null)}
+                onChange={(e) => {
+                  setEditingNote(prev => prev ? {...prev, title: e.target.value} : null);
+                  setTimeout(autoSaveNote, 1000);
+                }}
                 placeholder="Note title..."
-                className="text-sm font-medium border-none p-0 h-auto focus-visible:ring-0 bg-transparent"
+                className="w-full text-sm font-medium border-none outline-none bg-transparent placeholder:text-muted-foreground"
               />
-              <Button
-                onClick={handleSaveNote}
-                disabled={createNoteMutation.isPending || updateNoteMutation.isPending}
-                size="sm"
-                className="h-6 text-xs"
-              >
-                <Save className="w-3 h-3 mr-1" />
-                {isNewNote ? "Create" : "Save"}
-              </Button>
             </div>
 
             {/* Content */}
             <div className="flex-1 p-3">
-              <Textarea
+              <textarea
                 value={editingNote.content || ""}
-                onChange={(e) => setEditingNote(prev => prev ? {...prev, content: e.target.value} : null)}
+                onChange={(e) => {
+                  setEditingNote(prev => prev ? {...prev, content: e.target.value} : null);
+                  setTimeout(autoSaveNote, 1000);
+                }}
                 placeholder="Add anything notable..."
-                className="w-full h-full resize-none border-none p-0 focus-visible:ring-0 bg-transparent text-sm"
+                className="w-full h-full resize-none border-none outline-none bg-transparent text-sm placeholder:text-muted-foreground"
               />
             </div>
           </>
