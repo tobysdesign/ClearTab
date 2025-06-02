@@ -284,6 +284,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Chat messages endpoint
+  app.get("/api/chat/messages", async (req, res) => {
+    try {
+      const messages = await storage.getChatMessagesByUserId(DEFAULT_USER_ID);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chat messages" });
+    }
+  });
+
   // Calendar events endpoint (mock data)
   app.get("/api/calendar", async (req, res) => {
     try {

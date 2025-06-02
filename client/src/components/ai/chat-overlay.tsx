@@ -180,6 +180,7 @@ export default function ChatOverlay({ isOpen, onClose }: ChatOverlayProps) {
           <div className="flex space-x-2">
             <Input
               ref={inputRef}
+              id="chatInput"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}

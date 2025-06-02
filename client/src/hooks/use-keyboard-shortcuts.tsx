@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 export function useKeyboardShortcuts() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showShortcutHelper, setShowShortcutHelper] = useState(false);
+  const [initialMessage, setInitialMessage] = useState("");
 
   const openChat = useCallback(() => {
     setIsChatOpen(true);
@@ -10,18 +11,12 @@ export function useKeyboardShortcuts() {
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false);
+    setInitialMessage("");
   }, []);
 
   const openChatWithPrefix = useCallback((prefix: string) => {
+    setInitialMessage(prefix);
     setIsChatOpen(true);
-    // This would need to be handled by the ChatOverlay component
-    setTimeout(() => {
-      const chatInput = document.querySelector('#chatInput') as HTMLInputElement;
-      if (chatInput) {
-        chatInput.value = prefix;
-        chatInput.focus();
-      }
-    }, 100);
   }, []);
 
   useEffect(() => {

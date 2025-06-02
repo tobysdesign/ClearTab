@@ -85,6 +85,7 @@ export class MemStorage implements IStorage {
     const note: Note = { 
       ...noteData, 
       id, 
+      tags: noteData.tags || null,
       createdAt: new Date()
     };
     this.notes.set(id, note);
@@ -113,6 +114,10 @@ export class MemStorage implements IStorage {
     const task: Task = { 
       ...taskData, 
       id, 
+      description: taskData.description || null,
+      priority: taskData.priority || "medium",
+      completed: taskData.completed || false,
+      dueDate: taskData.dueDate || null,
       createdAt: new Date()
     };
     this.tasks.set(id, task);
@@ -138,7 +143,16 @@ export class MemStorage implements IStorage {
 
   async createUserPreferences(prefsData: InsertUserPreferences & { userId: number }): Promise<UserPreferences> {
     const id = this.currentPrefsId++;
-    const prefs: UserPreferences = { ...prefsData, id };
+    const prefs: UserPreferences = { 
+      id,
+      userId: prefsData.userId,
+      agentName: prefsData.agentName || "Alex",
+      userName: prefsData.userName || "User",
+      initialized: prefsData.initialized || false,
+      paydayDate: prefsData.paydayDate || null,
+      paydayFrequency: prefsData.paydayFrequency || "bi-weekly",
+      location: prefsData.location || null
+    };
     this.userPreferences.set(id, prefs);
     return prefs;
   }
