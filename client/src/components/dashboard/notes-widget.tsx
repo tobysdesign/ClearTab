@@ -4,11 +4,13 @@ import { StickyNote, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useChatContext } from "@/hooks/use-chat-context";
 import type { Note } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
 export default function NotesWidget() {
   const queryClient = useQueryClient();
+  const { openChatWithPrompt } = useChatContext();
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
@@ -106,10 +108,10 @@ export default function NotesWidget() {
         <Button 
           variant="ghost" 
           className="w-full justify-start text-xs text-text-muted hover:text-text-secondary"
-          onClick={() => {/* Open chat with #note */}}
+          onClick={() => openChatWithPrompt("Create a new note for me")}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add new note (Ctrl+N)
+          Add new note (Cmd+N)
         </Button>
       </div>
     </div>

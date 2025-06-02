@@ -5,11 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useChatContext } from "@/hooks/use-chat-context";
 import type { Task } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
 
 export default function TasksWidget() {
   const queryClient = useQueryClient();
+  const { openChatWithPrompt } = useChatContext();
   
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -128,10 +130,10 @@ export default function TasksWidget() {
         <Button 
           variant="ghost" 
           className="w-full justify-start text-xs text-text-muted hover:text-text-secondary"
-          onClick={() => {/* Open chat with #task */}}
+          onClick={() => openChatWithPrompt("Create a new task for me")}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add new task (Ctrl+T)
+          Add new task (Cmd+T)
         </Button>
       </div>
     </div>
