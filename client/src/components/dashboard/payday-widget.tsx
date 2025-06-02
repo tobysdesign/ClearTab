@@ -1,0 +1,72 @@
+import { useQuery } from "@tanstack/react-query";
+import { CalendarDays } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import type { UserPreferences } from "@shared/schema";
+
+export default function PaydayWidget() {
+  const { data: preferences } = useQuery<UserPreferences>({
+    queryKey: ["/api/preferences"],
+  });
+
+  const calculatePaydayInfo = () => {
+    if (!preferences?.paydayDate) {
+      return {
+        daysLeft: 12,
+        nextDate: "Dec 15",
+        progress: 60
+      };
+    }
+
+    const today = new Date();
+    const payday = new Date(preferences.paydayDate);
+    const diffTime = payday.getTime() - today.getTime();
+    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    const frequency = preferences.paydayFrequency;
+    const totalDays = frequency === 'weekly' ? 7 : frequency === 'bi-weekly' ? 14 : 30;
+    const progress = Math.max(0, ((totalDays - daysLeft) / totalDays) * 100);
+
+    return {
+      daysLeft: Math.max(0, daysLeft),
+      nextDate: payday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      progress: Math.min(100, progress)
+    };
+  };
+
+  const { daysLeft, nextDate, progress } = calculatePaydayInfo();
+
+  return (
+    <div className="widget">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-text-primary">Payday</h2>
+        <CalendarDays className="h-5 w-5 text-text-secondary" />
+      </div>
+      
+      <div className="text-center">
+        <div className="text-4xl font-light mb-2 text-text-primary">
+          {daysLeft}
+        </div>
+        <div className="text-sm text-text-secondary mb-3">
+          Days Left
+        </div>
+        <div className="space-y-2 text-xs text-text-muted">
+          <div className="flex justify-between">
+            <span>Next Date</span>
+            <span>{nextDate}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Frequency</span>
+            <span className="capitalize">{preferences?.paydayFrequency || 'Bi-weekly'}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-auto pt-3 border-t border-border">
+        <Progress 
+          value={progress} 
+          className="w-full h-2 bg-muted"
+        />
+      </div>
+    </div>
+  );
+}
