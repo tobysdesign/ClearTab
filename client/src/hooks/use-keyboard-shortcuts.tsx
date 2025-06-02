@@ -85,5 +85,6 @@ export function useKeyboardShortcuts() {
     openChat,
     closeChat,
     showShortcutHelper,
+    initialMessage,
   };
 }

@@ -7,7 +7,7 @@ import { useAgentInit } from "@/hooks/use-agent-init";
 
 export default function Dashboard() {
   const { isFirstTime, isInitFlowOpen, closeInitFlow } = useAgentInit();
-  const { isChatOpen, openChat, closeChat } = useKeyboardShortcuts();
+  const { isChatOpen, openChat, closeChat, initialMessage } = useKeyboardShortcuts();
 
   useEffect(() => {
     document.title = "AI Productivity Dashboard";
@@ -27,6 +27,7 @@ export default function Dashboard() {
       <ChatOverlay 
         isOpen={isChatOpen && !isInitFlowOpen}
         onClose={closeChat}
+        initialMessage={initialMessage}
       />
     </div>
   );

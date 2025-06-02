@@ -12,9 +12,10 @@ import type { ChatMessage, UserPreferences } from "@shared/schema";
 interface ChatOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  initialMessage?: string;
 }
 
-export default function ChatOverlay({ isOpen, onClose }: ChatOverlayProps) {
+export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: ChatOverlayProps) {
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,8 +68,11 @@ export default function ChatOverlay({ isOpen, onClose }: ChatOverlayProps) {
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+      if (initialMessage && initialMessage !== message) {
+        setMessage(initialMessage);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
