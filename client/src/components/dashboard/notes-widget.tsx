@@ -125,9 +125,9 @@ export default function NotesWidget() {
   };
 
   return (
-    <div className="widget notes-widget h-full flex">
+    <div className="widget notes-widget h-full flex flex-row">
       {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-12' : 'w-48'} transition-all duration-300 border-r border-border bg-card/50`}>
+      <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border bg-card/50 min-w-8`}>
         <div className="p-2 border-b border-border flex items-center justify-between">
           {!sidebarCollapsed && (
             <>
