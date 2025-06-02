@@ -38,6 +38,14 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
+      
+      // If a task or note was created, refresh those widgets
+      if (data.action === "create_task" || data.task) {
+        queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+      }
+      if (data.action === "create_note" || data.note) {
+        queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+      }
       if (data.note) {
         queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
         toast({

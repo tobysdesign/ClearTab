@@ -251,12 +251,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ message: response, task });
       }
 
-      // Regular AI chat
+      // Regular AI chat with action detection
       const systemPrompt = `You are ${agentName}, a helpful AI assistant for ${userName}'s productivity dashboard. 
       You can help create notes and tasks, answer questions, and provide assistance with productivity.
       
-      When suggesting to create content, always ask for confirmation first unless the user uses hashtag shortcuts.
-      Keep responses concise and helpful. You have memory of previous conversations.`;
+      When the user asks you to create a task or note, you should immediately do it and confirm what you created.
+      
+      Respond in JSON format with:
+      {
+        "message": "your response text",
+        "action": "create_task" | "create_note" | null,
+        "actionData": { task/note data if creating }
+      }`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -265,19 +271,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...contextMessages,
           { role: "user", content: message }
         ],
-        max_tokens: 500
+        max_tokens: 500,
+        response_format: { type: "json_object" }
       });
 
-      const aiResponse = completion.choices[0].message.content || "I'm sorry, I couldn't process that request.";
+      const aiResponse = completion.choices[0].message.content || '{"message": "I\'m sorry, I couldn\'t process that request.", "action": null}';
+      
+      let responseData;
+      try {
+        responseData = JSON.parse(aiResponse);
+      } catch {
+        responseData = { message: aiResponse, action: null };
+      }
+
+      // Handle actions
+      if (responseData.action === "create_task" && responseData.actionData) {
+        try {
+          const task = await storage.createTask({
+            title: responseData.actionData.title || "New Task",
+            description: responseData.actionData.description || "",
+            priority: responseData.actionData.priority || "medium",
+            userId: DEFAULT_USER_ID
+          });
+          responseData.task = task;
+          responseData.message = `I've created the task: "${task.title}"`;
+        } catch (error) {
+          responseData.message = "Sorry, I couldn't create that task. Please try again.";
+        }
+      }
+
+      if (responseData.action === "create_note" && responseData.actionData) {
+        try {
+          const note = await storage.createNote({
+            title: responseData.actionData.title || "New Note",
+            content: responseData.actionData.content || "",
+            tags: responseData.actionData.tags || [],
+            userId: DEFAULT_USER_ID
+          });
+          responseData.note = note;
+          responseData.message = `I've created the note: "${note.title}"`;
+        } catch (error) {
+          responseData.message = "Sorry, I couldn't create that note. Please try again.";
+        }
+      }
 
       // Store AI response
       await storage.createChatMessage({
-        message: aiResponse,
+        message: responseData.message,
         role: "assistant",
         userId: DEFAULT_USER_ID
       });
 
-      res.json({ message: aiResponse });
+      res.json(responseData);
     } catch (error) {
       console.error("Chat API error:", error);
       res.status(500).json({ 

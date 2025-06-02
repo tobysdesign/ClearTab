@@ -2,6 +2,7 @@ import { apiRequest } from "./queryClient";
 
 export interface ChatResponse {
   message: string;
+  action?: string;
   note?: any;
   task?: any;
 }
