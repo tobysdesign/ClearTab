@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import BentoGrid from "@/components/dashboard/bento-grid";
 import ChatOverlay from "@/components/ai/chat-overlay";
 import AgentInitFlow from "@/components/ai/agent-init-flow";
+import FloatingAIButton from "@/components/floating-ai-button";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAgentInit } from "@/hooks/use-agent-init";
 
@@ -16,6 +17,8 @@ export default function Dashboard() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <BentoGrid />
+      
+      <FloatingAIButton />
       
       {isInitFlowOpen && (
         <AgentInitFlow 
