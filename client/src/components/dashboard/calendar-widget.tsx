@@ -19,10 +19,12 @@ export default function CalendarWidget() {
   };
 
   return (
-    <div className="widget">
+    <div className="widget group">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-muted-foreground">#Events</h2>
-        <Calendar className="h-5 w-5 text-text-secondary" />
+        <h2 className="text-sm font-medium text-muted-foreground">Events</h2>
+        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreHorizontal className="h-3 w-3" />
+        </Button>
       </div>
       
       <div className="space-y-3">
