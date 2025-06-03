@@ -4,6 +4,7 @@ import { storage } from "./storage";
 // Google auth will be replaced with Supabase auth
 import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
+import { mem0Service } from "./mem0-service";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -207,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Chat endpoints
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, useMemory = true } = req.body;
       
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
@@ -231,6 +232,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: msg.role as "user" | "assistant",
         content: msg.message
       }));
+
+      // Retrieve relevant memories if using memory
+      let memoryContext = "";
+      if (useMemory) {
+        try {
+          const userId = DEFAULT_USER_ID.toString();
+          const relevantMemories = await mem0Service.searchMemories(message, userId);
+          if (relevantMemories && relevantMemories.length > 0) {
+            memoryContext = "\n\nRelevant memories:\n" + 
+              relevantMemories.map(mem => `- ${mem.memory}`).join("\n");
+          }
+        } catch (error) {
+          console.error("Memory retrieval error:", error);
+          // Continue without memory if service fails
+        }
+      }
 
       // Check for hashtag shortcuts anywhere in the message
       const hasNote = message.includes('#note');
@@ -290,6 +307,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Available actions:
       - create_task: Creates a new task
       - create_note: Creates a new note
+      
+      ${memoryContext}
       
       Respond in JSON format with:
       {
@@ -356,6 +375,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: DEFAULT_USER_ID
       });
 
+      // Store conversation in Mem0 for learning
+      if (useMemory) {
+        try {
+          const userId = DEFAULT_USER_ID.toString();
+          const conversationMessages = [
+            { role: "user", content: message },
+            { role: "assistant", content: responseData.message }
+          ];
+          await mem0Service.addMemory(conversationMessages, userId, {
+            timestamp: new Date().toISOString(),
+            hasActions: responseData.action ? true : false
+          });
+        } catch (error) {
+          console.error("Memory storage error:", error);
+          // Continue without memory storage if service fails
+        }
+      }
+
       res.json(responseData);
     } catch (error) {
       console.error("Chat API error:", error);
@@ -373,6 +410,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(messages);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch chat messages" });
+    }
+  });
+
+  // Memory management endpoints
+  app.get("/api/memories", async (req, res) => {
+    try {
+      const userId = DEFAULT_USER_ID.toString();
+      const memories = await mem0Service.getMemories(userId);
+      res.json(memories);
+    } catch (error) {
+      console.error("Get memories error:", error);
+      res.status(500).json({ error: "Failed to fetch memories" });
+    }
+  });
+
+  app.delete("/api/memories/:id", async (req, res) => {
+    try {
+      const memoryId = req.params.id;
+      await mem0Service.deleteMemory(memoryId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete memory error:", error);
+      res.status(500).json({ error: "Failed to delete memory" });
+    }
+  });
+
+  app.post("/api/memories/search", async (req, res) => {
+    try {
+      const { query } = req.body;
+      const userId = DEFAULT_USER_ID.toString();
+      const memories = await mem0Service.searchMemories(query, userId);
+      res.json(memories);
+    } catch (error) {
+      console.error("Search memories error:", error);
+      res.status(500).json({ error: "Failed to search memories" });
     }
   });
 

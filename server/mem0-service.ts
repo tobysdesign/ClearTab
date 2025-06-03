@@ -1,21 +1,34 @@
 import { MemoryClient } from 'mem0ai';
 
 export class Mem0Service {
-  private client: MemoryClient;
+  private client: MemoryClient | null = null;
 
   constructor() {
-    if (!process.env.MEM0_API_KEY) {
-      throw new Error('MEM0_API_KEY environment variable is required');
+    try {
+      if (process.env.MEM0_API_KEY) {
+        this.client = new MemoryClient({
+          apiKey: process.env.MEM0_API_KEY,
+        });
+      } else {
+        console.warn('MEM0_API_KEY not found, memory features will be disabled');
+      }
+    } catch (error) {
+      console.error('Failed to initialize Mem0 client:', error);
     }
-    
-    this.client = new MemoryClient({
-      apiKey: process.env.MEM0_API_KEY,
-    });
+  }
+
+  private isEnabled(): boolean {
+    return this.client !== null;
   }
 
   async addMemory(messages: any[], userId: string, metadata?: Record<string, any>) {
+    if (!this.isEnabled()) {
+      console.warn('Mem0 service not enabled, skipping memory addition');
+      return null;
+    }
+    
     try {
-      const result = await this.client.add(messages, {
+      const result = await this.client!.add(messages, {
         user_id: userId,
         metadata: metadata || {}
       });
@@ -27,8 +40,13 @@ export class Mem0Service {
   }
 
   async getMemories(userId: string, query?: string) {
+    if (!this.isEnabled()) {
+      console.warn('Mem0 service not enabled, returning empty memories');
+      return [];
+    }
+    
     try {
-      const result = await this.client.getAll({
+      const result = await this.client!.getAll({
         user_id: userId,
         ...(query && { query })
       });
@@ -40,8 +58,13 @@ export class Mem0Service {
   }
 
   async searchMemories(query: string, userId: string) {
+    if (!this.isEnabled()) {
+      console.warn('Mem0 service not enabled, returning empty search results');
+      return [];
+    }
+    
     try {
-      const result = await this.client.search(query, {
+      const result = await this.client!.search(query, {
         user_id: userId
       });
       return result;
@@ -52,8 +75,13 @@ export class Mem0Service {
   }
 
   async deleteMemory(memoryId: string) {
+    if (!this.isEnabled()) {
+      console.warn('Mem0 service not enabled, skipping memory deletion');
+      return null;
+    }
+    
     try {
-      const result = await this.client.delete(memoryId);
+      const result = await this.client!.delete(memoryId);
       return result;
     } catch (error) {
       console.error('Mem0 delete memory error:', error);
@@ -62,8 +90,13 @@ export class Mem0Service {
   }
 
   async updateMemory(memoryId: string, data: string) {
+    if (!this.isEnabled()) {
+      console.warn('Mem0 service not enabled, skipping memory update');
+      return null;
+    }
+    
     try {
-      const result = await this.client.update(memoryId, data);
+      const result = await this.client!.update(memoryId, data);
       return result;
     } catch (error) {
       console.error('Mem0 update memory error:', error);
