@@ -106,8 +106,14 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
   if (!isOpen) return null;
 
   return (
-    <div className="chat-overlay">
-      <div className="chat-container animate-slide-up">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div 
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transform transition-all duration-300 ease-out"
+        style={{
+          transformOrigin: 'bottom center',
+          animation: isOpen ? 'modalGrowFromFAB 0.4s ease-out forwards' : 'none'
+        }}
+      >
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-text-secondary rounded-full flex items-center justify-center">
