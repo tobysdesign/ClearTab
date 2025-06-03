@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface CalendarEvent {
   id: number;
@@ -10,6 +11,8 @@ interface CalendarEvent {
 }
 
 export default function CalendarWidget() {
+  const [activeTab, setActiveTab] = useState<'today' | 'tomorrow'>('today');
+  
   const { data: events = [], isLoading } = useQuery<CalendarEvent[]>({
     queryKey: ["/api/calendar"],
   });
@@ -18,12 +21,57 @@ export default function CalendarWidget() {
     return index === 0 ? 'border-text-secondary' : 'border-text-muted';
   };
 
+  const handleEventClick = (event: CalendarEvent) => {
+    // Open Google Calendar - using dummy URL for now
+    window.open('https://calendar.google.com', '_blank');
+  };
+
+  const filterEventsByTab = (events: CalendarEvent[]) => {
+    const today = new Date();
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    
+    return events.filter(event => {
+      const eventDate = new Date(event.date);
+      if (activeTab === 'today') {
+        return eventDate.toDateString() === today.toDateString();
+      } else {
+        return eventDate.toDateString() === tomorrow.toDateString();
+      }
+    });
+  };
+
+  const filteredEvents = filterEventsByTab(events);
+
   return (
     <div className="widget group">
       <div className="flex items-center justify-end mb-4">
         <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreHorizontal className="h-3 w-3" />
         </Button>
+      </div>
+      
+      {/* Tabs */}
+      <div className="flex mb-4 border-b border-border">
+        <button
+          onClick={() => setActiveTab('today')}
+          className={`flex-1 py-2 px-3 text-xs font-medium transition-colors ${
+            activeTab === 'today'
+              ? 'text-text-primary border-b-2 border-text-secondary'
+              : 'text-text-muted hover:text-text-secondary'
+          }`}
+        >
+          Today
+        </button>
+        <button
+          onClick={() => setActiveTab('tomorrow')}
+          className={`flex-1 py-2 px-3 text-xs font-medium transition-colors ${
+            activeTab === 'tomorrow'
+              ? 'text-text-primary border-b-2 border-text-secondary'
+              : 'text-text-muted hover:text-text-secondary'
+          }`}
+        >
+          Tomorrow
+        </button>
       </div>
       
       <div className="space-y-3">
@@ -36,40 +84,27 @@ export default function CalendarWidget() {
               </div>
             ))}
           </div>
-        ) : events.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           <div className="text-center text-text-muted py-4">
             <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No upcoming events</p>
+            <p className="text-sm">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
           </div>
         ) : (
-          events.map((event, index) => (
+          filteredEvents.map((event, index) => (
             <div 
               key={event.id} 
-              className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-dark-primary rounded-r transition-colors cursor-pointer p-1`}
+              onClick={() => handleEventClick(event)}
+              className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2`}
             >
               <div className="text-xs font-medium text-text-primary">
                 {event.title}
               </div>
               <div className="text-xs text-text-muted">
-                {new Date(event.date).toDateString() === new Date().toDateString() 
-                  ? `Today, ${event.time}`
-                  : new Date(event.date).toDateString() === new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString()
-                  ? `Tomorrow, ${event.time}`
-                  : `${new Date(event.date).toLocaleDateString()}, ${event.time}`
-                }
+                {event.time}
               </div>
             </div>
           ))
         )}
-      </div>
-      
-      <div className="mt-auto pt-3 border-t border-border">
-        <Button 
-          variant="ghost" 
-          className="w-full text-left text-xs text-text-muted hover:text-text-secondary"
-        >
-          View all events →
-        </Button>
       </div>
     </div>
   );
