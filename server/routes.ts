@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/weather", async (req, res) => {
     try {
       const location = req.query.location as string || "San Francisco,CA";
-      const apiKey = process.env.WEATHER_API_KEY;
+      const apiKey = process.env.OPENWEATHERMAP_API_KEY || process.env.WEATHER_API_KEY;
       
       if (!apiKey) {
         return res.status(500).json({ 
