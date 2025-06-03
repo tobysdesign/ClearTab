@@ -72,8 +72,14 @@ export class MemStorage implements IStorage {
     // Create a default user for testing
     const defaultUser: User = {
       id: 1,
-      username: "demo",
-      password: "password"
+      googleId: null,
+      email: "demo@example.com",
+      name: "Demo User",
+      picture: null,
+      accessToken: null,
+      refreshToken: null,
+      tokenExpiry: null,
+      createdAt: new Date()
     };
     this.users.set(1, defaultUser);
   }
@@ -84,7 +90,16 @@ export class MemStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     for (const user of this.users.values()) {
-      if (user.username === username) {
+      if (user.email === username) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.googleId === googleId) {
         return user;
       }
     }
@@ -93,9 +108,59 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      googleId: null,
+      picture: null,
+      accessToken: null,
+      refreshToken: null,
+      tokenExpiry: null,
+      createdAt: new Date()
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async createGoogleUser(userData: {
+    googleId: string;
+    email: string;
+    name: string;
+    picture?: string;
+    accessToken?: string;
+    refreshToken?: string;
+  }): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = {
+      id,
+      googleId: userData.googleId,
+      email: userData.email,
+      name: userData.name,
+      picture: userData.picture || null,
+      accessToken: userData.accessToken || null,
+      refreshToken: userData.refreshToken || null,
+      tokenExpiry: userData.accessToken ? new Date(Date.now() + 3600 * 1000) : null,
+      createdAt: new Date()
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser: User = {
+      ...user,
+      accessToken,
+      refreshToken: refreshToken || user.refreshToken,
+      tokenExpiry: new Date(Date.now() + 3600 * 1000)
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   async getNotesByUserId(userId: number): Promise<Note[]> {
@@ -202,7 +267,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db.select().from(users).where(eq(users.email, username));
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
     return user;
   }
 
@@ -210,6 +280,46 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async createGoogleUser(userData: {
+    googleId: string;
+    email: string;
+    name: string;
+    picture?: string;
+    accessToken?: string;
+    refreshToken?: string;
+  }): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        googleId: userData.googleId,
+        email: userData.email,
+        name: userData.name,
+        picture: userData.picture || null,
+        accessToken: userData.accessToken || null,
+        refreshToken: userData.refreshToken || null,
+        tokenExpiry: userData.accessToken ? new Date(Date.now() + 3600 * 1000) : null
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User> {
+    const updateData: any = {
+      accessToken,
+      tokenExpiry: new Date(Date.now() + 3600 * 1000)
+    };
+    if (refreshToken) {
+      updateData.refreshToken = refreshToken;
+    }
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
       .returning();
     return user;
   }
