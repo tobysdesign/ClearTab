@@ -77,10 +77,11 @@ export default function NotesWidget() {
   const selectedNote = notes.find(note => note.id === selectedNoteId);
 
   useEffect(() => {
-    if (selectedNote && !editingNote) {
+    if (selectedNote) {
       setEditingNote(selectedNote);
+      setIsNewNote(false);
     }
-  }, [selectedNote]);
+  }, [selectedNoteId, selectedNote]);
 
   // Initialize with new note if no notes exist
   useEffect(() => {

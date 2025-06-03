@@ -259,12 +259,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       You can help create notes and tasks, answer questions, and provide assistance with productivity.
       
       When the user asks you to create a task or note, you should immediately do it and confirm what you created.
+      When the user asks to convert a note to a task or vice versa, create the new item with the same content and mention that you've converted it.
+      
+      Available actions:
+      - create_task: Creates a new task
+      - create_note: Creates a new note
       
       Respond in JSON format with:
       {
         "message": "your response text",
         "action": "create_task" | "create_note" | null,
-        "actionData": { task/note data if creating }
+        "actionData": { title: "title", description: "description", content: "content", priority: "medium" }
       }`;
 
       const completion = await openai.chat.completions.create({
