@@ -64,7 +64,7 @@ export default function TasksWidget() {
         </div>
       </div>
       
-      <div className="flex-1 space-y-3">
+      <div className="flex-1 space-y-3 overflow-y-auto max-h-[400px]">
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(4)].map((_, i) => (

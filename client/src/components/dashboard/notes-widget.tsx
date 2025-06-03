@@ -18,6 +18,7 @@ export default function NotesWidget() {
   const [editingNote, setEditingNote] = useState<Partial<Note> | null>(null);
   const [isNewNote, setIsNewNote] = useState(false);
   const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
@@ -36,12 +37,16 @@ export default function NotesWidget() {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
       setSelectedNoteId(newNote.id);
       setIsNewNote(false);
-      setEditingNote(null);
+      setEditingNote(newNote);
+      setIsSaving(false);
       toast({
         title: "Note created",
         description: "Your note has been saved successfully.",
       });
     },
+    onError: () => {
+      setIsSaving(false);
+    }
   });
 
   const updateNoteMutation = useMutation({
@@ -115,13 +120,15 @@ export default function NotesWidget() {
   };
 
   const autoSaveNote = () => {
-    if (!editingNote) return;
+    if (!editingNote || isSaving) return;
 
     const title = editingNote.title?.trim() || generateUntitledName();
     const content = editingNote.content?.trim() || "";
 
     // Only save if there's actual content
     if (!content && !editingNote.title?.trim()) return;
+
+    setIsSaving(true);
 
     if (isNewNote) {
       createNoteMutation.mutate({
@@ -145,7 +152,7 @@ export default function NotesWidget() {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
-    const newTimeout = setTimeout(autoSaveNote, 2000);
+    const newTimeout = setTimeout(autoSaveNote, 3000);
     setSaveTimeout(newTimeout);
   };
 

@@ -216,42 +216,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
 
       // Check for hashtag shortcuts anywhere in the message
-      if (message.includes('#note')) {
-        const noteContent = message.replace('#note', '').trim();
-        const note = await storage.createNote({
-          title: noteContent.substring(0, 50) || "Untitled Note",
-          content: noteContent,
-          tags: [],
-          userId: DEFAULT_USER_ID
-        });
+      const hasNote = message.includes('#note');
+      const hasTask = message.includes('#task');
+      
+      if (hasNote || hasTask) {
+        const results = [];
+        let responseMessage = "";
         
-        const response = `Note created: "${note.title}"`;
+        if (hasNote) {
+          const noteContent = message.replace('#note', '').replace('#task', '').trim();
+          const note = await storage.createNote({
+            title: noteContent.substring(0, 50) || "Untitled Note",
+            content: noteContent,
+            tags: [],
+            userId: DEFAULT_USER_ID
+          });
+          results.push({ type: 'note', data: note });
+          responseMessage += `Note created: "${note.title}"`;
+        }
+        
+        if (hasTask) {
+          const taskContent = message.replace('#task', '').replace('#note', '').trim();
+          const task = await storage.createTask({
+            title: taskContent || "Untitled Task",
+            description: "",
+            priority: "medium",
+            userId: DEFAULT_USER_ID
+          });
+          results.push({ type: 'task', data: task });
+          if (responseMessage) responseMessage += " and ";
+          responseMessage += `Task created: "${task.title}"`;
+        }
+        
         await storage.createChatMessage({
-          message: response,
+          message: responseMessage,
           role: "assistant",
           userId: DEFAULT_USER_ID
         });
         
-        return res.json({ message: response, note });
-      }
-
-      if (message.includes('#task')) {
-        const taskContent = message.replace('#task', '').trim();
-        const task = await storage.createTask({
-          title: taskContent || "Untitled Task",
-          description: "",
-          priority: "medium",
-          userId: DEFAULT_USER_ID
+        const response: any = { message: responseMessage };
+        results.forEach(result => {
+          if (result.type === 'note') response.note = result.data;
+          if (result.type === 'task') response.task = result.data;
         });
         
-        const response = `Task created: "${task.title}"`;
-        await storage.createChatMessage({
-          message: response,
-          role: "assistant",
-          userId: DEFAULT_USER_ID
-        });
-        
-        return res.json({ message: response, task });
+        return res.json(response);
       }
 
       // Regular AI chat with action detection
