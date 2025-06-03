@@ -4,8 +4,14 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  googleId: text("google_id").unique(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  picture: text("picture"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const notes = pgTable("notes", {
@@ -49,8 +55,8 @@ export const chatMessages = pgTable("chat_messages", {
 
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+  email: true,
+  name: true,
 });
 
 export const insertNoteSchema = createInsertSchema(notes).omit({

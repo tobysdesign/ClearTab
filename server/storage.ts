@@ -11,7 +11,17 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  createGoogleUser(userData: {
+    googleId: string;
+    email: string;
+    name: string;
+    picture?: string;
+    accessToken?: string;
+    refreshToken?: string;
+  }): Promise<User>;
+  updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User>;
   
   // Notes methods
   getNotesByUserId(userId: number): Promise<Note[]>;
