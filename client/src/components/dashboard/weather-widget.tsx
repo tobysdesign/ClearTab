@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { CloudSun, Thermometer, Droplets } from "lucide-react";
+import { CloudSun, Thermometer, Droplets, MoreHorizontal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface WeatherData {
   temperature: number;
@@ -43,8 +44,10 @@ export default function WeatherWidget() {
     return (
       <div className="widget">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-muted-foreground">#Weather</h2>
-          <CloudSun className="h-5 w-5 text-text-secondary" />
+          <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+          <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
         </div>
         <div className="text-center text-text-muted">
           <CloudSun className="h-12 w-12 mx-auto mb-3 opacity-50" />
@@ -58,8 +61,10 @@ export default function WeatherWidget() {
   return (
     <div className="widget">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-muted-foreground">#Weather</h2>
-        <CloudSun className="h-5 w-5 text-text-secondary" />
+        <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreHorizontal className="h-3 w-3" />
+        </Button>
       </div>
       
       {weather && (

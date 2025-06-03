@@ -169,7 +169,7 @@ export default function NotesWidget() {
     <div className="widget notes-widget h-full flex flex-row">
       {/* Sidebar */}
       <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border min-w-8`}>
-        <div className="p-2 border-b border-border flex items-center justify-between min-h-[32px]">
+        <div className="p-2 flex items-center justify-between min-h-[32px]">
           {!sidebarCollapsed && (
             <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Notes</h3>
           )}
