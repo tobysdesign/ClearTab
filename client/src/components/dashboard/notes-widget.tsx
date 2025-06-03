@@ -236,18 +236,7 @@ export default function NotesWidget() {
               </div>
             )}
             
-            {!sidebarCollapsed && !isNewNote && (
-              <div className="mt-4 pt-3 border-t border-border">
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
-                  onClick={handleCreateNewNote}
-                >
-                  <Plus className="h-3 w-3 mr-2" />
-                  Add new note
-                </Button>
-              </div>
-            )}
+
           </div>
         )}
       </div>
@@ -300,6 +289,17 @@ export default function NotesWidget() {
             </div>
           </div>
         )}
+      </div>
+      
+      <div className="mt-4 pt-3 border-t border-border">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
+          onClick={handleCreateNewNote}
+        >
+          <Plus className="h-3 w-3 mr-2" />
+          Add new note
+        </Button>
       </div>
     </div>
   );
