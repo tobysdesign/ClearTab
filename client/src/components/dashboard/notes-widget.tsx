@@ -168,15 +168,15 @@ export default function NotesWidget() {
     <div className="widget notes-widget h-full flex flex-row">
       {/* Sidebar */}
       <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border bg-card/50 min-w-8`}>
-        <div className="p-2 border-b border-border flex items-center justify-between">
+        <div className="p-2 border-b border-border flex items-center justify-between min-h-[32px]">
           {!sidebarCollapsed && (
-            <h3 className="text-sm font-medium text-muted-foreground leading-4">#Notes</h3>
+            <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Notes</h3>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="h-4 w-4 p-0 flex items-center justify-center"
+            className="h-4 w-4 p-0 flex items-center justify-center shrink-0"
           >
             {sidebarCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
           </Button>

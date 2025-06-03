@@ -17,7 +17,12 @@ export default function TasksWidget() {
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Task>>({});
+  const [editForm, setEditForm] = useState<{
+    title?: string;
+    description?: string;
+    priority?: string;
+    dueDate?: string;
+  }>({});
   
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -55,7 +60,7 @@ export default function TasksWidget() {
       title: task.title,
       description: task.description,
       priority: task.priority,
-      dueDate: task.dueDate
+      dueDate: task.dueDate ? (typeof task.dueDate === 'string' ? task.dueDate : new Date(task.dueDate).toISOString().split('T')[0]) : ''
     });
   };
 
@@ -74,7 +79,11 @@ export default function TasksWidget() {
 
   const formatCompactDate = (dateString: string | null) => {
     if (!dateString) return null;
-    return format(new Date(dateString), 'M/d');
+    try {
+      return format(new Date(dateString), 'M/d');
+    } catch {
+      return null;
+    }
   };
 
   const getPriorityColor = (priority: string) => {
@@ -171,7 +180,7 @@ export default function TasksWidget() {
                         </Select>
                         <Input
                           type="date"
-                          value={editForm.dueDate || ''}
+                          value={editForm.dueDate ? (typeof editForm.dueDate === 'string' ? editForm.dueDate : new Date(editForm.dueDate).toISOString().split('T')[0]) : ''}
                           onChange={(e) => setEditForm({...editForm, dueDate: e.target.value})}
                           className="h-8 text-xs"
                         />
@@ -187,7 +196,7 @@ export default function TasksWidget() {
                     </div>
                   </Card>
                 ) : (
-                  <div className="flex items-center space-x-3 p-2 rounded hover:bg-muted/50 transition-colors cursor-pointer group">
+                  <div className="flex items-center space-x-3 p-2 rounded transition-colors cursor-pointer group">
                     <Checkbox
                       checked={task.completed}
                       onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
