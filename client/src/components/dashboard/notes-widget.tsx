@@ -184,59 +184,70 @@ export default function NotesWidget() {
         </div>
 
         {!sidebarCollapsed && (
-          <div className="overflow-y-auto h-[calc(100%-40px)]">
-            {isLoading ? (
-              <div className="p-2 space-y-2">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="p-2 rounded border animate-pulse">
-                    <div className="h-3 bg-muted rounded mb-1"></div>
-                    <div className="h-2 bg-muted rounded w-3/4"></div>
-                  </div>
-                ))}
-              </div>
-            ) : notes.length === 0 && !isNewNote ? (
-              <div className="p-2 text-center text-muted-foreground">
-                <StickyNote className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-xs">No notes yet</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 h-6 text-xs"
-                  onClick={handleCreateNewNote}
-                >
-                  Create first note
-                </Button>
-              </div>
-            ) : (
-              <div className="p-1">
-                {notes.map((note) => (
-                  <div
-                    key={note.id}
-                    className={`p-2 mb-1 rounded cursor-pointer ${
-                      selectedNoteId === note.id ? 'bg-muted border border-border' : ''
-                    }`}
-                    onClick={() => {
-                      setSelectedNoteId(note.id);
-                      setIsNewNote(false);
-                    }}
+          <div className="flex flex-col h-[calc(100%-40px)]">
+            <div className="flex-1 overflow-y-auto">
+              {isLoading ? (
+                <div className="p-2 space-y-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="p-2 rounded border animate-pulse">
+                      <div className="h-3 bg-muted rounded mb-1"></div>
+                      <div className="h-2 bg-muted rounded w-3/4"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : notes.length === 0 && !isNewNote ? (
+                <div className="p-2 text-center text-muted-foreground">
+                  <StickyNote className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-xs">No notes yet</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 h-6 text-xs"
+                    onClick={handleCreateNewNote}
                   >
-                    <h4 className="font-medium text-xs pt-0 pb-1.5 break-words">
-                      {note.title}
-                    </h4>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {note.content}
-                    </p>
-                  </div>
-                ))}
-                {isNewNote && (
-                  <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
-                    <p className="text-xs font-medium text-muted-foreground">New Note</p>
-                  </div>
-                )}
-              </div>
-            )}
+                    Create first note
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-1">
+                  {notes.map((note) => (
+                    <div
+                      key={note.id}
+                      className={`p-2 mb-1 rounded cursor-pointer ${
+                        selectedNoteId === note.id ? 'bg-muted border border-border' : ''
+                      }`}
+                      onClick={() => {
+                        setSelectedNoteId(note.id);
+                        setIsNewNote(false);
+                      }}
+                    >
+                      <h4 className="font-medium text-xs pt-0 pb-1.5 break-words">
+                        {note.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {note.content}
+                      </p>
+                    </div>
+                  ))}
+                  {isNewNote && (
+                    <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
+                      <p className="text-xs font-medium text-muted-foreground">New Note</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             
-
+            <div className="mt-4 pt-3 border-t border-border">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
+                onClick={handleCreateNewNote}
+              >
+                <Plus className="h-3 w-3 mr-2" />
+                Add new note
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -289,17 +300,6 @@ export default function NotesWidget() {
             </div>
           </div>
         )}
-      </div>
-      
-      <div className="mt-4 pt-3 border-t border-border">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
-          onClick={handleCreateNewNote}
-        >
-          <Plus className="h-3 w-3 mr-2" />
-          Add new note
-        </Button>
       </div>
     </div>
   );
