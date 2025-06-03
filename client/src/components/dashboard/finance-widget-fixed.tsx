@@ -105,7 +105,7 @@ export default function FinanceWidget() {
   };
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium flex items-center justify-end">
           <Popover open={isOpen} onOpenChange={handleOpenChange}>
@@ -202,7 +202,7 @@ export default function FinanceWidget() {
           </Popover>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 flex-1 flex flex-col">
         <div className="grid grid-cols-2 gap-4">
           {/* Payday Section */}
           <div className="space-y-2 text-left">
