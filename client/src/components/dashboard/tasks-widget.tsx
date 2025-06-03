@@ -74,7 +74,7 @@ export default function TasksWidget() {
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
-                  className="mt-0 flex-shrink-0 mr-2"
+                  className="mt-1.5 flex-shrink-0 mr-2"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
@@ -118,7 +118,7 @@ export default function TasksWidget() {
                     </div>
                     <div className="flex items-start ml-1">
                       {task.dueDate && (
-                        <span className="text-xs text-muted-foreground leading-tight mt-0">
+                        <span className="text-xs text-muted-foreground leading-tight mt-1.5">
                           {format(new Date(task.dueDate), 'M/d')}
                         </span>
                       )}
