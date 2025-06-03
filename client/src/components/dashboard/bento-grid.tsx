@@ -1,9 +1,8 @@
 import NotesWidget from "./notes-widget";
 import TasksWidget from "./tasks-widget";
 import WeatherWidget from "./weather-widget";
-import EnhancedPaydayWidget from "./enhanced-payday-widget";
+import FinanceWidget from "./finance-widget";
 import CalendarWidget from "./calendar-widget";
-import BudgetWidget from "./budget-widget";
 
 export default function BentoGrid() {
   return (
@@ -11,8 +10,7 @@ export default function BentoGrid() {
       <NotesWidget />
       <TasksWidget />
       <WeatherWidget />
-      <EnhancedPaydayWidget />
-      <BudgetWidget />
+      <FinanceWidget />
       <CalendarWidget />
     </div>
   );
