@@ -44,7 +44,7 @@ export default function CalendarWidget() {
 
   return (
     <div className="widget group">
-      <div className="flex items-center justify-end mb-4">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-1">
           <button
             onClick={() => setActiveTab('today')}
@@ -66,10 +66,10 @@ export default function CalendarWidget() {
           >
             Tomorrow
           </button>
-          <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
         </div>
+        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreHorizontal className="h-3 w-3" />
+        </Button>
       </div>
       
       <div className="space-y-3">
