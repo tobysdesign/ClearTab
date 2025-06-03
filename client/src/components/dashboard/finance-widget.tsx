@@ -230,44 +230,55 @@ export default function FinanceWidget() {
           </Popover>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Payday Section */}
-        <div className="space-y-2">
-          <div className="text-xs text-muted-foreground font-medium">Next Payday</div>
-          {daysUntilPayday !== null ? (
-            <div>
-              <div className="text-xl font-bold text-primary">
-                {daysUntilPayday} {daysUntilPayday === 1 ? 'day' : 'days'}
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Payday Section */}
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground font-medium">Next Payday</div>
+            {daysUntilPayday !== null ? (
+              <div>
+                <div className="text-xl font-bold text-primary">
+                  {daysUntilPayday}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {daysUntilPayday === 1 ? 'day' : 'days'}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground capitalize">
-                {preferences?.paydayFrequency?.replace("-", " ") || 'bi-weekly'}
+            ) : (
+              <div className="text-xs text-muted-foreground py-2">
+                Set payday
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-xs text-muted-foreground py-2">
-              Set payday to track payments
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Daily Budget Section */}
-        <div className="space-y-2 border-t pt-3">
-          <div className="text-xs text-muted-foreground font-medium">Est. Daily Spend</div>
-          {dailyBudget > 0 ? (
-            <div className="flex items-center justify-between">
-              <div className="text-xl font-bold text-primary">
-                ${dailyBudget}
+          {/* Daily Budget Section */}
+          <div className="space-y-2">
+            <div className="text-xs text-muted-foreground font-medium">Est. Daily Spend</div>
+            {dailyBudget > 0 ? (
+              <div>
+                <div className="text-xl font-bold text-primary">
+                  ${dailyBudget}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  per day
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                per day
+            ) : (
+              <div className="text-xs text-muted-foreground py-2">
+                Set salary
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-xs text-muted-foreground py-2">
-              Set salary to track daily budget
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        
+        {/* Frequency indicator */}
+        {preferences?.paydayFrequency && (
+          <div className="text-center border-t pt-2">
+            <div className="text-xs text-muted-foreground capitalize">
+              {preferences.paydayFrequency.replace("-", " ")} payments
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
