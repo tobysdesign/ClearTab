@@ -79,17 +79,18 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
 
   useEffect(() => {
     if (isOpen) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 300);
+      // Start animation immediately when opening
+      setTimeout(() => setIsAnimating(true), 50);
       
       if (inputRef.current) {
-        inputRef.current.focus();
-        if (initialMessage && initialMessage !== message) {
-          setMessage(initialMessage);
-        }
+        // Focus input after animation starts
+        setTimeout(() => {
+          inputRef.current?.focus();
+          if (initialMessage && initialMessage !== message) {
+            setMessage(initialMessage);
+          }
+        }, 100);
       }
-      
-      return () => clearTimeout(timer);
     }
   }, [isOpen, initialMessage]);
 
@@ -131,17 +132,22 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4 transition-opacity duration-300 ${
+      isClosing ? 'opacity-0' : 'opacity-100'
+    }`}>
       <div 
         ref={modalRef}
-        className={`bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transition-all duration-300 ease-out ${
-          isClosing 
-            ? 'transform scale-95 opacity-0' 
-            : 'transform scale-100 opacity-100'
-        }`}
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
         style={{
-          transform: isClosing ? 'scale(0.95) translateY(10px)' : 'scale(1) translateY(0)',
-          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          transform: isClosing 
+            ? 'translateY(100%) scale(0.95)' 
+            : isAnimating 
+              ? 'translateY(0) scale(1)' 
+              : 'translateY(100%) scale(0.95)',
+          transition: isClosing 
+            ? 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)' 
+            : 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          transformOrigin: 'bottom center'
         }}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
