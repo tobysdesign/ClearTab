@@ -43,7 +43,7 @@ export default function WeatherWidget() {
     return (
       <div className="widget">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-primary">Weather</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">#Weather</h2>
           <CloudSun className="h-5 w-5 text-text-secondary" />
         </div>
         <div className="text-center text-text-muted">
@@ -58,7 +58,7 @@ export default function WeatherWidget() {
   return (
     <div className="widget">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-text-primary">Weather</h2>
+        <h2 className="text-sm font-medium text-muted-foreground">#Weather</h2>
         <CloudSun className="h-5 w-5 text-text-secondary" />
       </div>
       

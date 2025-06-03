@@ -46,7 +46,7 @@ export default function CalendarWidget() {
               key={event.id} 
               className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-dark-primary rounded-r transition-colors cursor-pointer p-1`}
             >
-              <div className="text-sm font-medium text-text-primary">
+              <div className="text-xs font-medium text-text-primary">
                 {event.title}
               </div>
               <div className="text-xs text-text-muted">
