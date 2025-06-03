@@ -74,7 +74,7 @@ export default function TasksWidget() {
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
-                  className="mt-1.5 flex-shrink-0 mr-2"
+                  className="mt-1.5 flex-shrink-0 mr-2 text-muted-foreground border-muted-foreground"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
