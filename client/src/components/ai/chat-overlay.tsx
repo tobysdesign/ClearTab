@@ -79,6 +79,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
 
   useEffect(() => {
     if (isOpen) {
+      // Reset states when opening
+      setIsClosing(false);
       // Start animation immediately when opening
       setTimeout(() => setIsAnimating(true), 50);
       
@@ -91,6 +93,10 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
           }
         }, 100);
       }
+    } else {
+      // Reset animation states when closing
+      setIsAnimating(false);
+      setIsClosing(false);
     }
   }, [isOpen, initialMessage]);
 
@@ -107,16 +113,15 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
 
   const handleClose = () => {
     setIsClosing(true);
-    setIsAnimating(true);
+    setIsAnimating(false);
     setTimeout(() => {
       setIsClosing(false);
-      setIsAnimating(false);
       if (onCloseAnimated) {
         onCloseAnimated();
       } else {
         onClose();
       }
-    }, 300);
+    }, 350);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

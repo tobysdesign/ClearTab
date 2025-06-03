@@ -9,14 +9,7 @@ export default function FloatingAIButton() {
   const modalRef = useRef<HTMLDivElement>(null);
 
   const handleAnimatedClose = () => {
-    if (modalRef.current) {
-      modalRef.current.style.animation = 'modalShrinkToFAB 0.4s ease-out forwards';
-      setTimeout(() => {
-        setIsChatOpen(false);
-      }, 400);
-    } else {
-      setIsChatOpen(false);
-    }
+    setIsChatOpen(false);
   };
 
   useEffect(() => {
