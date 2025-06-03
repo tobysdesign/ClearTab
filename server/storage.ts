@@ -1,8 +1,8 @@
 import { 
-  users, notes, tasks, userPreferences, chatMessages,
+  users, notes, tasks, userPreferences, chatMessages, memoryUsage,
   type User, type InsertUser, type Note, type InsertNote, 
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
-  type ChatMessage, type InsertChatMessage
+  type ChatMessage, type InsertChatMessage, type MemoryUsage, type InsertMemoryUsage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -43,6 +43,11 @@ export interface IStorage {
   // Chat messages methods
   getChatMessagesByUserId(userId: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage & { userId: number }): Promise<ChatMessage>;
+  
+  // Memory usage tracking methods
+  getMemoryUsage(): Promise<MemoryUsage | undefined>;
+  updateMemoryUsage(totalMemories: number, monthlyRetrievals?: number): Promise<MemoryUsage>;
+  incrementRetrievals(): Promise<MemoryUsage>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,6 +56,7 @@ export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   private userPreferences: Map<number, UserPreferences>;
   private chatMessages: Map<number, ChatMessage>;
+  private memoryUsageData: MemoryUsage;
   private currentUserId: number;
   private currentNoteId: number;
   private currentTaskId: number;

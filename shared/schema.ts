@@ -53,6 +53,16 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Global memory usage tracking table
+export const memoryUsage = pgTable("memory_usage", {
+  id: serial("id").primaryKey(),
+  totalMemories: integer("total_memories").default(0),
+  monthlyRetrievals: integer("monthly_retrievals").default(0),
+  lastRetrievalReset: timestamp("last_retrieval_reset").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -92,3 +102,5 @@ export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+export type MemoryUsage = typeof memoryUsage.$inferSelect;
+export type InsertMemoryUsage = typeof memoryUsage.$inferInsert;
