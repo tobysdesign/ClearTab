@@ -7,8 +7,8 @@ export interface ChatResponse {
   task?: any;
 }
 
-export async function sendChatMessage(message: string): Promise<ChatResponse> {
-  const response = await apiRequest("POST", "/api/chat", { message });
+export async function sendChatMessage(message: string, useMemory: boolean = true): Promise<ChatResponse> {
+  const response = await apiRequest("POST", "/api/chat", { message, useMemory });
   return response.json();
 }
 
