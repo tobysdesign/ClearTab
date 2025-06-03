@@ -89,7 +89,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
+    for (const user of Array.from(this.users.values())) {
       if (user.email === username) {
         return user;
       }
@@ -98,7 +98,7 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByGoogleId(googleId: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
+    for (const user of Array.from(this.users.values())) {
       if (user.googleId === googleId) {
         return user;
       }
@@ -172,7 +172,8 @@ export class MemStorage implements IStorage {
     const note: Note = { 
       ...noteData, 
       id, 
-      createdAt: new Date() 
+      createdAt: new Date(),
+      tags: noteData.tags || null
     };
     this.notes.set(id, note);
     return note;
@@ -198,9 +199,14 @@ export class MemStorage implements IStorage {
   async createTask(taskData: InsertTask & { userId: number }): Promise<Task> {
     const id = this.currentTaskId++;
     const task: Task = { 
-      ...taskData, 
-      id, 
-      createdAt: new Date() 
+      id,
+      userId: taskData.userId,
+      title: taskData.title,
+      description: taskData.description || null,
+      priority: taskData.priority || "medium",
+      completed: taskData.completed || false,
+      dueDate: taskData.dueDate || null,
+      createdAt: new Date()
     };
     this.tasks.set(id, task);
     return task;

@@ -11,9 +11,18 @@ const openai = new OpenAI({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup Google OAuth authentication
-  setupGoogleAuth(app);
   const DEFAULT_USER_ID = 1; // Demo user
+
+  // Simple auth endpoint for development
+  app.get("/api/auth/user", (req, res) => {
+    // Return demo user for development
+    res.json({
+      id: 1,
+      name: "Demo User",
+      email: "demo@example.com",
+      picture: null
+    });
+  });
 
   // Weather API
   app.get("/api/weather", async (req, res) => {
@@ -21,12 +30,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = req.query.location as string || "San Francisco,CA";
       const apiKey = process.env.WEATHER_API_KEY;
       
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: "Weather API key not configured",
+          message: "Please provide a valid OpenWeatherMap API key"
+        });
+      }
+      
       const response = await fetch(
         `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`
       );
       
       if (!response.ok) {
-        throw new Error(`Weather API error: ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(`Weather API error: ${response.status} - ${errorData}`);
       }
       
       const data = await response.json();
