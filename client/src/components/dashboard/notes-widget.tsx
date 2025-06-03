@@ -167,7 +167,7 @@ export default function NotesWidget() {
   return (
     <div className="widget notes-widget h-full flex flex-row">
       {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border bg-card/50 min-w-8`}>
+      <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border min-w-8`}>
         <div className="p-2 border-b border-border flex items-center justify-between min-h-[32px]">
           {!sidebarCollapsed && (
             <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Notes</h3>
@@ -208,11 +208,6 @@ export default function NotesWidget() {
               </div>
             ) : (
               <div className="p-1">
-                {isNewNote && (
-                  <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
-                    <p className="text-xs font-medium text-muted-foreground">New Note</p>
-                  </div>
-                )}
                 {notes.map((note) => (
                   <div
                     key={note.id}
@@ -224,7 +219,7 @@ export default function NotesWidget() {
                       setIsNewNote(false);
                     }}
                   >
-                    <h4 className="font-medium text-xs mb-1 line-clamp-1">
+                    <h4 className="font-medium text-xs line-clamp-1 pt-0 pb-1.5">
                       {note.title}
                     </h4>
                     <p className="text-xs text-muted-foreground line-clamp-2">
@@ -232,6 +227,11 @@ export default function NotesWidget() {
                     </p>
                   </div>
                 ))}
+                {isNewNote && (
+                  <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
+                    <p className="text-xs font-medium text-muted-foreground">New Note</p>
+                  </div>
+                )}
               </div>
             )}
             

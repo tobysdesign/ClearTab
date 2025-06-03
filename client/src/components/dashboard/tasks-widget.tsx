@@ -58,15 +58,21 @@ export default function TasksWidget() {
     setEditingTaskId(task.id);
     setEditForm({
       title: task.title,
-      description: task.description,
+      description: task.description ?? '',
       priority: task.priority,
-      dueDate: task.dueDate ? (typeof task.dueDate === 'string' ? task.dueDate : new Date(task.dueDate).toISOString().split('T')[0]) : ''
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ''
     });
   };
 
   const handleSaveEdit = () => {
     if (editingTaskId) {
-      updateTaskMutation.mutate({ id: editingTaskId, data: editForm });
+      const saveData: Partial<Task> = {
+        title: editForm.title,
+        description: editForm.description,
+        priority: editForm.priority,
+        dueDate: editForm.dueDate ? new Date(editForm.dueDate) : null
+      };
+      updateTaskMutation.mutate({ id: editingTaskId, data: saveData });
       setEditingTaskId(null);
       setEditForm({});
     }
@@ -209,7 +215,10 @@ export default function TasksWidget() {
                     <div className="flex items-center space-x-2">
                       {task.dueDate && (
                         <span className="text-xs text-muted-foreground">
-                          {formatCompactDate(task.dueDate)}
+                          {task.dueDate instanceof Date 
+                            ? format(task.dueDate, 'M/d')
+                            : formatCompactDate(task.dueDate)
+                          }
                         </span>
                       )}
                       <button
