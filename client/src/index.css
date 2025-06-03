@@ -53,11 +53,7 @@
   }
 
   .widget {
-    @apply bg-card border border-border rounded-xl p-6 flex flex-col transition-all duration-200;
-  }
-
-  .widget:hover {
-    @apply bg-accent border-muted;
+    @apply bg-card border border-border rounded-xl p-6 flex flex-col;
   }
 
   .notes-widget { 

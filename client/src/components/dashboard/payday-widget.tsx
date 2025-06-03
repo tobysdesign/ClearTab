@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, MoreHorizontal } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { UserPreferences } from "@shared/schema";
 
@@ -13,8 +12,7 @@ export default function PaydayWidget() {
     if (!preferences?.paydayDate) {
       return {
         daysLeft: 12,
-        nextDate: "Dec 15",
-        progress: 60
+        nextDate: "Dec 15"
       };
     }
 
@@ -22,19 +20,14 @@ export default function PaydayWidget() {
     const payday = new Date(preferences.paydayDate);
     const diffTime = payday.getTime() - today.getTime();
     const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    const frequency = preferences.paydayFrequency;
-    const totalDays = frequency === 'weekly' ? 7 : frequency === 'bi-weekly' ? 14 : 30;
-    const progress = Math.max(0, ((totalDays - daysLeft) / totalDays) * 100);
 
     return {
       daysLeft: Math.max(0, daysLeft),
-      nextDate: payday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      progress: Math.min(100, progress)
+      nextDate: payday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     };
   };
 
-  const { daysLeft, nextDate, progress } = calculatePaydayInfo();
+  const { daysLeft, nextDate } = calculatePaydayInfo();
 
   return (
     <div className="widget group">
@@ -49,7 +42,7 @@ export default function PaydayWidget() {
           {daysLeft}
         </div>
         <div className="text-sm text-text-secondary mb-3">
-          Till Payday
+          Days to payday
         </div>
         <div className="space-y-2 text-xs text-text-muted">
           <div className="flex justify-between">
@@ -61,13 +54,6 @@ export default function PaydayWidget() {
             <span className="capitalize">{preferences?.paydayFrequency || 'Bi-weekly'}</span>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-auto pt-3 border-t border-border">
-        <Progress 
-          value={progress} 
-          className="w-full h-2 bg-muted"
-        />
       </div>
     </div>
   );
