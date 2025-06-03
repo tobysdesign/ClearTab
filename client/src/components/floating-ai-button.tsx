@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ChatOverlay from "@/components/ai/chat-overlay";
@@ -6,6 +6,7 @@ import { useChatContext } from "@/hooks/use-chat-context";
 
 export default function FloatingAIButton() {
   const { isChatOpen, setIsChatOpen, openChatWithPrompt, initialPrompt } = useChatContext();
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

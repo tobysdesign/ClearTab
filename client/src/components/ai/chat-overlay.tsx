@@ -12,11 +12,13 @@ import type { ChatMessage, UserPreferences } from "@shared/schema";
 interface ChatOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  onCloseAnimated?: () => void;
   initialMessage?: string;
 }
 
 export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: ChatOverlayProps) {
   const [message, setMessage] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
@@ -93,13 +95,21 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
     setMessage("");
   };
 
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 400); // Match animation duration
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
     if (e.key === "Escape") {
-      onClose();
+      handleClose();
     }
   };
 
@@ -111,7 +121,7 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
         className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transform transition-all duration-300 ease-out"
         style={{
           transformOrigin: 'bottom center',
-          animation: isOpen ? 'modalGrowFromFAB 0.4s ease-out forwards' : 'none'
+          animation: isClosing ? 'modalShrinkToFAB 0.4s ease-out forwards' : 'modalGrowFromFAB 0.4s ease-out forwards'
         }}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
@@ -127,7 +137,7 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-text-muted hover:text-text-primary"
           >
             <X className="h-4 w-4" />
