@@ -65,18 +65,18 @@ export default function TasksWidget() {
             <p className="text-xs mt-1">Click below to add your first task</p>
           </div>
         ) : (
-          <div className="pl-0 pr-2">
+          <div className="pr-2">
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className="flex items-start space-x-2 p-2 rounded mb-1"
+                className="flex items-start space-x-1 px-1 py-1.5 rounded mb-1"
               >
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
                   className="mt-0.5 flex-shrink-0"
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 ml-1">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <Popover>
@@ -116,9 +116,9 @@ export default function TasksWidget() {
                         </PopoverContent>
                       </Popover>
                     </div>
-                    <div className="flex items-start ml-2">
+                    <div className="flex items-start ml-1">
                       {task.dueDate && (
-                        <span className="text-xs text-muted-foreground leading-tight">
+                        <span className="text-xs text-muted-foreground leading-tight mt-0.5">
                           {format(new Date(task.dueDate), 'M/d')}
                         </span>
                       )}
