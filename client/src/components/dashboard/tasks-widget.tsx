@@ -82,7 +82,7 @@ export default function TasksWidget() {
                       <Popover>
                         <PopoverTrigger asChild>
                           <button 
-                            className={`text-left text-sm font-medium hover:text-primary transition-colors cursor-pointer ${
+                            className={`text-left text-xs font-medium hover:text-primary transition-colors cursor-pointer ${
                               task.completed ? 'line-through text-muted-foreground' : 'text-text-primary'
                             }`}
                           >
