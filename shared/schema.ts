@@ -42,6 +42,8 @@ export const userPreferences = pgTable("user_preferences", {
   initialized: boolean("initialized").default(false).notNull(),
   paydayDate: timestamp("payday_date"),
   paydayFrequency: text("payday_frequency").default("bi-weekly"), // weekly, bi-weekly, monthly
+  salary: integer("salary").default(0), // monthly salary before expenses
+  expenses: integer("expenses").default(2000), // monthly expenses
   location: text("location").default("San Francisco, CA"),
 });
 

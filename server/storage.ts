@@ -163,6 +163,8 @@ export class MemStorage implements IStorage {
       initialized: true,
       paydayDate: new Date(2025, 0, 15), // January 15th
       paydayFrequency: "monthly",
+      salary: 5000,
+      expenses: 2000,
       location: "San Francisco, CA"
     };
     
@@ -325,6 +327,8 @@ export class MemStorage implements IStorage {
       initialized: prefsData.initialized || false,
       paydayDate: prefsData.paydayDate || null,
       paydayFrequency: prefsData.paydayFrequency || null,
+      salary: prefsData.salary || null,
+      expenses: prefsData.expenses || null,
       location: prefsData.location || null
     };
     this.userPreferences.set(id, prefs);
