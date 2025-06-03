@@ -218,6 +218,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/preferences", async (req, res) => {
+    try {
+      const updatedPrefs = await storage.updateUserPreferences(DEFAULT_USER_ID, req.body);
+      if (!updatedPrefs) {
+        return res.status(404).json({ error: "Preferences not found" });
+      }
+      res.json(updatedPrefs);
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+      res.status(500).json({ error: "Failed to update preferences" });
+    }
+  });
+
   app.post("/api/preferences", async (req, res) => {
     try {
       const prefsData = insertUserPreferencesSchema.parse(req.body);
