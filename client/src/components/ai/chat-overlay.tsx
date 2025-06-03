@@ -20,6 +20,7 @@ interface ChatOverlayProps {
 export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialMessage = "", modalRef }: ChatOverlayProps) {
   const [message, setMessage] = useState("");
   const [isClosing, setIsClosing] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
@@ -77,11 +78,18 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   const userName = preferences?.userName || "User";
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
-      if (initialMessage && initialMessage !== message) {
-        setMessage(initialMessage);
+    if (isOpen) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 300);
+      
+      if (inputRef.current) {
+        inputRef.current.focus();
+        if (initialMessage && initialMessage !== message) {
+          setMessage(initialMessage);
+        }
       }
+      
+      return () => clearTimeout(timer);
     }
   }, [isOpen, initialMessage]);
 
@@ -97,15 +105,17 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   };
 
   const handleClose = () => {
-    if (onCloseAnimated) {
-      onCloseAnimated();
-    } else {
-      setIsClosing(true);
-      setTimeout(() => {
-        setIsClosing(false);
+    setIsClosing(true);
+    setIsAnimating(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setIsAnimating(false);
+      if (onCloseAnimated) {
+        onCloseAnimated();
+      } else {
         onClose();
-      }, 400);
-    }
+      }
+    }, 300);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -124,7 +134,15 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
+        className={`bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transition-all duration-300 ease-out ${
+          isClosing 
+            ? 'transform scale-95 opacity-0' 
+            : 'transform scale-100 opacity-100'
+        }`}
+        style={{
+          transform: isClosing ? 'scale(0.95) translateY(10px)' : 'scale(1) translateY(0)',
+          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center space-x-3">

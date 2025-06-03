@@ -50,7 +50,7 @@ export default function FloatingAIButton() {
     <>
       <Button
         onClick={() => isChatOpen ? handleAnimatedClose() : setIsChatOpen(true)}
-        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full bg-black hover:bg-gray-800 text-white shadow-lg z-[10001] p-0 group transition-all duration-200 hover:scale-110 active:scale-95 animate-bounce hover:animate-pulse"
+        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full bg-black hover:bg-gray-800 text-white shadow-lg z-[10001] p-0 group transition-all duration-200 hover:scale-110 active:scale-95"
         size="lg"
       >
         <MessageCircle className={`w-6 h-6 transition-all duration-200 ${isChatOpen ? 'group-hover:opacity-0 group-hover:scale-0' : 'group-hover:rotate-12'}`} />
