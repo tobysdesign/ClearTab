@@ -44,8 +44,7 @@ export default function CalendarWidget() {
 
   return (
     <div className="widget group">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Calendar</h3>
+      <div className="flex items-center justify-end mb-4">
         <div className="flex items-center space-x-1">
           <button
             onClick={() => setActiveTab('today')}
