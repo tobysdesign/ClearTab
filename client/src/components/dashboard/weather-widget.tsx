@@ -8,6 +8,7 @@ interface WeatherData {
   high: number;
   low: number;
   humidity: number;
+  rainChance: number;
   location: string;
 }
 
@@ -96,6 +97,13 @@ export default function WeatherWidget() {
                   <span>Humidity</span>
                 </div>
                 <span>{weather.humidity}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-1">
+                  <Droplets className="h-3 w-3" />
+                  <span>Rain</span>
+                </div>
+                <span>{weather.rainChance}%</span>
               </div>
             </div>
           </div>

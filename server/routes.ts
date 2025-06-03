@@ -60,6 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         high: Math.round(weather.temperatureMax || weather.temperature + 5),
         low: Math.round(weather.temperatureMin || weather.temperature - 5),
         humidity: Math.round(weather.humidity),
+        rainChance: Math.round(weather.precipitationProbability || 0),
         location: "San Francisco, CA"
       });
     } catch (error) {
