@@ -123,7 +123,7 @@ export default function NotesWidget() {
   };
 
   const autoSaveNote = () => {
-    if (!editingNote || isSaving) return;
+    if (!editingNote || isSaving || createNoteMutation.isPending || updateNoteMutation.isPending) return;
 
     const title = editingNote.title?.trim() || generateUntitledName();
     const content = editingNote.content?.trim() || "";
@@ -131,15 +131,16 @@ export default function NotesWidget() {
     // Only save if there's actual content
     if (!content && !editingNote.title?.trim()) return;
 
-    setIsSaving(true);
-
-    if (isNewNote) {
+    // Prevent duplicate saves by checking if we're already in the middle of a mutation
+    if (isNewNote && !createNoteMutation.isPending) {
+      setIsSaving(true);
       createNoteMutation.mutate({
         title,
         content,
         tags: editingNote.tags || []
       });
-    } else if (selectedNoteId) {
+    } else if (selectedNoteId && !updateNoteMutation.isPending) {
+      setIsSaving(true);
       updateNoteMutation.mutate({
         id: selectedNoteId,
         data: {
@@ -219,7 +220,7 @@ export default function NotesWidget() {
                       setIsNewNote(false);
                     }}
                   >
-                    <h4 className="font-medium text-xs line-clamp-1 pt-0 pb-1.5">
+                    <h4 className="font-medium text-xs pt-0 pb-1.5 break-words">
                       {note.title}
                     </h4>
                     <p className="text-xs text-muted-foreground line-clamp-2">
@@ -252,35 +253,37 @@ export default function NotesWidget() {
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {editingNote ? (
-          <>
-            {/* Header */}
-            <div className="p-3 border-b border-border">
-              <input
-                value={editingNote.title || ""}
-                onChange={(e) => {
-                  setEditingNote(prev => prev ? {...prev, title: e.target.value} : null);
-                }}
-                onBlur={() => {
-                  autoSaveNote();
-                }}
-                placeholder="Note title..."
-                className="w-full text-sm font-medium border-none outline-none bg-transparent placeholder:text-muted-foreground"
-              />
-            </div>
+          <div className="flex-1 p-3 flex flex-col">
+            {/* Title */}
+            <input
+              value={editingNote.title || ""}
+              onChange={(e) => {
+                setEditingNote(prev => prev ? {...prev, title: e.target.value} : null);
+              }}
+              onBlur={() => {
+                autoSaveNote();
+              }}
+              placeholder="Untitled"
+              className="w-full text-base font-semibold border-none outline-none bg-transparent placeholder:text-muted-foreground mb-2"
+            />
 
             {/* Content */}
-            <div className="flex-1 p-3">
+            <div className="flex-1">
               <textarea
                 value={editingNote.content || ""}
                 onChange={(e) => {
                   setEditingNote(prev => prev ? {...prev, content: e.target.value} : null);
                   scheduleAutoSave(30000);
                 }}
-                placeholder="Add anything notable..."
-                className="w-full h-full resize-none border-none outline-none bg-transparent text-sm placeholder:text-muted-foreground"
+                placeholder="Start writing..."
+                className="w-full h-full resize-none border-none outline-none bg-transparent text-sm placeholder:text-muted-foreground leading-relaxed"
+                style={{
+                  fontFamily: 'inherit',
+                  lineHeight: '1.6'
+                }}
               />
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex-1 flex items-center justify-center text-center">
             <div>
