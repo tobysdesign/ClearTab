@@ -232,9 +232,14 @@ export class MemStorage implements IStorage {
   async createUserPreferences(prefsData: InsertUserPreferences & { userId: number }): Promise<UserPreferences> {
     const id = this.currentPrefsId++;
     const prefs: UserPreferences = { 
-      ...prefsData, 
       id,
-      userId: prefsData.userId
+      userId: prefsData.userId,
+      agentName: prefsData.agentName || "AI Assistant",
+      userName: prefsData.userName || "User",
+      initialized: prefsData.initialized || false,
+      paydayDate: prefsData.paydayDate || null,
+      paydayFrequency: prefsData.paydayFrequency || null,
+      location: prefsData.location || null
     };
     this.userPreferences.set(id, prefs);
     return prefs;

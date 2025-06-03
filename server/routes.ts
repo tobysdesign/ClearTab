@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupGoogleAuth, requireAuth, getGoogleCalendarEvents } from "./google-auth";
+// Google auth will be replaced with Supabase auth
 import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
 
@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(note);
     } catch (error) {
       console.error("Note creation error:", error);
-      res.status(400).json({ error: "Invalid note data", details: error.message });
+      res.status(400).json({ error: "Invalid note data", details: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
