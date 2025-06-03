@@ -55,9 +55,7 @@ export default function TasksWidget() {
   return (
     <div className="widget tasks-widget">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-text-primary flex items-center gap-1">
-          <span className="text-muted-foreground">#</span>Tasks
-        </h2>
+        <h2 className="text-sm font-medium text-muted-foreground">#Tasks</h2>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary" className="text-xs text-text-muted bg-muted">
             Ctrl+T
@@ -128,15 +126,13 @@ export default function TasksWidget() {
         )}
       </div>
       
-      <div className="mt-4 pt-3 border-t border-border">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-xs text-text-muted hover:text-text-secondary"
+      <div className="mt-3">
+        <button
           onClick={() => openChatWithPrompt("Create a new task for me")}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Add new task (Cmd+T)
-        </Button>
+          Add new task
+        </button>
       </div>
     </div>
   );

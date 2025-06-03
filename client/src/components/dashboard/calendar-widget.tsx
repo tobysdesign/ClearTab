@@ -21,9 +21,7 @@ export default function CalendarWidget() {
   return (
     <div className="widget">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-text-primary flex items-center gap-1">
-          <span className="text-muted-foreground">#</span>Events
-        </h2>
+        <h2 className="text-sm font-medium text-muted-foreground">#Events</h2>
         <Calendar className="h-5 w-5 text-text-secondary" />
       </div>
       

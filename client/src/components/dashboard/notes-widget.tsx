@@ -170,20 +170,7 @@ export default function NotesWidget() {
       <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border bg-card/50 min-w-8`}>
         <div className="p-2 border-b border-border flex items-center justify-between">
           {!sidebarCollapsed && (
-            <>
-              <h3 className="text-sm font-medium flex items-center gap-1">
-                <span className="text-muted-foreground">#</span>
-                Notes
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleCreateNewNote}
-                className="h-6 w-6 p-0"
-              >
-                <Plus className="w-3 h-3" />
-              </Button>
-            </>
+            <h3 className="text-sm font-medium text-muted-foreground">#Notes</h3>
           )}
           <Button
             variant="ghost"
@@ -245,6 +232,17 @@ export default function NotesWidget() {
                     </p>
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {!sidebarCollapsed && (
+              <div className="p-2 border-t border-border">
+                <button
+                  onClick={handleCreateNewNote}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Add new note
+                </button>
               </div>
             )}
           </div>
