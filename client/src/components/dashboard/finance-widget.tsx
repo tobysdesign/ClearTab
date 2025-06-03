@@ -235,25 +235,13 @@ export default function FinanceWidget() {
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground font-medium">Next Payday</div>
           {daysUntilPayday !== null ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl font-bold text-primary">
-                  {daysUntilPayday} {daysUntilPayday === 1 ? 'day' : 'days'}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {preferences?.paydayFrequency?.replace("-", " ") || 'bi-weekly'}
-                </div>
+            <div>
+              <div className="text-xl font-bold text-primary">
+                {daysUntilPayday} {daysUntilPayday === 1 ? 'day' : 'days'}
               </div>
-              {netPay > 0 && (
-                <div className="text-right">
-                  <div className="text-lg font-semibold text-green-600">
-                    ${netPay}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    net pay
-                  </div>
-                </div>
-              )}
+              <div className="text-xs text-muted-foreground capitalize">
+                {preferences?.paydayFrequency?.replace("-", " ") || 'bi-weekly'}
+              </div>
             </div>
           ) : (
             <div className="text-center text-xs text-muted-foreground py-2">
@@ -264,35 +252,16 @@ export default function FinanceWidget() {
 
         {/* Daily Budget Section */}
         <div className="space-y-2 border-t pt-3">
-          <div className="text-xs text-muted-foreground font-medium">Daily Budget</div>
+          <div className="text-xs text-muted-foreground font-medium">Est. Daily Spend</div>
           {dailyBudget > 0 ? (
-            <>
-              <div className="flex justify-between items-center text-xs">
-                <span>Budget: ${dailyBudget}</span>
-                <span>Spent: ${todaySpent}</span>
+            <div className="flex items-center justify-between">
+              <div className="text-xl font-bold text-primary">
+                ${dailyBudget}
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className={`h-2 rounded-full transition-all duration-300 ${budgetStatus.color}`}
-                  style={{ width: `${Math.min(percentUsed, 100)}%` }}
-                />
+              <div className="text-xs text-muted-foreground">
+                per day
               </div>
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-xs">
-                  {budgetStatus.status}
-                </Badge>
-                <div className="flex items-center gap-1 text-xs">
-                  <span className={remaining >= 0 ? 'text-green-600' : 'text-red-600'}>
-                    ${Math.abs(remaining)} {remaining >= 0 ? 'left' : 'over'}
-                  </span>
-                  {remaining >= 0 ? (
-                    <TrendingUp className="h-3 w-3 text-green-600" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3 text-red-600" />
-                  )}
-                </div>
-              </div>
-            </>
+            </div>
           ) : (
             <div className="text-center text-xs text-muted-foreground py-2">
               Set salary to track daily budget
