@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar } from "lucide-react";
+import { Calendar, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CalendarEvent {

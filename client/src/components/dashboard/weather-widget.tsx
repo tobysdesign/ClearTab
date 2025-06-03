@@ -19,10 +19,12 @@ export default function WeatherWidget() {
 
   if (isLoading) {
     return (
-      <div className="widget">
+      <div className="widget group">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-primary">Weather</h2>
-          <CloudSun className="h-5 w-5 text-text-secondary" />
+          <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+          <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
         </div>
         <div className="text-center animate-pulse">
           <div className="h-12 w-16 bg-muted rounded mx-auto mb-2"></div>
@@ -42,7 +44,7 @@ export default function WeatherWidget() {
 
   if (error) {
     return (
-      <div className="widget">
+      <div className="widget group">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
           <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -59,7 +61,7 @@ export default function WeatherWidget() {
   }
 
   return (
-    <div className="widget">
+    <div className="widget group">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
         <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">

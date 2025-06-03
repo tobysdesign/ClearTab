@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, MoreHorizontal } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import type { UserPreferences } from "@shared/schema";
 
 export default function PaydayWidget() {
@@ -36,10 +37,12 @@ export default function PaydayWidget() {
   const { daysLeft, nextDate, progress } = calculatePaydayInfo();
 
   return (
-    <div className="widget">
+    <div className="widget group">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-muted-foreground">#Payday</h2>
-        <CalendarDays className="h-5 w-5 text-text-secondary" />
+        <h2 className="text-sm font-medium text-muted-foreground">Payday</h2>
+        <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoreHorizontal className="h-3 w-3" />
+        </Button>
       </div>
       
       <div className="text-center">
