@@ -55,11 +55,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertNoteSchema = createInsertSchema(notes).omit({
   id: true,
+  userId: true,
   createdAt: true,
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
+  userId: true,
   createdAt: true,
 });
 

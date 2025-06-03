@@ -59,11 +59,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/notes", async (req, res) => {
     try {
+      console.log("Received note data:", req.body);
       const noteData = insertNoteSchema.parse(req.body);
+      console.log("Parsed note data:", noteData);
       const note = await storage.createNote({ ...noteData, userId: DEFAULT_USER_ID });
       res.json(note);
     } catch (error) {
-      res.status(400).json({ error: "Invalid note data" });
+      console.error("Note creation error:", error);
+      res.status(400).json({ error: "Invalid note data", details: error.message });
     }
   });
 

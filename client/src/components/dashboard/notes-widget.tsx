@@ -17,6 +17,7 @@ export default function NotesWidget() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [editingNote, setEditingNote] = useState<Partial<Note> | null>(null);
   const [isNewNote, setIsNewNote] = useState(false);
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
@@ -118,7 +119,10 @@ export default function NotesWidget() {
     const title = editingNote.title?.trim() || generateUntitledName();
     const content = editingNote.content?.trim() || "";
 
-    if (isNewNote && (content || editingNote.title?.trim())) {
+    // Only save if there's actual content
+    if (!content && !editingNote.title?.trim()) return;
+
+    if (isNewNote) {
       createNoteMutation.mutate({
         title,
         content,
@@ -134,6 +138,14 @@ export default function NotesWidget() {
         }
       });
     }
+  };
+
+  const scheduleAutoSave = () => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+    const newTimeout = setTimeout(autoSaveNote, 2000);
+    setSaveTimeout(newTimeout);
   };
 
   const handleDeleteNote = (e: React.MouseEvent, id: number) => {
@@ -249,7 +261,7 @@ export default function NotesWidget() {
                 value={editingNote.title || ""}
                 onChange={(e) => {
                   setEditingNote(prev => prev ? {...prev, title: e.target.value} : null);
-                  setTimeout(autoSaveNote, 1000);
+                  scheduleAutoSave();
                 }}
                 placeholder="Note title..."
                 className="w-full text-sm font-medium border-none outline-none bg-transparent placeholder:text-muted-foreground"
@@ -262,7 +274,7 @@ export default function NotesWidget() {
                 value={editingNote.content || ""}
                 onChange={(e) => {
                   setEditingNote(prev => prev ? {...prev, content: e.target.value} : null);
-                  setTimeout(autoSaveNote, 1000);
+                  scheduleAutoSave();
                 }}
                 placeholder="Add anything notable..."
                 className="w-full h-full resize-none border-none outline-none bg-transparent text-sm placeholder:text-muted-foreground"
