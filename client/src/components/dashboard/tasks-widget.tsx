@@ -69,14 +69,14 @@ export default function TasksWidget() {
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className="flex items-start space-x-1 px-1 py-1.5 rounded mb-1"
+                className="flex items-start space-x-0 py-1 rounded mb-1"
               >
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
-                  className="mt-0.5 flex-shrink-0"
+                  className="mt-0.5 flex-shrink-0 mr-2"
                 />
-                <div className="flex-1 min-w-0 ml-1">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <Popover>
