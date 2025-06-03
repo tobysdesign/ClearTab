@@ -215,11 +215,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: msg.message
       }));
 
-      // Check for hashtag shortcuts
-      if (message.startsWith('#note ')) {
-        const noteContent = message.substring(6);
+      // Check for hashtag shortcuts anywhere in the message
+      if (message.includes('#note')) {
+        const noteContent = message.replace('#note', '').trim();
         const note = await storage.createNote({
-          title: noteContent.substring(0, 50),
+          title: noteContent.substring(0, 50) || "Untitled Note",
           content: noteContent,
           tags: [],
           userId: DEFAULT_USER_ID
@@ -235,10 +235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ message: response, note });
       }
 
-      if (message.startsWith('#task ')) {
-        const taskContent = message.substring(6);
+      if (message.includes('#task')) {
+        const taskContent = message.replace('#task', '').trim();
         const task = await storage.createTask({
-          title: taskContent,
+          title: taskContent || "Untitled Task",
           description: "",
           priority: "medium",
           userId: DEFAULT_USER_ID
