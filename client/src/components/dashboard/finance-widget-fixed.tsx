@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPreferences } from "@shared/schema";
-import { Calendar as CalendarIcon, MoreHorizontal, TrendingUp, TrendingDown } from "lucide-react";
+import { Calendar as CalendarIcon, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -83,19 +83,6 @@ export default function FinanceWidget() {
     return diffDays;
   };
 
-  const calculateNetPayPerPeriod = () => {
-    if (!preferences?.salary || !preferences?.expenses) return 0;
-    
-    const netMonthly = preferences.salary - preferences.expenses;
-    const freq = preferences.paydayFrequency || "bi-weekly";
-    
-    if (freq === "weekly") return Math.round(netMonthly / 4.33);
-    if (freq === "bi-weekly") return Math.round(netMonthly / 2.17);
-    if (freq === "monthly") return netMonthly;
-    
-    return 0;
-  };
-
   const calculateDailyBudget = () => {
     if (!preferences?.salary || !preferences?.expenses) return 0;
     
@@ -104,21 +91,7 @@ export default function FinanceWidget() {
   };
 
   const daysUntilPayday = calculateDaysUntilPayday();
-  const netPay = calculateNetPayPerPeriod();
   const dailyBudget = calculateDailyBudget();
-  
-  // Mock current spending for today
-  const todaySpent = Math.floor(Math.random() * (dailyBudget * 1.2));
-  const remaining = dailyBudget - todaySpent;
-  const percentUsed = dailyBudget > 0 ? (todaySpent / dailyBudget) * 100 : 0;
-
-  const getBudgetStatus = () => {
-    if (percentUsed <= 60) return { color: "bg-green-500", status: "On Track" };
-    if (percentUsed <= 90) return { color: "bg-yellow-500", status: "Watch Spending" };
-    return { color: "bg-red-500", status: "Over Budget" };
-  };
-
-  const budgetStatus = getBudgetStatus();
 
   // Initialize form with current preferences when opening
   const handleOpenChange = (open: boolean) => {
@@ -141,7 +114,7 @@ export default function FinanceWidget() {
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end" side="bottom" sideOffset={5}>
+            <PopoverContent className="w-80" align="center" side="bottom" sideOffset={10}>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="payday-date">Payday Date</Label>
