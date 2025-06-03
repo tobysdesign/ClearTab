@@ -242,16 +242,16 @@ export default function FinanceWidget() {
             )}
           </div>
         </div>
-        
-        {/* Frequency indicator */}
-        {preferences?.paydayFrequency && (
-          <div className="mt-auto pt-3 border-t border-border">
-            <p className="text-xs text-text-muted text-center capitalize">
-              {preferences.paydayFrequency.replace("-", " ")} payments
-            </p>
-          </div>
-        )}
       </CardContent>
+      
+      {/* Frequency indicator */}
+      {preferences?.paydayFrequency && (
+        <div className="mt-auto pt-3 border-t border-border px-6 pb-6">
+          <p className="text-xs text-text-muted text-center capitalize">
+            {preferences.paydayFrequency.replace("-", " ")} payments
+          </p>
+        </div>
+      )}
     </Card>
   );
 }

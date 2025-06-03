@@ -209,7 +209,7 @@ export default function NotesWidget() {
                   </Button>
                 </div>
               ) : (
-                <div className="p-1">
+                <div className="pl-0 pr-2">
                   {notes.map((note) => (
                     <div
                       key={note.id}

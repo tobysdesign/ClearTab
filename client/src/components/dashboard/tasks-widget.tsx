@@ -65,16 +65,16 @@ export default function TasksWidget() {
             <p className="text-xs mt-1">Click below to add your first task</p>
           </div>
         ) : (
-          <div className="p-1">
+          <div className="pl-0 pr-2">
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className="flex items-start space-x-3 p-2 rounded mb-1"
+                className="flex items-start space-x-2 p-2 rounded mb-1"
               >
                 <Checkbox
                   checked={task.completed}
                   onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
-                  className="mt-0.5"
+                  className="mt-0"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
@@ -82,7 +82,7 @@ export default function TasksWidget() {
                       <Popover>
                         <PopoverTrigger asChild>
                           <button 
-                            className={`text-left text-xs font-medium hover:text-primary transition-colors cursor-pointer ${
+                            className={`text-left text-xs font-medium hover:text-primary transition-colors cursor-pointer leading-tight ${
                               task.completed ? 'line-through text-muted-foreground' : 'text-text-primary'
                             }`}
                           >
@@ -116,9 +116,9 @@ export default function TasksWidget() {
                         </PopoverContent>
                       </Popover>
                     </div>
-                    <div className="flex items-center space-x-2 ml-2">
+                    <div className="flex items-start ml-2">
                       {task.dueDate && (
-                        <span className="text-xs text-muted-foreground mt-0.5">
+                        <span className="text-xs text-muted-foreground leading-tight">
                           {format(new Date(task.dueDate), 'M/d')}
                         </span>
                       )}
