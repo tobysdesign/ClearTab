@@ -124,11 +124,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transform transition-all duration-300 ease-out"
-        style={{
-          transformOrigin: 'bottom center',
-          animation: 'modalGrowFromFAB 0.4s ease-out forwards'
-        }}
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
           <div className="flex items-center space-x-3">
