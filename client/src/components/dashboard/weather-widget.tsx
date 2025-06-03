@@ -80,16 +80,9 @@ export default function WeatherWidget() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-1">
                   <Thermometer className="h-3 w-3" />
-                  <span>High</span>
+                  <span>Temperature</span>
                 </div>
-                <span>{weather.high}°</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-1">
-                  <Thermometer className="h-3 w-3" />
-                  <span>Low</span>
-                </div>
-                <span>{weather.low}°</span>
+                <span>{weather.high}°/{weather.low}°</span>
               </div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-1">
