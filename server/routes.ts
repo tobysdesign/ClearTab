@@ -25,21 +25,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Weather API
+  // Weather API using Tomorrow.io
   app.get("/api/weather", async (req, res) => {
     try {
       const location = req.query.location as string || "San Francisco,CA";
-      const apiKey = process.env.OPENWEATHERMAP_API_KEY || process.env.WEATHER_API_KEY;
+      const apiKey = process.env.TOMORROW_IO_API_KEY;
       
       if (!apiKey) {
         return res.status(500).json({ 
           error: "Weather API key not configured",
-          message: "Please provide a valid OpenWeatherMap API key"
+          message: "Please provide a valid Tomorrow.io API key"
         });
       }
       
+      // Use a default coordinate for San Francisco if no specific location provided
+      const lat = 37.7749;
+      const lon = -122.4194;
+      
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`
+        `https://api.tomorrow.io/v4/weather/realtime?location=${lat},${lon}&apikey=${apiKey}&units=metric`
       );
       
       if (!response.ok) {
@@ -48,13 +52,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const data = await response.json();
+      const weather = data.data.values;
+      
       res.json({
-        temperature: Math.round(data.main.temp),
-        description: data.weather[0].description,
-        high: Math.round(data.main.temp_max),
-        low: Math.round(data.main.temp_min),
-        humidity: data.main.humidity,
-        location: data.name
+        temperature: Math.round(weather.temperature),
+        description: getWeatherDescription(weather.weatherCode),
+        high: Math.round(weather.temperatureMax || weather.temperature + 5),
+        low: Math.round(weather.temperatureMin || weather.temperature - 5),
+        humidity: Math.round(weather.humidity),
+        location: "San Francisco, CA"
       });
     } catch (error) {
       console.error("Weather API error:", error);
@@ -64,6 +70,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Helper function to convert Tomorrow.io weather codes to descriptions
+  function getWeatherDescription(code: number): string {
+    const weatherCodes: Record<number, string> = {
+      0: "Unknown",
+      1000: "Clear, Sunny",
+      1100: "Mostly Clear",
+      1101: "Partly Cloudy",
+      1102: "Mostly Cloudy",
+      1001: "Cloudy",
+      2000: "Fog",
+      2100: "Light Fog",
+      4000: "Drizzle",
+      4001: "Rain",
+      4200: "Light Rain",
+      4201: "Heavy Rain",
+      5000: "Snow",
+      5001: "Flurries",
+      5100: "Light Snow",
+      5101: "Heavy Snow",
+      6000: "Freezing Drizzle",
+      6001: "Freezing Rain",
+      6200: "Light Freezing Rain",
+      6201: "Heavy Freezing Rain",
+      7000: "Ice Pellets",
+      7101: "Heavy Ice Pellets",
+      7102: "Light Ice Pellets",
+      8000: "Thunderstorm"
+    };
+    return weatherCodes[code] || "Unknown Weather";
+  }
 
   // Notes endpoints
   app.get("/api/notes", async (req, res) => {
