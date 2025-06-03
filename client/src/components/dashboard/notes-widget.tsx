@@ -151,11 +151,11 @@ export default function NotesWidget() {
     }
   };
 
-  const scheduleAutoSave = () => {
+  const scheduleAutoSave = (delay: number = 30000) => {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
-    const newTimeout = setTimeout(autoSaveNote, 3000);
+    const newTimeout = setTimeout(autoSaveNote, delay);
     setSaveTimeout(newTimeout);
   };
 
@@ -172,7 +172,7 @@ export default function NotesWidget() {
           {!sidebarCollapsed && (
             <>
               <h3 className="text-sm font-medium flex items-center gap-1">
-                <StickyNote className="w-4 h-4" />
+                <span className="text-muted-foreground">#</span>
                 Notes
               </h3>
               <Button
@@ -240,20 +240,9 @@ export default function NotesWidget() {
                     <h4 className="font-medium text-xs mb-1 line-clamp-1">
                       {note.title}
                     </h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1 mb-1">
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                       {note.content}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
-                      </span>
-                      <button
-                        onClick={(e) => handleDeleteNote(e, note.id)}
-                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all text-xs"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -272,7 +261,9 @@ export default function NotesWidget() {
                 value={editingNote.title || ""}
                 onChange={(e) => {
                   setEditingNote(prev => prev ? {...prev, title: e.target.value} : null);
-                  scheduleAutoSave();
+                }}
+                onBlur={() => {
+                  autoSaveNote();
                 }}
                 placeholder="Note title..."
                 className="w-full text-sm font-medium border-none outline-none bg-transparent placeholder:text-muted-foreground"
@@ -285,7 +276,7 @@ export default function NotesWidget() {
                 value={editingNote.content || ""}
                 onChange={(e) => {
                   setEditingNote(prev => prev ? {...prev, content: e.target.value} : null);
-                  scheduleAutoSave();
+                  scheduleAutoSave(30000);
                 }}
                 placeholder="Add anything notable..."
                 className="w-full h-full resize-none border-none outline-none bg-transparent text-sm placeholder:text-muted-foreground"

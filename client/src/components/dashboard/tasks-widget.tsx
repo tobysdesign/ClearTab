@@ -55,7 +55,9 @@ export default function TasksWidget() {
   return (
     <div className="widget tasks-widget">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-text-primary">Tasks</h2>
+        <h2 className="text-lg font-semibold text-text-primary flex items-center gap-1">
+          <span className="text-muted-foreground">#</span>Tasks
+        </h2>
         <div className="flex items-center space-x-2">
           <Badge variant="secondary" className="text-xs text-text-muted bg-muted">
             Ctrl+T
