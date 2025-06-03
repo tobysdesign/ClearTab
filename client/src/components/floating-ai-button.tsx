@@ -8,11 +8,26 @@ export default function FloatingAIButton() {
   const { isChatOpen, setIsChatOpen, openChatWithPrompt, initialPrompt } = useChatContext();
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const handleAnimatedClose = () => {
+    if (modalRef.current) {
+      modalRef.current.style.animation = 'modalShrinkToFAB 0.4s ease-out forwards';
+      setTimeout(() => {
+        setIsChatOpen(false);
+      }, 400);
+    } else {
+      setIsChatOpen(false);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsChatOpen(!isChatOpen);
+        if (isChatOpen) {
+          handleAnimatedClose();
+        } else {
+          setIsChatOpen(true);
+        }
       }
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
@@ -23,7 +38,7 @@ export default function FloatingAIButton() {
         openChatWithPrompt("Create a new task for me");
       }
       if (e.key === 'Escape' && isChatOpen) {
-        setIsChatOpen(false);
+        handleAnimatedClose();
       }
     };
 
@@ -34,7 +49,7 @@ export default function FloatingAIButton() {
   return (
     <>
       <Button
-        onClick={() => isChatOpen ? setIsChatOpen(false) : setIsChatOpen(true)}
+        onClick={() => isChatOpen ? handleAnimatedClose() : setIsChatOpen(true)}
         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full bg-black hover:bg-gray-800 text-white shadow-lg z-[10001] p-0 group transition-all duration-200"
         size="lg"
       >
@@ -47,7 +62,9 @@ export default function FloatingAIButton() {
       <ChatOverlay 
         isOpen={isChatOpen} 
         onClose={() => setIsChatOpen(false)}
+        onCloseAnimated={handleAnimatedClose}
         initialMessage={initialPrompt}
+        modalRef={modalRef}
       />
     </>
   );

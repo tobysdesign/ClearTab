@@ -14,9 +14,10 @@ interface ChatOverlayProps {
   onClose: () => void;
   onCloseAnimated?: () => void;
   initialMessage?: string;
+  modalRef?: React.RefObject<HTMLDivElement>;
 }
 
-export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: ChatOverlayProps) {
+export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialMessage = "", modalRef }: ChatOverlayProps) {
   const [message, setMessage] = useState("");
   const [isClosing, setIsClosing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,11 +97,15 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
   };
 
   const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 400); // Match animation duration
+    if (onCloseAnimated) {
+      onCloseAnimated();
+    } else {
+      setIsClosing(true);
+      setTimeout(() => {
+        setIsClosing(false);
+        onClose();
+      }, 400);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -118,10 +123,11 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div 
+        ref={modalRef}
         className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col transform transition-all duration-300 ease-out"
         style={{
           transformOrigin: 'bottom center',
-          animation: isClosing ? 'modalShrinkToFAB 0.4s ease-out forwards' : 'modalGrowFromFAB 0.4s ease-out forwards'
+          animation: 'modalGrowFromFAB 0.4s ease-out forwards'
         }}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
