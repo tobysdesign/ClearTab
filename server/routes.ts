@@ -376,27 +376,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Calendar events endpoint (mock data)
+  // Calendar events endpoint 
   app.get("/api/calendar", async (req, res) => {
     try {
+      const today = new Date();
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      
       const events = [
         {
           id: 1,
           title: "Team Standup",
-          date: new Date(),
-          time: "9:00 AM"
+          date: today.toISOString().split('T')[0],
+          time: "09:00"
         },
         {
           id: 2,
           title: "Product Review",
-          date: new Date(),
-          time: "2:00 PM"
+          date: today.toISOString().split('T')[0],
+          time: "14:00"
         },
         {
           id: 3,
           title: "Client Call",
-          date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          time: "10:30 AM"
+          date: tomorrow.toISOString().split('T')[0],
+          time: "10:30"
         }
       ];
       res.json(events);

@@ -69,19 +69,99 @@ export class MemStorage implements IStorage {
     this.currentPrefsId = 1;
     this.currentMessageId = 1;
 
-    // Create a default user for testing
-    const defaultUser: User = {
+    // Create two dummy users for testing
+    const user1: User = {
       id: 1,
       googleId: null,
-      email: "demo@example.com",
-      name: "Demo User",
+      email: "alice@example.com",
+      name: "Alice Johnson",
       picture: null,
       accessToken: null,
       refreshToken: null,
       tokenExpiry: null,
       createdAt: new Date()
     };
-    this.users.set(1, defaultUser);
+    
+    const user2: User = {
+      id: 2,
+      googleId: null,
+      email: "bob@example.com",
+      name: "Bob Smith",
+      picture: null,
+      accessToken: null,
+      refreshToken: null,
+      tokenExpiry: null,
+      createdAt: new Date()
+    };
+    
+    this.users.set(1, user1);
+    this.users.set(2, user2);
+    this.currentUserId = 3;
+    
+    // Add sample notes for Alice
+    const note1: Note = {
+      id: 1,
+      userId: 1,
+      title: "Project Planning Meeting",
+      content: "Discussed Q2 roadmap and resource allocation. Need to follow up on budget approval.",
+      tags: ["work", "planning"],
+      createdAt: new Date()
+    };
+    
+    const note2: Note = {
+      id: 2,
+      userId: 1,
+      title: "Weekend Trip Ideas",
+      content: "Considering hiking in Yosemite or visiting San Francisco museums. Check weather forecast.",
+      tags: ["personal", "travel"],
+      createdAt: new Date()
+    };
+    
+    this.notes.set(1, note1);
+    this.notes.set(2, note2);
+    this.currentNoteId = 3;
+    
+    // Add sample tasks for Alice
+    const task1: Task = {
+      id: 1,
+      userId: 1,
+      title: "Review design mockups",
+      description: "Check the latest UI designs from the design team",
+      priority: "high",
+      completed: false,
+      dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      createdAt: new Date()
+    };
+    
+    const task2: Task = {
+      id: 2,
+      userId: 1,
+      title: "Book dentist appointment",
+      description: "Schedule routine cleaning",
+      priority: "medium",
+      completed: false,
+      dueDate: null,
+      createdAt: new Date()
+    };
+    
+    this.tasks.set(1, task1);
+    this.tasks.set(2, task2);
+    this.currentTaskId = 3;
+    
+    // Add user preferences for Alice
+    const prefs1: UserPreferences = {
+      id: 1,
+      userId: 1,
+      agentName: "Aria",
+      userName: "Alice",
+      initialized: true,
+      paydayDate: new Date(2025, 0, 15), // January 15th
+      paydayFrequency: "monthly",
+      location: "San Francisco, CA"
+    };
+    
+    this.userPreferences.set(1, prefs1);
+    this.currentPrefsId = 2;
   }
 
   async getUser(id: number): Promise<User | undefined> {
