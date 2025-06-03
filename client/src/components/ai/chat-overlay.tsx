@@ -203,14 +203,14 @@ export default function ChatOverlay({ isOpen, onClose, initialMessage = "" }: Ch
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (try #note or #task for quick creation)"
-              className="flex-1 bg-secondary border border-border rounded-md px-3 py-2 text-text-primary placeholder-text-muted resize-none min-h-[40px] max-h-[120px] overflow-y-auto"
+              className="flex-1 bg-secondary border border-border rounded-md px-3 py-3 text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
               disabled={chatMutation.isPending}
-              rows={1}
+              rows={2}
               style={{ height: 'auto' }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
                 target.style.height = 'auto';
-                target.style.height = target.scrollHeight + 'px';
+                target.style.height = Math.max(60, target.scrollHeight) + 'px';
               }}
             />
             <Button 
