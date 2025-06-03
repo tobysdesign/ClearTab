@@ -65,7 +65,7 @@ export default function TasksWidget() {
             <p className="text-xs mt-1">Click below to add your first task</p>
           </div>
         ) : (
-          <div className="pr-2">
+          <div className="px-6">
             {tasks.map((task) => (
               <div 
                 key={task.id}
@@ -131,7 +131,7 @@ export default function TasksWidget() {
         )}
       </div>
       
-      <div className="mt-auto pt-3 border-t border-border">
+      <div className="mt-auto pt-3 border-t border-border mx-6">
         <button 
           className="text-xs text-text-muted text-center w-full hover:text-text-secondary transition-colors"
           onClick={() => openChatWithPrompt("Create a new task for me")}

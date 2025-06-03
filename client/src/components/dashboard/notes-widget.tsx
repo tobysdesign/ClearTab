@@ -209,7 +209,7 @@ export default function NotesWidget() {
                   </Button>
                 </div>
               ) : (
-                <div className="pl-0 pr-2">
+                <div className="px-6">
                   {notes.map((note) => (
                     <div
                       key={note.id}
@@ -238,7 +238,7 @@ export default function NotesWidget() {
               )}
             </div>
             
-            <div className="mt-auto pt-3 border-t border-border">
+            <div className="mt-auto pt-3 border-t border-border mx-6">
               <button 
                 className="text-xs text-text-muted text-center w-full hover:text-text-secondary transition-colors"
                 onClick={handleCreateNewNote}

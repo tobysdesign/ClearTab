@@ -246,7 +246,7 @@ export default function FinanceWidget() {
       
       {/* Frequency indicator */}
       {preferences?.paydayFrequency && (
-        <div className="mt-auto pt-3 border-t border-border px-6 pb-6">
+        <div className="mt-auto pt-3 border-t border-border mx-6 pb-6">
           <p className="text-xs text-text-muted text-center capitalize">
             {preferences.paydayFrequency.replace("-", " ")} payments
           </p>

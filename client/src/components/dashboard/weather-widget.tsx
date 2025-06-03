@@ -101,7 +101,7 @@ export default function WeatherWidget() {
             </div>
           </div>
           
-          <div className="mt-auto pt-3 border-t border-border">
+          <div className="mt-auto pt-3 border-t border-border mx-6">
             <p className="text-xs text-text-muted text-center">
               {weather.location}
             </p>
