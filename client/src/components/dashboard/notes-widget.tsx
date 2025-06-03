@@ -212,7 +212,7 @@ export default function NotesWidget() {
                 {notes.map((note) => (
                   <div
                     key={note.id}
-                    className={`p-2 mb-1 rounded cursor-pointer transition-colors hover:bg-muted/50 ${
+                    className={`p-2 mb-1 rounded cursor-pointer ${
                       selectedNoteId === note.id ? 'bg-muted border border-border' : ''
                     }`}
                     onClick={() => {
@@ -237,13 +237,15 @@ export default function NotesWidget() {
             )}
             
             {!sidebarCollapsed && !isNewNote && (
-              <div className="p-2">
-                <button
+              <div className="mt-4 pt-3 border-t border-border">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
                   onClick={handleCreateNewNote}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
+                  <Plus className="h-3 w-3 mr-2" />
                   Add new note
-                </button>
+                </Button>
               </div>
             )}
           </div>
