@@ -114,88 +114,88 @@ export default function FinanceWidget() {
                 <MoreHorizontal className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="center" side="bottom" sideOffset={10}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="payday-date">Payday Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !paydayDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {paydayDate ? format(paydayDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={paydayDate}
-                        onSelect={setPaydayDate}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+            <PopoverContent className="w-72" align="center" side="bottom" sideOffset={8}>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="salary" className="text-xs">Monthly Salary</Label>
+                    <Input
+                      id="salary"
+                      type="number"
+                      placeholder="5000"
+                      value={salary}
+                      onChange={(e) => setSalary(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="expenses" className="text-xs">Monthly Expenses</Label>
+                    <Input
+                      id="expenses"
+                      type="number"
+                      placeholder="2000"
+                      value={expenses}
+                      onChange={(e) => setExpenses(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="frequency">Pay Frequency</Label>
-                  <Select value={frequency} onValueChange={setFrequency}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="salary">Monthly Salary ($)</Label>
-                  <Input
-                    id="salary"
-                    type="number"
-                    placeholder="5000"
-                    value={salary}
-                    onChange={(e) => setSalary(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="expenses">Monthly Expenses ($)</Label>
-                  <Input
-                    id="expenses"
-                    type="number"
-                    placeholder="2000"
-                    value={expenses}
-                    onChange={(e) => setExpenses(e.target.value)}
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="frequency" className="text-xs">Frequency</Label>
+                    <Select value={frequency} onValueChange={setFrequency}>
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="payday-date" className="text-xs">Next Payday</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "h-8 text-sm justify-start font-normal",
+                            !paydayDate && "text-muted-foreground"
+                          )}
+                        >
+                          {paydayDate ? format(paydayDate, "MMM d") : "Set date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={paydayDate}
+                          onSelect={setPaydayDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
 
                 {salary && expenses && (
-                  <div className="p-3 bg-muted rounded-lg">
-                    <div className="text-sm font-medium">Net Pay Per Period</div>
-                    <div className="text-lg font-bold text-green-600">
+                  <div className="p-2 bg-muted rounded text-center">
+                    <div className="text-xs text-muted-foreground">Net per period</div>
+                    <div className="text-sm font-semibold text-green-600">
                       ${Math.round((parseInt(salary) - parseInt(expenses)) / (frequency === "weekly" ? 4.33 : frequency === "bi-weekly" ? 2.17 : 1))}
-                    </div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      Every {frequency.replace("-", " ")}
                     </div>
                   </div>
                 )}
 
                 <Button 
                   onClick={handleSave} 
-                  className="w-full"
+                  className="w-full h-8 text-sm"
                   disabled={updatePreferences.isPending}
                 >
-                  {updatePreferences.isPending ? "Saving..." : "Save Settings"}
+                  {updatePreferences.isPending ? "Saving..." : "Save"}
                 </Button>
               </div>
             </PopoverContent>
