@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const relevantMemories = await mem0Service.searchMemories(message, userId);
           if (relevantMemories && relevantMemories.length > 0) {
             memoryContext = "\n\nRelevant memories:\n" + 
-              relevantMemories.map(mem => `- ${mem.memory}`).join("\n");
+              relevantMemories.map((mem: any) => `- ${mem.memory}`).join("\n");
           }
         } catch (error) {
           console.error("Memory retrieval error:", error);
