@@ -56,12 +56,15 @@ export default function NotesWidget() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-      setEditingNote(null);
+      setIsSaving(false);
       toast({
         title: "Note updated",
         description: "Your changes have been saved.",
       });
     },
+    onError: () => {
+      setIsSaving(false);
+    }
   });
 
   const deleteNoteMutation = useMutation({
