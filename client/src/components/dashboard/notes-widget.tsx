@@ -235,7 +235,7 @@ export default function NotesWidget() {
               </div>
             )}
             
-            {!sidebarCollapsed && (
+            {!sidebarCollapsed && !isNewNote && (
               <div className="p-2">
                 <button
                   onClick={handleCreateNewNote}
