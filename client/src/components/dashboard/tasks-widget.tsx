@@ -131,15 +131,13 @@ export default function TasksWidget() {
         )}
       </div>
       
-      <div className="mt-4 pt-3 border-t border-border">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-xs text-muted-foreground hover:text-foreground h-8"
+      <div className="mt-auto pt-3 border-t border-border">
+        <button 
+          className="text-xs text-text-muted text-center w-full hover:text-text-secondary transition-colors"
           onClick={() => openChatWithPrompt("Create a new task for me")}
         >
-          <Plus className="h-3 w-3 mr-2" />
           Add new task
-        </Button>
+        </button>
       </div>
     </div>
   );

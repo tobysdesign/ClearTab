@@ -245,10 +245,10 @@ export default function FinanceWidget() {
         
         {/* Frequency indicator */}
         {preferences?.paydayFrequency && (
-          <div className="text-center border-t pt-2">
-            <div className="text-xs text-muted-foreground capitalize">
+          <div className="mt-auto pt-3 border-t border-border">
+            <p className="text-xs text-text-muted text-center capitalize">
               {preferences.paydayFrequency.replace("-", " ")} payments
-            </div>
+            </p>
           </div>
         )}
       </CardContent>
