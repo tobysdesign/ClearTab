@@ -38,8 +38,7 @@ export default function PaydayWidget() {
 
   return (
     <div className="widget group">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Payday</h2>
+      <div className="flex items-center justify-end mb-4">
         <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreHorizontal className="h-3 w-3" />
         </Button>
@@ -50,7 +49,7 @@ export default function PaydayWidget() {
           {daysLeft}
         </div>
         <div className="text-sm text-text-secondary mb-3">
-          Days Left
+          Till Payday
         </div>
         <div className="space-y-2 text-xs text-text-muted">
           <div className="flex justify-between">

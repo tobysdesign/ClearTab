@@ -20,8 +20,7 @@ export default function WeatherWidget() {
   if (isLoading) {
     return (
       <div className="widget group">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+        <div className="flex items-center justify-end mb-4">
           <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreHorizontal className="h-3 w-3" />
           </Button>
@@ -45,8 +44,7 @@ export default function WeatherWidget() {
   if (error) {
     return (
       <div className="widget group">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+        <div className="flex items-center justify-end mb-4">
           <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
             <MoreHorizontal className="h-3 w-3" />
           </Button>
@@ -62,8 +60,7 @@ export default function WeatherWidget() {
 
   return (
     <div className="widget group">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Weather</h2>
+      <div className="flex items-center justify-end mb-4">
         <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreHorizontal className="h-3 w-3" />
         </Button>
