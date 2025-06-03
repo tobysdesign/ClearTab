@@ -134,8 +134,7 @@ export default function FinanceWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium flex items-center justify-between">
-          <span>Finance</span>
+        <CardTitle className="text-sm font-medium flex items-center justify-end">
           <Popover open={isOpen} onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -233,7 +232,7 @@ export default function FinanceWidget() {
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-4">
           {/* Payday Section */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-left">
             <div className="text-xs text-muted-foreground font-medium">Next Payday</div>
             {daysUntilPayday !== null ? (
               <div>
@@ -252,7 +251,7 @@ export default function FinanceWidget() {
           </div>
 
           {/* Daily Budget Section */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-left">
             <div className="text-xs text-muted-foreground font-medium">Est. Daily Spend</div>
             {dailyBudget > 0 ? (
               <div>
