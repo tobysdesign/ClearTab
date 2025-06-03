@@ -97,7 +97,7 @@ export default function CalendarWidget() {
               onClick={() => handleEventClick(event)}
               className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2`}
             >
-              <div className="text-xs font-medium text-text-primary">
+              <div className="text-sm font-medium text-text-primary">
                 {event.title}
               </div>
               <div className="text-xs text-text-muted">

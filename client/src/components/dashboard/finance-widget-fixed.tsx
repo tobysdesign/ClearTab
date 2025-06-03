@@ -206,13 +206,13 @@ export default function FinanceWidget() {
         <div className="grid grid-cols-2 gap-4">
           {/* Payday Section */}
           <div className="space-y-2 text-left">
-            <div className="text-xs text-muted-foreground font-medium">Next Payday</div>
+            <div className="text-xs text-text-muted font-medium">Next Payday</div>
             {daysUntilPayday !== null ? (
               <div>
-                <div className="text-xl font-bold text-primary">
+                <div className="text-3xl font-light text-text-primary">
                   {daysUntilPayday}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-text-secondary">
                   {daysUntilPayday === 1 ? 'day' : 'days'}
                 </div>
               </div>
@@ -225,13 +225,13 @@ export default function FinanceWidget() {
 
           {/* Daily Budget Section */}
           <div className="space-y-2 text-left">
-            <div className="text-xs text-muted-foreground font-medium">Est. Daily Spend</div>
+            <div className="text-xs text-text-muted font-medium">Est. Daily Spend</div>
             {dailyBudget > 0 ? (
               <div>
-                <div className="text-xl font-bold text-primary">
+                <div className="text-3xl font-light text-text-primary">
                   ${dailyBudget}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-text-secondary">
                   per day
                 </div>
               </div>
