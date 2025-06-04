@@ -100,9 +100,9 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, triggerRe
               stiffness: 300,
               duration: 0.3,
             }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-card border border-border rounded-lg shadow-lg p-6">
+            <div className="bg-card border border-border rounded-lg shadow-lg p-6 w-full max-w-md">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-foreground">Edit Task</h2>
