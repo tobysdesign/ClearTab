@@ -45,13 +45,18 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, triggerRe
     if (!triggerRef?.current) return { x: 0, y: 0 };
     
     const rect = triggerRef.current.getBoundingClientRect();
-    const modalRect = modalRef.current?.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
     
-    if (!modalRect) return { x: 0, y: 0 };
+    // Calculate offset from center of screen
+    const centerX = windowWidth / 2;
+    const centerY = windowHeight / 2;
+    const taskCenterX = rect.left + rect.width / 2;
+    const taskCenterY = rect.top + rect.height / 2;
     
     return {
-      x: rect.left + rect.width / 2 - modalRect.width / 2,
-      y: rect.top + rect.height / 2 - modalRect.height / 2,
+      x: taskCenterX - centerX,
+      y: taskCenterY - centerY,
     };
   };
 
