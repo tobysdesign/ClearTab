@@ -16,6 +16,7 @@ export default function NotesWidgetCollapsible() {
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
@@ -60,151 +61,168 @@ export default function NotesWidgetCollapsible() {
       <PanelGroup direction="horizontal" className="flex-1">
         {/* Sidebar Panel */}
         <Panel defaultSize={40} minSize={25} collapsible collapsedSize={15}>
-          {({ isCollapsed }: { isCollapsed: boolean }) => (
-            <div className="h-full flex flex-col border-r border-border">
-              {!isCollapsed ? (
-                <>
-                  <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
-                      Notes
-                    </CardTitle>
-                  </CardHeader>
-                  
-                  <CardContent className="flex-1 flex flex-col space-y-3 overflow-hidden">
-                    <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
-                      {isLoading ? (
-                        <div className="space-y-2 p-1">
-                          {[...Array(4)].map((_, i) => (
-                            <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                              <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
-                              <div className="flex-1">
-                                <div className="h-3 bg-muted rounded mb-2"></div>
-                                <div className="h-2 bg-muted rounded w-2/3"></div>
-                              </div>
+          <div className="h-full flex flex-col border-r border-border">
+            {!isCollapsed ? (
+              <>
+                <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+                    Notes
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => setIsCollapsed(true)}
+                  >
+                    <ChevronLeft className="h-3 w-3" />
+                  </Button>
+                </CardHeader>
+                
+                <CardContent className="flex-1 flex flex-col space-y-3 overflow-hidden">
+                  <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+                    {isLoading ? (
+                      <div className="space-y-2 p-1">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
+                            <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
+                            <div className="flex-1">
+                              <div className="h-3 bg-muted rounded mb-2"></div>
+                              <div className="h-2 bg-muted rounded w-2/3"></div>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-2 p-1">
-                          {notes.map((note) => (
-                            <div 
-                              key={note.id} 
-                              className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer border border-solid ${
-                                selectedNoteId === note.id ? 'bg-muted/50 border-[#333333]' : 'border-transparent'
-                              }`}
-                              onClick={() => setSelectedNoteId(note.id)}
-                            >
-                              <div className="flex items-start justify-between mb-1">
-                                <p className={`text-sm line-clamp-1 flex-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
-                                  {note.title}
-                                </p>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-2 p-1">
+                        {notes.map((note) => (
+                          <div 
+                            key={note.id} 
+                            className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer border border-solid ${
+                              selectedNoteId === note.id ? 'bg-muted/50 border-[#333333]' : 'border-transparent'
+                            }`}
+                            onClick={() => setSelectedNoteId(note.id)}
+                          >
+                            <div className="flex items-start justify-between mb-1">
+                              <p className={`text-sm line-clamp-1 flex-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
+                                {note.title}
+                              </p>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <circle cx="12" cy="12" r="1"/>
+                                      <circle cx="12" cy="5" r="1"/>
+                                      <circle cx="12" cy="19" r="1"/>
+                                    </svg>
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-40 p-2" align="end">
+                                  <div className="space-y-1">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteNote(note.id);
+                                      }}
+                                      className="w-full text-left text-sm px-2 py-1 hover:bg-muted rounded text-destructive"
                                     >
-                                      <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="1"/>
-                                        <circle cx="12" cy="5" r="1"/>
-                                        <circle cx="12" cy="19" r="1"/>
-                                      </svg>
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-40 p-2" align="end">
-                                    <div className="space-y-1">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          deleteNote(note.id);
-                                        }}
-                                        className="w-full text-left text-sm px-2 py-1 hover:bg-muted rounded text-destructive"
-                                      >
-                                        Delete
-                                      </button>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
+                                      Delete
+                                    </button>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex gap-1">
+                                {note.tags && note.tags.length > 0 && (
+                                  note.tags.map((tag) => (
+                                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
+                                      {tag}
+                                    </Badge>
+                                  ))
+                                )}
                               </div>
                               
-                              <div className="flex items-center justify-between">
-                                <div className="flex gap-1">
-                                  {note.tags && note.tags.length > 0 && (
-                                    note.tags.map((tag) => (
-                                      <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
-                                        {tag}
-                                      </Badge>
-                                    ))
-                                  )}
-                                </div>
-                                
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox
-                                    checked={isNoteCompleted(note)}
-                                    onCheckedChange={(checked) => toggleNoteCompleted(note.id, checked as boolean)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="h-3 w-3"
-                                  />
-                                  <span className="text-xs text-muted-foreground">
-                                    {format(new Date(note.createdAt), 'MMM d')}
-                                  </span>
-                                </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={isNoteCompleted(note)}
+                                  onCheckedChange={(checked) => toggleNoteCompleted(note.id, checked as boolean)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="h-3 w-3"
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  {format(new Date(note.createdAt), 'MMM d')}
+                                </span>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="mt-auto pt-3 border-t border-border/50">
-                      <button 
-                        className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-                        onClick={() => openChatWithPrompt("Create a new note for me")}
-                      >
-                        Add new note
-                      </button>
-                    </div>
-                  </CardContent>
-                </>
-              ) : (
-                // Collapsed state with two-letter cards
-                <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
-                  {notes.slice(0, 5).map((note) => {
-                    const initials = note.title
-                      .split(' ')
-                      .map(word => word.charAt(0).toUpperCase())
-                      .slice(0, 2)
-                      .join('');
-                    
-                    return (
-                      <div
-                        key={note.id}
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
-                          selectedNoteId === note.id 
-                            ? 'bg-muted border-[#333333] text-foreground' 
-                            : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                        }`}
-                        onClick={() => setSelectedNoteId(note.id)}
-                        title={note.title}
-                      >
-                        {initials}
+                          </div>
+                        ))}
                       </div>
-                    );
-                  })}
-                  
-                  {/* +N button for add new note */}
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    onClick={() => openChatWithPrompt("Create a new note for me")}
-                    title="Add new note"
-                  >
-                    +N
+                    )}
                   </div>
+                  
+                  <div className="mt-auto pt-3 border-t border-border/50">
+                    <button 
+                      className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
+                      onClick={() => openChatWithPrompt("Create a new note for me")}
+                    >
+                      Add new note
+                    </button>
+                  </div>
+                </CardContent>
+              </>
+            ) : (
+              // Collapsed state with two-letter cards
+              <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
+                <div className="flex justify-center mb-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => setIsCollapsed(false)}
+                  >
+                    <ChevronRight className="h-3 w-3" />
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
+                
+                {notes.slice(0, 5).map((note) => {
+                  const initials = note.title
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase())
+                    .slice(0, 2)
+                    .join('');
+                  
+                  return (
+                    <div
+                      key={note.id}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
+                        selectedNoteId === note.id 
+                          ? 'bg-muted border-[#333333] text-foreground' 
+                          : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      }`}
+                      onClick={() => setSelectedNoteId(note.id)}
+                      title={note.title}
+                    >
+                      {initials}
+                    </div>
+                  );
+                })}
+                
+                {/* +N button for add new note */}
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  onClick={() => openChatWithPrompt("Create a new note for me")}
+                  title="Add new note"
+                >
+                  +N
+                </div>
+              </div>
+            )}
+          </div>
         </Panel>
 
         <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground/70 transition-colors group relative">

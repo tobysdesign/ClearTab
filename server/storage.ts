@@ -78,11 +78,21 @@ export class MemStorage implements IStorage {
     this.tasks = new Map();
     this.userPreferences = new Map();
     this.chatMessages = new Map();
+    this.emotionalMetadataMap = new Map();
     this.currentUserId = 1;
     this.currentNoteId = 1;
     this.currentTaskId = 1;
     this.currentPrefsId = 1;
     this.currentMessageId = 1;
+    this.currentEmotionalId = 1;
+    this.memoryUsageData = {
+      id: 1,
+      totalMemories: 0,
+      monthlyRetrievals: 0,
+      lastRetrievalReset: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
     // Create two dummy users for testing
     const user1: User = {
@@ -362,10 +372,68 @@ export class MemStorage implements IStorage {
     const message: ChatMessage = { 
       ...messageData, 
       id, 
-      createdAt: new Date() 
+      createdAt: new Date(),
+      sessionId: null
     };
     this.chatMessages.set(id, message);
     return message;
+  }
+
+  async cleanupExpiredMessages(): Promise<void> {
+    const now = new Date();
+    for (const [id, message] of this.chatMessages) {
+      if (message.expiresAt && message.expiresAt < now) {
+        this.chatMessages.delete(id);
+      }
+    }
+  }
+
+  async getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]> {
+    return Array.from(this.emotionalMetadataMap.values())
+      .filter(metadata => metadata.userId === userId);
+  }
+
+  async createEmotionalMetadata(metadataData: InsertEmotionalMetadata & { userId: number }): Promise<EmotionalMetadata> {
+    this.currentEmotionalId++;
+    const metadata: EmotionalMetadata = {
+      id: this.currentEmotionalId,
+      createdAt: new Date(),
+      ...metadataData
+    };
+    this.emotionalMetadataMap.set(this.currentEmotionalId, metadata);
+    return metadata;
+  }
+
+  async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
+    return Array.from(this.emotionalMetadataMap.values())
+      .filter(metadata => 
+        metadata.userId === userId &&
+        metadata.createdAt >= startDate &&
+        metadata.createdAt <= endDate
+      );
+  }
+
+  async getMemoryUsage(): Promise<MemoryUsage | undefined> {
+    return this.memoryUsageData;
+  }
+
+  async updateMemoryUsage(totalMemories: number, monthlyRetrievals?: number): Promise<MemoryUsage> {
+    this.memoryUsageData = {
+      ...this.memoryUsageData,
+      totalMemories,
+      monthlyRetrievals: monthlyRetrievals ?? this.memoryUsageData.monthlyRetrievals,
+      updatedAt: new Date()
+    };
+    return this.memoryUsageData;
+  }
+
+  async incrementRetrievals(): Promise<MemoryUsage> {
+    this.memoryUsageData = {
+      ...this.memoryUsageData,
+      monthlyRetrievals: this.memoryUsageData.monthlyRetrievals + 1,
+      updatedAt: new Date()
+    };
+    return this.memoryUsageData;
   }
 }
 
