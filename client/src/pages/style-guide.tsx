@@ -38,31 +38,53 @@ export default function StyleGuide() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Fixed Navigation */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-light text-text-primary">Style Guide</h1>
-              <p className="text-xs text-text-muted">Design system documentation</p>
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar Navigation */}
+      <div className="w-64 fixed left-0 top-0 h-full bg-card border-r border-border overflow-y-auto">
+        <div className="p-6">
+          <div className="mb-8">
+            <h1 className="text-xl font-light text-text-primary mb-1">Style Guide</h1>
+            <p className="text-xs text-text-muted">Design system documentation</p>
+          </div>
+          
+          <nav className="space-y-1">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                className="w-full text-left px-3 py-2 text-sm rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Design Tokens Quick Reference */}
+          <div className="mt-8 pt-6 border-t border-border">
+            <h3 className="text-sm font-medium text-text-primary mb-4">Quick Reference</h3>
+            <div className="space-y-3 text-xs">
+              <div>
+                <p className="text-text-muted mb-1">Main Numbers</p>
+                <p className="font-mono">text-3xl font-light</p>
+                <p className="text-text-muted">48px, 300 weight</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-1">Widget Padding</p>
+                <p className="font-mono">24px</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-1">Border Radius</p>
+                <p className="font-mono">6px (rounded)</p>
+                <p className="font-mono">8px (rounded-lg)</p>
+              </div>
             </div>
-            <nav className="flex space-x-1">
-              {sections.map((section) => (
-                <button
-                  key={section.id}
-                  onClick={() => scrollToSection(section.id)}
-                  className="px-3 py-1 text-xs rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                >
-                  {section.label}
-                </button>
-              ))}
-            </nav>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      {/* Main Content */}
+      <div className="ml-64 flex-1 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-8 py-8">
         {/* All sections visible */}
         <div className="space-y-12">
           {/* Typography Section */}

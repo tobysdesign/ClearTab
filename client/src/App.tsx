@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
-import StyleGuide from "@/pages/style-guide";
+import StyleGuide from "@/pages/style-guide-fixed";
 
 function Router() {
   return (
