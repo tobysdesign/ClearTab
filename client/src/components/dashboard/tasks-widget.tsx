@@ -139,14 +139,8 @@ export default function TasksWidget() {
                         </div>
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-40" align="start" side="bottom" sideOffset={4}>
+                    <PopoverContent className="w-36" align="start" side="bottom" sideOffset={4}>
                       <div className="space-y-1">
-                        <button
-                          onClick={() => handleEditTask(task)}
-                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                        >
-                          Edit Task
-                        </button>
                         <button
                           onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
                           className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
