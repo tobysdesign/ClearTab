@@ -235,17 +235,9 @@ export default function NotesWidgetCollapsible() {
           </div>
         </Panel>
 
-        <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground/70 transition-colors group relative cursor-col-resize">
+        <PanelResizeHandle className="w-0 group relative cursor-col-resize">
           <div className="absolute -left-2 -right-2 top-0 bottom-0 flex items-center justify-center">
-            <div className="opacity-40 group-hover:opacity-100 transition-opacity">
-              <div className="w-4 h-8 bg-muted/80 rounded-sm flex items-center justify-center shadow-sm border border-border/30">
-                <div className="flex flex-col space-y-0.5">
-                  <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
-                  <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
-                  <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
-                </div>
-              </div>
-            </div>
+            <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground/70 group-hover:w-1 transition-all duration-200 rounded-full"></div>
           </div>
         </PanelResizeHandle>
 
