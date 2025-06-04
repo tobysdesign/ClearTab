@@ -48,12 +48,10 @@
 
   @keyframes silk-bg {
     0%, 100% { 
-      background-position: 0% 0%, 0% 0%; 
-      transform: scale(1.1) rotate(0deg);
+      background-position: 0% 0%; 
     }
     50% { 
-      background-position: 100% 100%, 50% 50%; 
-      transform: scale(1.1) rotate(2.15deg);
+      background-position: 100% 100%; 
     }
   }
 
