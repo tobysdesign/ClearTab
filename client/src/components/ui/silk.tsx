@@ -60,17 +60,31 @@ const fragmentShader = `
     // Mouse position in UV coordinates
     vec2 mouseUv = mouse / resolution;
     mouseUv.y = 1.0 - mouseUv.y;
+    vec2 prevMouseUv = prevMouse / resolution;
+    prevMouseUv.y = 1.0 - prevMouseUv.y;
     
-    // Base silk pattern (unchanged)
+    // Calculate movement for disturbance
+    vec2 mouseVelocity = mouseUv - prevMouseUv;
+    float speed = length(mouseVelocity);
+    
+    // Create disturbance field around cursor movement
+    float mouseDist = distance(uv, mouseUv);
+    float disturbanceRadius = 0.1;
+    float disturbance = smoothstep(disturbanceRadius, 0.0, mouseDist) * speed * 10.0;
+    
+    // Apply disturbance to silk pattern coordinates
+    vec2 distortedP = p + mouseVelocity * disturbance * 0.5;
+    
+    // Generate silk pattern with mouse-induced distortion
     vec2 q = vec2(0.0);
-    q.x = fbm(p + t * vec2(0.1, 0.05));
-    q.y = fbm(p + vec2(1.0) + t * vec2(0.05, 0.1));
+    q.x = fbm(distortedP + t * vec2(0.1, 0.05));
+    q.y = fbm(distortedP + vec2(1.0) + t * vec2(0.05, 0.1));
     
     vec2 r = vec2(0.0);
-    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + t * 0.15);
-    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + t * 0.126);
+    r.x = fbm(distortedP + 1.0 * q + vec2(1.7, 9.2) + t * 0.15);
+    r.y = fbm(distortedP + 1.0 * q + vec2(8.3, 2.8) + t * 0.126);
     
-    float f = fbm(p + r + t * 0.1);
+    float f = fbm(distortedP + r + t * 0.1);
     
     // Base silk color
     vec3 color = vec3(0.02, 0.02, 0.03);
@@ -86,44 +100,6 @@ const fragmentShader = `
     color = mix(color,
                 vec3(0.12, 0.12, 0.16),
                 clamp(length(r), 0.0, 1.0));
-    
-    // Natural smoke dispersion effect
-    vec2 prevMouseUv = prevMouse / resolution;
-    prevMouseUv.y = 1.0 - prevMouseUv.y;
-    
-    // Calculate movement direction
-    vec2 mouseVelocity = mouseUv - prevMouseUv;
-    float speed = length(mouseVelocity);
-    
-    // Only show smoke when moving
-    if (speed > 0.001) {
-      // Calculate perpendicular direction for smoke spread
-      vec2 perpendicular = vec2(-mouseVelocity.y, mouseVelocity.x);
-      
-      // Create multiple smoke particles displaced from cursor path
-      float smokeIntensity = 0.0;
-      
-      for (int i = 0; i < 3; i++) {
-        float offset = float(i) - 1.0; // -1, 0, 1
-        vec2 smokePos = mouseUv + perpendicular * offset * 0.08;
-        
-        // Add trailing effect behind movement
-        smokePos -= mouseVelocity * (1.0 + float(i) * 0.5);
-        
-        float dist = distance(uv, smokePos);
-        float particle = exp(-dist * 15.0) * (0.3 + float(i) * 0.1);
-        
-        // Add noise for natural dispersion
-        vec2 noiseUv = (uv - smokePos) * 8.0 + t * vec2(0.5, -0.3);
-        float dispersion = fbm(noiseUv) * 0.5 + 0.5;
-        
-        smokeIntensity += particle * dispersion * speed * 5.0;
-      }
-      
-      // Subtle smoke color
-      vec3 smokeColor = vec3(0.04, 0.04, 0.07) * clamp(smokeIntensity, 0.0, 0.3);
-      color += smokeColor;
-    }
     
     float highlight = pow(max(0.0, f), 2.0);
     color += vec3(0.03, 0.03, 0.05) * highlight;
