@@ -1,4 +1,5 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { GripVertical, GripHorizontal } from "lucide-react";
 import NotesWidget from "./notes-widget-collapsible";
 import TasksWidget from "./tasks-widget";
 import WeatherWidget from "./weather-widget-minimal";
@@ -17,7 +18,11 @@ export default function ResizableBentoGrid() {
                 <NotesWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-2 bg-border hover:bg-border/80 transition-colors rounded-sm" />
+            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
+                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+              </div>
+            </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
               <div className="h-full pl-2">
                 <TasksWidget />
@@ -26,7 +31,11 @@ export default function ResizableBentoGrid() {
           </PanelGroup>
         </Panel>
         
-        <PanelResizeHandle className="h-2 bg-border hover:bg-border/80 transition-colors rounded-sm" />
+        <PanelResizeHandle className="h-1 group flex items-center justify-center hover:h-2 transition-all duration-200">
+          <div className="h-0.5 w-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:h-4">
+            <GripHorizontal className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+          </div>
+        </PanelResizeHandle>
         
         {/* Second Row: Weather, Finance, Events */}
         <Panel defaultSize={50} minSize={30}>
@@ -36,13 +45,21 @@ export default function ResizableBentoGrid() {
                 <WeatherWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-2 bg-border hover:bg-border/80 transition-colors rounded-sm" />
+            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
+                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+              </div>
+            </PanelResizeHandle>
             <Panel defaultSize={33} minSize={25}>
               <div className="h-full px-1">
                 <FinanceWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-2 bg-border hover:bg-border/80 transition-colors rounded-sm" />
+            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
+                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+              </div>
+            </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
               <div className="h-full pl-1">
                 <CalendarWidget />
