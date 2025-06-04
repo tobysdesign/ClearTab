@@ -1,4 +1,4 @@
-import NotesWidget from "./notes-widget";
+import NotesWidget from "./notes-widget-fixed";
 import TasksWidget from "./tasks-widget";
 import WeatherWidget from "./weather-widget-minimal";
 import FinanceWidget from "./finance-widget-fixed";
