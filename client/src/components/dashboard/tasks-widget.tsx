@@ -80,6 +80,19 @@ export default function TasksWidget() {
     setEditingTask(null);
   };
 
+  const handleDuplicateTask = (task: Task) => {
+    const duplicatedTask = {
+      title: `${task.title} (Copy)`,
+      description: task.description,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      completed: false
+    };
+    createTaskMutation.mutate(duplicatedTask);
+    setIsModalOpen(false);
+    setEditingTask(null);
+  };
+
   const deleteTask = (id: number) => {
     deleteTaskMutation.mutate(id);
   };

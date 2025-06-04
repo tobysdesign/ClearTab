@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Save, Calendar } from "lucide-react";
+import { MoreHorizontal, Save, Calendar, Copy, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { Task } from "@shared/schema";
 
@@ -16,15 +17,15 @@ interface TaskEditModalProps {
   onClose: () => void;
   onSave: (task: Partial<Task>) => void;
   onDelete: (taskId: number) => void;
+  onDuplicate: (task: Task) => void;
   triggerRef?: React.RefObject<HTMLElement>;
 }
 
-export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete, triggerRef }: TaskEditModalProps) {
+export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete, onDuplicate, triggerRef }: TaskEditModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"todo" | "inprogress" | "review">("todo");
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +40,6 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
       };
       setPriority(priorityMap[task.priority] || "todo");
       setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
-      setShowDeleteConfirm(false);
     }
   }, [task, isOpen]);
 
@@ -59,6 +59,12 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
   const handleDelete = () => {
     if (!task) return;
     onDelete(task.id);
+    onClose();
+  };
+
+  const handleDuplicate = () => {
+    if (!task) return;
+    onDuplicate(task);
     onClose();
   };
 
@@ -127,35 +133,27 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-foreground">Edit Task</h2>
-                {showDeleteConfirm ? (
-                  <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="h-8 px-2 text-xs"
+                      className="h-8 w-8 p-0"
                     >
-                      Cancel
+                      <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleDelete}
-                      className="h-8 px-2 text-xs"
-                    >
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleDuplicate}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Delete
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Form */}
