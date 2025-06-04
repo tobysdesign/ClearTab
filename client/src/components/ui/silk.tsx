@@ -18,6 +18,7 @@ const fragmentShader = `
   uniform float time;
   uniform vec2 resolution;
   uniform vec2 mouse;
+  uniform vec2 prevMouse;
   uniform float mouseActive;
   varying vec2 vUv;
 
@@ -86,19 +87,43 @@ const fragmentShader = `
                 vec3(0.12, 0.12, 0.16),
                 clamp(length(r), 0.0, 1.0));
     
-    // Natural fog effect around cursor
-    float mouseDist = distance(uv, mouseUv);
-    float fogRadius = 0.15;
-    float fogStrength = smoothstep(fogRadius, 0.0, mouseDist);
+    // Natural smoke dispersion effect
+    vec2 prevMouseUv = prevMouse / resolution;
+    prevMouseUv.y = 1.0 - prevMouseUv.y;
     
-    // Create natural fog patterns using noise
-    vec2 fogUv = (uv - mouseUv) * 8.0;
-    float fogNoise = fbm(fogUv + t * vec2(0.5, 0.3));
-    float fogPattern = fogNoise * fogStrength;
+    // Calculate movement direction
+    vec2 mouseVelocity = mouseUv - prevMouseUv;
+    float speed = length(mouseVelocity);
     
-    // Subtle fog color that blends naturally
-    vec3 fogColor = vec3(0.08, 0.08, 0.12) * fogPattern;
-    color += fogColor;
+    // Only show smoke when moving
+    if (speed > 0.001) {
+      // Calculate perpendicular direction for smoke spread
+      vec2 perpendicular = vec2(-mouseVelocity.y, mouseVelocity.x);
+      
+      // Create multiple smoke particles displaced from cursor path
+      float smokeIntensity = 0.0;
+      
+      for (int i = 0; i < 3; i++) {
+        float offset = float(i) - 1.0; // -1, 0, 1
+        vec2 smokePos = mouseUv + perpendicular * offset * 0.08;
+        
+        // Add trailing effect behind movement
+        smokePos -= mouseVelocity * (1.0 + float(i) * 0.5);
+        
+        float dist = distance(uv, smokePos);
+        float particle = exp(-dist * 15.0) * (0.3 + float(i) * 0.1);
+        
+        // Add noise for natural dispersion
+        vec2 noiseUv = (uv - smokePos) * 8.0 + t * vec2(0.5, -0.3);
+        float dispersion = fbm(noiseUv) * 0.5 + 0.5;
+        
+        smokeIntensity += particle * dispersion * speed * 5.0;
+      }
+      
+      // Subtle smoke color
+      vec3 smokeColor = vec3(0.04, 0.04, 0.07) * clamp(smokeIntensity, 0.0, 0.3);
+      color += smokeColor;
+    }
     
     float highlight = pow(max(0.0, f), 2.0);
     color += vec3(0.03, 0.03, 0.05) * highlight;
@@ -137,7 +162,8 @@ export default function Silk({ className = "", children }: SilkProps) {
       uniforms: {
         time: { value: 0 },
         resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-        mouse: { value: new THREE.Vector2(0.5, 0.5) },
+        mouse: { value: new THREE.Vector2(window.innerWidth * 0.5, window.innerHeight * 0.5) },
+        prevMouse: { value: new THREE.Vector2(window.innerWidth * 0.5, window.innerHeight * 0.5) },
         mouseActive: { value: 1.0 }
       }
     })
@@ -173,6 +199,9 @@ export default function Silk({ className = "", children }: SilkProps) {
     }
 
     const handleMouseMove = (event: MouseEvent) => {
+      // Store previous position
+      material.uniforms.prevMouse.value.copy(material.uniforms.mouse.value)
+      // Update current position
       material.uniforms.mouse.value.set(event.clientX, event.clientY)
     }
 
