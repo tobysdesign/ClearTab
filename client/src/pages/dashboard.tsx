@@ -17,32 +17,37 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <Silk 
-      speed={3}
-      scale={1.2}
-      color="#7B7481"
-      noiseIntensity={1.8}
-      rotation={0.1}
+    <SilkErrorBoundary 
+      fallbackColor="#7B7481"
       className="min-h-screen"
     >
-      <div className="bg-background/80 text-foreground min-h-screen backdrop-blur-sm">
-        <ResizableBentoGrid />
-        
-        <FloatingAIButton />
-        
-        {isInitFlowOpen && (
-          <AgentInitFlow 
-            isOpen={isInitFlowOpen}
-            onClose={closeInitFlow}
+      <Silk 
+        speed={3}
+        scale={1.2}
+        color="#7B7481"
+        noiseIntensity={1.8}
+        rotation={0.1}
+        className="min-h-screen"
+      >
+        <div className="bg-background/80 text-foreground min-h-screen backdrop-blur-sm">
+          <ResizableBentoGrid />
+          
+          <FloatingAIButton />
+          
+          {isInitFlowOpen && (
+            <AgentInitFlow 
+              isOpen={isInitFlowOpen}
+              onClose={closeInitFlow}
+            />
+          )}
+          
+          <ChatOverlay 
+            isOpen={isChatOpen && !isInitFlowOpen}
+            onClose={closeChat}
+            initialMessage={initialMessage}
           />
-        )}
-        
-        <ChatOverlay 
-          isOpen={isChatOpen && !isInitFlowOpen}
-          onClose={closeChat}
-          initialMessage={initialMessage}
-        />
-      </div>
-    </Silk>
+        </div>
+      </Silk>
+    </SilkErrorBoundary>
   );
 }

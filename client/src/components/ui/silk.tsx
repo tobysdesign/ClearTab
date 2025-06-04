@@ -149,6 +149,19 @@ export interface SilkProps {
 // WebGL capability detection
 const isWebGLSupported = (): boolean => {
   try {
+    // Check if we're in a Replit environment or if there are context issues
+    if (typeof window !== 'undefined') {
+      // Check for Replit-specific environment indicators
+      const isReplit = window.location.hostname.includes('replit.dev') || 
+                      window.location.hostname.includes('repl.co') ||
+                      document.querySelector('script[src*="replit"]') !== null;
+      
+      if (isReplit) {
+        console.warn('Replit environment detected, using fallback background for stability');
+        return false;
+      }
+    }
+    
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
     return !!gl;
@@ -222,16 +235,18 @@ const Silk: React.FC<SilkProps> = ({
     setWebglError(true);
   }, []);
 
-  // Check WebGL support on component mount
+  // Check WebGL support and environment on component mount
   React.useEffect(() => {
-    if (!isWebGLSupported()) {
+    const webglSupported = isWebGLSupported();
+    if (!webglSupported) {
       setWebglError(true);
       console.warn('WebGL not supported, using fallback background');
     }
   }, []);
 
-  // If WebGL is not supported or has errors, use fallback
-  if (webglError || contextLost || !isWebGLSupported()) {
+  // Early return for Replit environment or WebGL issues
+  const webglSupported = isWebGLSupported();
+  if (!webglSupported || webglError || contextLost) {
     return <FallbackBackground color={color} className={className} children={children} />;
   }
 
