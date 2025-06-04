@@ -213,7 +213,7 @@ export default function NotesWidget() {
                   {notes.map((note) => (
                     <div
                       key={note.id}
-                      className={`p-2 mb-1 rounded cursor-pointer ${
+                      className={`px-0 py-2 mb-1 rounded cursor-pointer ${
                         selectedNoteId === note.id ? 'bg-muted border border-border' : ''
                       }`}
                       onClick={() => {

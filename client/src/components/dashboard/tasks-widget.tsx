@@ -69,7 +69,7 @@ export default function TasksWidget() {
             {tasks.map((task) => (
               <div 
                 key={task.id}
-                className="flex items-start space-x-0 py-1 rounded mb-1"
+                className="flex items-start space-x-0 py-1 px-0 rounded mb-1"
               >
                 <Checkbox
                   checked={task.completed}
