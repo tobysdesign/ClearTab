@@ -25,9 +25,9 @@ export default function StyleGuide() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex" style={{ height: '100vh', overflow: 'hidden' }}>
       {/* Sidebar Navigation */}
-      <div className="w-80 fixed left-0 top-0 h-full bg-card border-r border-border overflow-y-auto">
+      <div className="w-80 fixed left-0 top-0 h-full bg-card border-r border-border overflow-y-auto z-10">
         <div className="p-6">
           <div className="mb-8">
             <h1 className="text-xl font-light text-text-primary mb-1">Design System</h1>
@@ -132,8 +132,15 @@ export default function StyleGuide() {
       </div>
 
       {/* Main Content */}
-      <div className="ml-80 flex-1 min-h-screen overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-8">
+      <div 
+        className="ml-80 flex-1 h-screen"
+        style={{ 
+          overflowY: 'scroll', 
+          overflowX: 'hidden',
+          maxHeight: '100vh'
+        }}
+      >
+        <div className="max-w-4xl mx-auto p-8 pb-16">
           <div className="space-y-16">
             
             {/* Typography Section */}
