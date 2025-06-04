@@ -31,9 +31,9 @@ export default function ResizableBentoGrid() {
           </PanelGroup>
         </Panel>
         
-        <PanelResizeHandle className="h-2 group flex items-center justify-center transition-all duration-200">
-          <div className="h-0.5 w-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:h-3">
-            <GripHorizontal className="h-2 w-2 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
+        <PanelResizeHandle className="h-1 group flex items-center justify-center transition-all duration-200">
+          <div className="h-0.5 w-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:h-2">
+            <GripHorizontal className="h-1.5 w-1.5 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
           </div>
         </PanelResizeHandle>
         
