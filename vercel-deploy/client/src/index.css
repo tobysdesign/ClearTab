@@ -1,0 +1,262 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 6%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 64%;
+  --popover: 0 0% 6%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 15%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 0 0% 17%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 0 0% 20%;
+  --radius: 0.75rem;
+  
+  --text-primary: 0 0% 98%;
+  --text-secondary: 0 0% 70%;
+  --text-muted: 0 0% 40%;
+  --dark-primary: 0 0% 4%;
+  --dark-secondary: 0 0% 10%;
+  --dark-border: 0 0% 20%;
+  --dark-hover: 0 0% 17%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased text-foreground overflow-hidden bg-background;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  @keyframes silk-flow {
+    0%, 100% { 
+      background-position: 0% 0%, 100% 100%, 100% 0%, 0% 100%;
+      filter: brightness(1) contrast(1);
+    }
+    25% { 
+      background-position: 25% 25%, 75% 75%, 80% 20%, 20% 80%;
+      filter: brightness(1.02) contrast(1.01);
+    }
+    50% { 
+      background-position: 50% 50%, 50% 50%, 60% 40%, 40% 60%;
+      filter: brightness(1.01) contrast(1.02);
+    }
+    75% { 
+      background-position: 75% 25%, 25% 75%, 40% 60%, 60% 40%;
+      filter: brightness(1.02) contrast(1);
+    }
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1rem;
+    height: calc(100vh - 2rem);
+    padding: 1rem;
+  }
+
+  .widget {
+    @apply bg-card border border-border rounded-xl p-6 flex flex-col;
+  }
+
+  /* First Row: Notes and Tasks */
+  .bento-grid > :nth-child(1) { /* Notes */
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+  
+  .bento-grid > :nth-child(2) { /* Tasks */
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  /* Second Row: Weather, Finance, Events */
+  .bento-grid > :nth-child(3) { /* Weather */
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .bento-grid > :nth-child(4) { /* Finance */
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .bento-grid > :nth-child(5) { /* Calendar */
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .chat-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-container {
+    width: 90%;
+    max-width: 600px;
+    height: 70%;
+    @apply bg-card border border-border rounded-2xl flex flex-col overflow-hidden;
+  }
+
+  @keyframes modalGrowFromFAB {
+    0% {
+      opacity: 0;
+      transform: scale(0.1) translateY(40vh);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(0.6) translateY(20vh);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes modalShrinkToFAB {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(0.6) translateY(20vh);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.1) translateY(40vh);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes pulseSubtle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulseSubtle 2s ease-in-out infinite;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thumb-muted {
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-track-transparent {
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 2px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer utilities {
+  .text-text-primary {
+    color: hsl(var(--text-primary));
+  }
+  
+  .text-text-secondary {
+    color: hsl(var(--text-secondary));
+  }
+  
+  .text-text-muted {
+    color: hsl(var(--text-muted));
+  }
+  
+  .bg-dark-primary {
+    background-color: hsl(var(--dark-primary));
+  }
+  
+  .bg-dark-secondary {
+    background-color: hsl(var(--dark-secondary));
+  }
+  
+  .border-dark-border {
+    border-color: hsl(var(--dark-border));
+  }
+  
+  .bg-dark-hover {
+    background-color: hsl(var(--dark-hover));
+  }
+}
