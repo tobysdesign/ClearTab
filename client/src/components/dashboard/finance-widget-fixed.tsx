@@ -108,7 +108,35 @@ export default function FinanceWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium flex items-center justify-end">
+        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+          #Finance
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 flex-1 flex flex-col">
+        {/* Tab Navigation */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex space-x-1">
+            <button
+              onClick={() => setActiveTab("payday")}
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                activeTab === "payday" 
+                  ? "bg-muted text-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Pay
+            </button>
+            <button
+              onClick={() => setActiveTab("budget")}
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                activeTab === "budget" 
+                  ? "bg-muted text-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Spend
+            </button>
+          </div>
           <Popover open={isOpen} onOpenChange={handleOpenChange}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -201,38 +229,13 @@ export default function FinanceWidget() {
               </div>
             </PopoverContent>
           </Popover>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 flex-1 flex flex-col">
-        {/* Tab Navigation */}
-        <div className="flex space-x-1 mb-4">
-          <button
-            onClick={() => setActiveTab("payday")}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              activeTab === "payday" 
-                ? "bg-primary text-primary-foreground" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Payday
-          </button>
-          <button
-            onClick={() => setActiveTab("budget")}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              activeTab === "budget" 
-                ? "bg-primary text-primary-foreground" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Budget
-          </button>
         </div>
 
         {/* Tab Content */}
         <div className="flex-1">
           {activeTab === "payday" ? (
             <div className="space-y-3">
-              <div className="text-center">
+              <div className="text-left">
                 <div className="text-xs text-text-muted font-medium mb-2">Next Payday</div>
                 {daysUntilPayday !== null ? (
                   <div>
@@ -255,7 +258,7 @@ export default function FinanceWidget() {
                 )}
               </div>
               {preferences?.salary && preferences?.expenses && (
-                <div className="text-center pt-2 border-t border-border/50">
+                <div className="text-left pt-2 border-t border-border/50">
                   <div className="text-xs text-text-muted mb-1">Net Pay</div>
                   <div className="text-lg font-medium text-green-600">
                     ${Math.round((preferences.salary - preferences.expenses) / (frequency === "weekly" ? 4.33 : frequency === "bi-weekly" ? 2.17 : 1))}
@@ -268,7 +271,7 @@ export default function FinanceWidget() {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="text-center">
+              <div className="text-left">
                 <div className="text-xs text-text-muted font-medium mb-2">Daily Budget</div>
                 {dailyBudget > 0 ? (
                   <div>
@@ -304,15 +307,6 @@ export default function FinanceWidget() {
           )}
         </div>
       </CardContent>
-      
-      {/* Frequency indicator */}
-      {preferences?.paydayFrequency && (
-        <div className="mt-auto pt-3 border-t border-border mx-6 pb-6">
-          <p className="text-xs text-text-muted text-center capitalize">
-            {preferences.paydayFrequency.replace("-", " ")} payments
-          </p>
-        </div>
-      )}
     </Card>
   );
 }

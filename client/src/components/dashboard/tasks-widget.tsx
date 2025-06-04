@@ -31,18 +31,13 @@ export default function TasksWidget() {
   };
 
   const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+    return 'bg-muted text-muted-foreground border-border';
   };
 
   return (
     <div className="widget tasks-widget h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Tasks</h3>
+        <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">Tasks</h3>
       </div>
       
       <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
@@ -102,7 +97,7 @@ export default function TasksWidget() {
                                 {task.priority} priority
                               </Badge>
                               {task.completed && (
-                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+                                <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
                                   Completed
                                 </Badge>
                               )}
