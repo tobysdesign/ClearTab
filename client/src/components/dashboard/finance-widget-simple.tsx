@@ -1,5 +1,10 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useChatContext } from "@/hooks/use-chat-context";
 import { format, differenceInDays, addDays, addWeeks } from "date-fns";
 
@@ -10,6 +15,7 @@ interface UserPreferences {
 
 export default function FinanceWidget() {
   const { openChatWithPrompt } = useChatContext();
+  const [activeTab, setActiveTab] = useState("pay");
   
   const { data: preferences } = useQuery<UserPreferences>({
     queryKey: ["/api/preferences"],
@@ -82,16 +88,64 @@ export default function FinanceWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
-          Finance
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+              <TabsList className="grid w-full grid-cols-2 h-6 bg-muted/50">
+                <TabsTrigger value="pay" className="text-xs h-5 px-2">Pay</TabsTrigger>
+                <TabsTrigger value="spend" className="text-xs h-5 px-2">Spend</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <MoreHorizontal className="h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48" align="end">
+                <div className="space-y-1">
+                  <button
+                    onClick={() => openChatWithPrompt("Help me set up my payday information and frequency")}
+                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                  >
+                    Set Payday Details
+                  </button>
+                  <button
+                    onClick={() => openChatWithPrompt("Help me track my monthly expenses and spending")}
+                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                  >
+                    Manage Expenses
+                  </button>
+                  <button
+                    onClick={() => openChatWithPrompt("Help me create a budget plan")}
+                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                  >
+                    Budget Planning
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-sm text-center leading-relaxed text-foreground">
-            {formatPaydayText()}
-          </p>
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <TabsContent value="pay" className="flex-1 flex flex-col mt-0">
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-center leading-relaxed text-foreground">
+                {formatPaydayText()}
+              </p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="spend" className="flex-1 flex flex-col mt-0">
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-center leading-relaxed text-muted-foreground">
+                Track your spending and expenses here
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
         
         <div className="mt-auto pt-3 border-t border-border/50">
           <button 
