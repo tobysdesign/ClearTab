@@ -60,19 +60,18 @@ const fragmentShader = `
     vec2 mouseUv = mouse / resolution;
     mouseUv.y = 1.0 - mouseUv.y;
     
-    // Create fog that follows the mouse
-    vec2 mouseOffset = (mouseUv - uv) * 0.3;
-    
+    // Base silk pattern (unchanged)
     vec2 q = vec2(0.0);
-    q.x = fbm(p + t * vec2(0.1, 0.05) + mouseOffset);
-    q.y = fbm(p + vec2(1.0) + t * vec2(0.05, 0.1) + mouseOffset * 0.5);
+    q.x = fbm(p + t * vec2(0.1, 0.05));
+    q.y = fbm(p + vec2(1.0) + t * vec2(0.05, 0.1));
     
     vec2 r = vec2(0.0);
-    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + t * 0.15 + mouseOffset * 0.2);
-    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + t * 0.126 + mouseOffset * 0.3);
+    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + t * 0.15);
+    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + t * 0.126);
     
-    float f = fbm(p + r + t * 0.1 + mouseOffset * 0.1);
+    float f = fbm(p + r + t * 0.1);
     
+    // Base silk color
     vec3 color = vec3(0.02, 0.02, 0.03);
     
     color = mix(color,
@@ -86,6 +85,19 @@ const fragmentShader = `
     color = mix(color,
                 vec3(0.12, 0.12, 0.16),
                 clamp(length(r), 0.0, 1.0));
+    
+    // Localized cursor fog effect
+    float mouseDist = distance(uv, mouseUv);
+    float fogRadius = 0.2;
+    float fogStrength = smoothstep(fogRadius, 0.0, mouseDist);
+    
+    // Create swirling fog around cursor
+    vec2 cursorOffset = uv - mouseUv;
+    float angle = atan(cursorOffset.y, cursorOffset.x) + t * 2.0;
+    float spiral = sin(angle * 3.0 + mouseDist * 10.0) * 0.5 + 0.5;
+    
+    vec3 fogColor = vec3(0.15, 0.15, 0.2) * spiral * fogStrength;
+    color += fogColor;
     
     float highlight = pow(max(0.0, f), 2.0);
     color += vec3(0.03, 0.03, 0.05) * highlight;
