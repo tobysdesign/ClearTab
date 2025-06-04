@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
 import type { Task } from "@shared/schema";
 import { format } from "date-fns";
@@ -35,12 +36,14 @@ export default function TasksWidget() {
   };
 
   return (
-    <div className="widget tasks-widget h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">Tasks</h3>
-      </div>
-      
-      <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+          Tasks
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 flex-1 flex flex-col">
+        <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
         {isLoading ? (
           <div className="space-y-2 p-1">
             {[...Array(4)].map((_, i) => (
