@@ -39,37 +39,29 @@
   }
 
   body {
-    @apply font-sans antialiased text-foreground overflow-hidden;
+    @apply font-sans antialiased text-foreground overflow-hidden bg-background;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: #212121;
-    background-image: 
-      linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
-      linear-gradient(-45deg, rgba(255,255,255,0.02) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.02) 75%),
-      linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.02) 75%),
-      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
-    background-size: 30px 30px, 30px 30px, 30px 30px, 30px 30px, 600px 600px, 400px 400px, 800px 800px;
-    background-position: 0 0, 0 15px, 15px -15px, -15px 0px, 0% 0%, 100% 100%, 50% 50%;
-    animation: silk-bg 25s ease-in-out infinite;
   }
 
-  @keyframes silk-bg {
+  .silk-background {
+    background: #212121;
+    background-image: 
+      radial-gradient(ellipse 80% 80% at 50% -20%, rgba(120, 119, 198, 0.3), transparent),
+      radial-gradient(ellipse 80% 80% at 80% 50%, rgba(255, 255, 255, 0.05), transparent),
+      radial-gradient(ellipse 80% 80% at 20% 80%, rgba(120, 119, 198, 0.1), transparent);
+    background-size: 100% 100%;
+    animation: silk-animation 20s ease-in-out infinite;
+  }
+
+  @keyframes silk-animation {
     0%, 100% { 
-      background-position: 
-        0 0, 0 15px, 15px -15px, -15px 0px,
-        0% 0%, 100% 100%, 50% 50%;
+      background-position: 0% 50%, 100% 50%, 50% 100%;
     }
     33% { 
-      background-position: 
-        5px 5px, 5px 20px, 20px -10px, -10px 5px,
-        30% 70%, 70% 30%, 80% 20%;
+      background-position: 100% 0%, 0% 100%, 100% 0%;
     }
     66% { 
-      background-position: 
-        -5px -5px, -5px 10px, 10px -20px, -20px -5px,
-        70% 30%, 30% 70%, 20% 80%;
+      background-position: 50% 100%, 50% 0%, 0% 50%;
     }
   }
 

@@ -7,12 +7,14 @@ import { ChatProvider } from "@/hooks/use-chat-context";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 import StyleGuide from "@/pages/style-guide-fixed";
+import SilkTest from "@/pages/silk-test";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/style" component={StyleGuide} />
+      <Route path="/silk" component={SilkTest} />
       <Route component={NotFound} />
     </Switch>
   );
