@@ -87,8 +87,8 @@ export default function FinanceWidget() {
 
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-end">
+      <CardContent className="space-y-3 flex-1 flex flex-col p-6">
+        <div className="flex items-center justify-end mb-3">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -119,8 +119,7 @@ export default function FinanceWidget() {
             </PopoverContent>
           </Popover>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3 flex-1 flex flex-col">
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2 h-6 bg-muted/50 mb-3">
             <TabsTrigger value="pay" className="text-xs h-5 px-2">Pay</TabsTrigger>
