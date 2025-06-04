@@ -56,11 +56,26 @@ export default function NotesWidgetCollapsible() {
   const selectedNote = notes.find(note => note.id === selectedNoteId);
   const isNoteCompleted = (note: Note) => note.tags?.includes('completed') || false;
 
+  const handlePanelCollapse = () => {
+    setIsCollapsed(true);
+  };
+
+  const handlePanelExpand = () => {
+    setIsCollapsed(false);
+  };
+
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col overflow-hidden">
       <PanelGroup direction="horizontal" className="flex-1">
         {/* Sidebar Panel */}
-        <Panel defaultSize={40} minSize={25} collapsible collapsedSize={15}>
+        <Panel 
+          defaultSize={40} 
+          minSize={20} 
+          collapsible 
+          collapsedSize={10}
+          onCollapse={handlePanelCollapse}
+          onExpand={handlePanelExpand}
+        >
           <div className="h-full flex flex-col border-r border-border">
             {!isCollapsed ? (
               <>
@@ -68,14 +83,6 @@ export default function NotesWidgetCollapsible() {
                   <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
                     Notes
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={() => setIsCollapsed(true)}
-                  >
-                    <ChevronLeft className="h-3 w-3" />
-                  </Button>
                 </CardHeader>
                 
                 <CardContent className="flex-1 flex flex-col space-y-3 overflow-hidden">
@@ -178,17 +185,6 @@ export default function NotesWidgetCollapsible() {
             ) : (
               // Collapsed state with two-letter cards
               <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
-                <div className="flex justify-center mb-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0"
-                    onClick={() => setIsCollapsed(false)}
-                  >
-                    <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </div>
-                
                 {notes.slice(0, 5).map((note) => {
                   const initials = note.title
                     .split(' ')
@@ -199,7 +195,7 @@ export default function NotesWidgetCollapsible() {
                   return (
                     <div
                       key={note.id}
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
                         selectedNoteId === note.id 
                           ? 'bg-muted border-[#333333] text-foreground' 
                           : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
@@ -214,7 +210,7 @@ export default function NotesWidgetCollapsible() {
                 
                 {/* +N button for add new note */}
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   onClick={() => openChatWithPrompt("Create a new note for me")}
                   title="Add new note"
                 >
@@ -229,6 +225,11 @@ export default function NotesWidgetCollapsible() {
           <div className="absolute -right-2 top-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
             <div className="w-3 h-3 bg-muted/70 rounded-full flex items-center justify-center">
               <ChevronLeft className="h-2 w-2 text-muted-foreground/70" />
+            </div>
+          </div>
+          <div className="absolute -left-2 top-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="w-3 h-3 bg-muted/70 rounded-full flex items-center justify-center">
+              <ChevronRight className="h-2 w-2 text-muted-foreground/70" />
             </div>
           </div>
         </PanelResizeHandle>

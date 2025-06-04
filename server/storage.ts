@@ -398,6 +398,10 @@ export class MemStorage implements IStorage {
     const metadata: EmotionalMetadata = {
       id: this.currentEmotionalId,
       createdAt: new Date(),
+      sourceId: null,
+      insights: null,
+      suggestedActions: null,
+      mem0MemoryId: null,
       ...metadataData
     };
     this.emotionalMetadataMap.set(this.currentEmotionalId, metadata);
@@ -578,6 +582,52 @@ export class DatabaseStorage implements IStorage {
   async createChatMessage(messageData: InsertChatMessage & { userId: number }): Promise<ChatMessage> {
     const [message] = await db.insert(chatMessages).values(messageData).returning();
     return message;
+  }
+
+  async cleanupExpiredMessages(): Promise<void> {
+    const now = new Date();
+    await db.delete(chatMessages).where(eq(chatMessages.expiresAt, now));
+  }
+
+  async getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]> {
+    return await db.select().from(emotionalMetadata).where(eq(emotionalMetadata.userId, userId));
+  }
+
+  async createEmotionalMetadata(metadataData: InsertEmotionalMetadata & { userId: number }): Promise<EmotionalMetadata> {
+    const [metadata] = await db.insert(emotionalMetadata).values(metadataData).returning();
+    return metadata;
+  }
+
+  async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
+    return await db.select().from(emotionalMetadata)
+      .where(eq(emotionalMetadata.userId, userId))
+      .where(eq(emotionalMetadata.createdAt, startDate))
+      .where(eq(emotionalMetadata.createdAt, endDate));
+  }
+
+  async getMemoryUsage(): Promise<MemoryUsage | undefined> {
+    const [usage] = await db.select().from(memoryUsage);
+    return usage;
+  }
+
+  async updateMemoryUsage(totalMemories: number, monthlyRetrievals?: number): Promise<MemoryUsage> {
+    const [usage] = await db.insert(memoryUsage)
+      .values({ totalMemories, monthlyRetrievals: monthlyRetrievals || 0 })
+      .onConflictDoUpdate({ target: memoryUsage.id, set: { totalMemories, monthlyRetrievals: monthlyRetrievals || 0 } })
+      .returning();
+    return usage;
+  }
+
+  async incrementRetrievals(): Promise<MemoryUsage> {
+    const [usage] = await db.select().from(memoryUsage);
+    if (usage) {
+      const [updated] = await db.update(memoryUsage)
+        .set({ monthlyRetrievals: usage.monthlyRetrievals + 1 })
+        .where(eq(memoryUsage.id, usage.id))
+        .returning();
+      return updated;
+    }
+    return this.updateMemoryUsage(0, 1);
   }
 }
 
