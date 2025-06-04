@@ -9,10 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
 import type { Task } from "@shared/schema";
 import { format } from "date-fns";
+import TaskEditModal from "@/components/task-edit-modal";
+import { useState, useRef } from "react";
 
 export default function TasksWidget() {
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const taskRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
@@ -48,6 +53,25 @@ export default function TasksWidget() {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
     },
   });
+
+  const updateTask = useMutation({
+    mutationFn: async (taskUpdate: Partial<Task> & { id: number }) => {
+      const response = await apiRequest("PATCH", `/api/tasks/${taskUpdate.id}`, taskUpdate);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    },
+  });
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveTask = (taskUpdate: Partial<Task>) => {
+    updateTask.mutate(taskUpdate);
+  };
 
   const deleteTask = (id: number) => {
     deleteTaskMutation.mutate(id);
