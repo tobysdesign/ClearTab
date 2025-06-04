@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-interface SilkBackgroundProps {
+interface SilkProps {
   className?: string
   children?: React.ReactNode
 }
@@ -17,9 +17,10 @@ const vertexShader = `
 const fragmentShader = `
   uniform float time;
   uniform vec2 resolution;
+  uniform vec2 mouse;
+  uniform float mouseActive;
   varying vec2 vUv;
 
-  // Simple noise function
   float noise(vec2 p) {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
   }
@@ -53,21 +54,25 @@ const fragmentShader = `
     vec2 uv = vUv;
     vec2 p = uv * 3.0;
     
-    // Create flowing silk pattern
     float t = time * 0.1;
     
-    // Multiple layers of flowing patterns
+    // Mouse position in UV coordinates
+    vec2 mouseUv = mouse / resolution;
+    mouseUv.y = 1.0 - mouseUv.y;
+    
+    // Create fog that follows the mouse
+    vec2 mouseOffset = (mouseUv - uv) * 0.3;
+    
     vec2 q = vec2(0.0);
-    q.x = fbm(p + t * vec2(0.1, 0.05));
-    q.y = fbm(p + vec2(1.0) + t * vec2(0.05, 0.1));
+    q.x = fbm(p + t * vec2(0.1, 0.05) + mouseOffset);
+    q.y = fbm(p + vec2(1.0) + t * vec2(0.05, 0.1) + mouseOffset * 0.5);
     
     vec2 r = vec2(0.0);
-    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + t * 0.15);
-    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + t * 0.126);
+    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + t * 0.15 + mouseOffset * 0.2);
+    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + t * 0.126 + mouseOffset * 0.3);
     
-    float f = fbm(p + r + t * 0.1);
+    float f = fbm(p + r + t * 0.1 + mouseOffset * 0.1);
     
-    // Create silk colors
     vec3 color = vec3(0.02, 0.02, 0.03);
     
     color = mix(color,
@@ -82,11 +87,9 @@ const fragmentShader = `
                 vec3(0.12, 0.12, 0.16),
                 clamp(length(r), 0.0, 1.0));
     
-    // Add silk-like highlights
     float highlight = pow(max(0.0, f), 2.0);
     color += vec3(0.03, 0.03, 0.05) * highlight;
     
-    // Add subtle shimmer
     float shimmer = sin(f * 8.0 + t * 2.0) * 0.01;
     color += shimmer;
     
@@ -94,7 +97,7 @@ const fragmentShader = `
   }
 `
 
-export default function SilkBackground({ className = "", children }: SilkBackgroundProps) {
+export default function Silk({ className = "", children }: SilkProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<{
     scene: THREE.Scene
@@ -109,7 +112,7 @@ export default function SilkBackground({ className = "", children }: SilkBackgro
 
     const scene = new THREE.Scene()
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -120,7 +123,9 @@ export default function SilkBackground({ className = "", children }: SilkBackgro
       fragmentShader,
       uniforms: {
         time: { value: 0 },
-        resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+        resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        mouse: { value: new THREE.Vector2(0.5, 0.5) },
+        mouseActive: { value: 1.0 }
       }
     })
 
@@ -154,10 +159,16 @@ export default function SilkBackground({ className = "", children }: SilkBackgro
       material.uniforms.resolution.value.set(width, height)
     }
 
+    const handleMouseMove = (event: MouseEvent) => {
+      material.uniforms.mouse.value.set(event.clientX, event.clientY)
+    }
+
     window.addEventListener('resize', handleResize)
+    window.addEventListener('mousemove', handleMouseMove)
 
     return () => {
       window.removeEventListener('resize', handleResize)
+      window.removeEventListener('mousemove', handleMouseMove)
       
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.animationId)
@@ -176,12 +187,7 @@ export default function SilkBackground({ className = "", children }: SilkBackgro
     <div className={`relative ${className}`}>
       <div 
         ref={mountRef} 
-        className="fixed inset-0 -z-10"
-        style={{ 
-          width: '100vw', 
-          height: '100vh',
-          pointerEvents: 'none'
-        }} 
+        className="fixed inset-0 -z-10 pointer-events-none"
       />
       {children}
     </div>
