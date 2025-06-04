@@ -70,7 +70,14 @@ export default function TasksWidget() {
   };
 
   const handleSaveTask = (taskUpdate: Partial<Task>) => {
-    updateTask.mutate(taskUpdate);
+    if (!taskUpdate.id) return;
+    updateTask.mutate(taskUpdate as Partial<Task> & { id: number });
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    deleteTaskMutation.mutate(taskId);
+    setIsModalOpen(false);
+    setEditingTask(null);
   };
 
   const deleteTask = (id: number) => {
@@ -163,6 +170,7 @@ export default function TasksWidget() {
           setEditingTask(null);
         }}
         onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
         triggerRef={editingTask ? { current: taskRefs.current[editingTask.id] } : undefined}
       />
     </Card>
