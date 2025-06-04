@@ -2,8 +2,9 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/index.ts",
+      "src": "package.json",
       "use": "@vercel/node"
+<<<<<<< HEAD
     },
     {
       "src": "client/package.json",
@@ -11,16 +12,22 @@
       "config": {
         "distDir": "../dist/public"
       }
+=======
+>>>>>>> 7853c0f5213e78ce9ef76713c795d3ecf77acdbb
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "server/index.ts"
+      "dest": "/api"
     },
     {
       "src": "/(.*)",
+<<<<<<< HEAD
       "dest": "dist/public/$1"
+=======
+      "dest": "/$1"
+>>>>>>> 7853c0f5213e78ce9ef76713c795d3ecf77acdbb
     }
   ]
 }
