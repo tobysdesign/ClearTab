@@ -1,7 +1,7 @@
 import NotesWidget from "./notes-widget-fixed";
 import TasksWidget from "./tasks-widget";
 import WeatherWidget from "./weather-widget-minimal";
-import FinanceWidget from "./finance-widget-fixed";
+import FinanceWidget from "./finance-widget-simple";
 import CalendarWidget from "./calendar-widget-fixed";
 
 export default function BentoGrid() {
