@@ -1,5 +1,9 @@
 import express from 'express';
-import cors from 'cors';
+import { OpenAI } from 'openai';
+import { db } from './db.js';
+import { mem0Service } from './mem0-service.js';
+import { notes, tasks, userPreferences } from '../shared/schema.js';
+import { eq } from 'drizzle-orm';
 
 const app = express();
 
