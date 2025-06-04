@@ -59,38 +59,41 @@ export default function NotesWidgetCollapsible() {
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col overflow-hidden">
       <PanelGroup direction="horizontal" className="flex-1">
         {/* Sidebar Panel */}
-        <Panel defaultSize={40} minSize={25} collapsible collapsedSize={0}>
-          <div className="h-full flex flex-col border-r border-border">
-            <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
-                Notes
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent className="flex-1 flex flex-col space-y-3">
-              <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-                {isLoading ? (
-                  <div className="space-y-2 p-1">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                        <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
-                        <div className="flex-1">
-                          <div className="h-3 bg-muted rounded mb-2"></div>
-                          <div className="h-2 bg-muted rounded w-2/3"></div>
+        <Panel defaultSize={40} minSize={25} collapsible collapsedSize={15}>
+          {({ isCollapsed }: { isCollapsed: boolean }) => (
+            <div className="h-full flex flex-col border-r border-border">
+              {!isCollapsed ? (
+                <>
+                  <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+                      Notes
+                    </CardTitle>
+                  </CardHeader>
+                  
+                  <CardContent className="flex-1 flex flex-col space-y-3 overflow-hidden">
+                    <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+                      {isLoading ? (
+                        <div className="space-y-2 p-1">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
+                              <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
+                              <div className="flex-1">
+                                <div className="h-3 bg-muted rounded mb-2"></div>
+                                <div className="h-2 bg-muted rounded w-2/3"></div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2 p-1">
-                    {notes.map((note) => (
-                      <div 
-                        key={note.id} 
-                        className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer border border-solid ${
-                          selectedNoteId === note.id ? 'bg-muted/50 border-[#333333]' : 'border-transparent'
-                        }`}
-                        onClick={() => setSelectedNoteId(note.id)}
-                      >
+                      ) : (
+                        <div className="space-y-2 p-1">
+                          {notes.map((note) => (
+                            <div 
+                              key={note.id} 
+                              className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer border border-solid ${
+                                selectedNoteId === note.id ? 'bg-muted/50 border-[#333333]' : 'border-transparent'
+                              }`}
+                              onClick={() => setSelectedNoteId(note.id)}
+                            >
                         <div className="flex items-start justify-between mb-1">
                           <p className={`text-sm line-clamp-1 flex-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
                             {note.title}

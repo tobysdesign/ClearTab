@@ -1,8 +1,9 @@
 import { 
-  users, notes, tasks, userPreferences, chatMessages, memoryUsage,
+  users, notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
   type User, type InsertUser, type Note, type InsertNote, 
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
-  type ChatMessage, type InsertChatMessage, type MemoryUsage, type InsertMemoryUsage
+  type ChatMessage, type InsertChatMessage, type EmotionalMetadata, type InsertEmotionalMetadata,
+  type MemoryUsage, type InsertMemoryUsage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -40,9 +41,15 @@ export interface IStorage {
   createUserPreferences(prefs: InsertUserPreferences & { userId: number }): Promise<UserPreferences>;
   updateUserPreferences(userId: number, prefs: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
   
-  // Chat messages methods
+  // Chat messages methods (temporary storage)
   getChatMessagesByUserId(userId: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage & { userId: number }): Promise<ChatMessage>;
+  cleanupExpiredMessages(): Promise<void>;
+  
+  // Emotional metadata methods
+  getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]>;
+  createEmotionalMetadata(metadata: InsertEmotionalMetadata & { userId: number }): Promise<EmotionalMetadata>;
+  getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]>;
   
   // Memory usage tracking methods
   getMemoryUsage(): Promise<MemoryUsage | undefined>;

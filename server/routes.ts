@@ -336,11 +336,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // Store user message
+      // Store user message with 3-day expiration for privacy
+      const expiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days
       await storage.createChatMessage({
         message,
         role: "user",
-        userId: DEFAULT_USER_ID
+        userId: DEFAULT_USER_ID,
+        expiresAt,
+        sessionId: `session_${Date.now()}_${DEFAULT_USER_ID}`
       });
 
       // Get user preferences for context
