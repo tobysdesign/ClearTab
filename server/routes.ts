@@ -410,7 +410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createChatMessage({
           message: responseMessage,
           role: "assistant",
-          userId: DEFAULT_USER_ID
+          userId: DEFAULT_USER_ID,
+          expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
         });
         
         const response: any = { message: responseMessage };
@@ -497,7 +498,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createChatMessage({
         message: responseData.message,
         role: "assistant",
-        userId: DEFAULT_USER_ID
+        userId: DEFAULT_USER_ID,
+        expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
       });
 
       // Store conversation in Mem0 for learning

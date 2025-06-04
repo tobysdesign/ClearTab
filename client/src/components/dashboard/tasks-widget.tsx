@@ -118,8 +118,8 @@ export default function TasksWidget() {
           Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 flex-1 flex flex-col">
-        <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
           {isLoading ? (
             <div className="space-y-2 p-1">
               {[...Array(4)].map((_, i) => (

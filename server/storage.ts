@@ -64,11 +64,13 @@ export class MemStorage implements IStorage {
   private userPreferences: Map<number, UserPreferences>;
   private chatMessages: Map<number, ChatMessage>;
   private memoryUsageData: MemoryUsage;
+  private emotionalMetadataMap: Map<number, EmotionalMetadata>;
   private currentUserId: number;
   private currentNoteId: number;
   private currentTaskId: number;
   private currentPrefsId: number;
   private currentMessageId: number;
+  private currentEmotionalId: number;
 
   constructor() {
     this.users = new Map();
