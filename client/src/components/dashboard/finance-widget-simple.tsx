@@ -88,7 +88,29 @@ export default function FinanceWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardContent className="space-y-3 flex-1 flex flex-col p-6">
-        <div className="flex items-center justify-end mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => setActiveTab('pay')}
+              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                activeTab === 'pay'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              }`}
+            >
+              Pay
+            </button>
+            <button
+              onClick={() => setActiveTab('spend')}
+              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                activeTab === 'spend'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              }`}
+            >
+              Spend
+            </button>
+          </div>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -120,41 +142,16 @@ export default function FinanceWidget() {
           </Popover>
         </div>
         
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center space-x-1 mb-3">
-            <button
-              onClick={() => setActiveTab('pay')}
-              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-                activeTab === 'pay'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-              }`}
-            >
-              Pay
-            </button>
-            <button
-              onClick={() => setActiveTab('spend')}
-              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-                activeTab === 'spend'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-              }`}
-            >
-              Spend
-            </button>
-          </div>
-          
-          <div className="flex-1 flex items-center justify-center">
-            {activeTab === 'pay' ? (
-              <p className="text-sm text-center leading-relaxed text-foreground">
-                {formatPaydayText()}
-              </p>
-            ) : (
-              <p className="text-sm text-center leading-relaxed text-muted-foreground">
-                Track your spending and expenses here
-              </p>
-            )}
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          {activeTab === 'pay' ? (
+            <p className="text-sm text-center leading-relaxed text-foreground">
+              {formatPaydayText()}
+            </p>
+          ) : (
+            <p className="text-sm text-center leading-relaxed text-muted-foreground">
+              Track your spending and expenses here
+            </p>
+          )}
         </div>
         
         <div className="mt-auto pt-3 border-t border-border/50">
