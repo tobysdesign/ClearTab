@@ -4,6 +4,7 @@ import ChatOverlay from "@/components/ai/chat-overlay";
 import AgentInitFlow from "@/components/ai/agent-init-flow";
 import FloatingAIButton from "@/components/floating-ai-button";
 import Silk from "@/components/ui/silk";
+import SilkErrorBoundary from "@/components/ui/silk-error-boundary";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAgentInit } from "@/hooks/use-agent-init";
 

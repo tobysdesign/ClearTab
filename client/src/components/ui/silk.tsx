@@ -2,7 +2,7 @@
         Installed from https://reactbits.dev/ts/tailwind/
 */
 
-import React, { forwardRef, useMemo, useRef, useLayoutEffect } from "react";
+import React, { forwardRef, useMemo, useRef, useLayoutEffect, useState, useCallback } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -94,30 +94,45 @@ const SilkPlane = forwardRef<THREE.Mesh, SilkPlaneProps>(function SilkPlane(
   const { viewport } = useThree();
 
   useLayoutEffect(() => {
-    const mesh = ref as React.MutableRefObject<THREE.Mesh | null>;
-    if (mesh.current) {
-      mesh.current.scale.set(viewport.width, viewport.height, 1);
+    try {
+      const mesh = ref as React.MutableRefObject<THREE.Mesh | null>;
+      if (mesh.current) {
+        mesh.current.scale.set(viewport.width, viewport.height, 1);
+      }
+    } catch (error) {
+      console.error('Error setting mesh scale:', error);
     }
   }, [ref, viewport]);
 
   useFrame((_state, delta: number) => {
-    const mesh = ref as React.MutableRefObject<THREE.Mesh | null>;
-    if (mesh.current) {
-      const material = mesh.current.material as THREE.ShaderMaterial;
-      material.uniforms.uTime.value += 0.1 * delta;
+    try {
+      const mesh = ref as React.MutableRefObject<THREE.Mesh | null>;
+      if (mesh.current && mesh.current.material) {
+        const material = mesh.current.material as THREE.ShaderMaterial;
+        if (material.uniforms && material.uniforms.uTime) {
+          material.uniforms.uTime.value += 0.1 * delta;
+        }
+      }
+    } catch (error) {
+      console.error('Error updating shader uniforms:', error);
     }
   });
 
-  return (
-    <mesh ref={ref}>
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-      />
-    </mesh>
-  );
+  try {
+    return (
+      <mesh ref={ref}>
+        <planeGeometry args={[1, 1, 1, 1]} />
+        <shaderMaterial
+          uniforms={uniforms}
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+        />
+      </mesh>
+    );
+  } catch (error) {
+    console.error('Error rendering SilkPlane:', error);
+    return null;
+  }
 });
 SilkPlane.displayName = "SilkPlane";
 
@@ -131,6 +146,41 @@ export interface SilkProps {
   children?: React.ReactNode;
 }
 
+// WebGL capability detection
+const isWebGLSupported = (): boolean => {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    return !!gl;
+  } catch (e) {
+    return false;
+  }
+};
+
+// CSS fallback background component
+const FallbackBackground: React.FC<{ color: string; className: string; children: React.ReactNode }> = ({ 
+  color, 
+  className, 
+  children 
+}) => {
+  const [r, g, b] = hexToNormalizedRGB(color);
+  const rgbColor = `${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}`;
+  
+  return (
+    <div className={`relative ${className}`}>
+      <div 
+        className="fixed inset-0 -z-10 animate-pulse"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, rgba(${rgbColor}, 0.15) 0%, rgba(${rgbColor}, 0.05) 50%, transparent 100%), 
+                      linear-gradient(45deg, rgba(${rgbColor}, 0.08) 0%, rgba(${rgbColor}, 0.03) 100%)`,
+          animation: 'pulse 8s ease-in-out infinite alternate'
+        }}
+      />
+      {children}
+    </div>
+  );
+};
+
 const Silk: React.FC<SilkProps> = ({
   speed = 5,
   scale = 1,
@@ -141,6 +191,8 @@ const Silk: React.FC<SilkProps> = ({
   children
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [webglError, setWebglError] = useState(false);
+  const [contextLost, setContextLost] = useState(false);
 
   const uniforms = useMemo<SilkUniforms>(
     () => ({
@@ -154,6 +206,35 @@ const Silk: React.FC<SilkProps> = ({
     [speed, scale, noiseIntensity, color, rotation]
   );
 
+  const handleContextLost = useCallback((event: Event) => {
+    event.preventDefault();
+    setContextLost(true);
+    console.warn('WebGL context lost, switching to fallback background');
+  }, []);
+
+  const handleContextRestored = useCallback(() => {
+    setContextLost(false);
+    console.log('WebGL context restored');
+  }, []);
+
+  const handleWebGLError = useCallback((error: any) => {
+    console.error('WebGL error:', error);
+    setWebglError(true);
+  }, []);
+
+  // Check WebGL support on component mount
+  React.useEffect(() => {
+    if (!isWebGLSupported()) {
+      setWebglError(true);
+      console.warn('WebGL not supported, using fallback background');
+    }
+  }, []);
+
+  // If WebGL is not supported or has errors, use fallback
+  if (webglError || contextLost || !isWebGLSupported()) {
+    return <FallbackBackground color={color} className={className} children={children} />;
+  }
+
   return (
     <div className={`relative ${className}`}>
       <div className="fixed inset-0 -z-10">
@@ -161,8 +242,16 @@ const Silk: React.FC<SilkProps> = ({
           dpr={[1, 2]} 
           frameloop="always"
           onCreated={({ gl }) => {
-            gl.setClearColor('#0a0a0a');
+            try {
+              gl.setClearColor('#0a0a0a');
+              // Add context loss/restore listeners
+              gl.domElement.addEventListener('webglcontextlost', handleContextLost);
+              gl.domElement.addEventListener('webglcontextrestored', handleContextRestored);
+            } catch (error) {
+              handleWebGLError(error);
+            }
           }}
+          onError={handleWebGLError}
         >
           <SilkPlane ref={meshRef} uniforms={uniforms} />
         </Canvas>
