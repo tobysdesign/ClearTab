@@ -65,7 +65,7 @@ export default function TasksWidget() {
             <p className="text-xs mt-1">Click below to add your first task</p>
           </div>
         ) : (
-          <div className="px-6">
+          <div>
             {tasks.map((task) => (
               <div 
                 key={task.id}
