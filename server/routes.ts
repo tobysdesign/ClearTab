@@ -72,6 +72,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multi-city weather API
+  app.get("/api/weather/cities", async (req, res) => {
+    try {
+      const apiKey = process.env.TOMORROW_IO_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: "Weather API key not configured",
+          message: "Please provide a valid Tomorrow.io API key"
+        });
+      }
+      
+      const cities = [
+        { name: "San Francisco", lat: 37.7749, lon: -122.4194 },
+        { name: "New York", lat: 40.7128, lon: -74.0060 },
+        { name: "London", lat: 51.5074, lon: -0.1278 }
+      ];
+      
+      const weatherPromises = cities.map(async (city) => {
+        try {
+          const response = await fetch(
+            `https://api.tomorrow.io/v4/weather/realtime?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric`
+          );
+          
+          if (!response.ok) {
+            throw new Error(`Weather API error for ${city.name}: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          const weather = data.data.values;
+          
+          return {
+            city: city.name,
+            temperature: Math.round(weather.temperature),
+            description: getWeatherDescription(weather.weatherCode),
+            rainChance: Math.round(weather.precipitationProbability || 0)
+          };
+        } catch (error) {
+          console.error(`Weather API error for ${city.name}:`, error);
+          return null;
+        }
+      });
+      
+      const weatherData = await Promise.all(weatherPromises);
+      const validWeatherData = weatherData.filter(data => data !== null);
+      
+      res.json(validWeatherData);
+    } catch (error) {
+      console.error("Multi-city weather API error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch multi-city weather data",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Helper function to convert Tomorrow.io weather codes to descriptions
   function getWeatherDescription(code: number): string {
     const weatherCodes: Record<number, string> = {

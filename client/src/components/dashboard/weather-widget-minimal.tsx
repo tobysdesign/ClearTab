@@ -3,21 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 
-interface WeatherData {
+interface CityWeatherData {
+  city: string;
   temperature: number;
   description: string;
-  high: number;
-  low: number;
-  humidity: number;
   rainChance: number;
-  location: string;
 }
 
 export default function WeatherWidget() {
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  const { data: weather, isLoading, error } = useQuery<WeatherData>({
-    queryKey: ["/api/weather"],
+  const { data: cities, isLoading, error } = useQuery<CityWeatherData[]>({
+    queryKey: ["/api/weather/cities"],
     refetchInterval: 5 * 60 * 1000, // 5 minutes
     retry: 3,
   });
@@ -35,7 +32,7 @@ export default function WeatherWidget() {
     );
   }
 
-  if (error || !weather) {
+  if (error || !cities || cities.length === 0) {
     return (
       <div className="widget weather-widget h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
@@ -48,20 +45,12 @@ export default function WeatherWidget() {
     );
   }
 
-  const weatherCards = [
-    {
-      title: "Now",
-      temp: `${weather.temperature}°`,
-      description: weather.description,
-      location: weather.location
-    },
-    {
-      title: "Today",
-      temp: `${weather.high}°/${weather.low}°`,
-      description: `${weather.rainChance}% rain`,
-      location: `${weather.humidity}% humidity`
-    }
-  ];
+  const weatherCards = cities.map(city => ({
+    title: city.city,
+    temp: `${city.temperature}°`,
+    description: city.description,
+    location: `${city.rainChance}% rain`
+  }));
 
   const nextCard = () => {
     setCurrentIndex((prev) => (prev + 1) % weatherCards.length);
