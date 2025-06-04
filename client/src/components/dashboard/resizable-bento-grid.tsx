@@ -14,7 +14,7 @@ export default function ResizableBentoGrid() {
         <Panel defaultSize={50} minSize={30}>
           <PanelGroup direction="horizontal" className="h-full">
             <Panel defaultSize={66} minSize={40} collapsible>
-              <div className="h-full pr-2">
+              <div className="h-full pr-1">
                 <NotesWidget />
               </div>
             </Panel>
@@ -24,7 +24,7 @@ export default function ResizableBentoGrid() {
               </div>
             </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
-              <div className="h-full pl-2">
+              <div className="h-full pl-1">
                 <TasksWidget />
               </div>
             </Panel>

@@ -116,6 +116,12 @@ export default function TasksWidget() {
                     <PopoverContent className="w-40" align="end">
                       <div className="space-y-1">
                         <button
+                          onClick={() => openChatWithPrompt(`Edit this task: "${task.title}"`)}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Edit Task
+                        </button>
+                        <button
                           onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
                           className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
                         >

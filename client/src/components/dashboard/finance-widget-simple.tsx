@@ -120,28 +120,42 @@ export default function FinanceWidget() {
           </Popover>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 h-6 bg-muted/50 mb-3">
-            <TabsTrigger value="pay" className="text-xs h-5 px-2">Pay</TabsTrigger>
-            <TabsTrigger value="spend" className="text-xs h-5 px-2">Spend</TabsTrigger>
-          </TabsList>
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center space-x-1 mb-3">
+            <button
+              onClick={() => setActiveTab('pay')}
+              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                activeTab === 'pay'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              }`}
+            >
+              Pay
+            </button>
+            <button
+              onClick={() => setActiveTab('spend')}
+              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                activeTab === 'spend'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+              }`}
+            >
+              Spend
+            </button>
+          </div>
           
-          <TabsContent value="pay" className="flex-1 flex flex-col mt-0">
-            <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center">
+            {activeTab === 'pay' ? (
               <p className="text-sm text-center leading-relaxed text-foreground">
                 {formatPaydayText()}
               </p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="spend" className="flex-1 flex flex-col mt-0">
-            <div className="flex-1 flex items-center justify-center">
+            ) : (
               <p className="text-sm text-center leading-relaxed text-muted-foreground">
                 Track your spending and expenses here
               </p>
-            </div>
-          </TabsContent>
-        </Tabs>
+            )}
+          </div>
+        </div>
         
         <div className="mt-auto pt-3 border-t border-border/50">
           <button 
