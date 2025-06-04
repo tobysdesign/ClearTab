@@ -161,10 +161,10 @@ export default function NotesWidgetCollapsible() {
           </div>
         </Panel>
 
-        <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground transition-colors group relative">
+        <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground/70 transition-colors group relative">
           <div className="absolute -right-2 top-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <div className="w-4 h-4 bg-muted rounded-full flex items-center justify-center">
-              <ChevronLeft className="h-3 w-3 text-muted-foreground" />
+            <div className="w-3 h-3 bg-muted/70 rounded-full flex items-center justify-center">
+              <ChevronLeft className="h-2 w-2 text-muted-foreground/70" />
             </div>
           </div>
         </PanelResizeHandle>

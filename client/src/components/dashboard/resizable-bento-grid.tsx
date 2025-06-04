@@ -18,9 +18,9 @@ export default function ResizableBentoGrid() {
                 <NotesWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
-              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
-                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+            <PanelResizeHandle className="w-2 group flex items-center justify-center transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:w-3">
+                <GripVertical className="h-2 w-2 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
               </div>
             </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
@@ -31,9 +31,9 @@ export default function ResizableBentoGrid() {
           </PanelGroup>
         </Panel>
         
-        <PanelResizeHandle className="h-1 group flex items-center justify-center hover:h-2 transition-all duration-200">
-          <div className="h-0.5 w-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:h-4">
-            <GripHorizontal className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+        <PanelResizeHandle className="h-2 group flex items-center justify-center transition-all duration-200">
+          <div className="h-0.5 w-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:h-3">
+            <GripHorizontal className="h-2 w-2 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
           </div>
         </PanelResizeHandle>
         
@@ -45,9 +45,9 @@ export default function ResizableBentoGrid() {
                 <WeatherWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
-              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
-                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+            <PanelResizeHandle className="w-2 group flex items-center justify-center transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:w-3">
+                <GripVertical className="h-2 w-2 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
               </div>
             </PanelResizeHandle>
             <Panel defaultSize={33} minSize={25}>
@@ -55,9 +55,9 @@ export default function ResizableBentoGrid() {
                 <FinanceWidget />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-1 group flex items-center justify-center hover:w-2 transition-all duration-200">
-              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground transition-colors rounded-full flex items-center justify-center group-hover:w-4">
-                <GripVertical className="h-3 w-3 text-transparent group-hover:text-muted-foreground transition-colors" />
+            <PanelResizeHandle className="w-2 group flex items-center justify-center transition-all duration-200">
+              <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground/70 transition-colors rounded-full flex items-center justify-center group-hover:w-3">
+                <GripVertical className="h-2 w-2 text-transparent group-hover:text-muted-foreground/70 transition-colors" />
               </div>
             </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
