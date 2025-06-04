@@ -18,17 +18,39 @@ export default function TasksWidget() {
     queryKey: ["/api/tasks"],
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Task> }) => {
-      await apiRequest("PUT", `/api/tasks/${id}`, data);
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/tasks/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
     },
   });
 
-  const handleToggleTask = (id: number, completed: boolean) => {
-    updateTaskMutation.mutate({ id, data: { completed } });
+  const updateTaskPriority = useMutation({
+    mutationFn: async ({ id, priority }: { id: number; priority: string }) => {
+      const res = await apiRequest("PATCH", `/api/tasks/${id}`, { priority });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    },
+  });
+
+  const toggleTaskStatus = useMutation({
+    mutationFn: async ({ id, completed }: { id: number; completed: boolean }) => {
+      const res = await apiRequest("PATCH", `/api/tasks/${id}`, { 
+        completed: completed
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    },
+  });
+
+  const deleteTask = (id: number) => {
+    deleteTaskMutation.mutate(id);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -44,99 +66,98 @@ export default function TasksWidget() {
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col">
         <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
-        {isLoading ? (
-          <div className="space-y-2 p-1">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
-                <div className="flex-1">
-                  <div className="h-3 bg-muted rounded mb-2"></div>
-                  <div className="h-2 bg-muted rounded w-1/3"></div>
+          {isLoading ? (
+            <div className="space-y-2 p-1">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
+                  <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
+                  <div className="flex-1">
+                    <div className="h-3 bg-muted rounded mb-2"></div>
+                    <div className="h-2 bg-muted rounded w-2/3"></div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : tasks.length === 0 ? (
-          <div className="text-center text-text-muted py-8">
-            <Plus className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">No tasks yet</p>
-            <p className="text-xs mt-1">Click below to add your first task</p>
-          </div>
-        ) : (
-          <div>
-            {tasks.map((task) => (
-              <div 
-                key={task.id}
-                className="flex items-start space-x-0 py-1 px-0 rounded mb-1"
-              >
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={(checked) => handleToggleTask(task.id, !!checked)}
-                  className="mt-1.5 flex-shrink-0 mr-2 text-muted-foreground border-muted-foreground"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <button 
-                            className={`text-left text-xs font-medium hover:text-primary transition-colors cursor-pointer leading-tight ${
-                              task.completed ? 'line-through text-muted-foreground' : 'text-text-primary'
-                            }`}
-                          >
-                            {task.title}
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4" side="right" align="start">
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-medium text-sm mb-2">{task.title}</h4>
-                              {task.description && (
-                                <p className="text-sm text-muted-foreground">{task.description}</p>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                                {task.priority} priority
-                              </Badge>
-                              {task.completed && (
-                                <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
-                                  Completed
-                                </Badge>
-                              )}
-                            </div>
-                            {task.dueDate && (
-                              <div className="text-xs text-muted-foreground">
-                                Due: {format(new Date(task.dueDate), 'MMM d, yyyy')}
-                              </div>
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="flex items-start ml-1">
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2 p-1">
+              {tasks.map((task) => (
+                <div key={task.id} className="flex items-start space-x-3 p-2 rounded hover:bg-muted/50 transition-colors group">
+                  <Checkbox
+                    checked={task.completed}
+                    onCheckedChange={(checked) => toggleTaskStatus.mutate({ id: task.id, completed: checked as boolean })}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm mb-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                      {task.title}
+                    </p>
+                    {task.description && (
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {task.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                        {task.priority}
+                      </Badge>
                       {task.dueDate && (
-                        <span className="text-xs text-muted-foreground leading-tight mt-1.5">
-                          {format(new Date(task.dueDate), 'M/d')}
+                        <span className="text-xs text-muted-foreground">
+                          Due: {format(new Date(task.dueDate), 'MMM d')}
                         </span>
                       )}
                     </div>
                   </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0">
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40" align="end">
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Mark High Priority
+                        </button>
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Mark Medium Priority
+                        </button>
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Mark Low Priority
+                        </button>
+                        <hr className="my-1" />
+                        <button
+                          onClick={() => deleteTask(task.id)}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                        >
+                          Delete Task
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      
-      <div className="mt-auto pt-3 border-t border-border">
-        <button 
-          className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-          onClick={() => openChatWithPrompt("Create a new task for me")}
-        >
-          Add new task
-        </button>
-      </div>
-    </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <div className="mt-auto pt-3 border-t border-border/50">
+          <button 
+            className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
+            onClick={() => openChatWithPrompt("Create a new task for me")}
+          >
+            Add new task
+          </button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
