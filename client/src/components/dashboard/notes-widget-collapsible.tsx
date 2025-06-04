@@ -68,7 +68,7 @@ export default function NotesWidgetCollapsible() {
             </CardHeader>
             
             <CardContent className="flex-1 flex flex-col space-y-3">
-              <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
+              <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                 {isLoading ? (
                   <div className="space-y-2 p-1">
                     {[...Array(4)].map((_, i) => (
@@ -86,69 +86,63 @@ export default function NotesWidgetCollapsible() {
                     {notes.map((note) => (
                       <div 
                         key={note.id} 
-                        className={`flex items-start space-x-3 p-2 rounded hover:bg-muted/50 transition-colors group cursor-pointer ${
+                        className={`p-2 rounded hover:bg-muted/50 transition-colors group cursor-pointer ${
                           selectedNoteId === note.id ? 'bg-muted/50' : ''
                         }`}
                         onClick={() => setSelectedNoteId(note.id)}
                       >
-                        <Checkbox
-                          checked={isNoteCompleted(note)}
-                          onCheckedChange={(checked) => toggleNoteCompleted(note.id, checked as boolean)}
-                          className="mt-0.5"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm mb-1 line-clamp-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
+                        <div className="flex items-start justify-between mb-1">
+                          <p className={`text-sm line-clamp-1 flex-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
                             {note.title}
                           </p>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {note.content}
-                          </p>
-                          {note.tags && note.tags.length > 0 && (
-                            <div className="flex items-center gap-1 mt-1 flex-wrap">
-                              {note.tags.filter(tag => tag !== 'completed').map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs bg-muted text-muted-foreground border-border">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-2"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-40" align="end">
+                              <div className="space-y-1">
+                                <button
+                                  onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
+                                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                                >
+                                  Edit Note
+                                </button>
+                                <button
+                                  onClick={() => toggleNoteCompleted(note.id, !isNoteCompleted(note))}
+                                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                                >
+                                  {isNoteCompleted(note) ? 'Mark Incomplete' : 'Mark Complete'}
+                                </button>
+                                <hr className="my-1" />
+                                <button
+                                  onClick={() => deleteNote(note.id)}
+                                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                                >
+                                  Delete Note
+                                </button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-40" align="end">
-                            <div className="space-y-1">
-                              <button
-                                onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
-                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                              >
-                                Edit Note
-                              </button>
-                              <button
-                                onClick={() => toggleNoteCompleted(note.id, !isNoteCompleted(note))}
-                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                              >
-                                {isNoteCompleted(note) ? 'Mark Incomplete' : 'Mark Complete'}
-                              </button>
-                              <hr className="my-1" />
-                              <button
-                                onClick={() => deleteNote(note.id)}
-                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                              >
-                                Delete Note
-                              </button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {note.content}
+                        </p>
+                        {note.tags && note.tags.length > 0 && (
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {note.tags.filter(tag => tag !== 'completed').map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs bg-muted text-muted-foreground border-border">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -167,7 +161,13 @@ export default function NotesWidgetCollapsible() {
           </div>
         </Panel>
 
-        <PanelResizeHandle className="w-2 bg-border hover:bg-border/80 transition-colors rounded-sm" />
+        <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground transition-colors group relative">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-4 h-4 bg-muted rounded-full flex items-center justify-center -mr-2">
+              <ChevronLeft className="h-3 w-3 text-muted-foreground" />
+            </div>
+          </div>
+        </PanelResizeHandle>
 
         {/* Content Panel */}
         <Panel defaultSize={60} minSize={30}>
@@ -193,7 +193,7 @@ export default function NotesWidgetCollapsible() {
                     )}
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                   <div className="prose prose-sm max-w-none text-foreground">
                     {selectedNote.content.split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-3 text-sm leading-relaxed">
