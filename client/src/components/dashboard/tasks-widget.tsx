@@ -116,29 +116,59 @@ export default function TasksWidget() {
                     className="mt-0.5"
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <div className="flex-1 min-w-0 cursor-pointer">
-                        <p className={`text-sm mb-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                  <div className="flex-1 min-w-0">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <p className={`text-sm mb-1 cursor-pointer hover:text-foreground transition-colors ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
                           {task.title}
                         </p>
-                        {task.description && (
-                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                            {task.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className={getPriorityColor(task.priority)}>
-                            {task.priority}
-                          </Badge>
-                          {task.dueDate && (
-                            <span className="text-xs text-muted-foreground">
-                              Due: {format(new Date(task.dueDate), 'MMM d')}
-                            </span>
-                          )}
+                      </PopoverTrigger>
+                      <PopoverContent className="w-36" align="start" side="bottom" sideOffset={4}>
+                        <div className="space-y-1">
+                          <button
+                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
+                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                          >
+                            High Priority
+                          </button>
+                          <button
+                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
+                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                          >
+                            Medium Priority
+                          </button>
+                          <button
+                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
+                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                          >
+                            Low Priority
+                          </button>
+                          <hr className="my-1" />
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                          >
+                            Delete Task
+                          </button>
                         </div>
-                      </div>
-                    </PopoverTrigger>
+                      </PopoverContent>
+                    </Popover>
+                    {task.description && (
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                        {task.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="outline" className={getPriorityColor(task.priority)}>
+                        {task.priority}
+                      </Badge>
+                      {task.dueDate && (
+                        <span className="text-xs text-muted-foreground">
+                          Due: {format(new Date(task.dueDate), 'MMM d')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                     <PopoverContent className="w-36" align="start" side="bottom" sideOffset={4}>
                       <div className="space-y-1">
                         <button

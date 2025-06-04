@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ]);
           
           const weather = currentData.data.values;
-          const forecast = forecastData.data.timelines[0].intervals.slice(1, 13); // Next 12 hours
+          const forecast = forecastData.data?.timelines?.[0]?.intervals?.slice(1, 13) || [];
           
           return {
             city: city.name,
