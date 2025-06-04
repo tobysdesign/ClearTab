@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function FinanceWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"payday" | "budget">("payday");
   const [paydayDate, setPaydayDate] = useState<Date>();
   const [frequency, setFrequency] = useState("bi-weekly");
   const [salary, setSalary] = useState("");
@@ -203,44 +204,104 @@ export default function FinanceWidget() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Payday Section */}
-          <div className="space-y-2 text-left">
-            <div className="text-xs text-text-muted font-medium">Next Payday</div>
-            {daysUntilPayday !== null ? (
-              <div>
-                <div className="text-3xl font-light text-text-primary">
-                  {daysUntilPayday}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  {daysUntilPayday === 1 ? 'day' : 'days'}
-                </div>
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground py-2">
-                Set payday
-              </div>
-            )}
-          </div>
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 mb-4">
+          <button
+            onClick={() => setActiveTab("payday")}
+            className={`px-3 py-1 text-xs rounded transition-colors ${
+              activeTab === "payday" 
+                ? "bg-primary text-primary-foreground" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Payday
+          </button>
+          <button
+            onClick={() => setActiveTab("budget")}
+            className={`px-3 py-1 text-xs rounded transition-colors ${
+              activeTab === "budget" 
+                ? "bg-primary text-primary-foreground" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Budget
+          </button>
+        </div>
 
-          {/* Daily Budget Section */}
-          <div className="space-y-2 text-left">
-            <div className="text-xs text-text-muted font-medium">Est. Daily Spend</div>
-            {dailyBudget > 0 ? (
-              <div>
-                <div className="text-3xl font-light text-text-primary">
-                  ${dailyBudget}
-                </div>
-                <div className="text-sm text-text-secondary">
-                  per day
-                </div>
+        {/* Tab Content */}
+        <div className="flex-1">
+          {activeTab === "payday" ? (
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-xs text-text-muted font-medium mb-2">Next Payday</div>
+                {daysUntilPayday !== null ? (
+                  <div>
+                    <div className="text-3xl font-light text-text-primary">
+                      {daysUntilPayday}
+                    </div>
+                    <div className="text-sm text-text-secondary mb-3">
+                      {daysUntilPayday === 1 ? 'day' : 'days'}
+                    </div>
+                    {preferences?.paydayDate && (
+                      <div className="text-xs text-text-muted">
+                        {format(new Date(preferences.paydayDate), 'EEEE, MMM d')}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground py-4">
+                    Set payday in settings
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-xs text-muted-foreground py-2">
-                Set salary
+              {preferences?.salary && preferences?.expenses && (
+                <div className="text-center pt-2 border-t border-border/50">
+                  <div className="text-xs text-text-muted mb-1">Net Pay</div>
+                  <div className="text-lg font-medium text-green-600">
+                    ${Math.round((preferences.salary - preferences.expenses) / (frequency === "weekly" ? 4.33 : frequency === "bi-weekly" ? 2.17 : 1))}
+                  </div>
+                  <div className="text-xs text-text-muted capitalize">
+                    per {frequency.replace("-", " ")}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-xs text-text-muted font-medium mb-2">Daily Budget</div>
+                {dailyBudget > 0 ? (
+                  <div>
+                    <div className="text-3xl font-light text-text-primary">
+                      ${dailyBudget}
+                    </div>
+                    <div className="text-sm text-text-secondary mb-3">
+                      per day
+                    </div>
+                    <div className="text-xs text-text-muted">
+                      Based on ${preferences?.salary || 0} salary - ${preferences?.expenses || 0} expenses
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground py-4">
+                    Set salary and expenses in settings
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+              {preferences?.salary && preferences?.expenses && (
+                <div className="space-y-2 pt-2 border-t border-border/50">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-text-muted">Weekly budget</span>
+                    <span className="text-text-primary">${(dailyBudget * 7).toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-text-muted">Monthly budget</span>
+                    <span className="text-text-primary">${(dailyBudget * 30).toFixed(0)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
       
