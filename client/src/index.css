@@ -43,36 +43,21 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  .silk-background {
-    background: #212121;
-    background-image: 
-      conic-gradient(from 0deg at 50% 50%, #212121 0deg, rgba(255, 255, 255, 0.03) 45deg, #212121 90deg, rgba(255, 255, 255, 0.03) 135deg, #212121 180deg, rgba(255, 255, 255, 0.03) 225deg, #212121 270deg, rgba(255, 255, 255, 0.03) 315deg, #212121 360deg),
-      radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 40%),
-      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 40%),
-      linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.005) 50%, transparent 70%),
-      linear-gradient(-45deg, transparent 30%, rgba(255, 255, 255, 0.005) 50%, transparent 70%);
-    background-size: 400px 400px, 300px 300px, 300px 300px, 600px 600px, 600px 600px, 200px 200px, 200px 200px;
-    background-position: 0% 0%, 0% 0%, 100% 100%, 100% 0%, 0% 100%, 0% 0%, 100% 100%;
-    animation: silk-flow 30s ease-in-out infinite;
-  }
-
   @keyframes silk-flow {
     0%, 100% { 
-      background-position: 0% 0%, 0% 0%, 100% 100%, 100% 0%, 0% 100%, 0% 0%, 100% 100%;
+      background-position: 0% 0%, 100% 100%, 100% 0%, 0% 100%;
       filter: brightness(1) contrast(1);
     }
     25% { 
-      background-position: 25% 25%, 10% 30%, 90% 70%, 80% 20%, 20% 80%, 30% 30%, 70% 70%;
+      background-position: 25% 25%, 75% 75%, 80% 20%, 20% 80%;
       filter: brightness(1.02) contrast(1.01);
     }
     50% { 
-      background-position: 50% 50%, 30% 60%, 70% 40%, 60% 40%, 40% 60%, 60% 60%, 40% 40%;
+      background-position: 50% 50%, 50% 50%, 60% 40%, 40% 60%;
       filter: brightness(1.01) contrast(1.02);
     }
     75% { 
-      background-position: 75% 25%, 60% 10%, 40% 90%, 40% 60%, 60% 40%, 90% 10%, 10% 90%;
+      background-position: 75% 25%, 25% 75%, 40% 60%, 60% 40%;
       filter: brightness(1.02) contrast(1);
     }
   }
