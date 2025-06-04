@@ -88,48 +88,45 @@ export default function FinanceWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-              <TabsList className="grid w-full grid-cols-2 h-6 bg-muted/50">
-                <TabsTrigger value="pay" className="text-xs h-5 px-2">Pay</TabsTrigger>
-                <TabsTrigger value="spend" className="text-xs h-5 px-2">Spend</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                  <MoreHorizontal className="h-3 w-3" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48" align="end">
-                <div className="space-y-1">
-                  <button
-                    onClick={() => openChatWithPrompt("Help me set up my payday information and frequency")}
-                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                  >
-                    Set Payday Details
-                  </button>
-                  <button
-                    onClick={() => openChatWithPrompt("Help me track my monthly expenses and spending")}
-                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                  >
-                    Manage Expenses
-                  </button>
-                  <button
-                    onClick={() => openChatWithPrompt("Help me create a budget plan")}
-                    className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                  >
-                    Budget Planning
-                  </button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+        <div className="flex items-center justify-end">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <MoreHorizontal className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48" align="end">
+              <div className="space-y-1">
+                <button
+                  onClick={() => openChatWithPrompt("Help me set up my payday information and frequency")}
+                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                >
+                  Set Payday Details
+                </button>
+                <button
+                  onClick={() => openChatWithPrompt("Help me track my monthly expenses and spending")}
+                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                >
+                  Manage Expenses
+                </button>
+                <button
+                  onClick={() => openChatWithPrompt("Help me create a budget plan")}
+                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                >
+                  Budget Planning
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 h-6 bg-muted/50 mb-3">
+            <TabsTrigger value="pay" className="text-xs h-5 px-2">Pay</TabsTrigger>
+            <TabsTrigger value="spend" className="text-xs h-5 px-2">Spend</TabsTrigger>
+          </TabsList>
+          
           <TabsContent value="pay" className="flex-1 flex flex-col mt-0">
             <div className="flex-1 flex items-center justify-center">
               <p className="text-sm text-center leading-relaxed text-foreground">
