@@ -6,11 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
+import StyleGuide from "@/pages/style-guide";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/style" component={StyleGuide} />
       <Route component={NotFound} />
     </Switch>
   );
