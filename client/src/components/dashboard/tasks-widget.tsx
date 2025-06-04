@@ -80,6 +80,16 @@ export default function TasksWidget() {
     setEditingTask(null);
   };
 
+  const createTask = useMutation({
+    mutationFn: async (newTask: Partial<Task>) => {
+      const response = await apiRequest("POST", "/api/tasks", newTask);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    },
+  });
+
   const handleDuplicateTask = (task: Task) => {
     const duplicatedTask = {
       title: `${task.title} (Copy)`,
@@ -88,7 +98,7 @@ export default function TasksWidget() {
       dueDate: task.dueDate,
       completed: false
     };
-    createTaskMutation.mutate(duplicatedTask);
+    createTask.mutate(duplicatedTask);
     setIsModalOpen(false);
     setEditingTask(null);
   };
@@ -184,6 +194,7 @@ export default function TasksWidget() {
         }}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
+        onDuplicate={handleDuplicateTask}
         triggerRef={editingTask ? { current: taskRefs.current[editingTask.id] } : undefined}
       />
     </Card>
