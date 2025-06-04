@@ -117,42 +117,12 @@ export default function TasksWidget() {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="flex-1 min-w-0">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <p className={`text-sm mb-1 cursor-pointer hover:text-foreground transition-colors ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                          {task.title}
-                        </p>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-36" align="start" side="bottom" sideOffset={4}>
-                        <div className="space-y-1">
-                          <button
-                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
-                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                          >
-                            High Priority
-                          </button>
-                          <button
-                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
-                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                          >
-                            Medium Priority
-                          </button>
-                          <button
-                            onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
-                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                          >
-                            Low Priority
-                          </button>
-                          <hr className="my-1" />
-                          <button
-                            onClick={() => deleteTask(task.id)}
-                            className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                          >
-                            Delete Task
-                          </button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <p 
+                      className={`text-sm mb-1 cursor-pointer hover:text-foreground transition-colors ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                      onClick={() => handleEditTask(task)}
+                    >
+                      {task.title}
+                    </p>
                     {task.description && (
                       <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                         {task.description}
@@ -169,36 +139,6 @@ export default function TasksWidget() {
                       )}
                     </div>
                   </div>
-                    <PopoverContent className="w-36" align="start" side="bottom" sideOffset={4}>
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
-                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                        >
-                          High Priority
-                        </button>
-                        <button
-                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
-                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                        >
-                          Medium Priority
-                        </button>
-                        <button
-                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
-                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                        >
-                          Low Priority
-                        </button>
-                        <hr className="my-1" />
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                        >
-                          Delete Task
-                        </button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
                 </div>
               ))}
             </div>
