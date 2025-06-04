@@ -86,17 +86,18 @@ const fragmentShader = `
                 vec3(0.12, 0.12, 0.16),
                 clamp(length(r), 0.0, 1.0));
     
-    // Localized cursor fog effect
+    // Natural fog effect around cursor
     float mouseDist = distance(uv, mouseUv);
-    float fogRadius = 0.2;
+    float fogRadius = 0.15;
     float fogStrength = smoothstep(fogRadius, 0.0, mouseDist);
     
-    // Create swirling fog around cursor
-    vec2 cursorOffset = uv - mouseUv;
-    float angle = atan(cursorOffset.y, cursorOffset.x) + t * 2.0;
-    float spiral = sin(angle * 3.0 + mouseDist * 10.0) * 0.5 + 0.5;
+    // Create natural fog patterns using noise
+    vec2 fogUv = (uv - mouseUv) * 8.0;
+    float fogNoise = fbm(fogUv + t * vec2(0.5, 0.3));
+    float fogPattern = fogNoise * fogStrength;
     
-    vec3 fogColor = vec3(0.15, 0.15, 0.2) * spiral * fogStrength;
+    // Subtle fog color that blends naturally
+    vec3 fogColor = vec3(0.08, 0.08, 0.12) * fogPattern;
     color += fogColor;
     
     float highlight = pow(max(0.0, f), 2.0);
