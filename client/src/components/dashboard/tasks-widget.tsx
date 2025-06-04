@@ -108,7 +108,7 @@ export default function TasksWidget() {
                 <div 
                   key={task.id} 
                   ref={(el) => { taskRefs.current[task.id] = el; }}
-                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 hover:border hover:border-solid hover:border-[#333333] transition-colors group"
+                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group border border-solid border-transparent hover:border-[#333333]"
                 >
                   <Checkbox
                     checked={task.completed}
