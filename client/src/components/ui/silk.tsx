@@ -6,32 +6,6 @@ import React, { forwardRef, useMemo, useRef, useLayoutEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-class SilkErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.log('Silk component error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || <div className="fixed inset-0 -z-10 bg-background" />;
-    }
-
-    return this.props.children;
-  }
-}
-
 type NormalizedRGB = [number, number, number];
 
 const hexToNormalizedRGB = (hex: string): NormalizedRGB => {
@@ -183,18 +157,15 @@ const Silk: React.FC<SilkProps> = ({
   return (
     <div className={`relative ${className}`}>
       <div className="fixed inset-0 -z-10">
-        <SilkErrorBoundary fallback={<div className="fixed inset-0 -z-10 bg-background" />}>
-          <Canvas 
-            dpr={[1, 2]} 
-            frameloop="always"
-            onCreated={({ gl }) => {
-              gl.setClearColor('#0a0a0a');
-            }}
-            fallback={<div className="fixed inset-0 -z-10 bg-background" />}
-          >
-            <SilkPlane ref={meshRef} uniforms={uniforms} />
-          </Canvas>
-        </SilkErrorBoundary>
+        <Canvas 
+          dpr={[1, 2]} 
+          frameloop="always"
+          onCreated={({ gl }) => {
+            gl.setClearColor('#0a0a0a');
+          }}
+        >
+          <SilkPlane ref={meshRef} uniforms={uniforms} />
+        </Canvas>
       </div>
       {children}
     </div>
