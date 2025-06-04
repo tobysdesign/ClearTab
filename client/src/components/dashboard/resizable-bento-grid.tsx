@@ -9,7 +9,7 @@ import CalendarWidget from "./calendar-widget-fixed";
 export default function ResizableBentoGrid() {
   return (
     <div className="h-[calc(100vh-2rem)] p-4">
-      <PanelGroup direction="vertical" className="h-full">
+      <PanelGroup direction="vertical" className="h-full" style={{ rowGap: '6px' }}>
         {/* First Row: Notes and Tasks */}
         <Panel defaultSize={50} minSize={30}>
           <PanelGroup direction="horizontal" className="h-full">
