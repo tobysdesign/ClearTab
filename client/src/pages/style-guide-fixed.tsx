@@ -488,9 +488,29 @@ export default function StyleGuide() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Interactive States</CardTitle>
+                    <CardTitle>Interactive Elements</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Widget Action Buttons</h4>
+                      <div className="border-t border-border/50 pt-3">
+                        <button className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors">
+                          Add new task
+                        </button>
+                      </div>
+                      <div className="border-t border-border/50 pt-3 mt-2">
+                        <button className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors">
+                          Add new note
+                        </button>
+                      </div>
+                      <div className="text-xs text-text-muted mt-3 space-y-1">
+                        <p className="font-mono">border-t border-border/50</p>
+                        <p className="font-mono">pt-3 = 12px top padding</p>
+                        <p className="font-mono">text-xs = 12px font size</p>
+                        <p>Left-aligned, full-width, positioned at widget bottom</p>
+                      </div>
+                    </div>
+                    
                     <div>
                       <h4 className="text-sm font-medium mb-2">Hover States</h4>
                       <div className="space-y-2">
