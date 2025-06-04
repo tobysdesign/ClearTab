@@ -114,10 +114,11 @@ export default function TasksWidget() {
                     checked={task.completed}
                     onCheckedChange={(checked) => toggleTaskStatus.mutate({ id: task.id, completed: checked as boolean })}
                     className="mt-0.5"
+                    onClick={(e) => e.stopPropagation()}
                   />
-                  <div className="flex-1 min-w-0 relative">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 pr-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <div className="flex-1 min-w-0 cursor-pointer">
                         <p className={`text-sm mb-1 ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
                           {task.title}
                         </p>
@@ -137,50 +138,43 @@ export default function TasksWidget() {
                           )}
                         </div>
                       </div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 shrink-0">
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-36" align="end" side="bottom" sideOffset={4}>
-                          <div className="space-y-1">
-                            <button
-                              onClick={() => handleEditTask(task)}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              Edit Task
-                            </button>
-                            <button
-                              onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              High Priority
-                            </button>
-                            <button
-                              onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              Medium Priority
-                            </button>
-                            <button
-                              onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              Low Priority
-                            </button>
-                            <hr className="my-1" />
-                            <button
-                              onClick={() => deleteTask(task.id)}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                            >
-                              Delete Task
-                            </button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40" align="start" side="bottom" sideOffset={4}>
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Edit Task
+                        </button>
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'high' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          High Priority
+                        </button>
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'medium' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Medium Priority
+                        </button>
+                        <button
+                          onClick={() => updateTaskPriority.mutate({ id: task.id, priority: 'low' })}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                        >
+                          Low Priority
+                        </button>
+                        <hr className="my-1" />
+                        <button
+                          onClick={() => deleteTask(task.id)}
+                          className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                        >
+                          Delete Task
+                        </button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               ))}
             </div>
