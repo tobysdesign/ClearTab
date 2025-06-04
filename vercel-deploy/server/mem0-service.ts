@@ -5,7 +5,9 @@ export class Mem0Service {
 
   constructor() {
     if (process.env.MEM0_API_KEY) {
-      this.client = new MemoryClient(process.env.MEM0_API_KEY);
+      this.client = new MemoryClient({
+        apiKey: process.env.MEM0_API_KEY
+      });
     }
   }
 
