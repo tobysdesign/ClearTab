@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useChatContext } from "@/hooks/use-chat-context";
 import type { Note } from "@shared/schema";
@@ -184,52 +185,64 @@ export default function NotesWidgetCollapsible() {
               </>
             ) : (
               // Collapsed state with two-letter cards
-              <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
-                {notes.slice(0, 5).map((note) => {
-                  const initials = note.title
-                    .split(' ')
-                    .map(word => word.charAt(0).toUpperCase())
-                    .slice(0, 2)
-                    .join('');
+              <TooltipProvider>
+                <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
+                  {notes.slice(0, 5).map((note) => {
+                    const initials = note.title
+                      .split(' ')
+                      .map(word => word.charAt(0).toUpperCase())
+                      .slice(0, 2)
+                      .join('');
+                    
+                    return (
+                      <Tooltip key={note.id}>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
+                              selectedNoteId === note.id 
+                                ? 'bg-muted border-[#333333] text-foreground' 
+                                : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                            }`}
+                            onClick={() => setSelectedNoteId(note.id)}
+                          >
+                            {initials}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          <p className="text-sm">{note.title}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
                   
-                  return (
-                    <div
-                      key={note.id}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
-                        selectedNoteId === note.id 
-                          ? 'bg-muted border-[#333333] text-foreground' 
-                          : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                      }`}
-                      onClick={() => setSelectedNoteId(note.id)}
-                      title={note.title}
-                    >
-                      {initials}
-                    </div>
-                  );
-                })}
-                
-                {/* +N button for add new note */}
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  onClick={() => openChatWithPrompt("Create a new note for me")}
-                  title="Add new note"
-                >
-                  +N
+                  {/* +N button for add new note */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        onClick={() => openChatWithPrompt("Create a new note for me")}
+                      >
+                        +N
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p className="text-sm">Add new note</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-              </div>
+              </TooltipProvider>
             )}
           </div>
         </Panel>
 
-        <PanelResizeHandle className="w-0 border-r border-border hover:border-muted-foreground/70 transition-colors group relative">
-          <div className="absolute -right-2 top-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <div className="w-3 h-3 bg-muted/70 rounded-full flex items-center justify-center">
-              <ChevronLeft className="h-2 w-2 text-muted-foreground/70" />
-            </div>
-          </div>
-          <div className="absolute -left-2 top-6 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <div className="w-3 h-3 bg-muted/70 rounded-full flex items-center justify-center">
-              <ChevronRight className="h-2 w-2 text-muted-foreground/70" />
+        <PanelResizeHandle className="w-1 bg-border hover:bg-muted-foreground/30 transition-colors group relative cursor-col-resize">
+          <div className="absolute -right-3 top-1/2 -translate-y-1/2 opacity-40 group-hover:opacity-100 transition-opacity z-10">
+            <div className="w-4 h-8 bg-muted/80 rounded-sm flex items-center justify-center shadow-sm border border-border/30">
+              <div className="flex flex-col space-y-0.5">
+                <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
+                <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
+                <div className="w-0.5 h-1 bg-muted-foreground/60 rounded-full"></div>
+              </div>
             </div>
           </div>
         </PanelResizeHandle>
