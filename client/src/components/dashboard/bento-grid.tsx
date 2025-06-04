@@ -1,6 +1,6 @@
 import NotesWidget from "./notes-widget";
 import TasksWidget from "./tasks-widget";
-import WeatherWidget from "./weather-widget";
+import WeatherWidget from "./weather-widget-minimal";
 import FinanceWidget from "./finance-widget-fixed";
 import CalendarWidget from "./calendar-widget-fixed";
 

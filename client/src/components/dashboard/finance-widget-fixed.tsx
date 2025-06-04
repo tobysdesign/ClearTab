@@ -109,7 +109,7 @@ export default function FinanceWidget() {
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
-          #Finance
+          Finance
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col">

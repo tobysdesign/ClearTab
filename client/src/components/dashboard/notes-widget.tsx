@@ -171,7 +171,7 @@ export default function NotesWidget() {
       <div className={`${sidebarCollapsed ? 'w-8' : 'w-1/3'} transition-all duration-300 border-r border-border min-w-8`}>
         <div className="p-2 flex items-center justify-between min-h-[32px]">
           {!sidebarCollapsed && (
-            <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">#Notes</h3>
+            <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">Notes</h3>
           )}
           <Button
             variant="ghost"
@@ -238,9 +238,9 @@ export default function NotesWidget() {
               )}
             </div>
             
-            <div className="mt-auto pt-3 border-t border-border mx-6">
+            <div className="mt-auto pt-3 border-t border-border">
               <button 
-                className="text-xs text-text-muted text-center w-full hover:text-text-secondary transition-colors"
+                className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
                 onClick={handleCreateNewNote}
               >
                 Add new note
