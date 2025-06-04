@@ -8,6 +8,14 @@ interface CityWeatherData {
   temperature: number;
   description: string;
   rainChance: number;
+  high: number;
+  low: number;
+  forecast: Array<{
+    time: number;
+    temperature: number;
+    rainChance: number;
+    weatherCode: number;
+  }>;
 }
 
 export default function WeatherWidget() {
@@ -49,7 +57,8 @@ export default function WeatherWidget() {
     title: city.city,
     temp: `${city.temperature}°`,
     description: city.description,
-    location: `${city.rainChance}% rain`
+    location: `${city.rainChance}% rain • ${city.high}°/${city.low}°`,
+    forecast: city.forecast
   }));
 
   const nextCard = () => {
@@ -103,6 +112,30 @@ export default function WeatherWidget() {
               {currentCard.location}
             </div>
           </div>
+          
+          {/* 12-hour forecast ticker */}
+          {currentCard.forecast && currentCard.forecast.length > 0 && (
+            <div className="mt-4 overflow-hidden">
+              <div className="text-xs text-text-muted mb-2">Next 12 hours</div>
+              <div className="relative">
+                <div className="flex space-x-3 overflow-x-auto scrollbar-none">
+                  {currentCard.forecast.map((hour, index) => (
+                    <div key={index} className="flex-shrink-0 text-center min-w-[40px]">
+                      <div className="text-xs text-text-muted mb-1">
+                        {hour.time === 0 ? '12AM' : hour.time <= 12 ? `${hour.time}${hour.time === 12 ? 'PM' : 'AM'}` : `${hour.time - 12}PM`}
+                      </div>
+                      <div className="text-sm font-medium text-text-primary mb-1">
+                        {hour.temperature}°
+                      </div>
+                      <div className="text-xs text-text-muted">
+                        {hour.rainChance}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
 

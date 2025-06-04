@@ -92,22 +92,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const weatherPromises = cities.map(async (city) => {
         try {
-          const response = await fetch(
-            `https://api.tomorrow.io/v4/weather/realtime?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric`
-          );
+          // Get current weather and 12-hour forecast
+          const [currentResponse, forecastResponse] = await Promise.all([
+            fetch(`https://api.tomorrow.io/v4/weather/realtime?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric`),
+            fetch(`https://api.tomorrow.io/v4/weather/forecast?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric&timesteps=1h`)
+          ]);
           
-          if (!response.ok) {
-            throw new Error(`Weather API error for ${city.name}: ${response.status}`);
+          if (!currentResponse.ok || !forecastResponse.ok) {
+            throw new Error(`Weather API error for ${city.name}`);
           }
           
-          const data = await response.json();
-          const weather = data.data.values;
+          const [currentData, forecastData] = await Promise.all([
+            currentResponse.json(),
+            forecastResponse.json()
+          ]);
+          
+          const weather = currentData.data.values;
+          const forecast = forecastData.data.timelines[0].intervals.slice(1, 13); // Next 12 hours
           
           return {
             city: city.name,
             temperature: Math.round(weather.temperature),
             description: getWeatherDescription(weather.weatherCode),
-            rainChance: Math.round(weather.precipitationProbability || 0)
+            rainChance: Math.round(weather.precipitationProbability || 0),
+            high: Math.round(weather.temperatureMax || weather.temperature + 5),
+            low: Math.round(weather.temperatureMin || weather.temperature - 5),
+            forecast: forecast.map((interval: any) => ({
+              time: new Date(interval.startTime).getHours(),
+              temperature: Math.round(interval.values.temperature),
+              rainChance: Math.round(interval.values.precipitationProbability || 0),
+              weatherCode: interval.values.weatherCode
+            }))
           };
         } catch (error) {
           console.error(`Weather API error for ${city.name}:`, error);
