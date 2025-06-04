@@ -156,19 +156,11 @@
     "note": "WebGL context issues in Replit environment only"
   },
   "deployment_notes": {
-    "platform": "Vercel deployment with dual build system",
-    "structure": "Separate client and server builds for optimal Vercel compatibility",
-    "build_commands": {
-      "client": "vite build (frontend React app)",
-      "server": "@vercel/node (TypeScript serverless functions)"
-    },
-    "output_directories": {
-      "client": "dist/public (static assets)",
-      "server": "server/index.ts (API functions)"
-    },
+    "platform": "Optimized for Vercel deployment",
+    "build_command": "npm run build",
+    "output_directory": "dist",
     "environment": "Node.js with WebGL support",
     "database": "Requires PostgreSQL connection string",
-    "routing": "API routes to server functions, static routes to client build",
     "known_issues": "Three.js WebGL context fails in Replit development environment but works in production"
   },
   "current_status": {
