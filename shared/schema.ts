@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, serial, integer, boolean, timestamp, jsonb, index, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -52,6 +52,24 @@ export const chatMessages = pgTable("chat_messages", {
   userId: integer("user_id").notNull(),
   message: text("message").notNull(),
   role: text("role").notNull(), // user, assistant
+  sessionId: text("session_id"), // for grouping conversations
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(), // auto-delete after few days
+});
+
+// Emotional metadata stored locally for querying/visualization
+export const emotionalMetadata = pgTable("emotional_metadata", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  sourceType: text("source_type").notNull(), // "note", "task", "chat"
+  sourceId: integer("source_id"), // reference to note/task id if applicable
+  emotion: text("emotion").notNull(), // joy, sadness, anger, fear, etc.
+  tone: text("tone").notNull(), // positive, negative, neutral, excited, etc.
+  intent: text("intent").notNull(), // goal-setting, venting, planning, etc.
+  confidence: integer("confidence").notNull(), // 0-100 score
+  insights: text("insights"), // AI-generated insights
+  suggestedActions: text("suggested_actions").array(), // ["revisit", "journal", "save_insight"]
+  mem0MemoryId: text("mem0_memory_id"), // reference to mem0 memory
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -93,6 +111,12 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertEmotionalMetadataSchema = createInsertSchema(emotionalMetadata).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -104,5 +128,7 @@ export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertEmotionalMetadata = z.infer<typeof insertEmotionalMetadataSchema>;
+export type EmotionalMetadata = typeof emotionalMetadata.$inferSelect;
 export type MemoryUsage = typeof memoryUsage.$inferSelect;
 export type InsertMemoryUsage = typeof memoryUsage.$inferInsert;
