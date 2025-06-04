@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MoreHorizontal } from "lucide-react";
+import { Calendar, MoreHorizontal, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
@@ -95,14 +95,17 @@ export default function CalendarWidget() {
             <div 
               key={event.id} 
               onClick={() => handleEventClick(event)}
-              className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2`}
+              className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2 group flex items-center justify-between`}
             >
-              <div className="text-sm font-medium text-text-primary">
-                {event.title}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-text-primary">
+                  {event.title}
+                </div>
+                <div className="text-xs text-text-muted">
+                  {event.time}
+                </div>
               </div>
-              <div className="text-xs text-text-muted">
-                {event.time}
-              </div>
+              <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
             </div>
           ))
         )}

@@ -86,8 +86,8 @@ export default function NotesWidgetCollapsible() {
                     {notes.map((note) => (
                       <div 
                         key={note.id} 
-                        className={`p-2 rounded hover:bg-muted/50 transition-colors group cursor-pointer ${
-                          selectedNoteId === note.id ? 'bg-muted/50' : ''
+                        className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer ${
+                          selectedNoteId === note.id ? 'bg-muted/50 rounded-lg' : ''
                         }`}
                         onClick={() => setSelectedNoteId(note.id)}
                       >

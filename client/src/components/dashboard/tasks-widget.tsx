@@ -81,7 +81,11 @@ export default function TasksWidget() {
           ) : (
             <div className="space-y-2 p-1">
               {tasks.map((task) => (
-                <div key={task.id} className="flex items-start space-x-3 p-2 rounded hover:bg-muted/50 transition-colors group">
+                <div 
+                  key={task.id} 
+                  ref={(el) => { taskRefs.current[task.id] = el; }}
+                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
+                >
                   <Checkbox
                     checked={task.completed}
                     onCheckedChange={(checked) => toggleTaskStatus.mutate({ id: task.id, completed: checked as boolean })}
@@ -116,7 +120,7 @@ export default function TasksWidget() {
                     <PopoverContent className="w-40" align="end">
                       <div className="space-y-1">
                         <button
-                          onClick={() => openChatWithPrompt(`Edit this task: "${task.title}"`)}
+                          onClick={() => handleEditTask(task)}
                           className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
                         >
                           Edit Task
@@ -164,6 +168,17 @@ export default function TasksWidget() {
           </button>
         </div>
       </CardContent>
+      
+      <TaskEditModal
+        task={editingTask}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingTask(null);
+        }}
+        onSave={handleSaveTask}
+        triggerRef={editingTask ? { current: taskRefs.current[editingTask.id] } : undefined}
+      />
     </Card>
   );
 }
