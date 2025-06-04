@@ -69,11 +69,11 @@ const fragmentShader = `
     
     // Create disturbance field around cursor movement
     float mouseDist = distance(uv, mouseUv);
-    float disturbanceRadius = 0.1;
-    float disturbance = smoothstep(disturbanceRadius, 0.0, mouseDist) * speed * 10.0;
+    float disturbanceRadius = 0.2;
+    float disturbance = smoothstep(disturbanceRadius, 0.0, mouseDist) * (speed * 50.0 + 1.0);
     
     // Apply disturbance to silk pattern coordinates
-    vec2 distortedP = p + mouseVelocity * disturbance * 0.5;
+    vec2 distortedP = p + mouseVelocity * disturbance * 2.0;
     
     // Generate silk pattern with mouse-induced distortion
     vec2 q = vec2(0.0);
