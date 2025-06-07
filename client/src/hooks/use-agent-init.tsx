@@ -10,10 +10,14 @@ export function useAgentInit() {
   });
 
   useEffect(() => {
+    // Clear localStorage to ensure fresh setup
+    localStorage.removeItem('dashboardInitialized');
+    
     const isInitialized = localStorage.getItem('dashboardInitialized') === 'true';
     const hasPreferences = preferences?.initialized;
     
-    if (!isInitialized && !hasPreferences) {
+    // Show wizard if no preferences exist or not initialized
+    if (!hasPreferences || !isInitialized) {
       setIsInitFlowOpen(true);
     } else {
       setIsInitFlowOpen(false);
