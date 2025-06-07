@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import { OpenAI } from 'openai';
 import { db } from './db.js';
-import { mem0Service } from './mem0-service.js';
 import { notes, tasks, userPreferences } from '../shared/schema.js';
 import { eq } from 'drizzle-orm';
 
@@ -289,17 +288,11 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Get relevant memories from Mem0
-    const memories = await mem0Service.searchMemories(message, DEFAULT_USER_ID.toString());
-    const memoryContext = memories.length > 0 
-      ? `\n\nRelevant memories: ${memories.map(m => m.memory).join(', ')}`
-      : '';
-
     // Create messages array for OpenAI
     const messages = [
       {
         role: "system" as const,
-        content: `You are Aria, a helpful AI assistant in a productivity dashboard. You help users manage their tasks, notes, and daily activities. Be friendly, concise, and helpful.${memoryContext}`
+        content: "You are Aria, a helpful AI assistant in a productivity dashboard. You help users manage their tasks, notes, and daily activities. Be friendly, concise, and helpful."
       },
       ...conversationHistory,
       {
@@ -317,12 +310,6 @@ app.post("/api/chat", async (req, res) => {
     });
 
     const response = completion.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
-
-    // Store conversation in Mem0 for future context
-    await mem0Service.addMemory([
-      { role: "user", content: message },
-      { role: "assistant", content: response }
-    ], DEFAULT_USER_ID.toString());
 
     res.json({ 
       response,

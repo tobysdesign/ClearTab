@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Bot, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,7 +137,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4 transition-opacity duration-300 ${
+    <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}>
       <div 
@@ -161,7 +162,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             </div>
             <div>
               <h3 className="font-medium text-text-primary">{agentName}</h3>
-              <p className="text-xs text-text-muted">AI Assistant • Online</p>
+              <p className="text-xs text-text-muted">AI Assistant</p>
             </div>
           </div>
           <Button 
