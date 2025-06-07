@@ -27,12 +27,24 @@ export default function AgentInitFlow({ isOpen, onClose }: AgentInitFlowProps) {
         initialized: true,
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
       localStorage.setItem('dashboardInitialized', 'true');
+      
+      // Send welcome message to chat
+      try {
+        await apiRequest("POST", "/api/chat", {
+          message: `Hello ${userName}! I'm ${agentName}, your AI assistant. I'm here to help you with tasks, notes, and productivity. How can I assist you today?`,
+          useMemory: false
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
+      } catch (error) {
+        console.error("Failed to send welcome message:", error);
+      }
+      
       toast({
         title: "Setup Complete",
-        description: `Welcome ${userName}! I'm ${agentName}, ready to help.`,
+        description: `Welcome! Check the chat for a message from ${agentName}.`,
       });
       onClose();
     },
