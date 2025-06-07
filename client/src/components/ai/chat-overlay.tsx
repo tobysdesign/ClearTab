@@ -137,12 +137,12 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 transition-opacity duration-300 ${
+    <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-end p-4 transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}>
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col mb-20"
         style={{
           transform: isClosing 
             ? 'translateY(100%) scale(0.95)' 
@@ -236,7 +236,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
         </div>
 
         <div className="p-4 border-t border-border">
-          <div className="flex space-x-2 items-end">
+          <div className="relative">
             <textarea
               ref={inputRef}
               id="chatInput"
@@ -244,7 +244,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message... (try #note or #task for quick creation)"
-              className="flex-1 bg-secondary border border-border rounded-md px-3 py-3 text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
+              className="w-full bg-secondary border border-border rounded-md pl-3 pr-12 py-3 text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
               disabled={chatMutation.isPending}
               rows={2}
               style={{ height: 'auto' }}
@@ -257,19 +257,13 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             <Button 
               onClick={handleSendMessage}
               disabled={!message.trim() || chatMutation.isPending}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8 p-0 rounded-full"
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
-          <div className="flex items-center justify-between mt-2 text-xs text-text-muted">
+          <div className="mt-2 text-xs text-text-muted text-center">
             <span>Press Escape to close • Shift+Enter for new line</span>
-            <div className="flex items-center space-x-1">
-              <span>Memory:</span>
-              <Badge variant="secondary" className="text-xs">
-                Mem0.ai
-              </Badge>
-            </div>
           </div>
         </div>
       </div>
