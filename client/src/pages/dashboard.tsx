@@ -12,7 +12,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.title = "AI Productivity Dashboard";
-  }, []);
+    
+    // Auto-open chat for setup if first time
+    if (isInitFlowOpen && !isChatOpen) {
+      openChat();
+    }
+  }, [isInitFlowOpen, isChatOpen, openChat]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -21,17 +26,12 @@ export default function Dashboard() {
         
         <FloatingAIButton />
         
-        {isInitFlowOpen && (
-          <AgentInitFlow 
-            isOpen={isInitFlowOpen}
-            onClose={closeInitFlow}
-          />
-        )}
-        
         <ChatOverlay 
-          isOpen={isChatOpen && !isInitFlowOpen}
+          isOpen={isChatOpen || isInitFlowOpen}
           onClose={closeChat}
           initialMessage={initialMessage}
+          isSetupMode={isInitFlowOpen}
+          onSetupComplete={closeInitFlow}
         />
       </div>
     </div>
