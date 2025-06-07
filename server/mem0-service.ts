@@ -1,4 +1,5 @@
 import { MemoryClient } from 'mem0ai';
+import { webcrypto } from 'crypto';
 
 export class Mem0Service {
   private client: MemoryClient | null = null;
@@ -11,6 +12,16 @@ export class Mem0Service {
   constructor() {
     try {
       if (process.env.MEM0_API_KEY) {
+        // Handle browser-specific code in mem0ai v1.0.39
+        if (typeof window === 'undefined') {
+          global.window = {} as any;
+          global.document = {} as any;
+          // Add crypto polyfill for Node.js
+          if (!global.window.crypto) {
+            global.window.crypto = webcrypto as any;
+          }
+        }
+        
         this.client = new MemoryClient({
           apiKey: process.env.MEM0_API_KEY,
         });
@@ -21,6 +32,8 @@ export class Mem0Service {
       }
     } catch (error) {
       console.error('Failed to initialize Mem0 client:', error);
+      // Disable client if initialization fails
+      this.client = null;
     }
   }
 
