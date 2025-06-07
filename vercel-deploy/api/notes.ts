@@ -54,7 +54,17 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     if (noteIndex === -1) {
       return res.status(404).json({ error: 'Note not found' });
     }
-    mockNotes[noteIndex] = { ...mockNotes[noteIndex], ...req.body, updatedAt: new Date() };
+    
+    // Only allow specific note properties to prevent prototype pollution
+    const allowedProperties = ['title', 'content', 'tags'];
+    const sanitizedBody: any = {};
+    for (const prop of allowedProperties) {
+      if (req.body[prop] !== undefined) {
+        sanitizedBody[prop] = req.body[prop];
+      }
+    }
+    
+    mockNotes[noteIndex] = { ...mockNotes[noteIndex], ...sanitizedBody, updatedAt: new Date() };
     return res.status(200).json(mockNotes[noteIndex]);
   }
 
