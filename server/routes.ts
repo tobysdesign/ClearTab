@@ -348,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user preferences for context
       const prefs = await storage.getUserPreferences(DEFAULT_USER_ID);
-      const agentName = prefs?.agentName || "Alex";
+      const agentName = prefs?.agentName || "t0by";
       const userName = prefs?.userName || "User";
       const isInitialized = prefs?.initialized || false;
 

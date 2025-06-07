@@ -15,36 +15,146 @@ interface SetupFlowProps {
 }
 
 const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
+  const [step, setStep] = useState(1);
+  const [agentName, setAgentName] = useState("t0by");
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   
-  useEffect(() => {
-    // Send initial setup message immediately
-    const sendSetupMessage = async () => {
+  const setupMutation = useMutation({
+    mutationFn: async (data: { agentName: string; userName: string }) => {
+      return apiRequest("POST", "/api/preferences", {
+        agentName: data.agentName,
+        userName: data.userName,
+        initialized: true,
+      });
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
+      localStorage.setItem('dashboardInitialized', 'true');
+      
+      // Send welcome message to chat
       try {
         await apiRequest("POST", "/api/chat", {
-          message: "Hello! I'm your AI assistant. To get started, what would you like me to call you? And what should I call myself?",
-          useMemory: false,
-          isSetupFlow: true
+          message: `Perfect! I'm ${agentName}, your AI assistant. I'm here to help you with tasks, notes, and productivity. You can use hashtags like #note or #task for quick creation. How can I help you today?`,
+          useMemory: false
         });
         queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
       } catch (error) {
-        console.error("Failed to send setup message:", error);
+        console.error("Failed to send welcome message:", error);
       }
-    };
-    
-    sendSetupMessage();
-  }, [queryClient]);
+      
+      toast({
+        title: "Setup Complete",
+        description: `Welcome! ${agentName} is ready to help you.`,
+      });
+      onSetupComplete?.();
+    },
+    onError: () => {
+      toast({
+        title: "Setup Failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleNameSubmit = (userName: string) => {
+    setupMutation.mutate({ agentName, userName });
+  };
 
   return (
-    <div className="flex items-start space-x-3">
-      <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-        <Bot className="h-3 w-3 text-dark-primary" />
-      </div>
-      <Card className="bg-secondary p-3 max-w-md">
-        <p className="text-sm text-text-primary">
-          Setting up your AI assistant...
-        </p>
-      </Card>
+    <div className="space-y-4">
+      {step === 1 && (
+        <div className="space-y-4">
+          <div className="flex items-start space-x-3">
+            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
+              <Bot className="h-3 w-3 text-dark-primary" />
+            </div>
+            <Card className="bg-secondary p-4 max-w-md w-full">
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-text-primary">Welcome to your AI Productivity Dashboard!</h3>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  I help you manage tasks, notes, and boost productivity. Features include:
+                  • Smart task and note creation with #hashtags
+                  • Optional local memory with Mem0 for personalized assistance  
+                  • Privacy-focused design - your data stays secure
+                  • Weather, calendar, and chat integration
+                </p>
+              </div>
+            </Card>
+          </div>
+          
+          <div className="flex items-start space-x-3">
+            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
+              <Bot className="h-3 w-3 text-dark-primary" />
+            </div>
+            <Card className="bg-secondary p-4 max-w-md w-full">
+              <div className="space-y-3">
+                <p className="text-sm text-text-primary">
+                  I'm <button 
+                    onClick={() => setStep(2)} 
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {agentName}
+                  </button>, but if you want you can rename me (just click my name)
+                </p>
+                <p className="text-sm text-text-primary">What would you like to be called?</p>
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Type your name"
+                    className="text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                        handleNameSubmit(e.currentTarget.value.trim());
+                      }
+                    }}
+                  />
+                </div>
+                <div className="pt-2 border-t border-border">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    onClick={() => window.location.href = '/api/login'}
+                  >
+                    Or Login with Google
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      )}
+      
+      {step === 2 && (
+        <div className="flex items-start space-x-3">
+          <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
+            <Bot className="h-3 w-3 text-dark-primary" />
+          </div>
+          <Card className="bg-secondary p-4 max-w-md w-full">
+            <div className="space-y-3">
+              <p className="text-sm text-text-primary">What would you like to call me?</p>
+              <Input
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                className="text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setStep(1);
+                  }
+                }}
+              />
+              <Button 
+                onClick={() => setStep(1)} 
+                size="sm" 
+                className="w-full"
+              >
+                Continue
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
