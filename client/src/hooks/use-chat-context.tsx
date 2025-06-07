@@ -10,7 +10,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true);
   const [initialPrompt, setInitialPrompt] = useState("");
 
   const openChatWithPrompt = (prompt: string) => {

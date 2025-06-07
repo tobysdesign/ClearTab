@@ -16,7 +16,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="bg-background/80 text-foreground min-h-screen backdrop-blur-sm">
+      <div className="bg-background/80 text-foreground min-h-screen">
         <ResizableBentoGrid />
         
         <FloatingAIButton />
