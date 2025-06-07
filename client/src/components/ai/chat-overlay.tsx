@@ -15,118 +15,36 @@ interface SetupFlowProps {
 }
 
 const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
-  const [agentName, setAgentName] = useState("");
-  const [userName, setUserName] = useState("");
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  const setupMutation = useMutation({
-    mutationFn: async (data: { agentName: string; userName: string }) => {
-      return apiRequest("POST", "/api/preferences", {
-        agentName: data.agentName,
-        userName: data.userName,
-        initialized: true,
-      });
-    },
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
-      localStorage.setItem('dashboardInitialized', 'true');
-      
-      // Send welcome message to chat
+  
+  useEffect(() => {
+    // Send initial setup message immediately
+    const sendSetupMessage = async () => {
       try {
         await apiRequest("POST", "/api/chat", {
-          message: `Hello ${userName}! I'm ${agentName}, your AI assistant. I'm here to help you with tasks, notes, and productivity. How can I assist you today?`,
-          useMemory: false
+          message: "Hello! I'm your AI assistant. To get started, what would you like me to call you? And what should I call myself?",
+          useMemory: false,
+          isSetupFlow: true
         });
         queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
       } catch (error) {
-        console.error("Failed to send welcome message:", error);
+        console.error("Failed to send setup message:", error);
       }
-      
-      toast({
-        title: "Setup Complete",
-        description: `Welcome! ${agentName} is ready to help you.`,
-      });
-      onSetupComplete?.();
-    },
-    onError: () => {
-      toast({
-        title: "Setup Failed",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleCompleteSetup = () => {
-    if (!agentName.trim() || !userName.trim()) {
-      toast({
-        title: "Names Required",
-        description: "Please enter both names to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setupMutation.mutate({ agentName: agentName.trim(), userName: userName.trim() });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleCompleteSetup();
-    }
-  };
+    };
+    
+    sendSetupMessage();
+  }, [queryClient]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-start space-x-3">
-        <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-          <Bot className="h-3 w-3 text-dark-primary" />
-        </div>
-        <Card className="bg-secondary p-4 max-w-md w-full">
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-text-primary mb-2">Welcome! Let's get you set up.</h3>
-              <p className="text-xs text-text-secondary mb-4">I'll be your AI assistant. Let me know what to call you, and choose a name for me.</p>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="userName" className="text-xs text-text-primary">What should I call you?</Label>
-                <Input
-                  id="userName"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Your name"
-                  className="mt-1 text-sm"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="agentName" className="text-xs text-text-primary">What should I call myself?</Label>
-                <Input
-                  id="agentName"
-                  value={agentName}
-                  onChange={(e) => setAgentName(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="AI assistant name"
-                  className="mt-1 text-sm"
-                />
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleCompleteSetup}
-              disabled={setupMutation.isPending || !agentName.trim() || !userName.trim()}
-              className="w-full text-sm"
-              size="sm"
-            >
-              {setupMutation.isPending ? "Setting up..." : "Start Working Together"}
-            </Button>
-          </div>
-        </Card>
+    <div className="flex items-start space-x-3">
+      <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
+        <Bot className="h-3 w-3 text-dark-primary" />
       </div>
+      <Card className="bg-secondary p-3 max-w-md">
+        <p className="text-sm text-text-primary">
+          Setting up your AI assistant...
+        </p>
+      </Card>
     </div>
   );
 };
@@ -166,6 +84,17 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
+      
+      // Handle setup completion
+      if (data.setupComplete) {
+        queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
+        localStorage.setItem('dashboardInitialized', 'true');
+        toast({
+          title: "Setup Complete",
+          description: "Your AI assistant is ready to help!",
+        });
+        onSetupComplete?.();
+      }
       
       // If a task or note was created, refresh those widgets
       if (data.action === "create_task" || data.task) {

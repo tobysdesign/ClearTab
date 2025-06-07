@@ -350,6 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prefs = await storage.getUserPreferences(DEFAULT_USER_ID);
       const agentName = prefs?.agentName || "Alex";
       const userName = prefs?.userName || "User";
+      const isInitialized = prefs?.initialized || false;
 
       // Get recent chat history for context
       const recentMessages = await storage.getChatMessagesByUserId(DEFAULT_USER_ID);
@@ -372,6 +373,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Memory retrieval error:", error);
           // Continue without memory if service fails
         }
+      }
+
+      // Handle setup flow for uninitialized users
+      if (!isInitialized) {
+        const setupSystemPrompt = `You are helping a user set up their AI assistant. The user needs to provide two names:
+        1. What they want to be called (their name)
+        2. What they want to call their AI assistant
+        
+        Analyze their message and extract these names if provided. If both names are found, respond with JSON:
+        {
+          "setupComplete": true,
+          "userName": "extracted user name",
+          "agentName": "extracted agent name",
+          "message": "Welcome message using both names"
+        }
+        
+        If names are missing or unclear, respond with JSON:
+        {
+          "setupComplete": false,
+          "message": "Ask for the missing information in a friendly way"
+        }`;
+
+        const setupCompletion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            { role: "system", content: setupSystemPrompt },
+            { role: "user", content: message }
+          ],
+          response_format: { type: "json_object" }
+        });
+
+        const content = setupCompletion.choices[0].message.content;
+        if (!content) {
+          throw new Error("No response from AI");
+        }
+        const setupResponse = JSON.parse(content);
+        
+        if (setupResponse.setupComplete) {
+          // Complete the setup
+          await storage.updateUserPreferences(DEFAULT_USER_ID, {
+            userName: setupResponse.userName,
+            agentName: setupResponse.agentName,
+            initialized: true
+          });
+        }
+
+        // Store AI response
+        await storage.createChatMessage({
+          message: setupResponse.message,
+          role: "assistant",
+          userId: DEFAULT_USER_ID,
+          expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        });
+
+        return res.json({ 
+          message: setupResponse.message,
+          setupComplete: setupResponse.setupComplete 
+        });
       }
 
       // Check for hashtag shortcuts anywhere in the message
