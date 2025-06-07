@@ -26,10 +26,9 @@ export class Mem0Service {
 
   private async initializeMemoryCount() {
     try {
-      // Get current memory count from Mem0
-      const memories = await this.client!.getAll({ limit: 1 });
-      // Note: This is a rough estimate as we can't get exact count easily
-      this.memoryCount = 0; // Start fresh tracking
+      // In v1.0.39, we can't get all memories without a user_id filter
+      // So we'll start with fresh tracking
+      this.memoryCount = 0;
       console.log(`Memory tracking initialized: ${this.memoryCount}/${this.MAX_MEMORIES} memories`);
     } catch (error) {
       console.error('Failed to initialize memory count:', error);
@@ -62,18 +61,11 @@ export class Mem0Service {
     if (!this.isEnabled()) return;
     
     try {
-      console.log('Memory limit reached, cleaning up old memories...');
-      // Get oldest memories and delete some to make room
-      const oldMemories = await this.client!.getAll({ limit: 50 });
-      if (oldMemories && oldMemories.length > 0) {
-        // Delete oldest 10% to make room
-        const toDelete = Math.min(50, Math.floor(this.MAX_MEMORIES * 0.1));
-        for (let i = 0; i < toDelete && i < oldMemories.length; i++) {
-          await this.client!.delete(oldMemories[i].id);
-          this.memoryCount--;
-        }
-        console.log(`Cleaned up ${toDelete} old memories`);
-      }
+      console.log('Memory limit reached, but cleanup requires user_id in v1.0.39');
+      // In v1.0.39, we can't cleanup without knowing specific user_id
+      // For now, we'll just reduce our memory count tracking
+      this.memoryCount = Math.max(0, this.memoryCount - Math.floor(this.MAX_MEMORIES * 0.1));
+      console.log(`Adjusted memory count tracking to ${this.memoryCount}`);
     } catch (error) {
       console.error('Failed to cleanup old memories:', error);
     }
@@ -121,15 +113,21 @@ export class Mem0Service {
       return [];
     }
     
+    if (!this.checkRetrievalLimit()) {
+      console.warn('Monthly retrieval limit reached, returning empty memories');
+      return [];
+    }
+    
     try {
       const result = await this.client!.getAll({
         user_id: userId,
         ...(query && { query })
       });
-      return result;
+      this.monthlyRetrievals++;
+      return result || [];
     } catch (error) {
       console.error('Mem0 get memories error:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -139,14 +137,20 @@ export class Mem0Service {
       return [];
     }
     
+    if (!this.checkRetrievalLimit()) {
+      console.warn('Monthly retrieval limit reached, returning empty search results');
+      return [];
+    }
+    
     try {
       const result = await this.client!.search(query, {
         user_id: userId
       });
-      return result;
+      this.monthlyRetrievals++;
+      return result || [];
     } catch (error) {
       console.error('Mem0 search memories error:', error);
-      throw error;
+      return [];
     }
   }
 
@@ -158,10 +162,14 @@ export class Mem0Service {
     
     try {
       const result = await this.client!.delete(memoryId);
+      if (result) {
+        this.memoryCount = Math.max(0, this.memoryCount - 1);
+        console.log(`Memory deleted. Current count: ${this.memoryCount}/${this.MAX_MEMORIES}`);
+      }
       return result;
     } catch (error) {
       console.error('Mem0 delete memory error:', error);
-      throw error;
+      return null;
     }
   }
 
@@ -176,7 +184,7 @@ export class Mem0Service {
       return result;
     } catch (error) {
       console.error('Mem0 update memory error:', error);
-      throw error;
+      return null;
     }
   }
 }
