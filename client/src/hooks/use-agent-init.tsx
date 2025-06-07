@@ -10,6 +10,9 @@ export function useAgentInit() {
   });
 
   useEffect(() => {
+    // Clear localStorage to force setup wizard for testing
+    localStorage.removeItem('dashboardInitialized');
+    
     const isInitialized = localStorage.getItem('dashboardInitialized') === 'true';
     const hasPreferences = preferences?.initialized;
     

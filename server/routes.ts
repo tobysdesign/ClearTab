@@ -575,6 +575,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset initialization endpoint (for testing)
+  app.post("/api/reset-init", async (req, res) => {
+    try {
+      await storage.updateUserPreferences(DEFAULT_USER_ID, { initialized: false });
+      res.json({ success: true, message: "Initialization reset" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reset initialization" });
+    }
+  });
+
   // Calendar events endpoint 
   app.get("/api/calendar", async (req, res) => {
     try {
