@@ -10,18 +10,9 @@ export function useAgentInit() {
   });
 
   useEffect(() => {
-    // Clear localStorage to force setup wizard for testing
-    localStorage.removeItem('dashboardInitialized');
-    
-    const isInitialized = localStorage.getItem('dashboardInitialized') === 'true';
-    const hasPreferences = preferences?.initialized;
-    
-    if (!isInitialized && !hasPreferences) {
-      setIsInitFlowOpen(true);
-    } else {
-      setIsInitFlowOpen(false);
-    }
-  }, [preferences]);
+    // Force setup wizard to show for testing
+    setIsInitFlowOpen(true);
+  }, []);
 
   const closeInitFlow = () => {
     setIsInitFlowOpen(false);
