@@ -85,7 +85,7 @@ export default function NotesWidgetCollapsible() {
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="p-6 pt-0 flex-1 flex flex-col space-y-3 pb-3 pl-[8px] pr-[8px]">
+                <CardContent className="p-6 pt-0 flex-1 flex flex-col space-y-3 pb-3 pl-[12px] pr-[12px]">
                   <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
                     {isLoading ? (
                       <div className="space-y-2 p-1">
@@ -177,7 +177,7 @@ export default function NotesWidgetCollapsible() {
               </>
             ) : (
               // Collapsed state with two-letter cards
-              <TooltipProvider>
+              (<TooltipProvider>
                 <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
                   {notes.slice(0, 6).map((note) => {
                     const initials = note.title 
@@ -219,7 +219,7 @@ export default function NotesWidgetCollapsible() {
                     </TooltipContent>
                   </Tooltip>
                 </div>
-              </TooltipProvider>
+              </TooltipProvider>)
             )}
           </div>
         </Panel>
