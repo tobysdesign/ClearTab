@@ -185,7 +185,7 @@ export default function NotesWidgetCollapsible() {
               </>
             ) : (
               // Collapsed state with two-letter cards
-              <TooltipProvider>
+              (<TooltipProvider>
                 <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
                   {notes.slice(0, 5).map((note) => {
                     const initials = note.title
@@ -230,7 +230,7 @@ export default function NotesWidgetCollapsible() {
                     </TooltipContent>
                   </Tooltip>
                 </div>
-              </TooltipProvider>
+              </TooltipProvider>)
             )}
           </div>
         </Panel>
@@ -272,7 +272,7 @@ export default function NotesWidgetCollapsible() {
               <div className="h-full flex items-center justify-center text-center">
                 <div className="max-w-sm">
                   <h3 className="text-lg font-medium mb-2">Select a note</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-muted-foreground mb-4 ml-[24px] mr-[24px]">
                     Choose a note from the sidebar to view its content, or create a new one.
                   </p>
                   <Button 
