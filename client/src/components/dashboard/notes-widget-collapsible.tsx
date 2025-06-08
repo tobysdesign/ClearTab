@@ -3,14 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useChatContext } from "@/hooks/use-chat-context";
 import type { Note } from "@shared/schema";
-import { format } from "date-fns";
 
 export default function NotesWidgetCollapsible() {
   const queryClient = useQueryClient();
@@ -42,19 +40,11 @@ export default function NotesWidgetCollapsible() {
     },
   });
 
-  const toggleNoteCompleted = (id: number, completed: boolean) => {
-    updateNoteMutation.mutate({ 
-      id, 
-      updates: { tags: completed ? ['completed'] : [] }
-    });
-  };
-
   const deleteNote = (id: number) => {
     deleteNoteMutation.mutate(id);
   };
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
-  const isNoteCompleted = (note: Note) => note.tags?.includes('completed') || false;
 
   const handlePanelCollapse = () => {
     setIsCollapsed(true);
@@ -64,61 +54,79 @@ export default function NotesWidgetCollapsible() {
     setIsCollapsed(false);
   };
 
+  // Auto-select the empty note (id: 3) if no note is selected and notes are loaded
+  if (!selectedNoteId && notes.length > 0) {
+    const emptyNote = notes.find(note => note.title === "" && note.content === "");
+    if (emptyNote) {
+      setSelectedNoteId(emptyNote.id);
+    } else {
+      setSelectedNoteId(notes[0].id);
+    }
+  }
+
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col overflow-hidden">
-      <PanelGroup direction="horizontal" className="flex-1">
+      <PanelGroup direction="horizontal" className="h-full">
         {/* Sidebar Panel */}
         <Panel 
           defaultSize={40} 
           minSize={20} 
-          collapsible 
-          collapsedSize={10}
+          maxSize={60}
+          collapsible={true}
           onCollapse={handlePanelCollapse}
           onExpand={handlePanelExpand}
         >
           <div className="h-full flex flex-col border-r border-border">
             {!isCollapsed ? (
               <>
-                <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+                <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
                     Notes
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="flex-1 flex flex-col space-y-3 overflow-hidden pl-[0px] pr-[0px]">
-                  <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+                <CardContent className="flex-1 flex flex-col space-y-3 pb-3">
+                  <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
                     {isLoading ? (
                       <div className="space-y-2 p-1">
                         {[...Array(4)].map((_, i) => (
                           <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                            <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
                             <div className="flex-1">
-                              <div className="h-3 bg-muted rounded mb-2"></div>
-                              <div className="h-2 bg-muted rounded w-2/3"></div>
+                              <div className="h-3 bg-muted rounded w-3/4 mb-1"></div>
+                              <div className="h-3 bg-muted rounded w-1/2"></div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="space-y-2 p-1">
+                      <div className="space-y-1">
                         {notes.map((note) => (
                           <div 
-                            key={note.id} 
-                            className={`p-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer border border-solid ${
-                              selectedNoteId === note.id ? 'bg-muted/50 border-[#333333]' : 'border-transparent'
+                            key={note.id}
+                            className={`group relative p-3 rounded cursor-pointer transition-colors border border-transparent hover:border-border/50 ${
+                              selectedNoteId === note.id 
+                                ? 'bg-accent border-border' 
+                                : 'hover:bg-muted/50'
                             }`}
                             onClick={() => setSelectedNoteId(note.id)}
                           >
-                            <div className="flex items-start justify-between mb-1">
-                              <p className={`text-sm line-clamp-1 flex-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
-                                {note.title}
-                              </p>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-xs pb-1 break-words">
+                                  {note.title || "Untitled"}
+                                </h4>
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {note.content || "Empty note - click to edit"}
+                                </p>
+                              </div>
+                              
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <Button 
                                     variant="ghost" 
-                                    size="sm"
-                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    size="sm" 
+                                    className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 ml-2"
+                                    onClick={(e) => e.stopPropagation()}
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                       <circle cx="12" cy="12" r="1"/>
@@ -142,30 +150,6 @@ export default function NotesWidgetCollapsible() {
                                 </PopoverContent>
                               </Popover>
                             </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex gap-1">
-                                {note.tags && note.tags.length > 0 && (
-                                  note.tags.map((tag) => (
-                                    <Badge key={tag} variant="secondary" className="text-xs px-1 py-0">
-                                      {tag}
-                                    </Badge>
-                                  ))
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Checkbox
-                                  checked={isNoteCompleted(note)}
-                                  onCheckedChange={(checked) => toggleNoteCompleted(note.id, checked as boolean)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="h-3 w-3"
-                                />
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(note.createdAt), 'MMM d')}
-                                </span>
-                              </div>
-                            </div>
                           </div>
                         ))}
                       </div>
@@ -184,86 +168,68 @@ export default function NotesWidgetCollapsible() {
               </>
             ) : (
               // Collapsed state with two-letter cards
-              (<TooltipProvider>
+              <TooltipProvider>
                 <div className="h-full flex flex-col p-2 space-y-2 overflow-y-auto">
-                  {notes.slice(0, 5).map((note) => {
-                    const initials = note.title
-                      .split(' ')
-                      .map(word => word.charAt(0).toUpperCase())
-                      .slice(0, 2)
-                      .join('');
+                  {notes.slice(0, 6).map((note) => {
+                    const initials = note.title 
+                      ? note.title.split(' ').map(word => word[0]).join('').substring(0, 2).toUpperCase()
+                      : 'UN'; // Untitled
                     
                     return (
                       <Tooltip key={note.id}>
                         <TooltipTrigger asChild>
-                          <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors border border-solid ${
+                          <div 
+                            className={`w-8 h-8 rounded border cursor-pointer flex items-center justify-center text-xs font-medium transition-colors ${
                               selectedNoteId === note.id 
-                                ? 'bg-muted border-[#333333] text-foreground' 
-                                : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                                ? 'bg-accent border-accent-foreground/20' 
+                                : 'bg-muted border-border hover:bg-accent'
                             }`}
                             onClick={() => setSelectedNoteId(note.id)}
                           >
                             {initials}
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-xs">
-                          <p className="text-sm">{note.title}</p>
+                        <TooltipContent side="right">
+                          <p className="text-xs">{note.title || "Untitled"}</p>
                         </TooltipContent>
                       </Tooltip>
                     );
                   })}
                   
-                  {/* +N button for add new note */}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium cursor-pointer transition-colors bg-muted/30 border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      <button 
+                        className="w-8 h-8 rounded border border-dashed border-border hover:border-accent-foreground/20 hover:bg-accent flex items-center justify-center transition-colors"
                         onClick={() => openChatWithPrompt("Create a new note for me")}
                       >
-                        +N
-                      </div>
+                        <Plus className="h-3 w-3" />
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                      <p className="text-sm">Add new note</p>
+                      <p className="text-xs">Add new note</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
-              </TooltipProvider>)
+              </TooltipProvider>
             )}
           </div>
         </Panel>
-
-        <PanelResizeHandle className="w-0 group relative cursor-col-resize">
-          <div className="absolute -left-2 -right-2 top-0 bottom-0 flex items-center justify-center">
-            <div className="w-0.5 h-8 bg-border group-hover:bg-muted-foreground/70 group-hover:w-1 transition-all duration-200 rounded-full"></div>
-          </div>
-        </PanelResizeHandle>
-
+        
+        {/* Resize Handle */}
+        <PanelResizeHandle className="w-1 bg-border hover:bg-accent transition-colors" />
+        
         {/* Content Panel */}
         <Panel defaultSize={60} minSize={30}>
           <div className="h-full flex flex-col">
             {selectedNote ? (
               <div className="p-6 h-full flex flex-col">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">{selectedNote.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{format(new Date(selectedNote.createdAt), 'MMMM d, yyyy')}</span>
-                    {selectedNote.tags && selectedNote.tags.length > 0 && (
-                      <div className="flex gap-1">
-                        {selectedNote.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{selectedNote.title || "Untitled"}</h3>
                 </div>
                 
                 <div className="flex-1 bg-muted/30 rounded-lg p-4 overflow-y-auto">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {selectedNote.content}
+                    {selectedNote.content || "Start typing or paste your content here..."}
                   </p>
                 </div>
               </div>
@@ -271,17 +237,9 @@ export default function NotesWidgetCollapsible() {
               <div className="h-full flex items-center justify-center text-center">
                 <div className="max-w-sm">
                   <h3 className="text-lg font-medium mb-2 text-left ml-[24px] mr-[24px]">Select a note</h3>
-                  <p className="text-sm text-muted-foreground mb-4 ml-[24px] mr-[24px] text-left">
-                    Choose a note from the sidebar to view its content, or create a new one.
+                  <p className="text-sm text-muted-foreground text-left ml-[24px] mr-[24px]">
+                    Choose a note from the sidebar to view and edit it.
                   </p>
-                  <Button 
-                    onClick={() => openChatWithPrompt("Create a new note for me")}
-                    variant="outline"
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Note
-                  </Button>
                 </div>
               </div>
             )}

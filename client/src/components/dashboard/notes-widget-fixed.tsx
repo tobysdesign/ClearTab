@@ -3,13 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
 import type { Note } from "@shared/schema";
-import { format } from "date-fns";
 
 export default function NotesWidget() {
   const queryClient = useQueryClient();
@@ -31,29 +28,21 @@ export default function NotesWidget() {
     },
   });
 
-  const updateNoteMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: Partial<Note> }) => {
-      const res = await apiRequest("PATCH", `/api/notes/${id}`, updates);
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-    },
-  });
-
-  const toggleNoteCompleted = (id: number, completed: boolean) => {
-    updateNoteMutation.mutate({ 
-      id, 
-      updates: { tags: completed ? ['completed'] : [] }
-    });
-  };
-
   const deleteNote = (id: number) => {
     deleteNoteMutation.mutate(id);
   };
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
-  const isNoteCompleted = (note: Note) => note.tags?.includes('completed') || false;
+
+  // Auto-select the empty note if available, otherwise select first note
+  if (!selectedNoteId && notes.length > 0) {
+    const emptyNote = notes.find(note => note.title === "" && note.content === "");
+    if (emptyNote) {
+      setSelectedNoteId(emptyNote.id);
+    } else {
+      setSelectedNoteId(notes[0].id);
+    }
+  }
 
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-row overflow-hidden">
@@ -86,89 +75,70 @@ export default function NotesWidget() {
                 <div className="space-y-2 p-1">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                      <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
                       <div className="flex-1">
-                        <div className="h-3 bg-muted rounded mb-2"></div>
-                        <div className="h-2 bg-muted rounded w-2/3"></div>
+                        <div className="h-3 bg-muted rounded w-3/4 mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-2 p-1">
+                <div className="space-y-1">
                   {notes.map((note) => (
-                    <div 
-                      key={note.id} 
-                      className={`flex items-start space-x-3 p-2 rounded hover:bg-muted/50 transition-colors group cursor-pointer ${
-                        selectedNoteId === note.id ? 'bg-muted/50' : ''
+                    <div
+                      key={note.id}
+                      className={`group relative p-3 rounded cursor-pointer transition-colors ${
+                        selectedNoteId === note.id 
+                          ? 'bg-accent border border-border' 
+                          : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
                       }`}
                       onClick={() => setSelectedNoteId(note.id)}
                     >
-                      <Checkbox
-                        checked={isNoteCompleted(note)}
-                        onCheckedChange={(checked) => toggleNoteCompleted(note.id, checked as boolean)}
-                        className="mt-0.5"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm mb-1 line-clamp-1 ${isNoteCompleted(note) ? 'line-through text-muted-foreground' : ''}`}>
-                          {note.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {note.content}
-                        </p>
-                        {note.tags && note.tags.length > 0 && (
-                          <div className="flex items-center gap-1 mt-1 flex-wrap">
-                            {note.tags.filter(tag => tag !== 'completed').map((tag) => (
-                              <Badge key={tag} variant="outline" className="text-xs bg-muted text-muted-foreground border-border">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-xs pb-1 break-words">
+                            {note.title || "Untitled"}
+                          </h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {note.content || "Empty note - click to edit"}
+                          </p>
+                        </div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-40" align="end">
+                            <div className="space-y-1">
+                              <button
+                                onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
+                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                              >
+                                Edit Note
+                              </button>
+                              <button
+                                onClick={() => deleteNote(note.id)}
+                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       </div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-40" align="end">
-                          <div className="space-y-1">
-                            <button
-                              onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              Edit Note
-                            </button>
-                            <button
-                              onClick={() => toggleNoteCompleted(note.id, !isNoteCompleted(note))}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                            >
-                              {isNoteCompleted(note) ? 'Mark Incomplete' : 'Mark Complete'}
-                            </button>
-                            <hr className="my-1" />
-                            <button
-                              onClick={() => deleteNote(note.id)}
-                              className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                            >
-                              Delete Note
-                            </button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
                     </div>
                   ))}
                 </div>
               )}
             </div>
             
-            <div className="mt-auto pt-3 border-t border-border/50">
+            <div className="mt-auto pt-3 border-t border-border">
               <button 
                 className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
                 onClick={() => openChatWithPrompt("Create a new note for me")}
@@ -185,42 +155,21 @@ export default function NotesWidget() {
         {selectedNote ? (
           <div className="p-6 h-full flex flex-col">
             <div className="mb-4">
-              <h2 className={`text-lg font-medium mb-2 ${isNoteCompleted(selectedNote) ? 'line-through text-muted-foreground' : ''}`}>
-                {selectedNote.title}
-              </h2>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>
-                  {format(new Date(selectedNote.createdAt), 'MMM d, yyyy')}
-                </span>
-                {selectedNote.tags && selectedNote.tags.length > 0 && (
-                  <div className="flex items-center gap-1">
-                    {selectedNote.tags.filter(tag => tag !== 'completed').map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs bg-muted text-muted-foreground border-border">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <h3 className="text-lg font-semibold mb-2">{selectedNote.title || "Untitled"}</h3>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <div className="prose prose-sm max-w-none text-foreground">
-                {selectedNote.content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-3 text-sm leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+            
+            <div className="flex-1 bg-muted/30 rounded-lg p-4 overflow-y-auto">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {selectedNote.content || "Start typing or paste your content here..."}
+              </p>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center p-6">
-            <div>
-              <p className="text-muted-foreground text-sm mb-2">
-                Select a note to view
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Choose a note from the sidebar to see its content
+          <div className="flex-1 flex items-center justify-center text-center">
+            <div className="max-w-sm">
+              <h3 className="text-lg font-medium mb-2">Select a note</h3>
+              <p className="text-sm text-muted-foreground">
+                Choose a note from the sidebar to view and edit it.
               </p>
             </div>
           </div>
