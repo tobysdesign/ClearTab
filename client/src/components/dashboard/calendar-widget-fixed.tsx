@@ -49,7 +49,31 @@ export default function CalendarWidget() {
     <Card className="bg-card text-card-foreground border-border h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
-          <span>Schedule</span>
+          <div className="flex items-center space-x-3">
+            <span>Schedule</span>
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setActiveTab('today')}
+                className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                  activeTab === 'today'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => setActiveTab('tomorrow')}
+                className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                  activeTab === 'tomorrow'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+              >
+                Tomorrow
+              </button>
+            </div>
+          </div>
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
             <MoreHorizontal className="h-3 w-3" />
           </Button>
@@ -57,28 +81,6 @@ export default function CalendarWidget() {
       </CardHeader>
       
       <CardContent className="space-y-3">
-        <div className="flex items-center space-x-1 mb-3">
-          <button
-            onClick={() => setActiveTab('today')}
-            className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-              activeTab === 'today'
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-            }`}
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setActiveTab('tomorrow')}
-            className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-              activeTab === 'tomorrow'
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-            }`}
-          >
-            Tomorrow
-          </button>
-        </div>
         
         {isLoading ? (
           <div className="space-y-3">

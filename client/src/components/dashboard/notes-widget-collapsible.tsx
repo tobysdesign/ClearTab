@@ -85,7 +85,7 @@ export default function NotesWidgetCollapsible() {
                   </CardTitle>
                 </CardHeader>
                 
-                <CardContent className="flex-1 flex flex-col space-y-3 pb-3">
+                <CardContent className="p-6 pt-0 flex-1 flex flex-col space-y-3 pb-3 pl-[8px] pr-[8px]">
                   <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
                     {isLoading ? (
                       <div className="space-y-2 p-1">
