@@ -177,7 +177,7 @@ export class MemStorage implements IStorage {
     const prefs1: UserPreferences = {
       id: 1,
       userId: 1,
-      agentName: "Aria",
+      agentName: "t0by",
       userName: "Alice",
       initialized: true,
       paydayDate: new Date(2025, 0, 15), // January 15th
