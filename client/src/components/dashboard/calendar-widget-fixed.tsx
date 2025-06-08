@@ -46,29 +46,8 @@ export default function CalendarWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium flex items-center justify-between">
-          <div className="flex items-center space-x-1">
-            <button
-              onClick={() => setActiveTab('today')}
-              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-                activeTab === 'today'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-              }`}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => setActiveTab('tomorrow')}
-              className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-                activeTab === 'tomorrow'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-              }`}
-            >
-              Tomorrow
-            </button>
-          </div>
+        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
+          <span>Schedule</span>
           <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
             <MoreHorizontal className="h-3 w-3" />
           </Button>
@@ -76,6 +55,29 @@ export default function CalendarWidget() {
       </CardHeader>
       
       <CardContent className="space-y-3">
+        <div className="flex items-center space-x-1 mb-3">
+          <button
+            onClick={() => setActiveTab('today')}
+            className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+              activeTab === 'today'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+            }`}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => setActiveTab('tomorrow')}
+            className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+              activeTab === 'tomorrow'
+                ? 'bg-accent text-accent-foreground'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+            }`}
+          >
+            Tomorrow
+          </button>
+        </div>
+        
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
@@ -86,9 +88,11 @@ export default function CalendarWidget() {
             ))}
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="text-center text-text-muted py-4">
-            <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
+          <div className="text-center py-4">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
           </div>
         ) : (
           filteredEvents.map((event, index) => (

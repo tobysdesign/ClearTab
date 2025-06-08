@@ -87,7 +87,12 @@ export default function FinanceWidget() {
 
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
-      <CardContent className="space-y-3 flex-1 flex flex-col p-6">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+          Finance
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-1">
             <button
@@ -144,13 +149,20 @@ export default function FinanceWidget() {
         
         <div className="flex-1 flex items-center justify-center">
           {activeTab === 'pay' ? (
-            <p className="text-sm text-center leading-relaxed text-foreground">
-              {formatPaydayText()}
-            </p>
+            <div className="text-center py-4">
+              <p className="text-sm text-center leading-relaxed text-foreground">
+                {formatPaydayText()}
+              </p>
+            </div>
           ) : (
-            <p className="text-sm text-center leading-relaxed text-muted-foreground">
-              Track your spending and expenses here
-            </p>
+            <div className="text-center py-4">
+              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-xs text-muted-foreground">$</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Track your spending and expenses here
+              </p>
+            </div>
           )}
         </div>
         
