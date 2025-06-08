@@ -3,6 +3,7 @@ import { Calendar, MoreHorizontal, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
+import { useChatContext } from "@/hooks/use-chat-context";
 
 interface CalendarEvent {
   id: number;
@@ -13,6 +14,7 @@ interface CalendarEvent {
 
 export default function CalendarWidget() {
   const [activeTab, setActiveTab] = useState<'today' | 'tomorrow'>('today');
+  const { openChatWithPrompt } = useChatContext();
   
   const { data: events = [], isLoading } = useQuery<CalendarEvent[]>({
     queryKey: ["/api/calendar"],
@@ -113,6 +115,15 @@ export default function CalendarWidget() {
             </div>
           ))
         )}
+        
+        <div className="mt-auto pt-3 border-t border-border/50">
+          <button 
+            className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
+            onClick={() => openChatWithPrompt("Help me manage my calendar and schedule")}
+          >
+            Manage schedule
+          </button>
+        </div>
       </CardContent>
     </Card>
   );

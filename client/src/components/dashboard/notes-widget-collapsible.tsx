@@ -98,6 +98,15 @@ export default function NotesWidgetCollapsible() {
                           </div>
                         ))}
                       </div>
+                    ) : notes.length === 0 ? (
+                      <div className="text-center py-4">
+                        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Plus className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          No notes yet
+                        </p>
+                      </div>
                     ) : (
                       <div className="space-y-1">
                         {notes.map((note) => (
@@ -112,7 +121,7 @@ export default function NotesWidgetCollapsible() {
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-xs pb-1 break-words">
+                                <h4 className="font-medium text-sm pb-1 break-words">
                                   {note.title || "Untitled"}
                                 </h4>
                                 <p className="text-xs text-muted-foreground line-clamp-2">

@@ -134,7 +134,16 @@ export default function TasksWidget() {
             </div>
           ) : (
             <div className="space-y-2 p-1">
-              {tasks.map((task) => (
+              {tasks.length === 0 ? (
+                <div className="text-center py-4">
+                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Plus className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    No tasks yet
+                  </p>
+                </div>
+              ) : tasks.map((task) => (
                 <div 
                   key={task.id} 
                   ref={(el) => { taskRefs.current[task.id] = el; }}
