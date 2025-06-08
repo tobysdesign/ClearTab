@@ -491,12 +491,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const task = await storage.createTask({
             title: taskContent || "Untitled Task",
             description: "",
-            priority: "medium",
+            priority: "todo",
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'task', data: task });
           if (responseMessage) responseMessage += " and ";
-          responseMessage += `Perfect! Added that to your tasks ✓`;
+          responseMessage += `Perfect! Added that to your tasks ✓\n\nWould you like to set a due date for this task? Just let me know when it's due (e.g., "tomorrow", "next Friday", "December 15th").`;
         }
         
         await storage.createChatMessage({
@@ -518,27 +518,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Regular AI chat with action detection
       const systemPrompt = `You are ${agentName}, ${userName}'s personal AI assistant. You're friendly, conversational, and helpful.
       
-      When creating tasks or notes, respond naturally like a helpful friend would. Use casual, encouraging language.
+      When creating tasks, ALWAYS ask for a due date as a follow-up question after confirming the task creation.
+      When creating notes, just confirm creation without asking for additional details.
       
-      Examples of good responses:
-      - "Got it! Added that to your tasks ✓"
-      - "Done! Created a note about that for you"
-      - "Perfect, I've added that task to your list"
-      - "All set! That's now in your notes"
+      Examples of good task responses:
+      - "Perfect! Added that to your tasks ✓\n\nWhen would you like this completed? Just let me know the due date (e.g., 'tomorrow', 'next Friday', 'December 15th')."
+      - "Got it! Created that task for you ✓\n\nWould you like to set a due date? You can say something like 'due next week' or 'by Friday'."
       
-      Avoid formal phrases like "I've created the task:" or "Task created:". Instead, be conversational and supportive.
+      Examples of good note responses:
+      - "Done! Created a note about that for you ✓"
+      - "All set! That's now in your notes ✓"
       
       Available actions:
-      - create_task: Creates a new task
+      - create_task: Creates a new task (always follow up asking for due date)
       - create_note: Creates a new note
+      - update_task_due_date: Updates a task's due date when user provides date information
       
       ${memoryContext}
       
       Respond in JSON format with:
       {
-        "message": "your casual, friendly response",
-        "action": "create_task" | "create_note" | null,
-        "actionData": { title: "title", description: "description", content: "content", priority: "medium" }
+        "message": "your casual, friendly response (include due date question for tasks)",
+        "action": "create_task" | "create_note" | "update_task_due_date" | null,
+        "actionData": { title: "title", description: "description", content: "content", priority: "todo", dueDate: "ISO date string if provided" }
       }`;
 
       const completion = await openai.chat.completions.create({
@@ -567,7 +569,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const task = await storage.createTask({
             title: responseData.actionData.title || "New Task",
             description: responseData.actionData.description || "",
-            priority: responseData.actionData.priority || "medium",
+            priority: responseData.actionData.priority || "todo",
+            dueDate: responseData.actionData.dueDate ? new Date(responseData.actionData.dueDate) : null,
             userId: DEFAULT_USER_ID
           });
           responseData.task = task;
@@ -588,6 +591,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Keep the AI's natural response instead of overriding it
         } catch (error) {
           responseData.message = "Sorry, I couldn't create that note. Please try again.";
+        }
+      }
+
+      if (responseData.action === "update_task_due_date" && responseData.actionData) {
+        try {
+          // Get the most recent task for this user
+          const tasks = await storage.getTasksByUserId(DEFAULT_USER_ID);
+          const recentTask = tasks.sort((a, b) => b.id - a.id)[0]; // Get most recently created task
+          
+          if (recentTask && responseData.actionData.dueDate) {
+            const updatedTask = await storage.updateTask(recentTask.id, {
+              dueDate: new Date(responseData.actionData.dueDate)
+            });
+            responseData.task = updatedTask;
+          }
+        } catch (error) {
+          responseData.message = "Sorry, I couldn't update the due date. Please try again.";
         }
       }
 
