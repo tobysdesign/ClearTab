@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { Task } from "@shared/schema";
 
@@ -73,9 +73,6 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
       <DialogContent className="sm:max-w-[500px] [&>button]:hidden">
         <DialogHeader>
           <DialogTitle className="text-lg">Edit Task</DialogTitle>
-          <DialogDescription className="text-sm">
-            Make changes to your task. Click save when you're done.
-          </DialogDescription>
         </DialogHeader>
         
         <div className="flex items-center justify-end mb-4">
