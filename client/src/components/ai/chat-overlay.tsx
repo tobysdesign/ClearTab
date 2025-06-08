@@ -251,7 +251,13 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <Drawer.Root open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} modal>
+    <Drawer.Root open={isOpen} onOpenChange={(open) => { 
+      console.log('Drawer onOpenChange:', open);
+      if (!open) {
+        console.log('Drawer closing, calling onClose');
+        onClose();
+      }
+    }} modal>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-300 data-[state=open]:duration-200" />
         <Drawer.Content 
