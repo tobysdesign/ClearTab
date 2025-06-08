@@ -353,8 +353,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
               ? 'translateY(0) scale(1)' 
               : 'translateY(100%) scale(0.95)',
           transition: isClosing 
-            ? 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)' 
-            : 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            ? 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+            : 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           transformOrigin: 'bottom center'
         }}
       >
