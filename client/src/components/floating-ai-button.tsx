@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ChatOverlay from "@/components/ai/chat-overlay";
 import { useChatContext } from "@/hooks/use-chat-context";
-import { OrganicMotion } from "@/components/ui/organic-motion";
+import { OrganicMotion, OrganicHover } from "@/components/ui/organic-motion";
 
 export default function FloatingAIButton() {
   const { isChatOpen, setIsChatOpen, openChatWithPrompt, initialPrompt } = useChatContext();
