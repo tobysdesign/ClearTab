@@ -16,183 +16,138 @@ interface SetupFlowProps {
 }
 
 const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
-  const [step, setStep] = useState(1);
-  const [agentName, setAgentName] = useState("t0by");
-  const [userName, setUserName] = useState("");
-  const queryClient = useQueryClient();
+  const [showNameInput, setShowNameInput] = useState(false);
+  const [agentName, setAgentName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [skipRemainingSteps, setSkipRemainingSteps] = useState(false);
   const { toast } = useToast();
-  
-  const setupMutation = useMutation({
-    mutationFn: async (data: { agentName: string; userName: string }) => {
-      return apiRequest("POST", "/api/preferences", {
-        agentName: data.agentName,
-        userName: data.userName,
-        initialized: true,
-      });
-    },
-    onSuccess: async () => {
+  const queryClient = useQueryClient();
+
+  const { mutate: updatePreferences } = useMutation({
+    mutationFn: (data: { agentName: string }) => 
+      apiRequest("/api/preferences", "PUT", data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
-      localStorage.setItem('dashboardInitialized', 'true');
-      
-      // Send welcome message to chat
-      try {
-        await apiRequest("POST", "/api/chat", {
-          message: `Perfect! I'm ${agentName}, your AI assistant. I'm here to help you with tasks, notes, and productivity. You can use hashtags like #note or #task for quick creation. How can I help you today?`,
-          useMemory: false
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
-      } catch (error) {
-        console.error("Failed to send welcome message:", error);
-      }
-      
+      setIsSubmitting(false);
+      if (onSetupComplete) onSetupComplete();
       toast({
-        title: "Setup Complete",
-        description: `Welcome! ${agentName} is ready to help you.`,
+        title: "Setup complete!",
+        description: `Your AI assistant ${agentName} is ready to help.`,
       });
-      onSetupComplete?.();
     },
     onError: () => {
+      setIsSubmitting(false);
       toast({
-        title: "Setup Failed",
-        description: "Please try again.",
+        title: "Error",
+        description: "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handleNameSubmit = () => {
-    if (userName.trim()) {
-      setStep(3);
+  const handleSetupComplete = () => {
+    if (showNameInput && agentName.trim()) {
+      setIsSubmitting(true);
+      updatePreferences({ agentName: agentName.trim() });
+    } else if (onSetupComplete) {
+      onSetupComplete();
     }
   };
 
-  const handleSetupComplete = () => {
-    setupMutation.mutate({ agentName, userName });
-  };
-
   return (
-    <div className="space-y-4">
-      {step === 1 && (
+    <div className="p-6 space-y-6 bg-gradient-to-br from-background/50 to-muted/30 rounded-lg border">
+      {!skipRemainingSteps && (
         <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-              <Bot className="h-3 w-3 text-dark-primary" />
+          <div className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bot className="w-8 h-8 text-primary" />
             </div>
-            <Card className="bg-secondary p-4 max-w-md w-full">
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-text-primary">Welcome to your AI Productivity Dashboard!</h3>
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  I help you manage tasks, notes, and boost productivity. Features include:
-                  • Smart task and note creation with #hashtags
-                  • Optional local memory with Mem0 for personalized assistance  
-                  • Privacy-focused design - your data stays secure
-                  • Weather, calendar, and chat integration
+            <h3 className="text-xl font-semibold mb-2">Welcome to your AI Dashboard</h3>
+            <p className="text-muted-foreground text-sm">
+              Let's get your personal assistant set up in just a few seconds.
+            </p>
+          </div>
+
+          {!showNameInput ? (
+            <div className="space-y-4">
+              <div className="grid gap-3">
+                <Button 
+                  onClick={() => setShowNameInput(true)}
+                  className="w-full"
+                >
+                  Customize AI Assistant Name
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setSkipRemainingSteps(true)}
+                  className="w-full"
+                >
+                  Use Default Settings
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="agent-name">Assistant Name</Label>
+                <Input
+                  id="agent-name"
+                  placeholder="e.g., Alex, Sage, Nova..."
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                  maxLength={20}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Choose a name for your AI assistant (optional)
                 </p>
               </div>
-            </Card>
-          </div>
-          
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-              <Bot className="h-3 w-3 text-dark-primary" />
-            </div>
-            <Card className="bg-secondary p-4 max-w-md w-full">
-              <div className="space-y-3">
-                <p className="text-sm text-text-primary">
-                  I'm <button 
-                    onClick={() => setStep(2)} 
-                    className="text-primary hover:underline font-medium"
-                  >
-                    {agentName}
-                  </button>, but you can rename me if you'd like (just click my name)
-                </p>
-                <p className="text-sm text-text-primary">What would you like to be called?</p>
-                <div className="flex space-x-2">
-                  <Input
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    placeholder="Type your name"
-                    className="text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                        handleNameSubmit();
-                      }
-                    }}
-                  />
-                  <Button 
-                    onClick={handleNameSubmit}
-                    disabled={!userName.trim()}
-                    size="sm"
-                  >
-                    Next
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSetupComplete}
+                  disabled={isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? "Setting up..." : "Complete Setup"}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowNameInput(false)}
+                  className="flex-1"
+                >
+                  Back
+                </Button>
               </div>
-            </Card>
-          </div>
+            </div>
+          )}
         </div>
       )}
-      
-      {step === 2 && (
-        <div className="flex items-start space-x-3">
-          <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-            <Bot className="h-3 w-3 text-dark-primary" />
+
+      {skipRemainingSteps && (
+        <div className="space-y-4 text-center">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+            <Bot className="w-6 h-6 text-green-600" />
           </div>
-          <Card className="bg-secondary p-4 max-w-md w-full">
-            <div className="space-y-3">
-              <p className="text-sm text-text-primary">What would you like to call me?</p>
-              <Input
-                value={agentName}
-                onChange={(e) => setAgentName(e.target.value)}
-                className="text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setStep(1);
-                  }
-                }}
-              />
+          <div>
+            <h3 className="font-semibold mb-2">You're all set!</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Your assistant is ready to help you manage tasks, notes, and more.
+            </p>
+            <div className="space-y-2">
               <Button 
-                onClick={() => setStep(1)} 
+                onClick={() => window.location.href = '/api/auth/google'}
+                variant="outline"
+                className="w-full text-xs"
+              >
+                Connect Google Calendar
+              </Button>
+              <Button 
+                onClick={handleSetupComplete}
                 size="sm" 
                 className="w-full"
               >
-                Continue
+                Skip for now
               </Button>
             </div>
-          </Card>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="space-y-4">
-          <div className="flex items-start space-x-3">
-            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-              <Bot className="h-3 w-3 text-dark-primary" />
-            </div>
-            <Card className="bg-secondary p-4 max-w-md w-full">
-              <div className="space-y-3">
-                <p className="text-sm text-text-primary">
-                  Great! Would you like to connect your Google Calendar to sync your events with the dashboard?
-                </p>
-                <div className="space-y-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full text-xs"
-                    onClick={() => window.location.href = '/api/auth/google'}
-                  >
-                    Connect Google Calendar
-                  </Button>
-                  <Button 
-                    onClick={handleSetupComplete}
-                    size="sm" 
-                    className="w-full"
-                  >
-                    Skip for now
-                  </Button>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
       )}
@@ -219,105 +174,67 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: preferences } = useQuery<UserPreferences>({
+  const { data: preferences } = useQuery({
     queryKey: ["/api/preferences"],
+    enabled: isOpen,
   });
 
   const { data: messages = [] } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat/messages"],
-    enabled: isOpen,
+    enabled: isOpen && !isSetupMode,
+    refetchInterval: 2000,
   });
 
-  const chatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await apiRequest("POST", "/api/chat", { message });
-      return response.json();
-    },
-    onSuccess: (data) => {
+  const agentName = preferences?.agentName || "Assistant";
+
+  const { mutate: sendMessage, isPending: isSending } = useMutation({
+    mutationFn: (data: { message: string }) => 
+      apiRequest("/api/chat/send", "POST", data),
+    onSuccess: () => {
+      setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
-      
-      // Handle setup completion
-      if (data.setupComplete) {
-        queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });
-        localStorage.setItem('dashboardInitialized', 'true');
-        toast({
-          title: "Setup Complete",
-          description: "Your AI assistant is ready to help!",
-        });
-        onSetupComplete?.();
-      }
-      
-      // If a task or note was created, refresh those widgets
-      if (data.action === "create_task" || data.task) {
-        queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-      }
-      if (data.action === "create_note" || data.note) {
-        queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-      }
-      if (data.note) {
-        queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-        toast({
-          title: "Note Created",
-          description: `"${data.note.title}" has been added to your notes.`,
-        });
-      }
-      if (data.task) {
-        queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
-        toast({
-          title: "Task Created",
-          description: `"${data.task.title}" has been added to your tasks.`,
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: error?.message || "Failed to send message",
         variant: "destructive",
       });
     },
   });
 
-  const agentName = preferences?.agentName || "t0by";
-  const userName = preferences?.userName || "User";
-
   useEffect(() => {
     if (isOpen) {
-      // Reset states when opening
-      setIsClosing(false);
-      // Start animation immediately when opening
-      setTimeout(() => setIsAnimating(true), 50);
-      
-      if (inputRef.current) {
-        // Focus input after animation starts
-        setTimeout(() => {
-          inputRef.current?.focus();
-          if (initialMessage && initialMessage !== message) {
-            setMessage(initialMessage);
-          }
-        }, 100);
+      setIsAnimating(true);
+      if (initialMessage) {
+        setMessage(initialMessage);
       }
-    } else {
-      // Reset animation states when closing
-      setIsAnimating(false);
-      setIsClosing(false);
     }
   }, [isOpen, initialMessage]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
+
   const handleSendMessage = () => {
-    if (!message.trim() || chatMutation.isPending) return;
-    
-    chatMutation.mutate(message);
-    setMessage("");
+    if (!message.trim() || isSending) return;
+    sendMessage({ message: message.trim() });
   };
 
   const handleClose = () => {
     setIsClosing(true);
-    setIsAnimating(false);
     setTimeout(() => {
       setIsClosing(false);
       if (onCloseAnimated) {
@@ -343,124 +260,116 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   return (
     <Drawer.Root open={isOpen} onOpenChange={onClose} modal>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/50 z-50" />
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[9999]" />
         <Drawer.Content 
           ref={modalRef}
-          className="bg-background border border-border rounded-t-lg shadow-xl fixed bottom-0 left-0 right-0 h-[85vh] max-w-md mx-auto flex flex-col outline-none z-50"
+          className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-0 left-0 right-0 h-[85vh] max-w-md mx-auto flex flex-col outline-none z-[10000]"
         >
-        <div className="flex items-center justify-between p-4 border-b border-border pt-[6px] pb-[6px]">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-text-secondary rounded-full flex items-center justify-center">
-              <Bot className="h-4 w-4 text-dark-primary" />
+          {/* Drag handle */}
+          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
+          
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium text-foreground">{agentName}</h3>
+                <p className="text-xs text-muted-foreground">AI Assistant</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-medium text-text-primary">{agentName}</h3>
-              <p className="text-xs text-text-muted">AI Assistant</p>
-            </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleClose}
-            className="text-text-muted hover:text-text-primary"
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex-1 p-4 overflow-y-auto scroll-smooth" style={{ maxHeight: "60vh" }}>
-          <div className="space-y-4">
-            {isSetupMode ? (
-              <SetupFlow onSetupComplete={onSetupComplete} />
-            ) : messages.length === 0 ? (
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-3 w-3 text-dark-primary" />
-                </div>
-                <Card className="bg-secondary p-3 max-w-md">
-                  <p className="text-sm text-text-primary">
-                    Hi {userName}! I'm ready to help you with notes, tasks, and anything else you need. What would you like to work on?
-                  </p>
-                </Card>
-              </div>
-            ) : null}
-            
-            {messages.map((msg) => (
-              <div key={msg.id} className="flex items-start space-x-3 animate-fade-in">
-                {msg.role === "user" ? (
-                  <>
-                    <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center flex-shrink-0 text-xs font-medium">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-                    <Card className="bg-primary text-primary-foreground p-3 max-w-md">
-                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                    </Card>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-3 w-3 text-dark-primary" />
-                    </div>
-                    <Card className="bg-secondary p-3 max-w-md">
-                      <p className="text-sm text-text-primary whitespace-pre-wrap">{msg.message}</p>
-                    </Card>
-                  </>
-                )}
-              </div>
-            ))}
-            
-            {chatMutation.isPending && (
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-3 w-3 text-dark-primary" />
-                </div>
-                <Card className="bg-secondary p-3 max-w-md">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-text-muted rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                      <div className="w-2 h-2 bg-text-muted rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
-                    </div>
-                    <span className="text-xs text-text-muted">Thinking...</span>
-                  </div>
-                </Card>
-              </div>
-            )}
-          </div>
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div className="p-4 border-t border-border">
-          <div className="relative">
-            <textarea
-              ref={inputRef}
-              id="chatInput"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="w-full bg-secondary border border-border rounded-md pl-3 pr-12 py-3 text-sm text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
-              disabled={chatMutation.isPending}
-              rows={2}
-              style={{ height: 'auto' }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = 'auto';
-                target.style.height = Math.max(60, target.scrollHeight) + 'px';
-              }}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              disabled={!message.trim() || chatMutation.isPending}
-              className="absolute right-2 bottom-2 bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8 p-0 rounded-full"
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="h-8 w-8 p-0"
             >
-              <Send className="h-4 w-4" />
+              <Minus className="h-4 w-4" />
             </Button>
           </div>
-          <div className="mt-2 text-xs text-text-muted text-center">
-            <span className="italic">Try adding <strong>#note</strong> or <strong>#task</strong> in your message</span>
+
+          {/* Content */}
+          <div className="flex-1 overflow-hidden flex flex-col">
+            {isSetupMode ? (
+              <div className="flex-1 p-4">
+                <SetupFlow onSetupComplete={onSetupComplete} />
+              </div>
+            ) : (
+              <>
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.length === 0 && (
+                    <div className="text-center py-8">
+                      <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                      <h3 className="font-medium text-foreground mb-2">How can I help you today?</h3>
+                      <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                        I can help you manage tasks, take notes, schedule events, and answer questions.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                        msg.role === "user" 
+                          ? "bg-primary text-primary-foreground ml-12" 
+                          : "bg-muted text-foreground mr-12"
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {new Date(msg.createdAt).toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {isSending && (
+                    <div className="flex justify-start">
+                      <div className="bg-muted text-foreground rounded-lg px-3 py-2 mr-12">
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input */}
+                <div className="border-t border-border p-4">
+                  <div className="flex space-x-2">
+                    <textarea
+                      ref={inputRef}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type your message..."
+                      className="flex-1 resize-none border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[40px] max-h-32"
+                      rows={1}
+                      disabled={isSending}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!message.trim() || isSending}
+                      size="sm"
+                      className="px-3"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground text-center">
+                    <span className="italic">Try adding <strong>#note</strong> or <strong>#task</strong> in your message</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-        </div>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
