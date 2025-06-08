@@ -190,7 +190,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
 
   const { mutate: sendMessage, isPending: isSending } = useMutation({
     mutationFn: (data: { message: string }) => 
-      apiRequest("POST", "/api/chat/send", data),
+      apiRequest("POST", "/api/chat", data),
     onSuccess: () => {
       setMessage("");
       queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });

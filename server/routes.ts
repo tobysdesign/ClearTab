@@ -215,6 +215,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/notes/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const noteData = insertNoteSchema.partial().parse(req.body);
+      const note = await storage.updateNote(id, noteData);
+      
+      if (!note) {
+        return res.status(404).json({ error: "Note not found" });
+      }
+      
+      res.json(note);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid note data" });
+    }
+  });
+
   app.delete("/api/notes/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -251,6 +267,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/tasks/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskData = insertTaskSchema.partial().parse(req.body);
+      const task = await storage.updateTask(id, taskData);
+      
+      if (!task) {
+        return res.status(404).json({ error: "Task not found" });
+      }
+      
+      res.json(task);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid task data" });
+    }
+  });
+
+  app.patch("/api/tasks/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const taskData = insertTaskSchema.partial().parse(req.body);
