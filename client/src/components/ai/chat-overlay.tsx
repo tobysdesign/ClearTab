@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import { Drawer } from "vaul";
 import type { ChatMessage, UserPreferences } from "@shared/schema";
 
@@ -248,30 +249,39 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <>
-      {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black/40 z-[9999] animate-in fade-in-0 duration-200"
-        onClick={onClose}
-      />
-      
-      {/* Chat Content */}
-      <div 
-        ref={modalRef}
-        className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[75vh] max-w-md mx-auto flex flex-col outline-none z-[10000] animate-in slide-in-from-bottom duration-500"
-        style={{
-          transform: 'translateY(0)',
-          transition: 'transform 400ms cubic-bezier(0.32, 0.72, 0, 1)'
-        }}
-      >
-        {/* Drag handle */}
-        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Overlay */}
+          <motion.div 
+            className="fixed inset-0 bg-black/40 z-[9999]"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
           
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          {/* Chat Content */}
+          <motion.div 
+            ref={modalRef}
+            className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[75vh] max-w-md mx-auto flex flex-col outline-none z-[10000]"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{
+              type: "spring",
+              damping: 30,
+              stiffness: 300,
+              duration: 0.4
+            }}
+          >
+            {/* Drag handle */}
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
+            
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
@@ -371,8 +381,10 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                 </div>
               </>
             )}
-        </div>
-      </div>
-    </>
+          </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
