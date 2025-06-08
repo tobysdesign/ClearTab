@@ -316,7 +316,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                       <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                       <h3 className="font-medium text-foreground mb-2">How can I help you today?</h3>
                       <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                        I can help you manage tasks, take notes, schedule events, and answer questions.
+                        I can take notes, track your tasks, jot down thoughts, plan your day, or help think something through.
                       </p>
                     </div>
                   )}
