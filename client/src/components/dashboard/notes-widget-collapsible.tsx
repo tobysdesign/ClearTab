@@ -40,8 +40,26 @@ export default function NotesWidgetCollapsible() {
     },
   });
 
+  const createNoteMutation = useMutation({
+    mutationFn: async (noteData: { title: string; content: string }) => {
+      const res = await apiRequest("POST", "/api/notes", noteData);
+      return res.json();
+    },
+    onSuccess: (newNote) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+      setSelectedNoteId(newNote.id);
+    },
+  });
+
   const deleteNote = (id: number) => {
     deleteNoteMutation.mutate(id);
+  };
+
+  const createNewNote = () => {
+    createNoteMutation.mutate({
+      title: "",
+      content: ""
+    });
   };
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
@@ -168,7 +186,7 @@ export default function NotesWidgetCollapsible() {
                   <div className="mt-auto pt-3 border-t border-border/50">
                     <button 
                       className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-                      onClick={() => openChatWithPrompt("Create a new note for me")}
+                      onClick={createNewNote}
                     >
                       Add new note
                     </button>
@@ -209,7 +227,7 @@ export default function NotesWidgetCollapsible() {
                     <TooltipTrigger asChild>
                       <button 
                         className="w-8 h-8 rounded border border-dashed border-border hover:border-accent-foreground/20 hover:bg-accent flex items-center justify-center transition-colors"
-                        onClick={() => openChatWithPrompt("Create a new note for me")}
+                        onClick={createNewNote}
                       >
                         <Plus className="h-3 w-3" />
                       </button>
