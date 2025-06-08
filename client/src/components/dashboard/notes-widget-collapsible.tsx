@@ -271,7 +271,7 @@ export default function NotesWidgetCollapsible() {
             ) : (
               <div className="h-full flex items-center justify-center text-center">
                 <div className="max-w-sm">
-                  <h3 className="text-lg font-medium mb-2">Select a note</h3>
+                  <h3 className="text-lg font-medium mb-2 text-left ml-[24px] mr-[24px]">Select a note</h3>
                   <p className="text-sm text-muted-foreground mb-4 ml-[24px] mr-[24px] text-left">
                     Choose a note from the sidebar to view its content, or create a new one.
                   </p>
