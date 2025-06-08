@@ -448,7 +448,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const note = await storage.createNote({
             title: noteContent.substring(0, 50) || "Untitled Note",
             content: noteContent,
-            tags: [],
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'note', data: note });

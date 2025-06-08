@@ -133,8 +133,6 @@ export class MemStorage implements IStorage {
       userId: 1,
       title: "Project Planning Meeting",
       content: "Discussed Q2 roadmap and resource allocation. Need to follow up on budget approval.",
-      tags: ["work", "planning"],
-      createdAt: new Date()
     };
     
     const note2: Note = {
@@ -142,13 +140,20 @@ export class MemStorage implements IStorage {
       userId: 1,
       title: "Weekend Trip Ideas",
       content: "Considering hiking in Yosemite or visiting San Francisco museums. Check weather forecast.",
-      tags: ["personal", "travel"],
-      createdAt: new Date()
+    };
+    
+    // Add default empty note for quick entry
+    const note3: Note = {
+      id: 3,
+      userId: 1,
+      title: "",
+      content: "",
     };
     
     this.notes.set(1, note1);
     this.notes.set(2, note2);
-    this.currentNoteId = 3;
+    this.notes.set(3, note3);
+    this.currentNoteId = 4;
     
     // Add sample tasks for Alice
     const task1: Task = {
@@ -282,9 +287,7 @@ export class MemStorage implements IStorage {
     const id = this.currentNoteId++;
     const note: Note = { 
       ...noteData, 
-      id, 
-      createdAt: new Date(),
-      tags: noteData.tags || null
+      id
     };
     this.notes.set(id, note);
     return note;

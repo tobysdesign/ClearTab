@@ -21,8 +21,6 @@ export const notes = pgTable("notes", {
   userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  tags: text("tags").array(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const tasks = pgTable("tasks", {
@@ -94,7 +92,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertNoteSchema = createInsertSchema(notes).omit({
   id: true,
   userId: true,
-  createdAt: true,
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
