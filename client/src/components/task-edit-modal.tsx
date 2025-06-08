@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MoreHorizontal, Save, Calendar, Copy, Trash2 } from "lucide-react";
+import { MoreHorizontal, Check, Calendar, Copy, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -172,8 +172,8 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
 
         <div className="flex justify-end mt-6">
           <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Save className="w-4 h-4 mr-2" />
-            Save Changes
+            <Check className="w-4 h-4 mr-2" />
+            Done
           </Button>
         </div>
       </DialogContent>
