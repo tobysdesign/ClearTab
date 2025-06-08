@@ -58,10 +58,12 @@ export default function FloatingAIButton() {
               <div className="absolute inset-1 rounded-full bg-gradient-to-l from-white/10 to-transparent animate-spin" style={{ animationDuration: '4s', animationDirection: 'reverse' }} />
             </div>
             
-            <MessageCircle className={`w-6 h-6 transition-all duration-200 relative z-10 ${isChatOpen ? 'group-hover:opacity-0 group-hover:scale-0' : 'group-hover:rotate-12'}`} />
-            {isChatOpen && (
-              <X className="absolute w-6 h-6 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 relative z-10" />
-            )}
+            <div className="relative z-10 flex items-center justify-center w-6 h-6">
+              <MessageCircle className={`w-6 h-6 transition-all duration-200 absolute ${isChatOpen ? 'group-hover:opacity-0 group-hover:scale-0' : 'group-hover:rotate-12'}`} />
+              {isChatOpen && (
+                <X className="w-6 h-6 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 absolute" />
+              )}
+            </div>
             {/* Notification indicator */}
             {hasUnfinishedSetup && !isChatOpen && (
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse z-20" />
