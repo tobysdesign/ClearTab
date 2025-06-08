@@ -47,7 +47,12 @@ export default function WeatherWidget() {
           <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">Weather unavailable</p>
+          <div className="text-center py-4">
+            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+              <span className="text-xs text-muted-foreground">☁</span>
+            </div>
+            <p className="text-sm text-muted-foreground">Weather unavailable</p>
+          </div>
         </div>
       </div>
     );
