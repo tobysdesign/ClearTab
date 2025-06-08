@@ -81,7 +81,7 @@ export default function CalendarWidget() {
       </CardHeader>
       
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto widget-scrollable">
           <div className="space-y-3 max-h-full">
             {isLoading ? (
               <div className="space-y-3">

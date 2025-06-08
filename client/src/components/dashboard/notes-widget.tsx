@@ -172,7 +172,7 @@ export default function NotesWidget() {
           
           {!sidebarCollapsed && (
             <div className="flex-1 flex flex-col">
-              <div className="flex-1 overflow-y-auto p-2">
+              <div className="flex-1 overflow-y-auto p-2 widget-scrollable">
                 <div className="space-y-1 max-h-full">
                   {isLoading ? (
                     <div className="space-y-2">

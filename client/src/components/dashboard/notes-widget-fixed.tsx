@@ -70,7 +70,7 @@ export default function NotesWidget() {
         
         {!sidebarCollapsed && (
           <CardContent className="flex-1 flex flex-col space-y-3">
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto widget-scrollable">
               <div className="space-y-2 p-1 max-h-full">
                 {isLoading ? (
                   <div className="space-y-2">
