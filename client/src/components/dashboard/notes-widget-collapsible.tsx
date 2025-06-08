@@ -220,18 +220,24 @@ export default function NotesWidgetCollapsible() {
         
         {/* Content Panel */}
         <Panel defaultSize={60} minSize={30}>
-          <div className="h-full flex flex-col">
+          <div className="h-full flex flex-col bg-muted/30">
             {selectedNote ? (
               <div className="p-6 h-full flex flex-col">
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">{selectedNote.title || "Untitled"}</h3>
-                </div>
-                
-                <div className="flex-1 bg-muted/30 rounded-lg p-4 overflow-y-auto">
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {selectedNote.content || "Start typing or paste your content here..."}
-                  </p>
-                </div>
+                <textarea
+                  className="flex-1 bg-transparent border-none outline-none resize-none text-sm leading-relaxed placeholder:text-muted-foreground"
+                  placeholder="Start typing your note here..."
+                  value={selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || ''}
+                  onChange={(e) => {
+                    const lines = e.target.value.split('\n');
+                    const title = lines[0];
+                    const content = lines.slice(2).join('\n'); // Skip the empty line after title
+                    
+                    updateNoteMutation.mutate({
+                      id: selectedNote.id,
+                      updates: { title, content }
+                    });
+                  }}
+                />
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-center">
