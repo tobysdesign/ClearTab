@@ -72,8 +72,8 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] [&>button]:hidden">
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg">Edit Task</DialogTitle>
+          <DialogDescription className="text-sm">
             Make changes to your task. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
@@ -104,36 +104,36 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
+            <label className="text-xs font-medium text-foreground mb-1.5 block">
               Title
             </label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task title..."
-              className="w-full"
+              className="w-full text-sm"
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
+            <label className="text-xs font-medium text-foreground mb-1.5 block">
               Description
             </label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Task description..."
-              className="w-full resize-none"
+              className="w-full resize-none text-sm"
               rows={3}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
+            <label className="text-xs font-medium text-foreground mb-1.5 block">
               Priority
             </label>
             <Select value={priority} onValueChange={(value: "todo" | "inprogress" | "review") => setPriority(value)}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -145,14 +145,14 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
           </div>
 
           <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">
+            <label className="text-xs font-medium text-foreground mb-1.5 block">
               Due Date
             </label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal"
+                  className="w-full justify-start text-left font-normal text-sm"
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   {dueDate ? format(dueDate, "PPP") : "Pick a date"}
