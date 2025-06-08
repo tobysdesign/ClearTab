@@ -343,21 +343,15 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 pb-20 transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}>
-      <div 
-        ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[70vh] flex flex-col"
-        style={{
-          transform: isClosing 
-            ? 'translateY(100%) scale(0.95)' 
-            : isAnimating 
-              ? 'translateY(0) scale(1)' 
-              : 'translateY(100%) scale(0.95)',
-          transition: isClosing 
-            ? 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
-            : 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          transformOrigin: 'bottom center'
-        }}
+      <OrganicMotion 
+        direction="up" 
+        isVisible={isAnimating && !isClosing}
+        className="w-full max-w-md h-[70vh]"
       >
+        <div 
+          ref={modalRef}
+          className="bg-background border border-border rounded-lg shadow-xl w-full h-full flex flex-col"
+        >
         <div className="flex items-center justify-between p-4 border-b border-border pt-[6px] pb-[6px]">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-text-secondary rounded-full flex items-center justify-center">
