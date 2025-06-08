@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   tokenExpiry: timestamp("token_expiry"),
+  googleCalendarConnected: boolean("google_calendar_connected").default(false),
+  lastCalendarSync: timestamp("last_calendar_sync"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
