@@ -174,7 +174,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: preferences } = useQuery({
+  const { data: preferences } = useQuery<UserPreferences>({
     queryKey: ["/api/preferences"],
     enabled: isOpen,
   });
@@ -234,15 +234,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   };
 
   const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      if (onCloseAnimated) {
-        onCloseAnimated();
-      } else {
-        onClose();
-      }
-    }, 350);
+    // Use Vaul's native close behavior for consistent animation
+    onClose();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -251,7 +244,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
       handleSendMessage();
     }
     if (e.key === "Escape") {
-      handleClose();
+      onClose();
     }
   };
 
@@ -282,8 +275,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleClose}
-              className="h-8 w-8 p-0"
+              onClick={onClose}
+              className="h-8 w-8 p-0 hover:bg-muted/50"
             >
               <Minus className="h-4 w-4" />
             </Button>
