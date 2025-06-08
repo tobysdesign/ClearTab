@@ -39,10 +39,10 @@ export default function Dashboard() {
         <FloatingAIButton />
         
         <ChatOverlay 
-          isOpen={isChatOpen || isInitFlowOpen}
+          isOpen={isChatOpen}
           onClose={closeChat}
           initialMessage={initialMessage}
-          isSetupMode={isInitFlowOpen}
+          isSetupMode={isInitFlowOpen && isChatOpen}
           onSetupComplete={closeInitFlow}
         />
       </div>
