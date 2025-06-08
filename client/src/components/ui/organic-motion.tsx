@@ -185,29 +185,18 @@ export function OrganicMotion({
 }: OrganicMotionProps) {
   const variants = directionVariants[direction]
 
-  // Create a copy of variants to avoid mutating the original
-  const customVariants = { ...variants }
-
-  // Apply custom duration if provided
-  if (duration) {
-    customVariants.animate = {
-      ...customVariants.animate,
+  // Create custom variants with proper typing
+  const customVariants = {
+    initial: variants.initial,
+    animate: {
+      ...variants.animate,
       transition: {
-        ...customVariants.animate.transition,
-        duration
+        ...variants.animate.transition,
+        ...(duration && { duration }),
+        ...(delay > 0 && { delay })
       }
-    }
-  }
-
-  // Apply delay if provided
-  if (delay > 0) {
-    customVariants.animate = {
-      ...customVariants.animate,
-      transition: {
-        ...customVariants.animate.transition,
-        delay
-      }
-    }
+    },
+    exit: variants.exit
   }
 
   return (

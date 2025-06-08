@@ -81,13 +81,16 @@ export default function FloatingAIButton() {
         </Tooltip>
       </OrganicMotion>
       
-      <OrganicMotion direction="center" isVisible={isChatOpen}>
-        <ChatOverlay 
-          ref={modalRef}
-          onClose={handleAnimatedClose}
-          initialPrompt={initialPrompt}
-        />
-      </OrganicMotion>
+      {isChatOpen && (
+        <OrganicMotion direction="center" isVisible={isChatOpen}>
+          <ChatOverlay 
+            isOpen={isChatOpen}
+            onClose={handleAnimatedClose}
+            initialMessage={initialPrompt}
+            modalRef={modalRef}
+          />
+        </OrganicMotion>
+      )}
     </>
   );
 }
