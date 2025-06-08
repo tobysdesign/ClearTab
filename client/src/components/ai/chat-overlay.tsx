@@ -278,7 +278,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             }}
           >
             {/* Drag handle */}
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-[-4px] mb-[-4px]" />
             
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border pt-[0px] pb-[0px]">
