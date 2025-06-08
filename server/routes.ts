@@ -483,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'note', data: note });
-          responseMessage += `Note created: "${note.title}"`;
+          responseMessage += `Got it! Added that to your notes ✓`;
         }
         
         if (hasTask) {
@@ -496,7 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           results.push({ type: 'task', data: task });
           if (responseMessage) responseMessage += " and ";
-          responseMessage += `Task created: "${task.title}"`;
+          responseMessage += `Perfect! Added that to your tasks ✓`;
         }
         
         await storage.createChatMessage({
@@ -516,11 +516,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Regular AI chat with action detection
-      const systemPrompt = `You are ${agentName}, a helpful AI assistant for ${userName}'s productivity dashboard. 
-      You can help create notes and tasks, answer questions, and provide assistance with productivity.
+      const systemPrompt = `You are ${agentName}, ${userName}'s personal AI assistant. You're friendly, conversational, and helpful.
       
-      When the user asks you to create a task or note, you should immediately do it and confirm what you created.
-      When the user asks to convert a note to a task or vice versa, create the new item with the same content and mention that you've converted it.
+      When creating tasks or notes, respond naturally like a helpful friend would. Use casual, encouraging language.
+      
+      Examples of good responses:
+      - "Got it! Added that to your tasks ✓"
+      - "Done! Created a note about that for you"
+      - "Perfect, I've added that task to your list"
+      - "All set! That's now in your notes"
+      
+      Avoid formal phrases like "I've created the task:" or "Task created:". Instead, be conversational and supportive.
       
       Available actions:
       - create_task: Creates a new task
@@ -530,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       Respond in JSON format with:
       {
-        "message": "your response text",
+        "message": "your casual, friendly response",
         "action": "create_task" | "create_note" | null,
         "actionData": { title: "title", description: "description", content: "content", priority: "medium" }
       }`;
@@ -565,7 +571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: DEFAULT_USER_ID
           });
           responseData.task = task;
-          responseData.message = `I've created the task: "${task.title}"`;
+          // Keep the AI's natural response instead of overriding it
         } catch (error) {
           responseData.message = "Sorry, I couldn't create that task. Please try again.";
         }
@@ -579,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: DEFAULT_USER_ID
           });
           responseData.note = note;
-          responseData.message = `I've created the note: "${note.title}"`;
+          // Keep the AI's natural response instead of overriding it
         } catch (error) {
           responseData.message = "Sorry, I couldn't create that note. Please try again.";
         }
