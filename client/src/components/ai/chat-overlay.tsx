@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Bot, X, Send } from "lucide-react";
+import { Bot, X, Send, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,7 @@ interface SetupFlowProps {
 const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
   const [step, setStep] = useState(1);
   const [agentName, setAgentName] = useState("t0by");
+  const [userName, setUserName] = useState("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
@@ -58,7 +59,13 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
     },
   });
 
-  const handleNameSubmit = (userName: string) => {
+  const handleNameSubmit = () => {
+    if (userName.trim()) {
+      setStep(3);
+    }
+  };
+
+  const handleSetupComplete = () => {
     setupMutation.mutate({ agentName, userName });
   };
 
@@ -96,28 +103,27 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
                     className="text-primary hover:underline font-medium"
                   >
                     {agentName}
-                  </button>, but if you want you can rename me (just click my name)
+                  </button>, but you can rename me if you'd like (just click my name)
                 </p>
                 <p className="text-sm text-text-primary">What would you like to be called?</p>
                 <div className="flex space-x-2">
                   <Input
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
                     placeholder="Type your name"
                     className="text-sm"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                        handleNameSubmit(e.currentTarget.value.trim());
+                        handleNameSubmit();
                       }
                     }}
                   />
-                </div>
-                <div className="pt-2 border-t border-border">
                   <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full text-xs"
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={handleNameSubmit}
+                    disabled={!userName.trim()}
+                    size="sm"
                   >
-                    Or Login with Google
+                    Next
                   </Button>
                 </div>
               </div>
@@ -153,6 +159,40 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
               </Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="space-y-4">
+          <div className="flex items-start space-x-3">
+            <div className="w-6 h-6 bg-text-secondary rounded-full flex items-center justify-center flex-shrink-0">
+              <Bot className="h-3 w-3 text-dark-primary" />
+            </div>
+            <Card className="bg-secondary p-4 max-w-md w-full">
+              <div className="space-y-3">
+                <p className="text-sm text-text-primary">
+                  Great! Would you like to connect your Google Calendar to sync your events with the dashboard?
+                </p>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-xs"
+                    onClick={() => window.location.href = '/api/auth/google'}
+                  >
+                    Connect Google Calendar
+                  </Button>
+                  <Button 
+                    onClick={handleSetupComplete}
+                    size="sm" 
+                    className="w-full"
+                  >
+                    Skip for now
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       )}
     </div>
@@ -300,12 +340,12 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-end p-4 transition-opacity duration-300 ${
+    <div className={`fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}>
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col mb-20"
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
         style={{
           transform: isClosing 
             ? 'translateY(100%) scale(0.95)' 
@@ -318,7 +358,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
           transformOrigin: 'bottom center'
         }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border pt-[6px] pb-[6px]">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-text-secondary rounded-full flex items-center justify-center">
               <Bot className="h-4 w-4 text-dark-primary" />
