@@ -216,7 +216,9 @@ export default function NotesWidgetCollapsible() {
         </Panel>
         
         {/* Resize Handle */}
-        <PanelResizeHandle className="w-1 bg-border hover:bg-accent transition-colors" />
+        <PanelResizeHandle className="w-1 bg-transparent hover:bg-transparent transition-colors relative group">
+          <div className="absolute inset-y-0 left-1/2 w-px bg-border group-hover:bg-accent transition-colors transform -translate-x-1/2" />
+        </PanelResizeHandle>
         
         {/* Content Panel */}
         <Panel defaultSize={60} minSize={30}>
