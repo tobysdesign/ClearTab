@@ -468,8 +468,6 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             </Button>
           </div>
           <div className="mt-2 text-xs text-text-muted text-center">
-            <span>Press Escape to close • Shift+Enter for new line</span>
-            <br />
             <span className="italic">Try adding #note or #task in your message</span>
           </div>
         </div>
