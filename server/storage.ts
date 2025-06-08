@@ -98,12 +98,14 @@ export class MemStorage implements IStorage {
     const user1: User = {
       id: 1,
       googleId: null,
-      email: "alice@example.com",
-      name: "Alice Johnson",
+      email: "user@example.com",
+      name: "Demo User",
       picture: null,
       accessToken: null,
       refreshToken: null,
       tokenExpiry: null,
+      googleCalendarConnected: false,
+      lastCalendarSync: null,
       createdAt: new Date()
     };
     
@@ -116,6 +118,8 @@ export class MemStorage implements IStorage {
       accessToken: null,
       refreshToken: null,
       tokenExpiry: null,
+      googleCalendarConnected: false,
+      lastCalendarSync: null,
       createdAt: new Date()
     };
     
@@ -178,7 +182,7 @@ export class MemStorage implements IStorage {
       id: 1,
       userId: 1,
       agentName: "t0by",
-      userName: "Alice",
+      userName: "User",
       initialized: true,
       paydayDate: new Date(2025, 0, 15), // January 15th
       paydayFrequency: "monthly",
