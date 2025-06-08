@@ -122,8 +122,8 @@ export default function WeatherWidget() {
           {currentCard.forecast && currentCard.forecast.length > 0 && (
             <div className="mt-4 overflow-hidden">
               <div className="text-xs text-text-muted mb-2">Next 12 hours</div>
-              <div className="relative">
-                <div className="flex space-x-3 overflow-x-auto scrollbar-none">
+              <div className="relative max-h-20 overflow-y-auto">
+                <div className="flex space-x-3 overflow-x-auto scrollbar-none pb-2">
                   {currentCard.forecast.map((hour, index) => (
                     <div key={index} className="flex-shrink-0 text-center min-w-[40px]">
                       <div className="text-xs text-text-muted mb-1">

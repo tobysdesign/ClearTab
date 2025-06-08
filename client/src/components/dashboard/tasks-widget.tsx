@@ -119,31 +119,31 @@ export default function TasksWidget() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
-          {isLoading ? (
-            <div className="space-y-2 p-1">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                  <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
-                  <div className="flex-1">
-                    <div className="h-3 bg-muted rounded mb-2"></div>
-                    <div className="h-2 bg-muted rounded w-2/3"></div>
+        <div className="flex-1 overflow-y-auto min-h-0 widget-scrollable">
+          <div className="space-y-2 p-1 max-h-full">
+            {isLoading ? (
+              <div className="space-y-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
+                    <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
+                    <div className="flex-1">
+                      <div className="h-3 bg-muted rounded mb-2"></div>
+                      <div className="h-2 bg-muted rounded w-2/3"></div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-4">
+                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Plus className="h-4 w-4 text-muted-foreground" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2 p-1">
-              {tasks.length === 0 ? (
-                <div className="text-center py-4">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-                    <Plus className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    No tasks yet
-                  </p>
-                </div>
-              ) : tasks.map((task) => (
+                <p className="text-sm text-muted-foreground">
+                  No tasks yet
+                </p>
+              </div>
+            ) : (
+              tasks.map((task) => (
                 <div 
                   key={task.id} 
                   ref={(el) => { taskRefs.current[task.id] = el; }}
@@ -179,9 +179,9 @@ export default function TasksWidget() {
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
         
         <div className="mt-auto pt-3 border-t border-border/50">

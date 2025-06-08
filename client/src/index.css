@@ -196,6 +196,30 @@
     animation: pulseSubtle 2s ease-in-out infinite;
   }
 
+  /* Custom scrollbar styling for widget lists */
+  .widget-scrollable::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .widget-scrollable::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .widget-scrollable::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.2);
+    border-radius: 2px;
+  }
+
+  .widget-scrollable::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Firefox scrollbar styling */
+  .widget-scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

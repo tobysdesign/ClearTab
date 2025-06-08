@@ -173,42 +173,44 @@ export default function NotesWidget() {
           {!sidebarCollapsed && (
             <div className="flex-1 flex flex-col">
               <div className="flex-1 overflow-y-auto p-2">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="p-2 mb-1 rounded bg-muted animate-pulse">
-                        <div className="h-3 bg-muted-foreground/20 rounded w-3/4 mb-1"></div>
-                        <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {notes.map((note) => (
-                      <div
-                        key={note.id}
-                        className={`p-2 mb-1 rounded cursor-pointer transition-colors ${
-                          selectedNoteId === note.id 
-                            ? 'bg-accent border border-border' 
-                            : 'hover:bg-muted/50'
-                        }`}
-                        onClick={() => handleNoteSelect(note)}
-                      >
-                        <h4 className="font-medium text-xs pt-0 pb-1.5 break-words">
-                          {note.title || "Untitled"}
-                        </h4>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {note.content || "Empty note - click to edit"}
-                        </p>
-                      </div>
-                    ))}
-                    {isNewNote && (
-                      <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
-                        <p className="text-xs font-medium text-muted-foreground">New Note</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="space-y-1 max-h-full">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="p-2 mb-1 rounded bg-muted animate-pulse">
+                          <div className="h-3 bg-muted-foreground/20 rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-muted-foreground/20 rounded w-1/2"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      {notes.map((note) => (
+                        <div
+                          key={note.id}
+                          className={`p-2 mb-1 rounded cursor-pointer transition-colors ${
+                            selectedNoteId === note.id 
+                              ? 'bg-accent border border-border' 
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => handleNoteSelect(note)}
+                        >
+                          <h4 className="font-medium text-xs pt-0 pb-1.5 break-words">
+                            {note.title || "Untitled"}
+                          </h4>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {note.content || "Empty note - click to edit"}
+                          </p>
+                        </div>
+                      ))}
+                      {isNewNote && (
+                        <div className="p-2 mb-1 rounded bg-muted/50 border border-dashed border-border">
+                          <p className="text-xs font-medium text-muted-foreground">New Note</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
               
               <div className="mt-auto pt-3 border-t border-border p-4">

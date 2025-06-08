@@ -80,43 +80,46 @@ export default function CalendarWidget() {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-3">
-        
-        {isLoading ? (
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="border-l-2 border-muted pl-3 animate-pulse">
-                <div className="h-4 bg-muted rounded mb-1"></div>
-                <div className="h-3 bg-muted rounded w-2/3"></div>
+      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-3 max-h-full">
+            {isLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="border-l-2 border-muted pl-3 animate-pulse">
+                    <div className="h-4 bg-muted rounded mb-1"></div>
+                    <div className="h-3 bg-muted rounded w-2/3"></div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="text-center py-4">
-            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
-          </div>
-        ) : (
-          filteredEvents.map((event, index) => (
-            <div 
-              key={event.id} 
-              onClick={() => handleEventClick(event)}
-              className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2 group flex items-center justify-between`}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-text-primary">
-                  {event.title}
+            ) : filteredEvents.length === 0 ? (
+              <div className="text-center py-4">
+                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="text-xs text-text-muted">
-                  {event.time}
-                </div>
+                <p className="text-sm text-muted-foreground">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
               </div>
-              <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
-            </div>
-          ))
-        )}
+            ) : (
+              filteredEvents.map((event, index) => (
+                <div 
+                  key={event.id} 
+                  onClick={() => handleEventClick(event)}
+                  className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2 group flex items-center justify-between`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-text-primary">
+                      {event.title}
+                    </div>
+                    <div className="text-xs text-text-muted">
+                      {event.time}
+                    </div>
+                  </div>
+                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
+                </div>
+              ))
+            )}
+          </div>
+        </div>
         
         <div className="mt-auto pt-3 border-t border-border/50">
           <button 

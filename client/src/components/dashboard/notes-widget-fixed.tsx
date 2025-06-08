@@ -70,72 +70,74 @@ export default function NotesWidget() {
         
         {!sidebarCollapsed && (
           <CardContent className="flex-1 flex flex-col space-y-3">
-            <div className="flex-1 space-y-2 overflow-y-auto max-h-[400px]">
-              {isLoading ? (
-                <div className="space-y-2 p-1">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                      <div className="flex-1">
-                        <div className="h-3 bg-muted rounded w-3/4 mb-1"></div>
-                        <div className="h-3 bg-muted rounded w-1/2"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {notes.map((note) => (
-                    <div
-                      key={note.id}
-                      className={`group relative p-3 rounded cursor-pointer transition-colors ${
-                        selectedNoteId === note.id 
-                          ? 'bg-accent border border-border' 
-                          : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
-                      }`}
-                      onClick={() => setSelectedNoteId(note.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-xs pb-1 break-words">
-                            {note.title || "Untitled"}
-                          </h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {note.content || "Empty note - click to edit"}
-                          </p>
+            <div className="flex-1 overflow-y-auto">
+              <div className="space-y-2 p-1 max-h-full">
+                {isLoading ? (
+                  <div className="space-y-2">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
+                        <div className="flex-1">
+                          <div className="h-3 bg-muted rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-muted rounded w-1/2"></div>
                         </div>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-40" align="end">
-                            <div className="space-y-1">
-                              <button
-                                onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
-                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
-                              >
-                                Edit Note
-                              </button>
-                              <button
-                                onClick={() => deleteNote(note.id)}
-                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {notes.map((note) => (
+                      <div
+                        key={note.id}
+                        className={`group relative p-3 rounded cursor-pointer transition-colors ${
+                          selectedNoteId === note.id 
+                            ? 'bg-accent border border-border' 
+                            : 'hover:bg-muted/50 border border-transparent hover:border-border/50'
+                        }`}
+                        onClick={() => setSelectedNoteId(note.id)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-xs pb-1 break-words">
+                              {note.title || "Untitled"}
+                            </h4>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {note.content || "Empty note - click to edit"}
+                            </p>
+                          </div>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-40" align="end">
+                              <div className="space-y-1">
+                                <button
+                                  onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
+                                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                                >
+                                  Edit Note
+                                </button>
+                                <button
+                                  onClick={() => deleteNote(note.id)}
+                                  className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded text-destructive"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="mt-auto pt-3 border-t border-border">
