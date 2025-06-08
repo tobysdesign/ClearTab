@@ -281,7 +281,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-[-4px] mb-[-4px]" />
             
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border pt-[6px] pb-[6px]">
+            <div className="flex items-center justify-between p-4 border-b border-border pt-[8px] pb-[8px]">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
                 <Bot className="h-4 w-4 text-primary" />
