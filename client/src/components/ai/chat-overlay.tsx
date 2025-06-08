@@ -277,7 +277,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
     },
   });
 
-  const agentName = preferences?.agentName || "Alex";
+  const agentName = preferences?.agentName || "t0by";
   const userName = preferences?.userName || "User";
 
   useEffect(() => {
@@ -340,12 +340,12 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
+    <div className={`fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 pb-20 transition-opacity duration-300 ${
       isClosing ? 'opacity-0' : 'opacity-100'
     }`}>
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[80vh] flex flex-col"
+        className="bg-background border border-border rounded-lg shadow-xl w-full max-w-md h-[70vh] flex flex-col"
         style={{
           transform: isClosing 
             ? 'translateY(100%) scale(0.95)' 
@@ -448,8 +448,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message... (try #note or #task for quick creation)"
-              className="w-full bg-secondary border border-border rounded-md pl-3 pr-12 py-3 text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
+              placeholder="Type your message..."
+              className="w-full bg-secondary border border-border rounded-md pl-3 pr-12 py-3 text-sm text-text-primary placeholder-text-muted resize-none min-h-[60px] max-h-[120px] overflow-y-auto leading-relaxed"
               disabled={chatMutation.isPending}
               rows={2}
               style={{ height: 'auto' }}
@@ -469,6 +469,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
           </div>
           <div className="mt-2 text-xs text-text-muted text-center">
             <span>Press Escape to close • Shift+Enter for new line</span>
+            <br />
+            <span className="italic">Try adding #note or #task in your message</span>
           </div>
         </div>
       </div>
