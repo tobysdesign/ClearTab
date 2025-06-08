@@ -5,6 +5,8 @@ import { storage } from "./storage";
 import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
 import { mem0Service } from "./mem0-service";
+import { googleCalendarService } from "./google-calendar";
+import type { GoogleCalendarEvent, CalendarSyncStatus } from "@shared/calendar-types";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -644,34 +646,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Calendar events endpoint 
+  // Google Calendar authentication routes
+  app.get("/api/auth/google", (req, res) => {
+    const authUrl = googleCalendarService.getAuthUrl();
+    res.redirect(authUrl);
+  });
+
+  app.get("/api/auth/google/callback", async (req, res) => {
+    try {
+      const { code } = req.query;
+      if (!code || typeof code !== 'string') {
+        return res.status(400).json({ error: "No authorization code provided" });
+      }
+
+      // Exchange code for tokens
+      const { accessToken, refreshToken } = await googleCalendarService.exchangeCodeForTokens(code);
+      
+      // Get user info from Google
+      const googleUser = await googleCalendarService.getUserInfo(accessToken);
+      
+      // Check if user exists by Google ID
+      let user = await storage.getUserByGoogleId(googleUser.id);
+      
+      if (!user) {
+        // Create new user
+        user = await storage.createGoogleUser({
+          googleId: googleUser.id,
+          email: googleUser.email,
+          name: googleUser.name,
+          picture: googleUser.picture,
+          accessToken,
+          refreshToken
+        });
+      } else {
+        // Update existing user tokens
+        user = await storage.updateUserTokens(user.id, accessToken, refreshToken);
+      }
+
+      // Mark Google Calendar as connected
+      await storage.updateUserTokens(user.id, accessToken, refreshToken);
+      
+      res.redirect("/?connected=true");
+    } catch (error) {
+      console.error("Google Calendar auth error:", error);
+      res.redirect("/?error=auth_failed");
+    }
+  });
+
+  // Calendar sync status endpoint
+  app.get("/api/calendar/status", async (req, res) => {
+    try {
+      const user = await storage.getUser(DEFAULT_USER_ID);
+      const status: CalendarSyncStatus = {
+        connected: user?.googleCalendarConnected || false,
+        lastSync: user?.lastCalendarSync || undefined,
+      };
+      res.json(status);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get calendar status" });
+    }
+  });
+
+  // Disconnect Google Calendar
+  app.post("/api/calendar/disconnect", async (req, res) => {
+    try {
+      const user = await storage.getUser(DEFAULT_USER_ID);
+      if (user) {
+        await storage.updateUserTokens(user.id, "", "");
+      }
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to disconnect calendar" });
+    }
+  });
+
+  // Calendar events endpoint with Google Calendar integration
   app.get("/api/calendar", async (req, res) => {
     try {
-      const today = new Date();
-      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      
-      const events = [
-        {
-          id: 1,
-          title: "Team Standup",
-          date: today.toISOString().split('T')[0],
-          time: "09:00"
-        },
-        {
-          id: 2,
-          title: "Product Review",
-          date: today.toISOString().split('T')[0],
-          time: "14:00"
-        },
-        {
-          id: 3,
-          title: "Client Call",
-          date: tomorrow.toISOString().split('T')[0],
-          time: "10:30"
+      const user = await storage.getUser(DEFAULT_USER_ID);
+      let events = [];
+
+      if (user?.googleCalendarConnected && user.accessToken) {
+        try {
+          // Fetch Google Calendar events
+          const googleEvents = await googleCalendarService.getCalendarEvents(
+            user.accessToken, 
+            user.refreshToken || undefined
+          );
+          
+          // Convert to calendar widget format
+          events = googleEvents.map(event => ({
+            id: event.id,
+            title: event.title,
+            date: event.startTime.toISOString().split('T')[0],
+            time: event.startTime.toTimeString().slice(0, 5),
+            type: "google-event",
+            source: "google",
+            description: event.description,
+            location: event.location,
+            endTime: event.endTime.toTimeString().slice(0, 5),
+            htmlLink: event.htmlLink
+          }));
+
+        } catch (error) {
+          console.error("Google Calendar sync error:", error);
+          // Return empty array if Google Calendar fails - no fallback data
+          events = [];
         }
-      ];
+      } else {
+        // Return empty array if not connected - no synthetic data
+        events = [];
+      }
+      
       res.json(events);
     } catch (error) {
+      console.error("Calendar API error:", error);
       res.status(500).json({ error: "Failed to fetch calendar events" });
     }
   });

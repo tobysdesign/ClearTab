@@ -1,14 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, MoreHorizontal } from "lucide-react";
+import { Calendar, MoreHorizontal, ExternalLink, Link2Off } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import type { CalendarSyncStatus } from "@shared/calendar-types";
 
 interface CalendarEvent {
-  id: number;
+  id: string | number;
   title: string;
   date: string;
   time: string;
+  source?: string;
+  htmlLink?: string;
+  endTime?: string;
+  location?: string;
 }
 
 export default function CalendarWidget() {
