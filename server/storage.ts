@@ -232,6 +232,8 @@ export class MemStorage implements IStorage {
       accessToken: null,
       refreshToken: null,
       tokenExpiry: null,
+      googleCalendarConnected: null,
+      lastCalendarSync: null,
       createdAt: new Date()
     };
     this.users.set(id, user);
@@ -256,6 +258,8 @@ export class MemStorage implements IStorage {
       accessToken: userData.accessToken || null,
       refreshToken: userData.refreshToken || null,
       tokenExpiry: userData.accessToken ? new Date(Date.now() + 3600 * 1000) : null,
+      googleCalendarConnected: userData.accessToken ? true : null,
+      lastCalendarSync: null,
       createdAt: new Date()
     };
     this.users.set(id, user);
