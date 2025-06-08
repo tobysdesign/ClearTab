@@ -171,7 +171,7 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
         </div>
 
         <div className="flex justify-end mt-6">
-          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm">
             <Check className="w-4 h-4 mr-2" />
             Done
           </Button>
