@@ -261,7 +261,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
       {/* Chat Content */}
       <div 
         ref={modalRef}
-        className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-0 left-0 right-0 h-[85vh] max-w-md mx-auto flex flex-col outline-none z-[10000] animate-in slide-in-from-bottom duration-500"
+        className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[75vh] max-w-md mx-auto flex flex-col outline-none z-[10000] animate-in slide-in-from-bottom duration-500"
         style={{
           transform: 'translateY(0)',
           transition: 'transform 400ms cubic-bezier(0.32, 0.72, 0, 1)'
