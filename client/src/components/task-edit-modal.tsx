@@ -70,7 +70,7 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] [&>button]:hidden">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
@@ -172,7 +172,7 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
 
         <div className="flex justify-end space-x-2 mt-6">
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            Done
           </Button>
           <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Save className="w-4 h-4 mr-2" />
