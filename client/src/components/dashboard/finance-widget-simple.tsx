@@ -90,7 +90,7 @@ export default function FinanceWidget() {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
-            <span>Finance</span>
+            <span className="text-[#383838]">Finance</span>
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('pay')}
