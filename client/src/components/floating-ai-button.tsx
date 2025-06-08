@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ChatOverlay from "@/components/ai/chat-overlay";
 import { useChatContext } from "@/hooks/use-chat-context";
+import { OrganicMotion } from "@/components/ui/organic-motion";
 
 export default function FloatingAIButton() {
   const { isChatOpen, setIsChatOpen, openChatWithPrompt, initialPrompt } = useChatContext();
@@ -45,9 +46,10 @@ export default function FloatingAIButton() {
 
   return (
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
+      <OrganicMotion direction="up" delay={0.5}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
             onClick={() => isChatOpen ? handleAnimatedClose() : setIsChatOpen(true)}
             className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-600 text-white shadow-lg z-[10001] p-0 group transition-all duration-300 hover:scale-110 active:scale-95 relative overflow-hidden"
             size="lg"
@@ -76,15 +78,16 @@ export default function FloatingAIButton() {
           </p>
           <p className="text-xs text-muted-foreground">⌘K to toggle</p>
         </TooltipContent>
-      </Tooltip>
+        </Tooltip>
+      </OrganicMotion>
       
-      <ChatOverlay 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)}
-        onCloseAnimated={handleAnimatedClose}
-        initialMessage={initialPrompt}
-        modalRef={modalRef}
-      />
+      <OrganicMotion direction="center" isVisible={isChatOpen}>
+        <ChatOverlay 
+          ref={modalRef}
+          onClose={handleAnimatedClose}
+          initialPrompt={initialPrompt}
+        />
+      </OrganicMotion>
     </>
   );
 }
