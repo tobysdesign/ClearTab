@@ -724,7 +724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/calendar", async (req, res) => {
     try {
       const user = await storage.getUser(DEFAULT_USER_ID);
-      let events = [];
+      let events: any[] = [];
 
       if (user?.googleCalendarConnected && user.accessToken) {
         try {

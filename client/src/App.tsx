@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import Dashboard from "@/pages/dashboard";
+import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 import StyleGuide from "@/pages/style-guide-fixed";
 import SilkTest from "@/pages/silk-test";
@@ -13,6 +14,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/settings" component={Settings} />
       <Route path="/style" component={StyleGuide} />
       <Route path="/silk" component={SilkTest} />
       <Route component={NotFound} />

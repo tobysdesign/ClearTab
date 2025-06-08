@@ -24,13 +24,24 @@ export default function CalendarWidget() {
     queryKey: ["/api/calendar"],
   });
 
+  const { data: calendarStatus } = useQuery<CalendarSyncStatus>({
+    queryKey: ["/api/calendar/status"],
+  });
+
   const getEventColor = (index: number) => {
     return index === 0 ? 'border-text-secondary' : 'border-text-muted';
   };
 
   const handleEventClick = (event: CalendarEvent) => {
-    // Open Google Calendar - using dummy URL for now
-    window.open('https://calendar.google.com', '_blank');
+    if (event.htmlLink) {
+      window.open(event.htmlLink, '_blank');
+    } else {
+      window.open('https://calendar.google.com', '_blank');
+    }
+  };
+
+  const handleConnectCalendar = () => {
+    window.location.href = '/api/auth/google';
   };
 
   const filterEventsByTab = (events: CalendarEvent[]) => {
@@ -90,6 +101,15 @@ export default function CalendarWidget() {
                 <div className="h-3 bg-muted rounded w-2/3"></div>
               </div>
             ))}
+          </div>
+        ) : !calendarStatus?.connected ? (
+          <div className="text-center py-4 space-y-3">
+            <Link2Off className="h-8 w-8 text-gray-400 mx-auto" />
+            <div className="text-xs text-text-muted">Connect Google Calendar to view your events</div>
+            <Button size="sm" onClick={handleConnectCalendar} className="text-xs">
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Connect Calendar
+            </Button>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="text-center text-text-muted py-4">
