@@ -71,15 +71,12 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] [&>button]:hidden">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0">
           <DialogTitle className="text-lg">Edit Task</DialogTitle>
-        </DialogHeader>
-        
-        <div className="flex items-center justify-end mb-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 className="h-8 w-8 p-0"
               >
@@ -97,7 +94,7 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </DialogHeader>
 
         <div className="space-y-4">
           <div>
