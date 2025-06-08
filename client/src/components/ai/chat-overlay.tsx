@@ -251,21 +251,24 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
   if (!isOpen) return null;
 
   return (
-    <Drawer.Root open={isOpen} onOpenChange={(open) => { 
-      console.log('Drawer onOpenChange:', open);
-      if (!open) {
-        console.log('Drawer closing, calling onClose');
-        onClose();
-      }
-    }} modal>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:duration-300 data-[state=open]:duration-200" />
-        <Drawer.Content 
-          ref={modalRef}
-          className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-0 left-0 right-0 h-[85vh] max-w-md mx-auto flex flex-col outline-none z-[10000] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom"
-        >
-          {/* Drag handle */}
-          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 bg-black/40 z-[9999] animate-in fade-in-0 duration-200"
+        onClick={onClose}
+      />
+      
+      {/* Chat Content */}
+      <div 
+        ref={modalRef}
+        className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-0 left-0 right-0 h-[85vh] max-w-md mx-auto flex flex-col outline-none z-[10000] animate-in slide-in-from-bottom duration-500"
+        style={{
+          transform: 'translateY(0)',
+          transition: 'transform 400ms cubic-bezier(0.32, 0.72, 0, 1)'
+        }}
+      >
+        {/* Drag handle */}
+        <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-4" />
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-border">
@@ -368,9 +371,8 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                 </div>
               </>
             )}
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+        </div>
+      </div>
+    </>
   );
 }

@@ -12,17 +12,14 @@ export default function FloatingAIButton() {
   const [hasUnfinishedSetup, setHasUnfinishedSetup] = useState(false);
 
   const handleButtonClick = () => {
-    console.log('FAB clicked, isChatOpen:', isChatOpen);
     if (isChatOpen) {
       handleAnimatedClose();
     } else {
-      console.log('Opening chat...');
       setIsChatOpen(true);
     }
   };
 
   const handleAnimatedClose = () => {
-    console.log('Closing chat...');
     setIsChatOpen(false);
   };
 
