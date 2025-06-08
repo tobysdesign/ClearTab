@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Bot, X, Send, ExternalLink } from "lucide-react";
+import { Bot, X, Send, ExternalLink, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -374,7 +374,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             onClick={handleClose}
             className="text-text-muted hover:text-text-primary"
           >
-            <X className="h-4 w-4" />
+            <Minus className="h-4 w-4" />
           </Button>
         </div>
 
@@ -462,13 +462,13 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             <Button 
               onClick={handleSendMessage}
               disabled={!message.trim() || chatMutation.isPending}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8 p-0 rounded-full"
+              className="absolute right-2 bottom-2 bg-primary text-primary-foreground hover:bg-primary/90 h-8 w-8 p-0 rounded-full"
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
           <div className="mt-2 text-xs text-text-muted text-center">
-            <span className="italic">Try adding #note or #task in your message</span>
+            <span className="italic">Try adding <strong>#note</strong> or <strong>#task</strong> in your message</span>
           </div>
         </div>
       </div>
