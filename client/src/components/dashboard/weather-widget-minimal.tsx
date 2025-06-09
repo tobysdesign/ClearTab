@@ -31,7 +31,7 @@ export default function WeatherWidget() {
     return (
       <div className="widget weather-widget h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
+          <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
           <p className="text-xs text-muted-foreground">Loading weather...</p>
@@ -44,7 +44,7 @@ export default function WeatherWidget() {
     return (
       <div className="widget weather-widget h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
+          <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="text-center">
@@ -79,7 +79,7 @@ export default function WeatherWidget() {
   return (
     <div className="widget weather-widget h-full flex flex-col relative">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
+        <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         <div className="flex items-center space-x-1">
           <button
             onClick={prevCard}
