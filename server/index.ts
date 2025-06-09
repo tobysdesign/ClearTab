@@ -56,8 +56,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use environment port or fallback to 5000
-  const port = parseInt(process.env.PORT || process.env.REPL_PORT || "5000", 10);
+  // Use environment port or fallback to 3000
+  const port = parseInt(process.env.PORT || process.env.REPL_PORT || "3000", 10);
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
