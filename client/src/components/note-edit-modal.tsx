@@ -27,13 +27,49 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     }
   }, [note, isOpen]);
 
+  // Throttled auto-save
+  const lastSaveRef = useRef<number>(0);
+  const saveIntervalRef = useRef<NodeJS.Timeout>();
+  const pendingDataRef = useRef<{ title: string; content: string } | null>(null);
+
+  const performSave = useCallback(() => {
+    if (!note || !pendingDataRef.current) return;
+    
+    onSave({
+      id: note.id,
+      title: pendingDataRef.current.title,
+      content: pendingDataRef.current.content,
+    });
+    pendingDataRef.current = null;
+    lastSaveRef.current = Date.now();
+  }, [note, onSave]);
+
+  const throttledSave = useCallback((newTitle: string, newContent: string) => {
+    pendingDataRef.current = { title: newTitle, content: newContent };
+    
+    const now = Date.now();
+    const timeSinceLastSave = now - lastSaveRef.current;
+    const throttleInterval = 1000; // Save max once per second
+    
+    if (timeSinceLastSave >= throttleInterval) {
+      performSave();
+    } else {
+      if (saveIntervalRef.current) {
+        clearTimeout(saveIntervalRef.current);
+      }
+      saveIntervalRef.current = setTimeout(performSave, throttleInterval - timeSinceLastSave);
+    }
+  }, [performSave]);
+
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
-  }, []);
+    throttledSave(newTitle, content);
+  }, [content, throttledSave]);
 
   const handleContentChange = useCallback((newContent: string) => {
     setContent(newContent);
-  }, []);
+    throttledSave(title, newContent);
+  }, [title, throttledSave]);
 
   const handleSave = () => {
     if (!note) return;
