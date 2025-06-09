@@ -183,15 +183,6 @@ export default function TasksWidget() {
             )}
           </div>
         </div>
-        
-        <div className="mt-auto pt-3 border-t border-border/50">
-          <button 
-            className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-            onClick={() => openChatWithPrompt("Create a new task for me")}
-          >
-            Add new task
-          </button>
-        </div>
       </CardContent>
       
       <TaskEditModal

@@ -212,15 +212,7 @@ export default function NotesWidget() {
                   )}
                 </div>
               </div>
-              
-              <div className="mt-auto pt-3 border-t border-border p-4">
-                <button 
-                  className="text-xs text-muted-foreground text-left w-full hover:text-foreground transition-colors"
-                  onClick={handleCreateNewNote}
-                >
-                  Add new note
-                </button>
-              </div>
+
             </div>
           )}
         </div>

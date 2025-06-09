@@ -165,15 +165,6 @@ export default function FinanceWidget() {
             </div>
           )}
         </div>
-        
-        <div className="mt-auto pt-3 border-t border-border/50">
-          <button 
-            className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-            onClick={() => openChatWithPrompt("Help me manage my finances and budget")}
-          >
-            Manage finances
-          </button>
-        </div>
       </CardContent>
     </Card>
   );

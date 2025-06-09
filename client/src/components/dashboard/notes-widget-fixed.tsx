@@ -197,15 +197,7 @@ export default function NotesWidget() {
                 )}
               </div>
             </div>
-            
-            <div className="mt-auto pt-3 border-t border-border/50">
-              <button 
-                className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-                onClick={() => openChatWithPrompt("Create a new note for me")}
-              >
-                Add new note
-              </button>
-            </div>
+
           </CardContent>
         )}
       </div>

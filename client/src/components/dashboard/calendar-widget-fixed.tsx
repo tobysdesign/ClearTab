@@ -120,15 +120,6 @@ export default function CalendarWidget() {
             )}
           </div>
         </div>
-        
-        <div className="mt-auto pt-3 border-t border-border/50">
-          <button 
-            className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-            onClick={() => openChatWithPrompt("Help me manage my calendar and schedule")}
-          >
-            Manage schedule
-          </button>
-        </div>
       </CardContent>
     </Card>
   );
