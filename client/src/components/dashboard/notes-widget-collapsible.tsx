@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useChatContext } from "@/hooks/use-chat-context";
+import YooptaEditorComponent from "@/components/ui/yoopta-editor";
 import type { Note } from "@shared/schema";
 
 export default function NotesWidgetCollapsible() {

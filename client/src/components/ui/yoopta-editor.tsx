@@ -1,5 +1,15 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
-import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
+import { createYooptaEditor, YooptaContentValue } from '@yoopta/editor';
+import { YooptaEditor } from '@yoopta/editor';
+import Paragraph from '@yoopta/paragraph';
+import Blockquote from '@yoopta/blockquote';
+import Code from '@yoopta/code';
+import { HeadingOne, HeadingThree, HeadingTwo } from '@yoopta/headings';
+import { BulletedList, NumberedList, TodoList } from '@yoopta/lists';
+import { Bold, Italic, CodeMark, Underline, Strike } from '@yoopta/marks';
+import Link from '@yoopta/link';
+import ActionMenuList, { DefaultActionMenuRender } from '@yoopta/action-menu-list';
+import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
 
 interface YooptaEditorComponentProps {
   value?: string;
@@ -14,40 +24,116 @@ export interface YooptaEditorRef {
   setValue: (value: string) => void;
 }
 
+const plugins = [
+  Paragraph,
+  HeadingOne,
+  HeadingTwo, 
+  HeadingThree,
+  Blockquote,
+  BulletedList,
+  NumberedList,
+  TodoList,
+  Code,
+  Link,
+];
+
+const TOOLS = {
+  ActionMenu: {
+    render: DefaultActionMenuRender,
+    tool: ActionMenuList,
+  },
+  Toolbar: {
+    render: DefaultToolbarRender,
+    tool: Toolbar,
+  },
+};
+
+const MARKS = [Bold, Italic, CodeMark, Underline, Strike];
+
 const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentProps>(({ 
   value = "", 
   onChange, 
-  placeholder = "Write your content...",
+  placeholder = "Type '/' for commands...",
   className = "",
   readOnly = false 
 }, ref) => {
   
-  const [localValue, setLocalValue] = useState(value);
+  const editor = useMemo(() => createYooptaEditor(), []);
+  const selectionRef = useRef(null);
+  
+  // Parse initial value
+  const [editorValue, setEditorValue] = useState<YooptaContentValue>(() => {
+    try {
+      return value ? JSON.parse(value) : {};
+    } catch {
+      return {};
+    }
+  });
 
-  // Update local value when prop changes
+  // Update editor value when prop changes
   useEffect(() => {
-    setLocalValue(value);
+    try {
+      const newValue = value ? JSON.parse(value) : {};
+      setEditorValue(newValue);
+    } catch {
+      setEditorValue({});
+    }
   }, [value]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
-    getValue: () => localValue,
-    setValue: (newValue: string) => setLocalValue(newValue)
+    getValue: () => JSON.stringify(editorValue),
+    setValue: (newValue: string) => {
+      try {
+        const parsed = JSON.parse(newValue);
+        setEditorValue(parsed);
+      } catch {
+        setEditorValue({});
+      }
+    }
   }));
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setLocalValue(e.target.value);
+  const handleEditorChange = (newValue: YooptaContentValue) => {
+    setEditorValue(newValue);
     // Do not call onChange automatically - only on manual trigger
+    if (onChange) {
+      onChange(JSON.stringify(newValue));
+    }
   };
 
+  if (readOnly) {
+    return (
+      <div className={`min-h-[200px] p-3 border rounded-md bg-muted ${className}`}>
+        <YooptaEditor
+          editor={editor}
+          plugins={plugins}
+          tools={TOOLS}
+          marks={MARKS}
+          value={editorValue}
+          onChange={handleEditorChange}
+          selectionBoxRoot={selectionRef}
+          readOnly={true}
+        />
+        <div ref={selectionRef} />
+      </div>
+    );
+  }
+
   return (
-    <Textarea
-      value={localValue}
-      onChange={handleChange}
-      placeholder={placeholder}
-      className={`min-h-[200px] resize-y ${className}`}
-      readOnly={readOnly}
-    />
+    <div className={`min-h-[200px] border rounded-md ${className}`}>
+      <YooptaEditor
+        editor={editor}
+        plugins={plugins}
+        tools={TOOLS}
+        marks={MARKS}
+        value={editorValue}
+        onChange={handleEditorChange}
+        selectionBoxRoot={selectionRef}
+        placeholder={placeholder}
+        readOnly={readOnly}
+      />
+      <div ref={selectionRef} />
+    </div>
   );
 });
 
