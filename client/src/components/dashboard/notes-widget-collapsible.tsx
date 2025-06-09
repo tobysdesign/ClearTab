@@ -26,6 +26,7 @@ export default function NotesWidgetCollapsible() {
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [localContent, setLocalContent] = useState({});
+  const [editorKey, setEditorKey] = useState(0);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Yoopta editor configuration
@@ -164,10 +165,12 @@ export default function NotesWidgetCollapsible() {
       const fullContent = selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || '';
       const yooptaValue = convertTextToYooptaValue(fullContent);
       setLocalContent(yooptaValue);
+      setEditorKey(prev => prev + 1); // Force editor re-mount
     } else {
       setLocalContent(convertTextToYooptaValue(""));
+      setEditorKey(prev => prev + 1);
     }
-  }, [selectedNote]);
+  }, [selectedNote, convertTextToYooptaValue]);
 
   const handlePanelCollapse = () => {
     setIsCollapsed(true);
@@ -359,7 +362,7 @@ export default function NotesWidgetCollapsible() {
               <div className="p-6 h-full flex flex-col">
                 <div className="flex-1">
                   <YooptaEditor
-                    key={selectedNote?.id || 'empty'}
+                    key={`${selectedNote?.id || 'empty'}-${editorKey}`}
                     editor={editor}
                     plugins={plugins}
                     tools={tools}
