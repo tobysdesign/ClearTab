@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
@@ -15,6 +15,8 @@ export default function NotesWidgetCollapsible() {
   const { openChatWithPrompt } = useChatContext();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [localContent, setLocalContent] = useState("");
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
@@ -63,6 +65,16 @@ export default function NotesWidgetCollapsible() {
   };
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
+
+  // Update local content when switching notes
+  useEffect(() => {
+    if (selectedNote) {
+      const fullContent = selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || '';
+      setLocalContent(fullContent);
+    } else {
+      setLocalContent("");
+    }
+  }, [selectedNote]);
 
   const handlePanelCollapse = () => {
     setIsCollapsed(true);
@@ -255,16 +267,27 @@ export default function NotesWidgetCollapsible() {
                 <textarea
                   className="flex-1 bg-transparent border-none outline-none resize-none text-sm leading-relaxed placeholder:text-muted-foreground"
                   placeholder="Start typing your note here..."
-                  value={selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || ''}
+                  value={localContent}
                   onChange={(e) => {
-                    const lines = e.target.value.split('\n');
-                    const title = lines[0];
-                    const content = lines.slice(2).join('\n'); // Skip the empty line after title
+                    const newValue = e.target.value;
+                    setLocalContent(newValue);
                     
-                    updateNoteMutation.mutate({
-                      id: selectedNote.id,
-                      updates: { title, content }
-                    });
+                    // Clear existing timeout
+                    if (saveTimeoutRef.current) {
+                      clearTimeout(saveTimeoutRef.current);
+                    }
+                    
+                    // Set new timeout for auto-save
+                    saveTimeoutRef.current = setTimeout(() => {
+                      const lines = newValue.split('\n');
+                      const title = lines[0];
+                      const content = lines.slice(2).join('\n'); // Skip the empty line after title
+                      
+                      updateNoteMutation.mutate({
+                        id: selectedNote.id,
+                        updates: { title, content }
+                      });
+                    }, 1000);
                   }}
                 />
               </div>
