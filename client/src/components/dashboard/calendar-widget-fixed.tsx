@@ -54,11 +54,7 @@ export default function CalendarWidget() {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('today')}
-                className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
-                  activeTab === 'today'
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                }`}
+                className="px-2 py-1 text-xs font-medium transition-colors rounded bg-accent text-[#d4d4d4]"
               >
                 Today
               </button>
@@ -79,7 +75,6 @@ export default function CalendarWidget() {
           </Button>
         </CardTitle>
       </CardHeader>
-      
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
         {isLoading ? (
           <div className="flex-1 overflow-y-auto widget-scrollable">
@@ -127,7 +122,6 @@ export default function CalendarWidget() {
           </div>
         )}
       </CardContent>
-      
       {/* Blur fade effect */}
       <div className="blur-fade"></div>
     </Card>
