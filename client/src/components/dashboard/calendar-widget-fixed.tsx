@@ -90,7 +90,7 @@ export default function CalendarWidget() {
             </div>
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
