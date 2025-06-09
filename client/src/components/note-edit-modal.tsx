@@ -39,23 +39,31 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     contentRef.current = content;
   }, [content]);
 
-  // Debounced save that always uses the latest value
-  const debouncedSave = useRef(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          if (!note) return;
-          onSave({
-            id: note.id,
-            title: titleRef.current,
-            content: contentRef.current,
-          });
-        }, 1000);
-      };
-    })()
-  ).current;
+  // Stable refs for dependencies
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const onSaveRef = useRef(onSave);
+  const noteRef = useRef(note);
+  
+  useEffect(() => {
+    onSaveRef.current = onSave;
+    noteRef.current = note;
+  }, [onSave, note]);
+
+  // Completely stable debounced save - no dependencies
+  const debouncedSave = useRef(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      const currentNote = noteRef.current;
+      if (!currentNote) return;
+      onSaveRef.current({
+        id: currentNote.id,
+        title: titleRef.current,
+        content: contentRef.current,
+      });
+    }, 1000);
+  }).current;
 
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);           // Fast UI update
