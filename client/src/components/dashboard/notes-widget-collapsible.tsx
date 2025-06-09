@@ -50,12 +50,65 @@ export default function NotesWidgetCollapsible() {
     Strike,
   ], []);
 
-  const tools = useMemo(() => [
-    ActionMenuList,
-    Toolbar,
-  ], []);
+  const tools = useMemo(() => ({
+    ActionMenu: {
+      render: DefaultActionMenuRender,
+      tool: ActionMenuList,
+    },
+    Toolbar: {
+      render: DefaultToolbarRender,
+      tool: Toolbar,
+    },
+  }), []);
 
   const editor = useMemo(() => createYooptaEditor(), []);
+
+  // Convert plain text to Yoopta format
+  const convertTextToYooptaValue = (text: string) => {
+    if (!text) {
+      return {
+        "paragraph-1": {
+          id: "paragraph-1",
+          type: "Paragraph",
+          value: [{ id: "text-1", type: "text", children: [{ text: "" }] }],
+          meta: { order: 0, depth: 0 }
+        }
+      };
+    }
+
+    // Try to parse as JSON first (for existing Yoopta content)
+    try {
+      const parsed = JSON.parse(text);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+    } catch (e) {
+      // Not JSON, treat as plain text
+    }
+
+    // Convert plain text to Yoopta structure
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const blocks: any = {};
+    
+    lines.forEach((line, index) => {
+      const blockId = `paragraph-${index + 1}`;
+      blocks[blockId] = {
+        id: blockId,
+        type: "Paragraph",
+        value: [{ id: `text-${index + 1}`, type: "text", children: [{ text: line }] }],
+        meta: { order: index, depth: 0 }
+      };
+    });
+
+    return Object.keys(blocks).length > 0 ? blocks : {
+      "paragraph-1": {
+        id: "paragraph-1",
+        type: "Paragraph",
+        value: [{ id: "text-1", type: "text", children: [{ text: "" }] }],
+        meta: { order: 0, depth: 0 }
+      }
+    };
+  };
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
@@ -109,9 +162,10 @@ export default function NotesWidgetCollapsible() {
   useEffect(() => {
     if (selectedNote) {
       const fullContent = selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || '';
-      setLocalContent(fullContent);
+      const yooptaValue = convertTextToYooptaValue(fullContent);
+      setLocalContent(yooptaValue);
     } else {
-      setLocalContent("");
+      setLocalContent(convertTextToYooptaValue(""));
     }
   }, [selectedNote]);
 
@@ -311,8 +365,7 @@ export default function NotesWidgetCollapsible() {
                     marks={marks}
                     value={localContent}
                     onChange={(newValue) => {
-                      const serializedValue = JSON.stringify(newValue);
-                      setLocalContent(serializedValue);
+                      setLocalContent(newValue);
                       
                       // Clear existing timeout
                       if (saveTimeoutRef.current) {
@@ -325,6 +378,7 @@ export default function NotesWidgetCollapsible() {
                         const blocks = Object.values(newValue);
                         const firstBlock = blocks[0] as any;
                         const title = firstBlock?.value?.[0]?.children?.[0]?.text || "Untitled";
+                        const serializedValue = JSON.stringify(newValue);
                         
                         updateNoteMutation.mutate({
                           id: selectedNote.id,
