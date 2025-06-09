@@ -273,7 +273,7 @@ export default function NotesWidgetCollapsible() {
                                 <h4 className="font-medium text-sm pb-1 break-words text-[#d4d4d4]">
                                   {note.title || "Untitled"}
                                 </h4>
-                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                <p className="text-xs line-clamp-2 text-[#a1a1a1]">
                                   {getReadablePreview(note.content || "")}
                                 </p>
                               </div>
