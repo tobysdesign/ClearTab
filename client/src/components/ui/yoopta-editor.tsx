@@ -1,6 +1,6 @@
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { createYooptaEditor, YooptaContentValue } from '@yoopta/editor';
-import { YooptaEditor } from '@yoopta/editor';
+const YooptaEditor = require('@yoopta/editor').default;
 import Paragraph from '@yoopta/paragraph';
 import Blockquote from '@yoopta/blockquote';
 import Code from '@yoopta/code';
@@ -120,7 +120,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   }
 
   return (
-    <div className={`min-h-[200px] border rounded-md ${className}`}>
+    <div className={`min-h-[200px] ${className}`}>
       <YooptaEditor
         editor={editor}
         plugins={plugins}
