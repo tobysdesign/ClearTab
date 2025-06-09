@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MoreHorizontal, Copy, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,15 +27,40 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     }
   }, [note, isOpen]);
 
-  // Debounced save function - only save when needed
-  const debouncedSave = useDebounce(() => {
+  // Simple debounced save with useRef to avoid recreating
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const latestDataRef = useRef({ title, content });
+  
+  // Keep latest data in ref
+  useEffect(() => {
+    latestDataRef.current = { title, content };
+  }, [title, content]);
+
+  const debouncedSave = useCallback(() => {
     if (!note) return;
-    onSave({
-      id: note.id,
-      title,
-      content,
-    });
-  }, 1000);
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      const { title: currentTitle, content: currentContent } = latestDataRef.current;
+      onSave({
+        id: note.id,
+        title: currentTitle,
+        content: currentContent,
+      });
+    }, 1000);
+  }, [note?.id, onSave]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle); // Immediate local update
