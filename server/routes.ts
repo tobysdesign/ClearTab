@@ -491,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const task = await storage.createTask({
             title: taskContent || "Untitled Task",
             description: "",
-            priority: "todo",
+            priority: "low",
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'task', data: task });
@@ -540,7 +540,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       {
         "message": "your casual, friendly response (include due date question for tasks)",
         "action": "create_task" | "create_note" | "update_task_due_date" | null,
-        "actionData": { title: "title", description: "description", content: "content", priority: "todo", dueDate: "ISO date string if provided" }
+        "actionData": { title: "title", description: "description", content: "content", priority: "low", dueDate: "ISO date string if provided" }
       }`;
 
       const completion = await openai.chat.completions.create({
@@ -569,7 +569,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const task = await storage.createTask({
             title: responseData.actionData.title || "New Task",
             description: responseData.actionData.description || "",
-            priority: responseData.actionData.priority || "todo",
+            priority: responseData.actionData.priority || "low",
             dueDate: responseData.actionData.dueDate ? new Date(responseData.actionData.dueDate) : null,
             userId: DEFAULT_USER_ID
           });
