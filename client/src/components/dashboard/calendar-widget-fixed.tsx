@@ -48,7 +48,7 @@ export default function CalendarWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full relative">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
+        <CardTitle className="text-base font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
             <span>Schedule</span>
             <div className="flex items-center space-x-1">
@@ -81,9 +81,9 @@ export default function CalendarWidget() {
       </CardHeader>
       
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
-        <div className="flex-1 overflow-y-auto widget-scrollable">
-          <div className="space-y-3 max-h-full">
-            {isLoading ? (
+        {isLoading ? (
+          <div className="flex-1 overflow-y-auto widget-scrollable">
+            <div className="space-y-3 max-h-full">
               <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="border-l-2 border-muted pl-3 animate-pulse">
@@ -92,15 +92,21 @@ export default function CalendarWidget() {
                   </div>
                 ))}
               </div>
-            ) : filteredEvents.length === 0 ? (
-              <div className="text-center py-4">
-                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
+            </div>
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="text-center">
+              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </div>
-            ) : (
-              filteredEvents.map((event, index) => (
+              <p className="text-sm text-muted-foreground">No events {activeTab === 'today' ? 'today' : 'tomorrow'}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto widget-scrollable">
+            <div className="space-y-3 max-h-full">
+              {filteredEvents.map((event, index) => (
                 <div 
                   key={event.id} 
                   onClick={() => handleEventClick(event)}
@@ -116,10 +122,10 @@ export default function CalendarWidget() {
                   </div>
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
                 </div>
-              ))
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
       
       {/* Blur fade effect */}
