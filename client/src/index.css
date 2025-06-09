@@ -13,7 +13,10 @@
 
 /* Yoopta Editor Custom Styles */
 /* Action Menu (slash commands) styling */
-.yoopta-action-menu-list {
+.yoopta-action-menu-list,
+[data-yoopta-action-menu-list],
+div[role="menu"],
+.yoo-action-menu-list {
   background: hsl(var(--card)) !important;
   border: 1px solid hsl(var(--border)) !important;
   border-radius: 8px !important;
@@ -42,7 +45,10 @@
 }
 
 /* Toolbar styling */
-.yoopta-toolbar {
+.yoopta-toolbar,
+[data-yoopta-toolbar],
+div[role="toolbar"],
+.yoo-toolbar {
   background: hsl(var(--card)) !important;
   border: 1px solid hsl(var(--border)) !important;
   border-radius: 6px !important;
@@ -72,13 +78,25 @@
   color: hsl(var(--accent-foreground)) !important;
 }
 
-/* Override any white backgrounds */
+/* Override any white backgrounds - comprehensive selectors */
 .yoopta-action-menu-list,
 .yoopta-toolbar,
 [data-element-type="action-menu-list"],
 [data-element-type="toolbar"],
 .yoo-action-menu-list,
-.yoo-toolbar {
+.yoo-toolbar,
+/* Target any white containers */
+div[style*="background-color: white"],
+div[style*="background-color: #fff"],
+div[style*="background-color: #ffffff"],
+div[style*="background: white"],
+div[style*="background: #fff"],
+div[style*="background: #ffffff"],
+/* Target Yoopta specific classes */
+.yt-action-menu,
+.yt-toolbar,
+[class*="ActionMenu"],
+[class*="Toolbar"] {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
@@ -101,6 +119,30 @@
 .yoopta-editor ::selection {
   background: hsl(var(--accent)) !important;
   color: hsl(var(--accent-foreground)) !important;
+}
+
+/* Global override for any remaining white backgrounds */
+* {
+  --tw-bg-opacity: 1;
+}
+
+/* Force dark theme on all potential Yoopta components */
+div[data-radix-popper-content-wrapper] > div,
+div[data-radix-portal] > div,
+[data-state="open"] > div {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Very aggressive white background override */
+div:has([data-element-type]) {
+  background: hsl(var(--card)) !important;
+}
+
+/* Target any floating/portal elements */
+body > div:not(#root) > div {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Custom Vaul animation overrides for smoother spring feel */

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
@@ -64,7 +64,7 @@ export default function NotesWidgetCollapsible() {
   const editor = useMemo(() => createYooptaEditor(), []);
 
   // Convert plain text to Yoopta format
-  const convertTextToYooptaValue = (text: string) => {
+  const convertTextToYooptaValue = useCallback((text: string) => {
     if (!text) {
       return {
         "paragraph-1": {
@@ -108,7 +108,7 @@ export default function NotesWidgetCollapsible() {
         meta: { order: 0, depth: 0 }
       }
     };
-  };
+  }, []);
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
