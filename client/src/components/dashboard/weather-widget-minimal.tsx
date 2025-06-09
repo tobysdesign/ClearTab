@@ -79,7 +79,7 @@ export default function WeatherWidget() {
   return (
     <div className="widget weather-widget h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">Weather</h3>
+        <h3 className="text-sm font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         <div className="flex items-center space-x-1">
           <button
             onClick={prevCard}
