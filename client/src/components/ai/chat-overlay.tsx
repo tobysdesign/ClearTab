@@ -74,10 +74,8 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
               <div className="grid gap-3">
                 <Button 
                   onClick={() => setShowNameInput(true)}
-                  className="w-full"
-                >
-                  Customize AI Assistant Name
-                </Button>
+                  className="w-full bg-[#e0c2ff]"
+                >Customise your agent</Button>
                 <Button 
                   variant="outline"
                   onClick={() => setSkipRemainingSteps(true)}
