@@ -48,19 +48,21 @@ export default function CalendarWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full relative">
       <CardHeader className="pb-3">
-        <CardTitle className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center justify-between h-4">
-          <div className="flex items-center space-x-3">
-            <span>Schedule</span>
+        <div className="flex items-center justify-between h-4">
+          <CardTitle className="text-[13px] font-aileron-black text-muted-foreground leading-none">
+            Schedule
+          </CardTitle>
+          <div className="flex items-center space-x-1">
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('today')}
-                className="px-2 py-1 text-xs font-medium transition-colors rounded bg-accent text-[#d4d4d4]"
+                className="px-2 py-1 text-xs font-normal transition-colors rounded bg-accent text-[#d4d4d4]"
               >
                 Today
               </button>
               <button
                 onClick={() => setActiveTab('tomorrow')}
-                className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                className={`px-2 py-1 text-xs font-normal transition-colors rounded ${
                   activeTab === 'tomorrow'
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
@@ -69,11 +71,11 @@ export default function CalendarWidget() {
                 Tomorrow
               </button>
             </div>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <MoreHorizontal className="h-3 w-3" />
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
         {isLoading ? (
