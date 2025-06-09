@@ -33,8 +33,8 @@ export default function WeatherWidget() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         </div>
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">Loading weather...</p>
+        <div className="flex-1 flex flex-col justify-center">
+          <p className="text-xs text-muted-foreground text-center">Loading weather...</p>
         </div>
       </div>
     );
@@ -46,7 +46,7 @@ export default function WeatherWidget() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Weather</h3>
         </div>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex flex-col justify-center">
           <div className="text-center">
             <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
               <span className="text-xs text-muted-foreground">☁</span>
