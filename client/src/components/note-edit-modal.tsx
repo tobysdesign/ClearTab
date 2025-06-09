@@ -27,13 +27,46 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     }
   }, [note, isOpen]);
 
+  // Auto-save with proper debouncing
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const noteRef = useRef(note);
+  const onSaveRef = useRef(onSave);
+  
+  useEffect(() => {
+    noteRef.current = note;
+    onSaveRef.current = onSave;
+  }, [note, onSave]);
+
+  const performSave = useRef((currentTitle: string, currentContent: string) => {
+    const currentNote = noteRef.current;
+    if (!currentNote) return;
+    
+    onSaveRef.current({
+      id: currentNote.id,
+      title: currentTitle,
+      content: currentContent,
+    });
+  }).current;
+
+  const debouncedSave = useRef((newTitle: string, newContent: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      performSave(newTitle, newContent);
+    }, 800);
+  }).current;
+
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
-  }, []);
+    debouncedSave(newTitle, content);
+  }, [content, debouncedSave]);
 
   const handleContentChange = useCallback((newContent: string) => {
     setContent(newContent);
-  }, []);
+    debouncedSave(title, newContent);
+  }, [title, debouncedSave]);
 
   const handleSave = () => {
     if (!note) return;

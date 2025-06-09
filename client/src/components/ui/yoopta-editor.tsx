@@ -25,24 +25,32 @@ export default function YooptaEditorComponent({
     setLocalValue(value);
   }, [value]);
   
-  // Debounced sync function
-  const debouncedSync = useCallback((newValue: string) => {
+  // Stable debounced sync function
+  const latestValueRef = useRef(localValue);
+  const onChangeRef = useRef(onChange);
+  
+  useEffect(() => {
+    latestValueRef.current = localValue;
+    onChangeRef.current = onChange;
+  }, [localValue, onChange]);
+
+  const debouncedSync = useRef(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     
     timeoutRef.current = setTimeout(() => {
-      if (onChange) {
-        onChange(newValue);
+      if (onChangeRef.current) {
+        onChangeRef.current(latestValueRef.current);
       }
     }, 500);
-  }, [onChange]);
+  }).current;
   
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     
     setLocalValue(newValue); // no debounce here - immediate UI update
-    debouncedSync(newValue); // debounce only the expensive onChange call
+    debouncedSync(); // debounce only the expensive onChange call
   }, [debouncedSync]);
 
   return (
