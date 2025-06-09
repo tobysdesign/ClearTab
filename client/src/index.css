@@ -136,8 +136,7 @@ div[data-radix-portal] > div,
 
 /* Additional aggressive overrides for YooptaEditor */
 [data-yoopta-editor-id] .yoopta-action-menu-list,
-[data-yoopta-editor-id] .yoopta-toolbar,
-div[style*="background"] {
+[data-yoopta-editor-id] .yoopta-toolbar {
   background: hsl(var(--card)) !important;
 }
 
