@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MoreHorizontal, Copy, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ interface NoteEditModalProps {
 export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete, onDuplicate }: NoteEditModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (note && isOpen) {
@@ -26,6 +27,33 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
       setContent(note.content || "");
     }
   }, [note, isOpen]);
+
+  // Debounced auto-save to prevent excessive API calls
+  const debouncedSave = useCallback((updatedTitle: string, updatedContent: string) => {
+    if (!note) return;
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      onSave({
+        id: note.id,
+        title: updatedTitle,
+        content: updatedContent,
+      });
+    }, 500); // 500ms debounce
+  }, [note, onSave]);
+
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setTitle(newTitle);
+    debouncedSave(newTitle, content);
+  }, [content, debouncedSave]);
+
+  const handleContentChange = useCallback((newContent: string) => {
+    setContent(newContent);
+    debouncedSave(title, newContent);
+  }, [title, debouncedSave]);
 
   const handleSave = () => {
     if (!note) return;
@@ -89,7 +117,7 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
             </label>
             <Input
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Note title..."
               className="w-full text-sm"
             />
@@ -101,7 +129,7 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
             </label>
             <YooptaEditorComponent
               value={content}
-              onChange={setContent}
+              onChange={handleContentChange}
               placeholder="Write your note content..."
               className="w-full"
             />
