@@ -191,7 +191,7 @@ export default function NotesWidgetCollapsible() {
   }
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full flex flex-col overflow-hidden">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col overflow-hidden relative">
       <PanelGroup direction="horizontal" className="h-full">
         {/* Sidebar Panel */}
         <Panel 
@@ -409,6 +409,9 @@ export default function NotesWidgetCollapsible() {
           </div>
         </Panel>
       </PanelGroup>
+      
+      {/* Blur fade effect */}
+      <div className="blur-fade"></div>
     </Card>
   );
 }

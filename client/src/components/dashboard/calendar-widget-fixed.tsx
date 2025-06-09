@@ -80,7 +80,7 @@ export default function CalendarWidget() {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
+      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
         <div className="flex-1 overflow-y-auto widget-scrollable">
           <div className="space-y-3 max-h-full">
             {isLoading ? (
@@ -121,6 +121,9 @@ export default function CalendarWidget() {
           </div>
         </div>
       </CardContent>
+      
+      {/* Blur fade effect */}
+      <div className="blur-fade"></div>
     </Card>
   );
 }
