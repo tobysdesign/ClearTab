@@ -330,20 +330,6 @@ export default function NotesWidgetCollapsible() {
                       </Tooltip>
                     );
                   })}
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        className="w-8 h-8 rounded border border-dashed border-border hover:border-accent-foreground/20 hover:bg-accent flex items-center justify-center transition-colors"
-                        onClick={createNewNote}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <p className="text-xs">Add new note</p>
-                    </TooltipContent>
-                  </Tooltip>
                 </div>
               </TooltipProvider>)
             )}
