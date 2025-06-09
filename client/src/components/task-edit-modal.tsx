@@ -9,6 +9,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import YooptaEditorComponent, { yooptaToPlainText, plainTextToYoopta } from "@/components/ui/yoopta-editor";
 import { Task } from "@shared/schema";
 
 interface TaskEditModalProps {
