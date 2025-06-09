@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 
 interface YooptaEditorComponentProps {
@@ -17,15 +17,36 @@ export default function YooptaEditorComponent({
   readOnly = false 
 }: YooptaEditorComponentProps) {
   
+  const [localValue, setLocalValue] = useState(value);
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  
+  // Update local value when prop changes
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+  
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onChange) {
-      onChange(e.target.value);
+    const newValue = e.target.value;
+    
+    // Update local state immediately for responsive UI
+    setLocalValue(newValue);
+    
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    
+    // Debounce the onChange callback
+    timeoutRef.current = setTimeout(() => {
+      if (onChange) {
+        onChange(newValue);
+      }
+    }, 500);
   }, [onChange]);
 
   return (
     <Textarea
-      value={value}
+      value={localValue}
       onChange={handleChange}
       placeholder={placeholder}
       className={`min-h-[200px] resize-y ${className}`}
