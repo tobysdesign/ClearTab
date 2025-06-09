@@ -46,7 +46,7 @@ export default function CalendarWidget() {
   const filteredEvents = filterEventsByTab(events);
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full relative">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between h-4">
           <CardTitle className="text-[13px] font-aileron-black text-muted-foreground leading-none">
@@ -77,7 +77,7 @@ export default function CalendarWidget() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col pb-0">
+      <CardContent className="space-y-3 flex-1 flex flex-col pb-0">
         {isLoading ? (
           <div className="flex-1 overflow-y-auto widget-scrollable">
             <div className="space-y-3 max-h-full">
