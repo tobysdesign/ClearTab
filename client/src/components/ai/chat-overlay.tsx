@@ -266,7 +266,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
           {/* Chat Content */}
           <motion.div 
             ref={modalRef}
-            className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[75vh] max-w-md mx-auto flex flex-col outline-none z-[10000]"
+            className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[420px] max-w-sm mx-auto flex flex-col outline-none z-[10000]"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -310,12 +310,12 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
             ) : (
               <>
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                <div className="flex-1 overflow-y-auto p-3 space-y-3">
                   {messages.length === 0 && (
-                    <div className="text-center py-8">
-                      <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <h3 className="font-medium text-foreground mb-2">How can I help you today?</h3>
-                      <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    <div className="text-center py-6">
+                      <Bot className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <h3 className="text-sm font-medium text-foreground mb-1">How can I help you today?</h3>
+                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                         I can take notes, track your tasks, jot down thoughts, plan your day, or help think something through.
                       </p>
                     </div>
@@ -354,7 +354,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-border p-4">
+                <div className="border-t border-border p-3">
                   <div className="flex space-x-2">
                     <textarea
                       ref={inputRef}
