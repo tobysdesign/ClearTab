@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
@@ -8,7 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useChatContext } from "@/hooks/use-chat-context";
-import YooptaEditorComponent from "@/components/ui/yoopta-editor";
+import YooptaEditor, { createYooptaEditor } from '@yoopta/editor';
+import Paragraph from '@yoopta/paragraph';
+import Blockquote from '@yoopta/blockquote';
+import Code from '@yoopta/code';
+import { HeadingOne, HeadingThree, HeadingTwo } from '@yoopta/headings';
+import { BulletedList, NumberedList, TodoList } from '@yoopta/lists';
+import { Bold, Italic, CodeMark, Underline, Strike } from '@yoopta/marks';
+import Link from '@yoopta/link';
+import ActionMenuList, { DefaultActionMenuRender } from '@yoopta/action-menu-list';
+import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
 import type { Note } from "@shared/schema";
 
 export default function NotesWidgetCollapsible() {
@@ -16,8 +25,37 @@ export default function NotesWidgetCollapsible() {
   const { openChatWithPrompt } = useChatContext();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [localContent, setLocalContent] = useState("");
+  const [localContent, setLocalContent] = useState({});
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Yoopta editor configuration
+  const plugins = useMemo(() => [
+    Paragraph,
+    HeadingOne,
+    HeadingTwo,
+    HeadingThree,
+    BulletedList,
+    NumberedList,
+    TodoList,
+    Blockquote,
+    Code,
+    Link,
+  ], []);
+
+  const marks = useMemo(() => [
+    Bold,
+    Italic,
+    CodeMark,
+    Underline,
+    Strike,
+  ], []);
+
+  const tools = useMemo(() => [
+    ActionMenuList,
+    Toolbar,
+  ], []);
+
+  const editor = useMemo(() => createYooptaEditor(), []);
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
@@ -265,32 +303,38 @@ export default function NotesWidgetCollapsible() {
           <div className="h-full flex flex-col bg-muted/30">
             {selectedNote ? (
               <div className="p-6 h-full flex flex-col">
-                <textarea
-                  className="flex-1 bg-transparent border-none outline-none resize-none text-sm leading-relaxed placeholder:text-muted-foreground"
-                  placeholder="Start typing your note here..."
-                  value={localContent}
-                  onChange={(e) => {
-                    const newValue = e.target.value;
-                    setLocalContent(newValue);
-                    
-                    // Clear existing timeout
-                    if (saveTimeoutRef.current) {
-                      clearTimeout(saveTimeoutRef.current);
-                    }
-                    
-                    // Set new timeout for auto-save
-                    saveTimeoutRef.current = setTimeout(() => {
-                      const lines = newValue.split('\n');
-                      const title = lines[0];
-                      const content = lines.slice(2).join('\n'); // Skip the empty line after title
+                <div className="flex-1">
+                  <YooptaEditor
+                    editor={editor}
+                    plugins={plugins}
+                    tools={tools}
+                    marks={marks}
+                    value={localContent}
+                    onChange={(newValue) => {
+                      const serializedValue = JSON.stringify(newValue);
+                      setLocalContent(serializedValue);
                       
-                      updateNoteMutation.mutate({
-                        id: selectedNote.id,
-                        updates: { title, content }
-                      });
-                    }, 1000);
-                  }}
-                />
+                      // Clear existing timeout
+                      if (saveTimeoutRef.current) {
+                        clearTimeout(saveTimeoutRef.current);
+                      }
+                      
+                      // Set new timeout for auto-save
+                      saveTimeoutRef.current = setTimeout(() => {
+                        // Extract title and content from Yoopta structure
+                        const blocks = Object.values(newValue);
+                        const firstBlock = blocks[0] as any;
+                        const title = firstBlock?.value?.[0]?.children?.[0]?.text || "Untitled";
+                        
+                        updateNoteMutation.mutate({
+                          id: selectedNote.id,
+                          updates: { title, content: serializedValue }
+                        });
+                      }, 1000);
+                    }}
+                    placeholder="Start typing your note here..."
+                  />
+                </div>
               </div>
             ) : (
               <div className="h-full flex items-center justify-center text-center">
