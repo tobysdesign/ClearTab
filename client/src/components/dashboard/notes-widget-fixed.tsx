@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
 import NoteEditModal from "@/components/note-edit-modal";
+import YooptaEditorComponent from "@/components/ui/yoopta-editor";
 import type { Note } from "@shared/schema";
 
 export default function NotesWidget() {
@@ -170,10 +171,16 @@ export default function NotesWidget() {
                           <PopoverContent className="w-40" align="end">
                             <div className="space-y-1">
                               <button
-                                onClick={() => openChatWithPrompt(`Edit this note: "${note.title}"`)}
+                                onClick={() => handleEditNote(note)}
                                 className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
                               >
                                 Edit Note
+                              </button>
+                              <button
+                                onClick={() => handleDuplicateNote(note)}
+                                className="w-full text-left text-xs px-2 py-1 hover:bg-accent rounded"
+                              >
+                                Duplicate
                               </button>
                               <button
                                 onClick={() => deleteNote(note.id)}
@@ -211,10 +218,13 @@ export default function NotesWidget() {
               <h3 className="text-lg font-semibold mb-2">{selectedNote.title || "Untitled"}</h3>
             </div>
             
-            <div className="flex-1 bg-muted/30 rounded-lg p-4 overflow-y-auto">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {selectedNote.content || "Start typing or paste your content here..."}
-              </p>
+            <div className="flex-1 bg-muted/30 rounded-lg overflow-y-auto">
+              <YooptaEditorComponent
+                value={selectedNote.content || ""}
+                readOnly={true}
+                placeholder="Start typing or paste your content here..."
+                className="h-full"
+              />
             </div>
           </div>
         ) : (
@@ -228,6 +238,18 @@ export default function NotesWidget() {
           </div>
         )}
       </div>
+
+      <NoteEditModal
+        note={editNote}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditNote(null);
+        }}
+        onSave={handleSaveNote}
+        onDelete={handleDeleteNote}
+        onDuplicate={handleDuplicateNote}
+      />
     </Card>
   );
 }
