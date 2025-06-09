@@ -20,16 +20,24 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const currentDataRef = useRef({ title: "", content: "", noteId: 0 });
 
   useEffect(() => {
     if (note && isOpen) {
       setTitle(note.title);
       setContent(note.content || "");
+      currentDataRef.current = { title: note.title, content: note.content || "", noteId: note.id };
     }
   }, [note, isOpen]);
 
-  // Debounced auto-save to prevent excessive API calls
-  const debouncedSave = useCallback((updatedTitle: string, updatedContent: string) => {
+  // Update current data ref whenever local state changes
+  useEffect(() => {
+    currentDataRef.current.title = title;
+    currentDataRef.current.content = content;
+  }, [title, content]);
+
+  // Debounced auto-save function
+  const debouncedSave = useCallback(() => {
     if (!note) return;
     
     if (saveTimeoutRef.current) {
@@ -37,23 +45,33 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     }
     
     saveTimeoutRef.current = setTimeout(() => {
+      const { title: currentTitle, content: currentContent } = currentDataRef.current;
       onSave({
         id: note.id,
-        title: updatedTitle,
-        content: updatedContent,
+        title: currentTitle,
+        content: currentContent,
       });
-    }, 500); // 500ms debounce
+    }, 1000); // 1 second debounce
   }, [note, onSave]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleTitleChange = useCallback((newTitle: string) => {
-    setTitle(newTitle);
-    debouncedSave(newTitle, content);
-  }, [content, debouncedSave]);
+    setTitle(newTitle); // Immediate local update
+    debouncedSave(); // Trigger debounced save
+  }, [debouncedSave]);
 
   const handleContentChange = useCallback((newContent: string) => {
-    setContent(newContent);
-    debouncedSave(title, newContent);
-  }, [title, debouncedSave]);
+    setContent(newContent); // Immediate local update
+    debouncedSave(); // Trigger debounced save
+  }, [debouncedSave]);
 
   const handleSave = () => {
     if (!note) return;
