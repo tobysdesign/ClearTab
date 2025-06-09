@@ -114,7 +114,7 @@ export default function TasksWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+        <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none flex items-center h-4">
           Tasks
         </CardTitle>
       </CardHeader>

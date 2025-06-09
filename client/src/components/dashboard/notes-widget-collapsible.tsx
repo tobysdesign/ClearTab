@@ -203,7 +203,7 @@ export default function NotesWidgetCollapsible() {
             {!isCollapsed ? (
               <>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center h-4">
+                  <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none flex items-center h-4">
                     Notes
                   </CardTitle>
                 </CardHeader>
