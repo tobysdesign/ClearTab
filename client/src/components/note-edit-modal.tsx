@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import YooptaEditorComponent from "@/components/ui/yoopta-editor";
+import YooptaEditorComponent, { YooptaEditorRef } from "@/components/ui/yoopta-editor";
 import { Note } from "@shared/schema";
 
 interface NoteEditModalProps {
@@ -19,6 +19,7 @@ interface NoteEditModalProps {
 export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete, onDuplicate }: NoteEditModalProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const editorRef = useRef<YooptaEditorRef>(null);
 
   useEffect(() => {
     if (note && isOpen) {
@@ -38,10 +39,12 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
   const handleSave = () => {
     if (!note) return;
     
+    const currentContent = editorRef.current?.getValue() || content;
+    
     onSave({
       id: note.id,
       title,
-      content,
+      content: currentContent,
     });
     
     onClose();
@@ -49,11 +52,12 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
 
   const handleClose = () => {
     // Save changes before closing
-    if (note && (title !== note.title || content !== note.content)) {
+    const currentContent = editorRef.current?.getValue() || content;
+    if (note && (title !== note.title || currentContent !== note.content)) {
       onSave({
         id: note.id,
         title,
-        content,
+        content: currentContent,
       });
     }
     onClose();
@@ -120,6 +124,7 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
               Content
             </label>
             <YooptaEditorComponent
+              ref={editorRef}
               value={content}
               placeholder="Write your note content..."
               className="w-full"

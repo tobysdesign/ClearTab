@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 
 interface YooptaEditorComponentProps {
@@ -9,30 +9,51 @@ interface YooptaEditorComponentProps {
   readOnly?: boolean;
 }
 
-export default function YooptaEditorComponent({ 
+export interface YooptaEditorRef {
+  getValue: () => string;
+  setValue: (value: string) => void;
+}
+
+const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentProps>(({ 
   value = "", 
   onChange, 
   placeholder = "Write your content...",
   className = "",
   readOnly = false 
-}: YooptaEditorComponentProps) {
+}, ref) => {
   
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (onChange) {
-      onChange(e.target.value);
-    }
-  }, [onChange]);
+  const [localValue, setLocalValue] = useState(value);
+
+  // Update local value when prop changes
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    getValue: () => localValue,
+    setValue: (newValue: string) => setLocalValue(newValue)
+  }));
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setLocalValue(e.target.value);
+    // Do not call onChange automatically - only on manual trigger
+  };
 
   return (
     <Textarea
-      value={value}
+      value={localValue}
       onChange={handleChange}
       placeholder={placeholder}
       className={`min-h-[200px] resize-y ${className}`}
       readOnly={readOnly}
     />
   );
-}
+});
+
+YooptaEditorComponent.displayName = "YooptaEditorComponent";
+
+export default YooptaEditorComponent;
 
 // Utility function to convert rich text to plain text
 export function yooptaToPlainText(value: string): string {
