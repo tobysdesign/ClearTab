@@ -89,16 +89,18 @@ export default function NotesWidgetCollapsible() {
       // Not valid JSON, treat as plain text
     }
 
-    // Convert plain text to Yoopta structure
+    // Convert plain text to Yoopta structure with unique IDs
     const lines = content.split('\n');
     const blocks: any = {};
     
     lines.forEach((line, index) => {
-      const blockId = `paragraph-${index + 1}`;
+      // Use timestamp + index for unique IDs to avoid conflicts
+      const timestamp = Date.now();
+      const blockId = `paragraph-${timestamp}-${index}`;
       blocks[blockId] = {
         id: blockId,
         type: "Paragraph",
-        value: [{ id: `text-${index + 1}`, type: "text", children: [{ text: line }] }],
+        value: [{ id: `text-${timestamp}-${index}`, type: "text", children: [{ text: line }] }],
         meta: { order: index, depth: 0 }
       };
     });
@@ -150,7 +152,7 @@ export default function NotesWidgetCollapsible() {
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
   
-  const editor = useMemo(() => createYooptaEditor(), [selectedNoteId]);
+  const editor = useMemo(() => createYooptaEditor(), []);
 
   const deleteNoteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -403,7 +405,9 @@ export default function NotesWidgetCollapsible() {
                     tools={tools}
                     marks={marks}
                     value={localContent}
+                    autoFocus={false}
                     onChange={(newValue) => {
+                      console.log('YooptaEditor onChange:', newValue);
                       setLocalContent(newValue);
                       
                       // Clear existing timeout

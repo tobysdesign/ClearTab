@@ -121,15 +121,9 @@ div[style*="background: #ffffff"],
   color: hsl(var(--accent-foreground)) !important;
 }
 
-/* Global override for any remaining white backgrounds */
-* {
-  --tw-bg-opacity: 1;
-}
-
-/* Force dark theme on all potential Yoopta components */
-div[data-radix-popper-content-wrapper] > div,
-div[data-radix-portal] > div,
-[data-state="open"] > div {
+/* Force dark theme on Yoopta popover components only */
+div[data-radix-popper-content-wrapper] > div[role="menu"],
+div[data-radix-portal] > div[role="menu"] {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
