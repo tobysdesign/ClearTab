@@ -121,7 +121,6 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
             </label>
             <YooptaEditorComponent
               value={content}
-              onChange={handleContentChange}
               placeholder="Write your note content..."
               className="w-full"
             />
