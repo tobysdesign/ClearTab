@@ -63,7 +63,7 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Bot className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Welcome to your AI Dashboard</h3>
+            <h3 className="font-semibold mb-2 text-[17px] text-[#ebebeb]">Welcome to your personal productivity dashboard.</h3>
             <p className="text-muted-foreground text-sm">
               Let's get your personal assistant set up in just a few seconds.
             </p>
@@ -122,7 +122,6 @@ const SetupFlow = ({ onSetupComplete }: SetupFlowProps) => {
           )}
         </div>
       )}
-
       {skipRemainingSteps && (
         <div className="space-y-4 text-center">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
