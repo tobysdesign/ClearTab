@@ -171,7 +171,7 @@ export default function TasksWidget() {
                       {task.title}
                     </p>
                     {task.description && (
-                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                      <p className="text-xs mb-2 line-clamp-2 text-[#a1a1a1]">
                         {task.description}
                       </p>
                     )}
@@ -192,10 +192,8 @@ export default function TasksWidget() {
           </div>
         </div>
       </CardContent>
-      
       {/* Blur fade effect */}
       <div className="blur-fade"></div>
-      
       <TaskEditModal
         task={editingTask}
         isOpen={isModalOpen}
