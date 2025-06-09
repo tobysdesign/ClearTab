@@ -78,35 +78,34 @@ div[role="toolbar"],
   color: hsl(var(--accent-foreground)) !important;
 }
 
-/* Override any white backgrounds - comprehensive selectors */
+/* Target specific Yoopta UI components only */
 .yoopta-action-menu-list,
-.yoopta-toolbar,
-[data-element-type="action-menu-list"],
-[data-element-type="toolbar"],
-.yoo-action-menu-list,
-.yoo-toolbar,
-/* Target any white containers */
-div[style*="background-color: white"],
-div[style*="background-color: #fff"],
-div[style*="background-color: #ffffff"],
-div[style*="background: white"],
-div[style*="background: #fff"],
-div[style*="background: #ffffff"],
-/* Target Yoopta specific classes */
-.yt-action-menu,
-.yt-toolbar,
-[class*="ActionMenu"],
-[class*="Toolbar"] {
+.yoopta-toolbar {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
 
-/* Additional overrides for any Yoopta components */
-[class*="yoopta"],
-[class*="yoo-"] {
-  --yoopta-bg-color: hsl(var(--card));
-  --yoopta-text-color: hsl(var(--foreground));
-  --yoopta-border-color: hsl(var(--border));
+/* Ensure proper scrolling for widget containers */
+.widget-scrollable {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.widget-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.widget-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widget-scrollable::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.widget-scrollable::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }
 
 /* Ensure selection area styling */
