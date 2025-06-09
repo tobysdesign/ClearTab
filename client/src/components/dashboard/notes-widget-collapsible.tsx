@@ -62,9 +62,9 @@ export default function NotesWidgetCollapsible() {
     },
   }), []);
 
-  // Convert plain text to Yoopta format
-  const convertTextToYooptaValue = useCallback((text: string) => {
-    if (!text) {
+  // Convert stored content to Yoopta format
+  const convertTextToYooptaValue = useCallback((content: string) => {
+    if (!content || content.trim() === '') {
       return {
         "paragraph-1": {
           id: "paragraph-1",
@@ -75,18 +75,22 @@ export default function NotesWidgetCollapsible() {
       };
     }
 
-    // Try to parse as JSON first (for existing Yoopta content)
+    // Try to parse as JSON first (for Yoopta-saved content)
     try {
-      const parsed = JSON.parse(text);
-      if (typeof parsed === 'object' && parsed !== null) {
-        return parsed;
+      const parsed = JSON.parse(content);
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+        // Validate it looks like Yoopta structure
+        const firstKey = Object.keys(parsed)[0];
+        if (firstKey && parsed[firstKey].type && parsed[firstKey].value) {
+          return parsed;
+        }
       }
     } catch (e) {
-      // Not JSON, treat as plain text
+      // Not valid JSON, treat as plain text
     }
 
     // Convert plain text to Yoopta structure
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const lines = content.split('\n');
     const blocks: any = {};
     
     lines.forEach((line, index) => {
@@ -107,6 +111,37 @@ export default function NotesWidgetCollapsible() {
         meta: { order: 0, depth: 0 }
       }
     };
+  }, []);
+
+  // Extract readable text from note content for preview
+  const getReadablePreview = useCallback((content: string) => {
+    if (!content) return "Empty note - click to edit";
+    
+    try {
+      const parsed = JSON.parse(content);
+      if (typeof parsed === 'object' && parsed !== null) {
+        const blocks = Object.values(parsed);
+        const textContent = blocks
+          .map((block: any) => {
+            if (block.value && Array.isArray(block.value)) {
+              return block.value
+                .map((item: any) => 
+                  item.children?.map((child: any) => child.text || '').join('') || ''
+                )
+                .join('');
+            }
+            return '';
+          })
+          .filter(text => text.trim() !== '')
+          .join(' ');
+        
+        return textContent.trim() || "Empty note - click to edit";
+      }
+    } catch (e) {
+      // Fallback to showing the content as-is if it's not JSON
+    }
+    
+    return content.length > 100 ? content.substring(0, 100) + "..." : content;
   }, []);
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
@@ -162,8 +197,8 @@ export default function NotesWidgetCollapsible() {
   // Update local content when switching notes
   useEffect(() => {
     if (selectedNote) {
-      const fullContent = selectedNote.title ? `${selectedNote.title}\n\n${selectedNote.content || ''}` : selectedNote.content || '';
-      const yooptaValue = convertTextToYooptaValue(fullContent);
+      // Use just the content, which should contain the full Yoopta structure
+      const yooptaValue = convertTextToYooptaValue(selectedNote.content || '');
       setLocalContent(yooptaValue);
       setEditorKey(prev => prev + 1); // Force editor re-mount
     } else {
@@ -251,7 +286,7 @@ export default function NotesWidgetCollapsible() {
                                   {note.title || "Untitled"}
                                 </h4>
                                 <p className="text-xs text-muted-foreground line-clamp-2">
-                                  {note.content || "Empty note - click to edit"}
+                                  {getReadablePreview(note.content || "")}
                                 </p>
                               </div>
                               
@@ -378,10 +413,27 @@ export default function NotesWidgetCollapsible() {
                       
                       // Set new timeout for auto-save
                       saveTimeoutRef.current = setTimeout(() => {
-                        // Extract title and content from Yoopta structure
+                        // Extract text content from Yoopta structure for title and readable content
                         const blocks = Object.values(newValue);
-                        const firstBlock = blocks[0] as any;
-                        const title = firstBlock?.value?.[0]?.children?.[0]?.text || "Untitled";
+                        const textContent = blocks
+                          .map((block: any) => {
+                            if (block.value && Array.isArray(block.value)) {
+                              return block.value
+                                .map((item: any) => 
+                                  item.children?.map((child: any) => child.text || '').join('') || ''
+                                )
+                                .join('');
+                            }
+                            return '';
+                          })
+                          .filter(text => text.trim() !== '')
+                          .join('\n');
+
+                        // Use first line as title, rest as content
+                        const lines = textContent.split('\n');
+                        const title = lines[0]?.trim() || "Untitled";
+                        
+                        // Store the Yoopta structure as content
                         const serializedValue = JSON.stringify(newValue);
                         
                         updateNoteMutation.mutate({
