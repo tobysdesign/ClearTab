@@ -1,7 +1,14 @@
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered, Quote, Code, Link2 } from "lucide-react";
-import { useEffect, useState, useRef } from 'react';
+import { createYooptaEditor } from '@yoopta/editor';
+import Paragraph from '@yoopta/paragraph';
+import Blockquote from '@yoopta/blockquote';
+import Code from '@yoopta/code';
+import { HeadingOne, HeadingThree, HeadingTwo } from '@yoopta/headings';
+import { BulletedList, NumberedList, TodoList } from '@yoopta/lists';
+import Link from '@yoopta/link';
+import { Bold, Italic, CodeMark, Underline, Strike, Highlight } from '@yoopta/marks';
+import ActionMenuList, { DefaultActionMenuRender } from '@yoopta/action-menu-list';
+import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
+import { useEffect, useMemo, useState, useRef } from 'react';
 
 interface YooptaEditorComponentProps {
   value?: string;
@@ -11,188 +18,138 @@ interface YooptaEditorComponentProps {
   readOnly?: boolean;
 }
 
+const plugins = [
+  Paragraph,
+  HeadingOne,
+  HeadingTwo, 
+  HeadingThree,
+  BulletedList,
+  NumberedList,
+  TodoList,
+  Blockquote,
+  Code,
+  Link,
+];
+
+const TOOLS = {
+  ActionMenu: {
+    render: DefaultActionMenuRender,
+    tool: ActionMenuList,
+  },
+  Toolbar: {
+    render: DefaultToolbarRender,
+    tool: Toolbar,
+  },
+};
+
+const MARKS = [Bold, Italic, CodeMark, Underline, Strike, Highlight];
+
 export default function YooptaEditorComponent({ 
   value = "", 
   onChange, 
-  placeholder = "Start typing...",
+  placeholder = "Type '/' for commands",
   className = "",
   readOnly = false 
 }: YooptaEditorComponentProps) {
-  const [content, setContent] = useState(value);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editor = useMemo(() => createYooptaEditor(), []);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [isClient, setIsClient] = useState(false);
+  
+  const [editorValue, setEditorValue] = useState(() => {
+    if (!value) {
+      return {
+        [crypto.randomUUID()]: {
+          id: crypto.randomUUID(),
+          type: 'Paragraph',
+          value: [
+            {
+              id: crypto.randomUUID(),
+              type: 'paragraph',
+              children: [{ text: '' }],
+              props: { nodeType: 'block' },
+            },
+          ],
+          meta: { order: 0, depth: 0 },
+        },
+      };
+    }
+    
+    try {
+      return JSON.parse(value);
+    } catch {
+      return {
+        [crypto.randomUUID()]: {
+          id: crypto.randomUUID(),
+          type: 'Paragraph',
+          value: [
+            {
+              id: crypto.randomUUID(),
+              type: 'paragraph',
+              children: [{ text: value }],
+              props: { nodeType: 'block' },
+            },
+          ],
+          meta: { order: 0, depth: 0 },
+        },
+      };
+    }
+  });
 
   useEffect(() => {
-    setContent(value);
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (value !== undefined) {
+      try {
+        const parsedValue = JSON.parse(value);
+        setEditorValue(parsedValue);
+      } catch {
+        setEditorValue({
+          [crypto.randomUUID()]: {
+            id: crypto.randomUUID(),
+            type: 'Paragraph',
+            value: [
+              {
+                id: crypto.randomUUID(),
+                type: 'paragraph',
+                children: [{ text: value }],
+                props: { nodeType: 'block' },
+              },
+            ],
+            meta: { order: 0, depth: 0 },
+          },
+        });
+      }
+    }
   }, [value]);
 
-  const handleChange = (newValue: string) => {
-    setContent(newValue);
+  const handleChange = (newValue: any) => {
+    setEditorValue(newValue);
     if (onChange) {
-      onChange(newValue);
+      onChange(JSON.stringify(newValue));
     }
   };
 
-  const insertText = (before: string, after: string = "") => {
-    if (!textareaRef.current) return;
-    
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end);
-    
-    const newText = content.substring(0, start) + before + selectedText + after + content.substring(end);
-    
-    handleChange(newText);
-    
-    // Set cursor position after the inserted text
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length);
-    }, 0);
-  };
-
-  const insertListItem = (type: 'ul' | 'ol') => {
-    const prefix = type === 'ul' ? '• ' : '1. ';
-    const lines = content.split('\n');
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    
-    const start = textarea.selectionStart;
-    const lineStart = content.lastIndexOf('\n', start - 1) + 1;
-    const currentLine = lines.find((_, index) => {
-      const lineEnd = content.indexOf('\n', lineStart);
-      return start >= lineStart && start <= (lineEnd === -1 ? content.length : lineEnd);
-    }) || '';
-    
-    if (!currentLine.startsWith(prefix)) {
-      insertText('\n' + prefix);
-    }
-  };
+  if (!isClient) {
+    return (
+      <div className={`p-3 border rounded-md bg-background text-sm ${className}`}>
+        <div className="text-muted-foreground">{placeholder}</div>
+      </div>
+    );
+  }
 
   if (readOnly) {
     return (
-      <div className={`p-3 border rounded-md bg-muted/30 text-sm whitespace-pre-wrap ${className}`}>
-        {content || placeholder}
+      <div className={`yoopta-read-only ${className}`}>
+        <div ref={editorRef} className="yoopta-editor-readonly" />
       </div>
     );
   }
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      {/* Formatting Toolbar */}
-      <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/30">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertText('**', '**')}
-          className="h-8 w-8 p-0"
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertText('*', '*')}
-          className="h-8 w-8 p-0"
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertText('`', '`')}
-          className="h-8 w-8 p-0"
-        >
-          <Code className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertListItem('ul')}
-          className="h-8 w-8 p-0"
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertListItem('ol')}
-          className="h-8 w-8 p-0"
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertText('\n> ')}
-          className="h-8 w-8 p-0"
-        >
-          <Quote className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => insertText('[', '](url)')}
-          className="h-8 w-8 p-0"
-        >
-          <Link2 className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {/* Text Editor */}
-      <Textarea
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder}
-        className="min-h-[200px] resize-none font-mono text-sm"
-        rows={8}
-      />
-
-      {/* Preview */}
-      {content && (
-        <div className="p-3 border rounded-md bg-muted/30">
-          <div className="text-xs font-medium text-muted-foreground mb-2">Preview:</div>
-          <div className="text-sm space-y-2">
-            {content.split('\n').map((line, index) => {
-              if (line.startsWith('# ')) {
-                return <h1 key={index} className="text-lg font-bold">{line.substring(2)}</h1>;
-              }
-              if (line.startsWith('## ')) {
-                return <h2 key={index} className="text-base font-semibold">{line.substring(3)}</h2>;
-              }
-              if (line.startsWith('### ')) {
-                return <h3 key={index} className="text-sm font-medium">{line.substring(4)}</h3>;
-              }
-              if (line.startsWith('> ')) {
-                return <blockquote key={index} className="border-l-4 border-border pl-3 italic text-muted-foreground">{line.substring(2)}</blockquote>;
-              }
-              if (line.startsWith('• ') || line.match(/^\d+\. /)) {
-                return <li key={index} className="ml-4">{line.replace(/^[•\d+\.]\s/, '')}</li>;
-              }
-              if (line.trim() === '') {
-                return <br key={index} />;
-              }
-              
-              // Process inline formatting
-              let processedLine = line
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code class="bg-muted px-1 rounded text-xs font-mono">$1</code>')
-                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-primary underline">$1</a>');
-              
-              return <p key={index} dangerouslySetInnerHTML={{ __html: processedLine }} />;
-            })}
-          </div>
-        </div>
-      )}
+    <div className={`yoopta-editor-container ${className}`}>
+      <div ref={editorRef} className="yoopta-editor-wrapper" />
     </div>
   );
 }

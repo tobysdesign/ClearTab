@@ -9,7 +9,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import YooptaEditorComponent, { yooptaToPlainText, plainTextToYoopta } from "@/components/ui/yoopta-editor";
+
 import { Task } from "@shared/schema";
 
 interface TaskEditModalProps {
@@ -114,11 +114,12 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
             <label className="text-xs font-medium text-foreground mb-1.5 block">
               Description
             </label>
-            <YooptaEditorComponent
+            <Textarea
               value={description}
-              onChange={setDescription}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Task description..."
-              className="w-full"
+              className="w-full resize-none text-sm"
+              rows={3}
             />
           </div>
 
