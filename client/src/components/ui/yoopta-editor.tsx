@@ -25,24 +25,25 @@ export default function YooptaEditorComponent({
     setLocalValue(value);
   }, [value]);
   
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    
-    // Update local state immediately for responsive UI
-    setLocalValue(newValue);
-    
-    // Clear existing timeout
+  // Debounced sync function
+  const debouncedSync = useCallback((newValue: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     
-    // Debounce the onChange callback
     timeoutRef.current = setTimeout(() => {
       if (onChange) {
         onChange(newValue);
       }
     }, 500);
   }, [onChange]);
+  
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    
+    setLocalValue(newValue); // no debounce here - immediate UI update
+    debouncedSync(newValue); // debounce only the expensive onChange call
+  }, [debouncedSync]);
 
   return (
     <Textarea
