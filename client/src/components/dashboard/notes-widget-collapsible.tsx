@@ -206,9 +206,17 @@ export default function NotesWidgetCollapsible() {
             {!isCollapsed ? (
               <>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none flex items-center h-4">
-                    Notes
-                  </CardTitle>
+                  <div className="flex items-center justify-between h-4">
+                    <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none">
+                      Notes
+                    </CardTitle>
+                    <button
+                      onClick={createNewNote}
+                      className="w-4 h-4 bg-muted hover:bg-muted/80 rounded-sm flex items-center justify-center transition-colors"
+                    >
+                      <Plus className="w-2.5 h-2.5 text-muted-foreground" />
+                    </button>
+                  </div>
                 </CardHeader>
                 
                 <CardContent className="p-6 pt-0 flex-1 flex flex-col space-y-3 pb-3 pl-[12px] pr-[12px] overflow-hidden">
@@ -289,15 +297,6 @@ export default function NotesWidgetCollapsible() {
                         ))}
                       </div>
                     )}
-                  </div>
-                  
-                  <div className="mt-auto pt-3 border-t border-border/50">
-                    <button 
-                      className="text-xs text-text-muted text-left w-full hover:text-text-secondary transition-colors"
-                      onClick={createNewNote}
-                    >
-                      Add new note
-                    </button>
                   </div>
                 </CardContent>
               </>
