@@ -61,8 +61,6 @@ export default function NotesWidgetCollapsible() {
     },
   }), []);
 
-  const editor = useMemo(() => createYooptaEditor(), []);
-
   // Convert plain text to Yoopta format
   const convertTextToYooptaValue = useCallback((text: string) => {
     if (!text) {
@@ -114,6 +112,10 @@ export default function NotesWidgetCollapsible() {
     queryKey: ["/api/notes"],
   });
 
+  const selectedNote = notes.find(note => note.id === selectedNoteId);
+  
+  const editor = useMemo(() => createYooptaEditor(), [selectedNoteId]);
+
   const deleteNoteMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/notes/${id}`);
@@ -155,8 +157,6 @@ export default function NotesWidgetCollapsible() {
       content: ""
     });
   };
-
-  const selectedNote = notes.find(note => note.id === selectedNoteId);
 
   // Update local content when switching notes
   useEffect(() => {
@@ -359,6 +359,7 @@ export default function NotesWidgetCollapsible() {
               <div className="p-6 h-full flex flex-col">
                 <div className="flex-1">
                   <YooptaEditor
+                    key={selectedNote?.id || 'empty'}
                     editor={editor}
                     plugins={plugins}
                     tools={tools}

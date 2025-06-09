@@ -134,15 +134,36 @@ div[data-radix-portal] > div,
   color: hsl(var(--foreground)) !important;
 }
 
-/* Very aggressive white background override */
-div:has([data-element-type]) {
+/* Additional aggressive overrides for YooptaEditor */
+[data-yoopta-editor-id] .yoopta-action-menu-list,
+[data-yoopta-editor-id] .yoopta-toolbar,
+div[style*="background"] {
   background: hsl(var(--card)) !important;
 }
 
-/* Target any floating/portal elements */
-body > div:not(#root) > div {
+/* Target any React portals that might contain white backgrounds */
+body > div[data-radix-portal] {
+  background: transparent !important;
+}
+
+body > div[data-radix-portal] > div {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Target specific Yoopta elements */
+[data-element-type="action-menu-list-item"],
+[data-element-type="action-menu-list"] {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Target toolbar buttons specifically */
+.yoopta-toolbar button,
+[data-element-type="toolbar"] button {
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 /* Custom Vaul animation overrides for smoother spring feel */
