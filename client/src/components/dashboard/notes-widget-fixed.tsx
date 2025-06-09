@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
+import NoteEditModal from "@/components/note-edit-modal";
 import type { Note } from "@shared/schema";
 
 export default function NotesWidget() {
@@ -13,9 +14,20 @@ export default function NotesWidget() {
   const { openChatWithPrompt } = useChatContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
+  const [editNote, setEditNote] = useState<Note | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const { data: notes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
+  });
+
+  const updateNoteMutation = useMutation({
+    mutationFn: async ({ id, ...data }: Partial<Note> & { id: number }) => {
+      return await apiRequest("PATCH", `/api/notes/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+    },
   });
 
   const deleteNoteMutation = useMutation({
@@ -27,6 +39,37 @@ export default function NotesWidget() {
       setSelectedNoteId(null);
     },
   });
+
+  const createNoteMutation = useMutation({
+    mutationFn: async (noteData: { title: string; content: string }) => {
+      return await apiRequest("POST", "/api/notes", noteData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+    },
+  });
+
+  const handleEditNote = (note: Note) => {
+    setEditNote(note);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveNote = (noteData: Partial<Note>) => {
+    if (noteData.id) {
+      updateNoteMutation.mutate(noteData as Partial<Note> & { id: number });
+    }
+  };
+
+  const handleDeleteNote = (id: number) => {
+    deleteNoteMutation.mutate(id);
+  };
+
+  const handleDuplicateNote = (note: Note) => {
+    createNoteMutation.mutate({
+      title: `${note.title} (Copy)`,
+      content: note.content || "",
+    });
+  };
 
   const deleteNote = (id: number) => {
     deleteNoteMutation.mutate(id);
@@ -102,6 +145,7 @@ export default function NotesWidget() {
                           : 'hover:bg-muted/50'
                       }`}
                       onClick={() => setSelectedNoteId(note.id)}
+                      onDoubleClick={() => handleEditNote(note)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">

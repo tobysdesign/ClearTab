@@ -114,12 +114,11 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
             <label className="text-xs font-medium text-foreground mb-1.5 block">
               Description
             </label>
-            <Textarea
+            <YooptaEditorComponent
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={setDescription}
               placeholder="Task description..."
-              className="w-full resize-none text-sm"
-              rows={3}
+              className="w-full"
             />
           </div>
 
