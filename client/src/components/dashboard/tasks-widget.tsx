@@ -165,7 +165,7 @@ export default function TasksWidget() {
                   />
                   <div className="flex-1 min-w-0">
                     <p 
-                      className={`text-sm mb-1 cursor-pointer hover:text-foreground transition-colors ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                      className="text-sm mb-1 cursor-pointer hover:text-foreground transition-colors text-[#d4d4d4]"
                       onClick={() => handleEditTask(task)}
                     >
                       {task.title}
