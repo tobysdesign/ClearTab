@@ -27,55 +27,13 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
     }
   }, [note, isOpen]);
 
-  // Mutable refs for up-to-date values
-  const titleRef = useRef(title);
-  const contentRef = useRef(content);
-  
-  useEffect(() => {
-    titleRef.current = title;
-  }, [title]);
-  
-  useEffect(() => {
-    contentRef.current = content;
-  }, [content]);
-
-  // Stable refs for dependencies
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const onSaveRef = useRef(onSave);
-  const noteRef = useRef(note);
-  
-  useEffect(() => {
-    onSaveRef.current = onSave;
-    noteRef.current = note;
-  }, [onSave, note]);
-
-  // Completely stable debounced save - no dependencies
-  const debouncedSave = useRef(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      const currentNote = noteRef.current;
-      if (!currentNote) return;
-      onSaveRef.current({
-        id: currentNote.id,
-        title: titleRef.current,
-        content: contentRef.current,
-      });
-    }, 1000);
-  }).current;
-
   const handleTitleChange = useCallback((newTitle: string) => {
-    setTitle(newTitle);           // Fast UI update
-    titleRef.current = newTitle;  // Ensure latest is saved
-    debouncedSave();             // Debounced async side effect
-  }, [debouncedSave]);
+    setTitle(newTitle);
+  }, []);
 
   const handleContentChange = useCallback((newContent: string) => {
-    setContent(newContent);           // Fast UI update
-    contentRef.current = newContent;  // Ensure latest is saved
-    debouncedSave();                 // Debounced async side effect
-  }, [debouncedSave]);
+    setContent(newContent);
+  }, []);
 
   const handleSave = () => {
     if (!note) return;
@@ -86,6 +44,18 @@ export default function NoteEditModal({ note, isOpen, onClose, onSave, onDelete,
       content,
     });
     
+    onClose();
+  };
+
+  const handleClose = () => {
+    // Save changes before closing
+    if (note && (title !== note.title || content !== note.content)) {
+      onSave({
+        id: note.id,
+        title,
+        content,
+      });
+    }
     onClose();
   };
 
