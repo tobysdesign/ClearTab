@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -56,9 +57,11 @@ function App() {
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
             <FloatingDock items={dockItems} />
           </div>
-          {showAI && (
-            <AIFab onAIRequest={handleAIRequest} />
-          )}
+          <AIFab 
+            isOpen={showAI} 
+            onClose={() => setShowAI(false)}
+            onAIRequest={handleAIRequest} 
+          />
         </ChatProvider>
       </TooltipProvider>
     </QueryClientProvider>
