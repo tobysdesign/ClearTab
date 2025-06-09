@@ -155,6 +155,9 @@ export default function WeatherWidget() {
           />
         ))}
       </div>
+      
+      {/* Blur fade effect */}
+      <div className="blur-fade"></div>
     </div>
   );
 }
