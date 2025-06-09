@@ -119,11 +119,8 @@ export default function NotesWidgetCollapsible() {
       if (aIsUntitled && !bIsUntitled) return -1;
       if (!aIsUntitled && bIsUntitled) return 1;
       
-      // Second priority: most recently updated first
-      const aUpdated = new Date(a.updatedAt || a.createdAt).getTime();
-      const bUpdated = new Date(b.updatedAt || b.createdAt).getTime();
-      
-      return bUpdated - aUpdated;
+      // Second priority: most recently updated first (using id as proxy for creation order)
+      return b.id - a.id;
     });
   }, [rawNotes]);
 

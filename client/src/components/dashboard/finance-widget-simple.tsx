@@ -56,7 +56,7 @@ export default function FinanceWidget() {
     return nextPayday;
   };
 
-  const formatPaydayText = () => {
+  const formatPaydayText = (): string | { text: string; days: number } => {
     const nextPayday = getNextPayday();
     if (!nextPayday || !preferences) return "Set up your payday information";
     
@@ -77,20 +77,20 @@ export default function FinanceWidget() {
     }
     
     if (daysUntil === 0) {
-      return "Your payday is today!";
+      return { text: "Your payday is today!", days: 0 };
     } else if (daysUntil === 1) {
-      return "Your next pay will be tomorrow!";
+      return { text: "Your next pay will be tomorrow!", days: 1 };
     } else {
-      return `Your next pay will be in ${daysUntil} days, around the ${timeText}.`;
+      return { text: "Your next pay day will be in", days: daysUntil };
     }
   };
 
   return (
     <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
+        <CardTitle className="text-base font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
-            <span className="text-[#383838]">Finance</span>
+            <span className="text-muted-foreground">Finance</span>
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('pay')}
@@ -147,12 +147,27 @@ export default function FinanceWidget() {
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col pb-0">
         
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex flex-col justify-center">
           {activeTab === 'pay' ? (
-            <div className="text-center py-4">
-              <p className="text-sm text-center leading-relaxed text-foreground">
-                {formatPaydayText()}
-              </p>
+            <div className="text-center">
+              {(() => {
+                const paydayInfo = formatPaydayText();
+                if (typeof paydayInfo === 'string') {
+                  return <p className="text-sm text-center leading-relaxed text-foreground">{paydayInfo}</p>;
+                } else if (paydayInfo.days > 1) {
+                  return (
+                    <div className="text-center">
+                      <p className="text-sm text-muted-foreground mb-2">{paydayInfo.text}</p>
+                      <div className="flex items-baseline justify-center">
+                        <span className="text-3xl font-bold text-foreground">{paydayInfo.days}</span>
+                        <span className="text-sm text-muted-foreground ml-1">days</span>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return <p className="text-sm text-center leading-relaxed text-foreground">{paydayInfo.text}</p>;
+                }
+              })()}
             </div>
           ) : (
             <div className="text-center py-4">
