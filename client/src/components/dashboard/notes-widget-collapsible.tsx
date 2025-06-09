@@ -222,7 +222,7 @@ export default function NotesWidgetCollapsible() {
               <>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between h-4">
-                    <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none">
+                    <CardTitle className="text-base font-aileron-black text-muted-foreground leading-none">
                       Notes
                     </CardTitle>
                     <button

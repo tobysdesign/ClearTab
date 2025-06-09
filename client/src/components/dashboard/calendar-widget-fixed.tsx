@@ -48,7 +48,7 @@ export default function CalendarWidget() {
   return (
     <Card className="bg-card text-card-foreground border-border h-full relative">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
+        <CardTitle className="text-base font-aileron-black text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
             <span>Schedule</span>
             <div className="flex items-center space-x-1">
