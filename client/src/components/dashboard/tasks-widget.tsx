@@ -112,13 +112,13 @@ export default function TasksWidget() {
   };
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-aileron-black text-muted-foreground leading-none flex items-center h-4">
           Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden">
+      <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
         <div className="flex-1 overflow-y-auto min-h-0 widget-scrollable">
           <div className="space-y-2 p-1 max-h-full">
             {isLoading ? (
@@ -184,6 +184,9 @@ export default function TasksWidget() {
           </div>
         </div>
       </CardContent>
+      
+      {/* Blur fade effect */}
+      <div className="blur-fade"></div>
       
       <TaskEditModal
         task={editingTask}

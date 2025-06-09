@@ -86,7 +86,7 @@ export default function FinanceWidget() {
   };
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full flex flex-col">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
@@ -145,7 +145,7 @@ export default function FinanceWidget() {
           </Popover>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 flex-1 flex flex-col">
+      <CardContent className="space-y-3 flex-1 flex flex-col pb-0">
         
         <div className="flex-1 flex items-center justify-center">
           {activeTab === 'pay' ? (
@@ -166,6 +166,9 @@ export default function FinanceWidget() {
           )}
         </div>
       </CardContent>
+      
+      {/* Blur fade effect */}
+      <div className="blur-fade"></div>
     </Card>
   );
 }
