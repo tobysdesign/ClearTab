@@ -105,9 +105,27 @@ export default function NotesWidgetCollapsible() {
     return content.length > 100 ? content.substring(0, 100) + "..." : content;
   }, []);
   
-  const { data: notes = [], isLoading } = useQuery<Note[]>({
+  const { data: rawNotes = [], isLoading } = useQuery<Note[]>({
     queryKey: ["/api/notes"],
   });
+
+  // Sort notes with untitled at top, then by most recently modified
+  const notes = useMemo(() => {
+    return [...rawNotes].sort((a, b) => {
+      // First priority: untitled notes at top
+      const aIsUntitled = !a.title || a.title.trim() === '' || a.title === 'Untitled';
+      const bIsUntitled = !b.title || b.title.trim() === '' || b.title === 'Untitled';
+      
+      if (aIsUntitled && !bIsUntitled) return -1;
+      if (!aIsUntitled && bIsUntitled) return 1;
+      
+      // Second priority: most recently updated first
+      const aUpdated = new Date(a.updatedAt || a.createdAt).getTime();
+      const bUpdated = new Date(b.updatedAt || b.createdAt).getTime();
+      
+      return bUpdated - aUpdated;
+    });
+  }, [rawNotes]);
 
   const selectedNote = notes.find(note => note.id === selectedNoteId);
   
