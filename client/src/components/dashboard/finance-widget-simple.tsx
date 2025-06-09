@@ -90,7 +90,7 @@ export default function FinanceWidget() {
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-aileron-black text-muted-foreground leading-none flex items-center justify-between h-4">
           <div className="flex items-center space-x-3">
-            <span className="text-muted-foreground">Finance</span>
+            <span className="text-muted-foreground text-[14px]">Finance</span>
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('pay')}
@@ -181,7 +181,6 @@ export default function FinanceWidget() {
           )}
         </div>
       </CardContent>
-      
       {/* Blur fade effect */}
       <div className="blur-fade"></div>
     </Card>
