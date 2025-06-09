@@ -94,13 +94,13 @@ export default function FinanceWidget() {
             <div className="flex items-center space-x-1">
               <button
                 onClick={() => setActiveTab('pay')}
-                className="px-2 py-1 text-xs font-medium transition-colors rounded bg-accent text-[#d4d4d4]"
+                className="px-2 py-1 text-xs font-normal transition-colors rounded bg-accent text-[#d4d4d4]"
               >
                 Pay
               </button>
               <button
                 onClick={() => setActiveTab('spend')}
-                className={`px-2 py-1 text-xs font-medium transition-colors rounded ${
+                className={`px-2 py-1 text-xs font-normal transition-colors rounded ${
                   activeTab === 'spend'
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'

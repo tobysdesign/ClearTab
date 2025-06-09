@@ -53,7 +53,7 @@ export default function CalendarWidget() {
             Schedule
           </CardTitle>
           <div className="flex items-center space-x-1">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center justify-center space-x-1">
               <button
                 onClick={() => setActiveTab('today')}
                 className="px-2 py-1 text-xs font-normal transition-colors rounded bg-accent text-[#d4d4d4]"
