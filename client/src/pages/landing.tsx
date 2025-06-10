@@ -28,32 +28,32 @@ export default function Landing() {
 
   const features = [
     {
-      icon: <FileText className="h-8 w-8 text-blue-600" />,
+      icon: <FileText className="h-8 w-8 text-white" />,
       title: "Smart Notes",
       description: "AI-powered note-taking with intelligent organization and search capabilities."
     },
     {
-      icon: <CheckSquare className="h-8 w-8 text-green-600" />,
+      icon: <CheckSquare className="h-8 w-8 text-white" />,
       title: "Task Management",
       description: "Prioritize and track tasks with smart deadlines and progress monitoring."
     },
     {
-      icon: <Calendar className="h-8 w-8 text-purple-600" />,
+      icon: <Calendar className="h-8 w-8 text-white" />,
       title: "Calendar Integration",
       description: "Seamlessly sync with Google Calendar for unified schedule management."
     },
     {
-      icon: <TrendingUp className="h-8 w-8 text-orange-600" />,
+      icon: <TrendingUp className="h-8 w-8 text-white" />,
       title: "Finance Tracking",
       description: "Monitor income, expenses, and financial goals with intelligent insights."
     },
     {
-      icon: <Cloud className="h-8 w-8 text-cyan-600" />,
+      icon: <Cloud className="h-8 w-8 text-white" />,
       title: "Weather Insights",
       description: "Real-time weather data to help plan your day effectively."
     },
     {
-      icon: <Zap className="h-8 w-8 text-yellow-600" />,
+      icon: <Zap className="h-8 w-8 text-white" />,
       title: "AI Assistant",
       description: "Conversational AI that learns your preferences and optimizes your workflow."
     }
@@ -68,7 +68,7 @@ export default function Landing() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="bg-black">
       {/* Header */}
       <header className="border-b dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 bg-[#000000cc]">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
