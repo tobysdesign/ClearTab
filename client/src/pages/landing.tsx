@@ -137,11 +137,11 @@ export default function Landing() {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center space-x-3">
                   {feature.icon}
-                  <CardTitle className="text-lg">{feature.title}</CardTitle>
+                  <CardTitle className="text-lg text-gray-900 dark:text-white">{feature.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -153,7 +153,7 @@ export default function Landing() {
       </section>
 
       {/* Benefits Section */}
-      <section className="bg-white dark:bg-slate-900 py-20">
+      <section className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -238,7 +238,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-900 dark:bg-slate-950 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -247,7 +247,7 @@ export default function Landing() {
               </div>
               <span className="text-xl font-bold">ProductivityAI</span>
             </div>
-            <p className="text-gray-400">© 2025 ProductivityAI. All rights reserved.</p>
+            <p className="text-gray-400 dark:text-gray-500">© 2025 ProductivityAI. All rights reserved.</p>
           </div>
         </div>
       </footer>
