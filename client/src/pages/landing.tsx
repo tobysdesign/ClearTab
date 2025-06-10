@@ -84,6 +84,13 @@ export default function Landing() {
             >
               Get Started
             </Button>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.href = '/api/auth/dev-login'}
+              className="text-xs"
+            >
+              Dev Login
+            </Button>
           </div>
         </div>
       </header>

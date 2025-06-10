@@ -703,6 +703,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Development login route (bypasses Google OAuth)
+  app.get("/api/auth/dev-login", async (req, res) => {
+    try {
+      // Use the existing default user or create one if needed
+      let user = await storage.getUser(DEFAULT_USER_ID);
+      
+      if (!user) {
+        // Create a default admin user for development
+        user = await storage.createUser({
+          name: "Admin User",
+          email: "admin@productivityai.com",
+          password: null,
+          googleId: null,
+          picture: null,
+          accessToken: null,
+          refreshToken: null,
+          tokenExpiry: null,
+          googleCalendarConnected: false,
+          lastCalendarSync: null,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+      
+      res.redirect("/dashboard?dev=true");
+    } catch (error) {
+      console.error("Dev login error:", error);
+      res.redirect("/?error=dev_login_failed");
+    }
+  });
+
   // Google Calendar authentication routes
   app.get("/api/auth/google", (req, res) => {
     const authUrl = googleCalendarService.getAuthUrl();
