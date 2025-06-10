@@ -118,7 +118,9 @@ export default function Landing() {
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-16 md:h-20" />
+            <span className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              t0by
+            </span>
           </div>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
@@ -257,7 +259,9 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-6" />
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                t0by
+              </span>
             </div>
             <p className="text-gray-400 dark:text-gray-500">© 2025 t0by. All rights reserved.</p>
           </div>
