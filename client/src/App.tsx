@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider, useChatContext } from "@/hooks/use-chat-context";
 import { FloatingDock } from "@/components/ui/floating-dock";
-import { Settings, MessageCircle } from "lucide-react";
+import { SmileFace, UpconfusedFace } from "@/components/emotional-faces";
 import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
@@ -35,12 +35,12 @@ function DockContent() {
   const dockItems = [
     {
       title: "Settings",
-      icon: <Settings className="h-5 w-5" />,
+      icon: <SmileFace size="md" />,
       onClick: () => setIsSettingsOpen(true)
     },
     {
       title: "AI Assistant",
-      icon: <MessageCircle className="h-5 w-5" />,
+      icon: <UpconfusedFace size="md" />,
       onClick: () => setIsChatOpen(!isChatOpen)
     }
   ];

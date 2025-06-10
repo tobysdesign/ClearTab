@@ -7,6 +7,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
+import { EmotionalStates } from "@/components/emotional-states";
+import { SmileFace } from "@/components/emotional-faces";
 import type { Task } from "@shared/schema";
 import { format } from "date-fns";
 import TaskEditModal from "@/components/task-edit-modal";
@@ -137,26 +139,9 @@ export default function TasksWidget() {
         <div className="flex-1 overflow-y-auto min-h-0 widget-scrollable">
           <div className="space-y-2 p-1 max-h-full">
             {isLoading ? (
-              <div className="space-y-2">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="flex items-start space-x-3 p-2 rounded animate-pulse">
-                    <div className="w-4 h-4 bg-muted rounded mt-0.5"></div>
-                    <div className="flex-1">
-                      <div className="h-3 bg-muted rounded mb-2"></div>
-                      <div className="h-2 bg-muted rounded w-2/3"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <EmotionalStates.LoadingTasks />
             ) : tasks.length === 0 ? (
-              <div className="text-center py-4">
-                <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center mx-auto mb-2">
-                  <Plus className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  No tasks yet
-                </p>
-              </div>
+              <EmotionalStates.NoTasks />
             ) : (
               tasks.map((task) => (
                 <div 
