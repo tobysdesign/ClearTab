@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/components/theme-provider";
-import t0byLogoLight from "@/assets/t0by-light.svg";
-import t0byLogoDark from "@/assets/t0by-dark.svg";
+// Logo imports will be added when new logos are provided
 import { 
   CheckCircle, 
   Calendar, 
@@ -73,7 +72,7 @@ export default function Landing() {
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <img src={theme === "dark" ? t0byLogoDark : t0byLogoLight} alt="t0by" className="w-10 h-10" />
+            <div className="text-xl font-bold text-gray-900 dark:text-white">t0by</div>
           </a>
           <div className="flex items-center space-x-4">
             <Button
@@ -118,7 +117,7 @@ export default function Landing() {
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
-            <img src={theme === "dark" ? t0byLogoDark : t0byLogoLight} alt="t0by" className="w-20 h-20 md:w-24 md:h-24" />
+            <div className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">t0by</div>
           </div>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
