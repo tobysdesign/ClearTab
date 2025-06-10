@@ -16,8 +16,8 @@ export class GoogleCalendarService {
   private oauth2Client: OAuth2Client;
 
   constructor() {
-    // Use production domain uset0.by, fallback to Replit domain for development
-    const productionDomain = 'uset0.by';
+    // Use production domain t0.by, fallback to Replit domain for development
+    const productionDomain = 't0.by';
     const replitDomain = process.env.REPLIT_DEV_DOMAIN || '6831cd48-e927-4fba-879d-0649453b1e2a-00-10wxp596mzofb.spock.replit.dev';
     const domain = process.env.NODE_ENV === 'production' ? productionDomain : replitDomain;
     const redirectUri = `https://${domain}/api/auth/google/callback`;
