@@ -114,13 +114,13 @@ export default function Landing() {
         <Badge variant="secondary" className="mb-4">
           ✨ AI-Powered Productivity Platform
         </Badge>
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+        <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
             <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
           Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimization 
           designed for the modern professional.
         </p>
@@ -134,27 +134,27 @@ export default function Landing() {
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+        <p className="text-sm text-gray-400 mt-4">
           Free 14-day trial • No credit card required • Cancel anytime
         </p>
       </section>
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Everything you need to stay productive
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
             Our comprehensive suite of tools adapts to your workflow and learns from your habits.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-gray-900/80 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center space-x-3">
                   {feature.icon}
-                  <CardTitle className="text-lg text-gray-900 dark:text-white">{feature.title}</CardTitle>
+                  <CardTitle className="text-lg text-white">{feature.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -175,8 +175,8 @@ export default function Landing() {
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <CheckCircle className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-600 dark:text-gray-300">{benefit}</p>
+                    <CheckCircle className="h-6 w-6 text-white mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-300">{benefit}</p>
                   </div>
                 ))}
               </div>
