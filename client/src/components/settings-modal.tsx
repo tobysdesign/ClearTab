@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings as SettingsIcon, LogOut, User, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Settings as SettingsIcon, LogOut, User, Moon, Sun } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/components/theme-provider";
 import CalendarSettings from "@/components/calendar-settings";
 
 interface SettingsModalProps {
@@ -15,6 +18,7 @@ interface SettingsModalProps {
 export default function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -71,6 +75,25 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  {theme === "dark" ? (
+                    <Moon className="h-5 w-5 text-gray-900 dark:text-white" />
+                  ) : (
+                    <Sun className="h-5 w-5 text-gray-900 dark:text-white" />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white">Dark Mode</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      Toggle between light and dark themes
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                />
+              </div>
               <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">Sign Out</h3>

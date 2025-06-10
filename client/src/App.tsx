@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider, useChatContext } from "@/hooks/use-chat-context";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { Settings, MessageCircle } from "lucide-react";
+import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
@@ -57,13 +58,15 @@ function DockContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ChatProvider>
-          <Toaster />
-          <Router />
-          <DockContent />
-        </ChatProvider>
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="productivity-ui-theme">
+        <TooltipProvider>
+          <ChatProvider>
+            <Toaster />
+            <Router />
+            <DockContent />
+          </ChatProvider>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "@/components/theme-provider";
 import { 
   CheckCircle, 
   Calendar, 
@@ -14,11 +15,14 @@ import {
   Zap,
   Users,
   Shield,
-  ArrowRight
+  ArrowRight,
+  Moon,
+  Sun
 } from "lucide-react";
 
 export default function Landing() {
   const [email, setEmail] = useState("");
+  const { theme, setTheme } = useTheme();
 
   const features = [
     {
@@ -73,6 +77,18 @@ export default function Landing() {
             <span className="text-xl font-bold text-gray-900 dark:text-white">ProductivityAI</span>
           </div>
           <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="mr-2"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
             <Button 
               variant="ghost"
               onClick={() => window.location.href = '/api/auth/google'}
