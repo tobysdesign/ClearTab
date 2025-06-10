@@ -252,7 +252,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-6" />
+              <img src={whiteLogo} alt="t0by" className="h-6" />
             </div>
             <p className="text-gray-400 dark:text-gray-500">© 2025 t0by. All rights reserved.</p>
           </div>
