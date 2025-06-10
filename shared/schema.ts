@@ -4,16 +4,18 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  googleId: text("google_id").unique(),
   email: text("email").notNull().unique(),
+  password: text("password"),
   name: text("name").notNull(),
   picture: text("picture"),
+  googleId: text("google_id").unique(),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   tokenExpiry: timestamp("token_expiry"),
   googleCalendarConnected: boolean("google_calendar_connected").default(false),
   lastCalendarSync: timestamp("last_calendar_sync"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const notes = pgTable("notes", {
