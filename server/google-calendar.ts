@@ -16,9 +16,7 @@ export class GoogleCalendarService {
   private oauth2Client: OAuth2Client;
 
   constructor() {
-    const redirectUri = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`
-      : 'http://localhost:5000/api/auth/google/callback';
+    const redirectUri = 'https://t0.by/api/auth/google/callback';
       
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
