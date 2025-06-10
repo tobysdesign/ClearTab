@@ -4,7 +4,7 @@ import NotesWidget from "./notes-widget-collapsible";
 import TasksWidget from "./tasks-widget";
 import WeatherWidget from "./weather-widget-minimal";
 import FinanceWidget from "./finance-widget-simple";
-import CalendarWidget from "./calendar-widget-fixed";
+import ScheduleWidget from "./schedule-widget";
 
 export default function ResizableBentoGrid() {
   return (
@@ -62,7 +62,7 @@ export default function ResizableBentoGrid() {
             </PanelResizeHandle>
             <Panel defaultSize={34} minSize={25}>
               <div className="h-full pl-1">
-                <CalendarWidget />
+                <ScheduleWidget />
               </div>
             </Panel>
           </PanelGroup>
