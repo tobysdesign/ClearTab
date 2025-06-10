@@ -64,7 +64,7 @@ function DockContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="productivity-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="productivity-ui-theme">
         <TooltipProvider>
           <ChatProvider>
             <Toaster />

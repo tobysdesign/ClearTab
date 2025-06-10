@@ -45,7 +45,7 @@ export default function FloatingAIButton() {
           <TooltipTrigger asChild>
             <Button
               onClick={handleButtonClick}
-              className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-600 text-white shadow-lg p-0 group transition-all duration-300 hover:scale-110 active:scale-95 relative overflow-hidden"
+              className="w-14 h-14 rounded-full bg-gradient-to-br from-gray-800 via-gray-900 to-black hover:from-gray-700 hover:via-gray-800 hover:to-gray-900 text-white shadow-lg p-0 group transition-all duration-300 hover:scale-110 active:scale-95 relative overflow-hidden"
               size="lg"
             >
               {/* Animated swirl background */}

@@ -114,9 +114,9 @@ export default function CalendarSettings() {
           </div>
         )}
 
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">Benefits of connecting:</h4>
-          <ul className="text-xs text-blue-800 space-y-1">
+        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Benefits of connecting:</h4>
+          <ul className="text-xs text-gray-800 dark:text-gray-200 space-y-1">
             <li>• View your Google Calendar events in the dashboard</li>
             <li>• Automatic sync with your existing schedule</li>
             <li>• Click events to open in Google Calendar</li>
