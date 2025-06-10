@@ -319,6 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const prefs = await storage.getUserPreferences(DEFAULT_USER_ID);
       res.json(prefs);
     } catch (error) {
+      console.error("Error fetching preferences:", error);
       res.status(500).json({ error: "Failed to fetch preferences" });
     }
   });
