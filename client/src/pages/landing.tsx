@@ -73,7 +73,7 @@ export default function Landing() {
       <header className="border-b dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 bg-[#000000cc]">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
+            <img src={whiteLogo} alt="t0by" className="h-8" />
           </a>
           <div className="flex items-center space-x-4">
             <Button
@@ -117,7 +117,7 @@ export default function Landing() {
         <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-16 md:h-20" />
+            <img src={whiteLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </h1>
         <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
@@ -158,18 +158,18 @@ export default function Landing() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                <p className="text-gray-300">{feature.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       </section>
       {/* Benefits Section */}
-      <section className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm py-20">
+      <section className="bg-gray-900/90 backdrop-blur-sm py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
                 Why thousands of professionals choose t0by
               </h2>
               <div className="space-y-4">
@@ -193,21 +193,21 @@ export default function Landing() {
             <div className="relative">
               <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
                 <div className="flex items-center space-x-4 mb-6">
-                  <Users className="h-8 w-8" />
+                  <Users className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">10,000+</p>
                     <p className="text-blue-100">Active Users</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4 mb-6">
-                  <Shield className="h-8 w-8" />
+                  <Shield className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">99.9%</p>
                     <p className="text-blue-100">Uptime</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <TrendingUp className="h-8 w-8" />
+                  <TrendingUp className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">40%</p>
                     <p className="text-blue-100">Productivity Increase</p>
@@ -221,10 +221,10 @@ export default function Landing() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to transform your productivity?
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+          <p className="text-lg text-gray-300 mb-8">
             Join thousands of professionals who have already revolutionized their workflow with t0by.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -248,7 +248,7 @@ export default function Landing() {
         </div>
       </section>
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-slate-950 text-white py-12">
+      <footer className="bg-gray-950 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
