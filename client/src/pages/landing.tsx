@@ -70,7 +70,7 @@ export default function Landing() {
   return (
     <div className="bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 bg-[#000000cc]">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
@@ -109,7 +109,6 @@ export default function Landing() {
           </div>
         </div>
       </header>
-
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <Badge variant="secondary" className="mb-4">
@@ -139,7 +138,6 @@ export default function Landing() {
           Free 14-day trial • No credit card required • Cancel anytime
         </p>
       </section>
-
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
@@ -166,7 +164,6 @@ export default function Landing() {
           ))}
         </div>
       </section>
-
       {/* Benefits Section */}
       <section className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm py-20">
         <div className="container mx-auto px-4">
@@ -221,7 +218,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
@@ -251,7 +247,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-slate-950 text-white py-12">
         <div className="container mx-auto px-4">
