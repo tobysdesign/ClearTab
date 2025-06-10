@@ -16,9 +16,11 @@ export class GoogleCalendarService {
   private oauth2Client: OAuth2Client;
 
   constructor() {
-    // Use current Replit domain
-    const currentDomain = process.env.REPLIT_DEV_DOMAIN || '6831cd48-e927-4fba-879d-0649453b1e2a-00-10wxp596mzofb.spock.replit.dev';
-    const redirectUri = `https://${currentDomain}/api/auth/google/callback`;
+    // Use custom domain if available, fallback to Replit domain for development
+    const customDomain = process.env.CUSTOM_DOMAIN; // e.g., 'yourdomain.com' or 'app.yourdomain.com'
+    const replitDomain = process.env.REPLIT_DEV_DOMAIN || '6831cd48-e927-4fba-879d-0649453b1e2a-00-10wxp596mzofb.spock.replit.dev';
+    const domain = customDomain || replitDomain;
+    const redirectUri = `https://${domain}/api/auth/google/callback`;
       
     this.oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
