@@ -73,12 +73,17 @@ export default function Landing() {
             <span className="text-xl font-bold text-gray-900 dark:text-white">ProductivityAI</span>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Get Started</Button>
-            </Link>
+            <Button 
+              variant="ghost"
+              onClick={() => window.location.href = '/api/auth/google'}
+            >
+              Sign In with Google
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/api/auth/google'}
+            >
+              Get Started
+            </Button>
           </div>
         </div>
       </header>
@@ -98,20 +103,15 @@ export default function Landing() {
           Streamline your workflow with intelligent task management, smart notes, calendar integration, 
           and AI-powered insights. Everything you need to stay organized and productive.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1"
-          />
-          <Link href="/signup">
-            <Button size="lg" className="w-full sm:w-auto">
-              Start Free Trial
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="flex justify-center">
+          <Button 
+            size="lg" 
+            className="px-8"
+            onClick={() => window.location.href = '/api/auth/google'}
+          >
+            Start Free Trial with Google
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
           Free 14-day trial • No credit card required • Cancel anytime
@@ -162,12 +162,13 @@ export default function Landing() {
                 ))}
               </div>
               <div className="mt-8">
-                <Link href="/signup">
-                  <Button size="lg">
-                    Start Your Free Trial
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg"
+                  onClick={() => window.location.href = '/api/auth/google'}
+                >
+                  Start Your Free Trial
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
             <div className="relative">
@@ -209,17 +210,22 @@ export default function Landing() {
             Join thousands of professionals who have already revolutionized their workflow with ProductivityAI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="w-full sm:w-auto">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Sign In
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto"
+              onClick={() => window.location.href = '/api/auth/google'}
+            >
+              Start Free Trial
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-full sm:w-auto"
+              onClick={() => window.location.href = '/api/auth/google'}
+            >
+              Sign In with Google
+            </Button>
           </div>
         </div>
       </section>

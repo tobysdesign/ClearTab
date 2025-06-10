@@ -9,6 +9,7 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import { Settings, MessageCircle } from "lucide-react";
 import Dashboard from "@/pages/dashboard";
 import SettingsPage from "@/pages/Settings";
+import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 import StyleGuide from "@/pages/style-guide-fixed";
 import SilkTest from "@/pages/silk-test";
@@ -16,7 +17,8 @@ import SilkTest from "@/pages/silk-test";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Landing} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/settings" component={SettingsPage} />
       <Route path="/style" component={StyleGuide} />
       <Route path="/silk" component={SilkTest} />

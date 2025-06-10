@@ -743,7 +743,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark Google Calendar as connected
       await storage.updateUserTokens(user.id, accessToken, refreshToken);
       
-      res.redirect("/?connected=true");
+      res.redirect("/dashboard?connected=true");
     } catch (error) {
       console.error("Google Calendar auth error:", error);
       res.redirect("/?error=auth_failed");
