@@ -8,18 +8,17 @@ import { ChatProvider, useChatContext } from "@/hooks/use-chat-context";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { Settings, MessageCircle } from "lucide-react";
 import Dashboard from "@/pages/dashboard";
-import SettingsPage from "@/pages/Settings";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
 import StyleGuide from "@/pages/style-guide-fixed";
 import SilkTest from "@/pages/silk-test";
+import SettingsModal from "@/components/settings-modal";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/settings" component={SettingsPage} />
       <Route path="/style" component={StyleGuide} />
       <Route path="/silk" component={SilkTest} />
       <Route component={NotFound} />
@@ -30,12 +29,13 @@ function Router() {
 function DockContent() {
   const [location, setLocation] = useLocation();
   const { isChatOpen, setIsChatOpen } = useChatContext();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const dockItems = [
     {
       title: "Settings",
       icon: <Settings className="h-5 w-5" />,
-      onClick: () => setLocation("/settings")
+      onClick: () => setIsSettingsOpen(true)
     },
     {
       title: "AI Assistant",
@@ -45,9 +45,12 @@ function DockContent() {
   ];
 
   return (
-    <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50">
-      <FloatingDock items={dockItems} />
-    </div>
+    <>
+      <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50">
+        <FloatingDock items={dockItems} />
+      </div>
+      <SettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+    </>
   );
 }
 
