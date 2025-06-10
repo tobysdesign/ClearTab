@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { createServer } from "net";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -56,8 +57,27 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use environment port or fallback to 5000
-  const port = parseInt(process.env.PORT || process.env.REPL_PORT || "5000", 10);
+  // Find available port starting from 5000
+  const findAvailablePort = (startPort: number): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      const testServer = createServer();
+      testServer.listen(startPort, '0.0.0.0', () => {
+        const port = testServer.address()?.port || startPort;
+        testServer.close(() => resolve(port));
+      });
+      testServer.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(findAvailablePort(startPort + 1));
+        } else {
+          reject(err);
+        }
+      });
+    });
+  };
+
+  const preferredPort = parseInt(process.env.PORT || process.env.REPL_PORT || "5000", 10);
+  const port = await findAvailablePort(preferredPort);
+  
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
