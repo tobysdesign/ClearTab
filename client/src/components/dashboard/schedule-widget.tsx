@@ -156,16 +156,16 @@ export default function ScheduleWidget() {
                 return (
                   <div 
                     key={event.id}
-                    className={`rounded-xl p-4 hover:bg-black/70 transition-all cursor-pointer relative ${
+                    className={`rounded-xl p-4 hover:bg-gray-600/60 transition-all cursor-pointer relative ${
                       isCurrent 
-                        ? 'bg-gray-700/80 text-white font-medium' 
-                        : 'bg-black/50 text-gray-300'
+                        ? 'bg-gray-600 text-white border border-gray-500' 
+                        : 'bg-gray-800/80 text-gray-300'
                     }`}
                   >
-                    <div className={`text-base mb-1 ${isCurrent ? 'font-medium' : 'font-normal'}`}>
+                    <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-white' : 'font-normal text-gray-200'}`}>
                       {event.title}
                     </div>
-                    <div className="text-gray-400 text-sm">
+                    <div className={`text-sm ${isCurrent ? 'text-gray-200' : 'text-gray-400'}`}>
                       {event.time}
                     </div>
                   </div>
@@ -177,13 +177,13 @@ export default function ScheduleWidget() {
           {/* Vertical red line that moves through events */}
           {redLinePosition.show && (
             <div 
-              className="absolute left-0 w-full flex items-center pointer-events-none transition-all duration-1000 ease-out"
+              className="absolute left-0 w-full flex items-center pointer-events-none transition-all duration-500 ease-out z-20"
               style={{ top: `${redLinePosition.top}%` }}
             >
               {/* Red dot */}
-              <div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0 z-10"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 shadow-sm"></div>
               {/* Red line */}
-              <div className="flex-1 h-0.5 bg-red-500"></div>
+              <div className="flex-1 h-px bg-red-500 shadow-sm"></div>
             </div>
           )}
         </div>
