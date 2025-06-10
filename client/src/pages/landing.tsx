@@ -88,6 +88,11 @@ export default function Landing() {
                 <Moon className="h-5 w-5" />
               )}
             </Button>
+            <Link href="/dashboard">
+              <Button variant="ghost">
+                Dashboard
+              </Button>
+            </Link>
             <Button 
               variant="ghost"
               onClick={() => window.location.href = '/api/auth/google'}
@@ -184,26 +189,26 @@ export default function Landing() {
               </div>
             </div>
             <div className="relative">
-              <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 text-white">
                 <div className="flex items-center space-x-4 mb-6">
                   <Users className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">10,000+</p>
-                    <p className="text-blue-100">Active Users</p>
+                    <p className="text-gray-100">Active Users</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4 mb-6">
                   <Shield className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">99.9%</p>
-                    <p className="text-blue-100">Uptime</p>
+                    <p className="text-gray-100">Uptime</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <TrendingUp className="h-8 w-8 text-white" />
                   <div>
                     <p className="text-2xl font-bold">40%</p>
-                    <p className="text-blue-100">Productivity Increase</p>
+                    <p className="text-gray-100">Productivity Increase</p>
                   </div>
                 </div>
               </div>
