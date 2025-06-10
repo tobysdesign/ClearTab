@@ -34,28 +34,77 @@ export default function ScheduleWidget() {
   const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
   const dayNumber = today.getDate();
 
-  // Calculate progress through the day (0-100%)
-  const getTimeProgress = () => {
-    const now = new Date();
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-    
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-    
-    const totalMinutes = (endOfDay.getTime() - startOfDay.getTime()) / (1000 * 60);
-    const currentMinutes = (now.getTime() - startOfDay.getTime()) / (1000 * 60);
-    
-    return Math.min(100, Math.max(0, (currentMinutes / totalMinutes) * 100));
-  };
-
-  // Filter today's events
+  // Filter today's events and sort by time
   const todaysEvents = events.filter(event => {
     const eventDate = new Date(event.date);
     return eventDate.toDateString() === today.toDateString();
+  }).sort((a, b) => {
+    // Parse time strings for sorting (assuming format like "9:00 AM")
+    const timeA = new Date(`2000/01/01 ${a.time}`).getTime();
+    const timeB = new Date(`2000/01/01 ${b.time}`).getTime();
+    return timeA - timeB;
   });
 
-  const timeProgress = getTimeProgress();
+  // Parse current time to minutes from start of day
+  const getCurrentTimeMinutes = () => {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  };
+
+  // Parse event time to minutes from start of day
+  const parseEventTime = (timeString: string) => {
+    try {
+      const time = new Date(`2000/01/01 ${timeString}`);
+      return time.getHours() * 60 + time.getMinutes();
+    } catch {
+      return 0;
+    }
+  };
+
+  // Check if current time is within an event
+  const isCurrentEvent = (event: CalendarEvent) => {
+    const currentMinutes = getCurrentTimeMinutes();
+    const eventStartMinutes = parseEventTime(event.time);
+    
+    // Assume 1 hour duration if no end time specified
+    let eventEndMinutes = eventStartMinutes + 60;
+    
+    // If event has end time, parse it
+    if (event.endTime) {
+      eventEndMinutes = parseEventTime(event.endTime);
+    } else if (event.time.includes(' - ')) {
+      // Handle time ranges like "9:00 AM - 11:00 AM"
+      const [, endTime] = event.time.split(' - ');
+      if (endTime) {
+        eventEndMinutes = parseEventTime(endTime.trim());
+      }
+    }
+    
+    return currentMinutes >= eventStartMinutes && currentMinutes <= eventEndMinutes;
+  };
+
+  // Calculate vertical position of red line based on current time and events
+  const getRedLinePosition = () => {
+    if (todaysEvents.length === 0) return { show: false, top: 0 };
+    
+    const currentMinutes = getCurrentTimeMinutes();
+    const firstEventMinutes = parseEventTime(todaysEvents[0].time);
+    const lastEventMinutes = parseEventTime(todaysEvents[todaysEvents.length - 1].time) + 60; // Add 1 hour to last event
+    
+    // If current time is before first event or after last event, don't show line
+    if (currentMinutes < firstEventMinutes || currentMinutes > lastEventMinutes) {
+      return { show: false, top: 0 };
+    }
+    
+    // Calculate position between events
+    const totalEventTimeSpan = lastEventMinutes - firstEventMinutes;
+    const currentTimeFromStart = currentMinutes - firstEventMinutes;
+    const percentage = (currentTimeFromStart / totalEventTimeSpan) * 100;
+    
+    return { show: true, top: Math.min(95, Math.max(5, percentage)) };
+  };
+
+  const redLinePosition = getRedLinePosition();
 
   return (
     <Card className="bg-gray-800 dark:bg-gray-900 text-white border-0 h-full flex flex-col relative overflow-hidden">
@@ -84,23 +133,10 @@ export default function ScheduleWidget() {
           </div>
         </div>
 
-        {/* Right side - Progress bar and events */}
-        <div className="flex-1 min-w-0">
-          {/* Red progress bar */}
-          <div className="mb-6">
-            <div className="w-full bg-gray-700 h-1 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-red-500 transition-all duration-1000 ease-out relative"
-                style={{ width: `${timeProgress}%` }}
-              >
-                {/* Red dot at the end of progress bar */}
-                <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-red-500 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
+        {/* Right side - Events with vertical red line */}
+        <div className="flex-1 min-w-0 relative">
           {/* Events */}
-          <div className="space-y-3">
+          <div className="space-y-3 relative">
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(2)].map((_, i) => (
@@ -115,21 +151,41 @@ export default function ScheduleWidget() {
                 <div className="text-gray-400 text-sm">No events today</div>
               </div>
             ) : (
-              todaysEvents.slice(0, 3).map((event) => (
-                <div 
-                  key={event.id}
-                  className="bg-black/50 rounded-xl p-4 hover:bg-black/70 transition-colors cursor-pointer"
-                >
-                  <div className="text-white font-medium text-base mb-1">
-                    {event.title}
+              todaysEvents.slice(0, 3).map((event) => {
+                const isCurrent = isCurrentEvent(event);
+                return (
+                  <div 
+                    key={event.id}
+                    className={`rounded-xl p-4 hover:bg-black/70 transition-all cursor-pointer relative ${
+                      isCurrent 
+                        ? 'bg-gray-700/80 text-white font-medium' 
+                        : 'bg-black/50 text-gray-300'
+                    }`}
+                  >
+                    <div className={`text-base mb-1 ${isCurrent ? 'font-medium' : 'font-normal'}`}>
+                      {event.title}
+                    </div>
+                    <div className="text-gray-400 text-sm">
+                      {event.time}
+                    </div>
                   </div>
-                  <div className="text-gray-400 text-sm">
-                    {event.time}
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
+
+          {/* Vertical red line that moves through events */}
+          {redLinePosition.show && (
+            <div 
+              className="absolute left-0 w-full flex items-center pointer-events-none transition-all duration-1000 ease-out"
+              style={{ top: `${redLinePosition.top}%` }}
+            >
+              {/* Red dot */}
+              <div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0 z-10"></div>
+              {/* Red line */}
+              <div className="flex-1 h-0.5 bg-red-500"></div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
