@@ -33,6 +33,9 @@ function DockContent() {
   const { isChatOpen, setIsChatOpen } = useChatContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Only show dock on dashboard page
+  const shouldShowDock = location === '/dashboard';
+
   const dockItems = [
     {
       title: "Settings",
@@ -48,9 +51,11 @@ function DockContent() {
 
   return (
     <>
-      <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50">
-        <FloatingDock items={dockItems} />
-      </div>
+      {shouldShowDock && (
+        <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 z-50">
+          <FloatingDock items={dockItems} />
+        </div>
+      )}
       <SettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </>
   );
