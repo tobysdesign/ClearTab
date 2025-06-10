@@ -120,7 +120,7 @@ export default function Landing() {
             <img src={whiteLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </h1>
-        <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto">
           Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimization 
           designed for the modern professional.
         </p>
@@ -134,7 +134,7 @@ export default function Landing() {
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
-        <p className="text-sm text-gray-400 mt-4">
+        <p className="text-sm text-gray-200 mt-4">
           Free 14-day trial • No credit card required • Cancel anytime
         </p>
       </section>
@@ -144,7 +144,7 @@ export default function Landing() {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Everything you need to stay productive
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-100 max-w-2xl mx-auto">
             Our comprehensive suite of tools adapts to your workflow and learns from your habits.
           </p>
         </div>
@@ -158,7 +158,7 @@ export default function Landing() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-300">{feature.description}</p>
+                <p className="text-gray-100">{feature.description}</p>
               </CardContent>
             </Card>
           ))}
@@ -176,7 +176,7 @@ export default function Landing() {
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <CheckCircle className="h-6 w-6 text-white mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-300">{benefit}</p>
+                    <p className="text-gray-100">{benefit}</p>
                   </div>
                 ))}
               </div>
@@ -224,7 +224,7 @@ export default function Landing() {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to transform your productivity?
           </h2>
-          <p className="text-lg text-gray-300 mb-8">
+          <p className="text-lg text-gray-100 mb-8">
             Join thousands of professionals who have already revolutionized their workflow with t0by.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -254,7 +254,7 @@ export default function Landing() {
             <div className="flex items-center space-x-2">
               <img src={whiteLogo} alt="t0by" className="h-6" />
             </div>
-            <p className="text-gray-400 dark:text-gray-500">© 2025 t0by. All rights reserved.</p>
+            <p className="text-gray-200">© 2025 t0by. All rights reserved.</p>
           </div>
         </div>
       </footer>
