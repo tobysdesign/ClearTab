@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/components/theme-provider";
-// Logo imports will be added when new logos are provided
+import blackLogo from "@/assets/black_t0by.svg";
+import whiteLogo from "@/assets/white_t0by.svg";
 import { 
   CheckCircle, 
   Calendar, 
@@ -72,7 +73,7 @@ export default function Landing() {
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <div className="text-xl font-bold text-gray-900 dark:text-white">t0by</div>
+            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
           </a>
           <div className="flex items-center space-x-4">
             <Button
@@ -117,7 +118,7 @@ export default function Landing() {
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
-            <div className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">t0by</div>
+            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
@@ -256,7 +257,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold">t0by</span>
+              <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-6" />
             </div>
             <p className="text-gray-400 dark:text-gray-500">© 2025 t0by. All rights reserved.</p>
           </div>
