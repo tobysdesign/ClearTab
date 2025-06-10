@@ -71,10 +71,9 @@ export default function Landing() {
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src={t0byLogo} alt="t0by" className="w-8 h-8" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">t0by</span>
-          </div>
+          <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <img src={t0byLogo} alt="t0by" className="w-10 h-10" />
+          </a>
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
@@ -117,9 +116,9 @@ export default function Landing() {
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            t0by
-          </span>
+          <div className="flex justify-center mt-4">
+            <img src={t0byLogo} alt="t0by" className="w-20 h-20 md:w-24 md:h-24" />
+          </div>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
           Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimization 
@@ -173,7 +172,7 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                Why thousands of professionals choose ProductivityAI
+                Why thousands of professionals choose t0by
               </h2>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -229,7 +228,7 @@ export default function Landing() {
             Ready to transform your productivity?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-            Join thousands of professionals who have already revolutionized their workflow with ProductivityAI.
+            Join thousands of professionals who have already revolutionized their workflow with t0by.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -257,12 +256,10 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Zap className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">ProductivityAI</span>
+              <img src={t0byLogo} alt="t0by" className="w-8 h-8" />
+              <span className="text-xl font-bold">t0by</span>
             </div>
-            <p className="text-gray-400 dark:text-gray-500">© 2025 ProductivityAI. All rights reserved.</p>
+            <p className="text-gray-400 dark:text-gray-500">© 2025 t0by. All rights reserved.</p>
           </div>
         </div>
       </footer>
