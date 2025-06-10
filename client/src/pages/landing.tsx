@@ -71,10 +71,8 @@ export default function Landing() {
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">ProductivityAI</span>
+            <img src="/t0by.svg" alt="t0by" className="w-8 h-8" />
+            <span className="text-xl font-bold text-gray-900 dark:text-white">t0by</span>
           </div>
           <div className="flex items-center space-x-4">
             <Button
@@ -117,14 +115,14 @@ export default function Landing() {
           ✨ AI-Powered Productivity Platform
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-          Your Personal
+          Meet
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            Productivity Command Center
+            t0by
           </span>
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-          Streamline your workflow with intelligent task management, smart notes, calendar integration, 
-          and AI-powered insights. Everything you need to stay organized and productive.
+          Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimization 
+          designed for the modern professional.
         </p>
         <div className="flex justify-center">
           <Button 
