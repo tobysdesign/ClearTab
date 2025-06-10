@@ -8,7 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChatContext } from "@/hooks/use-chat-context";
 import { EmotionalStates } from "@/components/emotional-states";
-import { SmileFace } from "@/components/emotional-faces";
 import type { Task } from "@shared/schema";
 import { format } from "date-fns";
 import TaskEditModal from "@/components/task-edit-modal";
