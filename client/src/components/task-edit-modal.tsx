@@ -29,30 +29,49 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    if (task && isOpen) {
-      setTitle(task.title);
-      setDescription(task.description || "");
-      // Map old priority values to new ones
-      const priorityMap: Record<string, "todo" | "inprogress" | "review"> = {
-        "low": "todo",
-        "medium": "inprogress", 
-        "high": "review"
-      };
-      setPriority(priorityMap[task.priority] || "todo");
-      setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
+    if (isOpen) {
+      if (task) {
+        // Editing existing task
+        setTitle(task.title);
+        setDescription(task.description || "");
+        // Map old priority values to new ones
+        const priorityMap: Record<string, "todo" | "inprogress" | "review"> = {
+          "low": "todo",
+          "medium": "inprogress", 
+          "high": "review"
+        };
+        setPriority(priorityMap[task.priority] || "todo");
+        setDueDate(task.dueDate ? new Date(task.dueDate) : undefined);
+      } else {
+        // Creating new task - reset form
+        setTitle("");
+        setDescription("");
+        setPriority("todo");
+        setDueDate(undefined);
+      }
     }
   }, [task, isOpen]);
 
   const handleSave = () => {
-    if (!task) return;
-    
-    onSave({
-      id: task.id,
-      title,
-      description,
-      priority,
-      dueDate: dueDate || null,
-    });
+    if (task) {
+      // Editing existing task
+      onSave({
+        id: task.id,
+        title,
+        description,
+        priority,
+        dueDate: dueDate || null,
+      });
+    } else {
+      // Creating new task
+      onSave({
+        title,
+        description,
+        priority,
+        dueDate: dueDate || null,
+        completed: false,
+      });
+    }
     
     onClose();
   };
@@ -71,30 +90,32 @@ export default function TaskEditModal({ task, isOpen, onClose, onSave, onDelete,
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] [&>button]:hidden">
+      <DialogContent className="sm:max-w-[400px] [&>button]:hidden fixed right-4 top-1/2 -translate-y-1/2 left-auto transform-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-200">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-          <DialogTitle className="text-lg">Edit Task</DialogTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleDuplicate}>
-                <Copy className="mr-2 h-4 w-4" />
-                Duplicate
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DialogTitle className="text-lg">{task ? 'Edit Task' : 'New Task'}</DialogTitle>
+          {task && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleDuplicate}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </DialogHeader>
 
         <div className="space-y-4">

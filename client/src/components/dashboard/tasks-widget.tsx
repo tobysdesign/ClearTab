@@ -70,8 +70,15 @@ export default function TasksWidget() {
   };
 
   const handleSaveTask = (taskUpdate: Partial<Task>) => {
-    if (!taskUpdate.id) return;
-    updateTask.mutate(taskUpdate as Partial<Task> & { id: number });
+    if (taskUpdate.id) {
+      // Update existing task
+      updateTask.mutate(taskUpdate as Partial<Task> & { id: number });
+    } else {
+      // Create new task
+      createTask.mutate(taskUpdate);
+    }
+    setIsModalOpen(false);
+    setEditingTask(null);
   };
 
   const handleDeleteTask = (taskId: number) => {
