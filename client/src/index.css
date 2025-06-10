@@ -239,7 +239,7 @@ body > div[data-radix-portal] > div {
   }
 
   body {
-    @apply font-sans antialiased text-foreground overflow-hidden bg-background;
+    @apply font-sans antialiased text-foreground bg-background;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
