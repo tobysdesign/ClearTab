@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/components/theme-provider";
-import blackLogo from "@/assets/black_t0by.svg";
-import whiteLogo from "@/assets/white_t0by.svg";
 import { 
   CheckCircle, 
   Calendar, 
@@ -73,7 +71,9 @@ export default function Landing() {
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              t0by
+            </span>
           </a>
           <div className="flex items-center space-x-4">
             <Button
