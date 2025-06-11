@@ -100,8 +100,12 @@ export class GoogleCalendarService {
         id: cal.id, 
         summary: cal.summary,
         primary: cal.primary,
-        accessRole: cal.accessRole 
+        accessRole: cal.accessRole,
+        selected: cal.selected 
       })));
+      
+      // Also try to search for "Sotten" events specifically across all calendars
+      console.log('Searching specifically for "Sotten" events...');
 
       // Fetch events from all accessible calendars, not just primary
       const allEvents: any[] = [];
