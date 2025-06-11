@@ -161,8 +161,8 @@ export default function Landing() {
             >
               <div className="flex flex-col space-y-1.5 mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gray-900 dark:bg-white rounded-lg">
-                    <div className="text-white dark:text-gray-900">
+                  <div className="p-2 bg-white dark:bg-gray-900 rounded-lg">
+                    <div className="text-gray-900 dark:text-white">
                       {feature.icon}
                     </div>
                   </div>
