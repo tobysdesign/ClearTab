@@ -116,14 +116,14 @@ export default function Landing() {
           🚀 Early Access - Free Until Official Launch
         </Badge>
         <div className="mb-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-gray-300 mb-4">
             Meet
           </h1>
           <div className="flex justify-center">
             <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </div>
-        <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
+        <p className="text-xl text-gray-700 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
           A personal productivity board with honest AI guidance. Brain dump freely, organise thoughtfully, act purposefully.
         </p>
         <div className="flex justify-center">
@@ -143,10 +143,10 @@ export default function Landing() {
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">
             Thoughtful productivity, not overwhelming features
           </h2>
-          <p className="text-lg text-gray-700 dark:text-gray-100 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 dark:text-gray-400 max-w-2xl mx-auto">
             Transform scattered thoughts into purposeful action. AI that gives honest guidance, not endless encouragement.
           </p>
         </div>
@@ -166,11 +166,11 @@ export default function Landing() {
                       {feature.icon}
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white">{feature.title}</h3>
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-300">{feature.title}</h3>
                 </div>
               </div>
               <div>
-                <p className="text-gray-700 dark:text-gray-100">{feature.description}</p>
+                <p className="text-gray-700 dark:text-gray-400">{feature.description}</p>
               </div>
             </div>
           ))}
@@ -181,14 +181,14 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-300 mb-6">
                 Early access means you shape the future
               </h2>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <CheckCircle className="h-6 w-6 text-gray-900 dark:text-white mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700 dark:text-gray-100">{benefit}</p>
+                    <CheckCircle className="h-6 w-6 text-gray-900 dark:text-gray-300 mt-0.5 flex-shrink-0" />
+                    <p className="text-gray-700 dark:text-gray-400">{benefit}</p>
                   </div>
                 ))}
               </div>
