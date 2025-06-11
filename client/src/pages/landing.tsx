@@ -250,13 +250,69 @@ export default function Landing() {
                 </li>
               </ul>
             </div>
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600">
-              <div className="flex flex-col items-center justify-center h-64 text-center">
-                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-gray-500" />
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="ml-4 text-sm text-gray-500 dark:text-gray-400">Note Editor</span>
                 </div>
-                <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Writing Experience</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Rich text editor with<br />contextual highlighting</p>
+                <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <strong className="text-xs">B</strong>
+                  </button>
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <em className="text-xs">I</em>
+                  </button>
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <span className="text-xs underline">U</span>
+                  </button>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <span className="text-xs">#</span>
+                  </button>
+                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <span className="text-xs">•</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="min-h-64 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+                <div className="prose dark:prose-invert max-w-none">
+                  <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Project Ideas for Q2</h2>
+                  
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                    Had some thoughts during my morning walk about what we should focus on next quarter. 
+                    <span className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">Need to discuss with team</span> 
+                    the feasibility of these ideas.
+                  </p>
+                  
+                  <ul className="list-disc pl-6 space-y-2 mb-4">
+                    <li className="text-gray-700 dark:text-gray-300">
+                      <span className="bg-blue-200 dark:bg-blue-800 px-1 rounded">Task: Research competitor pricing</span> - 
+                      this could be crucial for our positioning
+                    </li>
+                    <li className="text-gray-700 dark:text-gray-300">
+                      User interview sessions - 
+                      <span className="bg-green-200 dark:bg-green-800 px-1 rounded">Schedule for next week</span>
+                    </li>
+                    <li className="text-gray-700 dark:text-gray-300">
+                      Mobile app prototype - still weighing the investment
+                    </li>
+                  </ul>
+                  
+                  <p className="text-gray-700 dark:text-gray-300">
+                    The highlighting system automatically detects actionable items and potential tasks. 
+                    Just write naturally and organize later.
+                  </p>
+                  
+                  <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                      💡 Contextual highlighting detected 3 potential tasks in this note
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
