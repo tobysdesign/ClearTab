@@ -101,6 +101,7 @@ export class MemStorage implements IStorage {
       id: 1,
       googleId: null,
       email: "user@example.com",
+      password: null,
       name: "Demo User",
       picture: null,
       accessToken: null,
@@ -108,13 +109,15 @@ export class MemStorage implements IStorage {
       tokenExpiry: null,
       googleCalendarConnected: false,
       lastCalendarSync: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     const user2: User = {
       id: 2,
       googleId: null,
       email: "bob@example.com",
+      password: null,
       name: "Bob Smith",
       picture: null,
       accessToken: null,
@@ -122,7 +125,8 @@ export class MemStorage implements IStorage {
       tokenExpiry: null,
       googleCalendarConnected: false,
       lastCalendarSync: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     
     this.users.set(1, user1);
@@ -209,6 +213,15 @@ export class MemStorage implements IStorage {
   async getUserByUsername(username: string): Promise<User | undefined> {
     for (const user of Array.from(this.users.values())) {
       if (user.email === username) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    for (const user of Array.from(this.users.values())) {
+      if (user.email === email) {
         return user;
       }
     }

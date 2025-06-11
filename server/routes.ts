@@ -748,26 +748,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user info from Google
       const googleUser = await googleCalendarService.getUserInfo(accessToken);
       
-      // Check if user exists by Google ID
-      let user = await storage.getUserByGoogleId(googleUser.id);
+      // For demo purposes, update the default user with Google Calendar connection
+      let user = await storage.getUser(DEFAULT_USER_ID);
       
       if (!user) {
-        // Create new user
-        user = await storage.createGoogleUser({
-          googleId: googleUser.id,
-          email: googleUser.email,
+        // Create default user if not exists
+        user = await storage.createUser({
           name: googleUser.name,
-          picture: googleUser.picture,
-          accessToken,
-          refreshToken
+          email: googleUser.email
         });
-      } else {
-        // Update existing user tokens
-        user = await storage.updateUserTokens(user.id, accessToken, refreshToken);
       }
 
-      // Mark Google Calendar as connected
-      await storage.updateUserTokens(user.id, accessToken, refreshToken);
+      // Update the user with Google Calendar connection and tokens
+      user = await storage.updateGoogleCalendarConnection(user.id, true, accessToken, refreshToken);
       
       res.redirect("/dashboard?connected=true");
     } catch (error) {
@@ -795,7 +788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = await storage.getUser(DEFAULT_USER_ID);
       if (user) {
-        await storage.updateUserTokens(user.id, "", "");
+        await storage.updateGoogleCalendarConnection(user.id, false, "", "");
       }
       res.json({ success: true });
     } catch (error) {
