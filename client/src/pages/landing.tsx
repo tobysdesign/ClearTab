@@ -142,10 +142,10 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Everything you need to stay productive
+            A thoughtful approach to productivity
           </h2>
           <p className="text-lg text-gray-700 dark:text-gray-100 max-w-2xl mx-auto">
-            Our comprehensive suite of tools adapts to your workflow and learns from your habits.
+            Brain dump to structured action. Privacy by design. AI guidance without the gushing compliments.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -174,7 +174,7 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                Why thousands of professionals choose t0by
+                Early access means you shape the future
               </h2>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -227,10 +227,10 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
-            Ready to transform your productivity?
+            Ready to experience mindful productivity?
           </h2>
           <p className="text-lg text-gray-700 dark:text-gray-100 mb-8">
-            Join thousands of professionals who have already revolutionised their workflow with t0by.
+            Be part of the early access community. Free access, earn credits through feedback, and help us build something genuinely useful.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
