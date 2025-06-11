@@ -115,12 +115,14 @@ export default function Landing() {
         <Badge variant="secondary" className="mb-4 bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
           🚀 Early Access - Free Until Official Launch
         </Badge>
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-          Meet
-          <div className="flex justify-center mt-4">
+        <div className="mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+            Meet
+          </h1>
+          <div className="flex justify-center">
             <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
-        </h1>
+        </div>
         <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
           A personal productivity board with honest AI guidance. Brain dump freely, organise thoughtfully, act purposefully.
         </p>
