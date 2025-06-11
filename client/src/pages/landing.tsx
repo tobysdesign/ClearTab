@@ -30,12 +30,12 @@ export default function Landing() {
     {
       icon: <FileText className="h-8 w-8 text-white" />,
       title: "Smart Notes",
-      description: "Rich writing experience with styles, AI-powered organization, and contextual highlighting for notes to be discussed or turned into tasks."
+      description: "Rich writing experience with styles, AI-powered organisation, and contextual highlighting for notes to be discussed or turned into tasks."
     },
     {
       icon: <CheckSquare className="h-8 w-8 text-white" />,
       title: "Task Management",
-      description: "Prioritize and track tasks with smart deadlines and progress monitoring."
+      description: "Prioritise and track tasks with smart deadlines and progress monitoring."
     },
     {
       icon: <Calendar className="h-8 w-8 text-white" />,
@@ -55,7 +55,7 @@ export default function Landing() {
     {
       icon: <Zap className="h-8 w-8 text-white" />,
       title: "AI Assistant",
-      description: "Conversational AI that learns your preferences and optimizes your workflow."
+      description: "Conversational AI that learns your preferences and optimises your workflow."
     }
   ];
 
@@ -230,7 +230,7 @@ export default function Landing() {
             Ready to transform your productivity?
           </h2>
           <p className="text-lg text-gray-700 dark:text-gray-100 mb-8">
-            Join thousands of professionals who have already revolutionized their workflow with t0by.
+            Join thousands of professionals who have already revolutionised their workflow with t0by.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
