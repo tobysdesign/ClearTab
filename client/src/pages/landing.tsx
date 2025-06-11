@@ -70,7 +70,7 @@ export default function Landing() {
   return (
     <div className="bg-white dark:bg-black transition-colors duration-300">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
+      <header className="border-b bg-white/80 dark:bg-black backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
