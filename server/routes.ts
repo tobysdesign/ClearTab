@@ -812,29 +812,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Convert to calendar widget format with proper timezone handling
           events = googleEvents.map(event => {
-            // Extract time directly from the ISO string to avoid timezone conversion issues
-            const extractTimeFromISO = (isoString: string) => {
-              // Extract time portion from ISO string like "2025-06-12T11:00:00+10:00"
-              const timePart = isoString.split('T')[1];
-              if (timePart) {
-                const time = timePart.split('+')[0].split('-')[0]; // Remove timezone offset
-                return time.substring(0, 5); // Return HH:MM format
+            // Use original Google Calendar datetime strings to preserve timezone
+            const extractTimeFromOriginal = (originalTime: any) => {
+              if (originalTime?.dateTime) {
+                // Handle datetime with timezone: "2025-06-12T11:00:00+10:00"
+                const timePart = originalTime.dateTime.split('T')[1];
+                if (timePart) {
+                  const time = timePart.split('+')[0].split('-')[0].split('Z')[0];
+                  return time.substring(0, 5); // Return HH:MM
+                }
+              } else if (originalTime?.date) {
+                // All-day event
+                return "00:00";
               }
               return "00:00";
             };
-            
-            const startISOString = event.startTime.toISOString();
+
+            const extractDateFromOriginal = (originalTime: any) => {
+              if (originalTime?.dateTime) {
+                return originalTime.dateTime.split('T')[0];
+              } else if (originalTime?.date) {
+                return originalTime.date;
+              }
+              return new Date().toISOString().split('T')[0];
+            };
             
             return {
               id: event.id,
               title: event.title,
-              date: startISOString.split('T')[0],
-              time: extractTimeFromISO(event.startTime.toString()),
+              date: extractDateFromOriginal(event.originalStartTime),
+              time: extractTimeFromOriginal(event.originalStartTime),
               type: "google-event",
               source: "google",
               description: event.description,
               location: event.location,
-              endTime: extractTimeFromISO(event.endTime.toString()),
+              endTime: extractTimeFromOriginal(event.originalEndTime),
               htmlLink: event.htmlLink
             };
           });

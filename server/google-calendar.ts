@@ -177,8 +177,10 @@ export class GoogleCalendarService {
         id: event.id!,
         title: event.summary || 'No Title',
         description: event.description ?? undefined,
-        startTime: new Date(event.start?.dateTime || event.start?.date || startDate),
-        endTime: new Date(event.end?.dateTime || event.end?.date || startDate),
+        startTime: event.start?.dateTime || event.start?.date || startDate,
+        endTime: event.end?.dateTime || event.end?.date || startDate,
+        originalStartTime: event.start,
+        originalEndTime: event.end,
         location: event.location ?? undefined,
         attendees: event.attendees?.map(a => a.email!).filter(Boolean),
         htmlLink: event.htmlLink ?? undefined
