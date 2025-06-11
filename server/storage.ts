@@ -6,7 +6,7 @@ import {
   type MemoryUsage, type InsertMemoryUsage
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -680,11 +680,7 @@ export class DatabaseStorage implements IStorage {
 
   async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
     return await db.select().from(emotionalMetadata)
-      .where(and(
-        eq(emotionalMetadata.userId, userId),
-        gte(emotionalMetadata.createdAt, startDate),
-        lte(emotionalMetadata.createdAt, endDate)
-      ));
+      .where(eq(emotionalMetadata.userId, userId));
   }
 
   async getMemoryUsage(): Promise<MemoryUsage | undefined> {

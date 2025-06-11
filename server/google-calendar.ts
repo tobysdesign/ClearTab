@@ -182,7 +182,7 @@ export class GoogleCalendarService {
         originalStartTime: event.start,
         originalEndTime: event.end,
         location: event.location ?? undefined,
-        attendees: event.attendees?.map(a => a.email!).filter(Boolean),
+        attendees: event.attendees?.map((attendee: { email?: string }) => attendee.email).filter(Boolean) as string[],
         htmlLink: event.htmlLink ?? undefined
       }));
     } catch (error) {
