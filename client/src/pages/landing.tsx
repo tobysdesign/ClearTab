@@ -156,7 +156,7 @@ export default function Landing() {
               key={index} 
               className="border-0 shadow-lg hover:shadow-xl transition-shadow rounded-lg p-6 overflow-hidden"
               style={{
-                backgroundColor: theme === 'dark' ? '#000000' : '#f9fafb'
+                backgroundColor: theme === 'dark' ? 'rgb(22, 14, 22)' : '#f9fafb'
               }}
             >
               <div className="flex flex-col space-y-1.5 mb-4">
