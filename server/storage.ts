@@ -247,9 +247,10 @@ export class MemStorage implements IStorage {
       accessToken: null,
       refreshToken: null,
       tokenExpiry: null,
-      googleCalendarConnected: null,
+      googleCalendarConnected: false,
       lastCalendarSync: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.users.set(id, user);
     return user;
@@ -266,6 +267,7 @@ export class MemStorage implements IStorage {
     const id = this.currentUserId++;
     const user: User = {
       id,
+      password: null,
       googleId: userData.googleId,
       email: userData.email,
       name: userData.name,
@@ -273,9 +275,10 @@ export class MemStorage implements IStorage {
       accessToken: userData.accessToken || null,
       refreshToken: userData.refreshToken || null,
       tokenExpiry: userData.accessToken ? new Date(Date.now() + 3600 * 1000) : null,
-      googleCalendarConnected: userData.accessToken ? true : null,
+      googleCalendarConnected: userData.accessToken ? true : false,
       lastCalendarSync: null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.users.set(id, user);
     return user;

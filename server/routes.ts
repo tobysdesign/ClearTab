@@ -16,15 +16,100 @@ const openai = new OpenAI({
 export async function registerRoutes(app: Express): Promise<Server> {
   const DEFAULT_USER_ID = 1; // Demo user
 
-  // Simple auth endpoint for development
-  app.get("/api/auth/user", (req, res) => {
-    // Return demo user for development
-    res.json({
-      id: 1,
-      name: "Demo User",
-      email: "demo@example.com",
-      picture: null
-    });
+  // Authentication endpoints
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+
+      // For demo purposes, use username as email for lookup
+      const user = await storage.getUserByEmail(username);
+      
+      if (!user || !user.password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // For demo purposes, simple password check (in production use bcrypt)
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      res.json({ 
+        id: user.id, 
+        name: user.name, 
+        email: user.email,
+        message: "Login successful" 
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/register", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(username);
+      if (existingUser) {
+        return res.status(400).json({ error: "User already exists" });
+      }
+
+      // Create new user (using username as both email and name for demo)
+      const newUser = await storage.createUser({
+        email: username,
+        name: username,
+        password: password
+      });
+
+      res.json({ 
+        id: newUser.id, 
+        name: newUser.name, 
+        email: newUser.email,
+        message: "Registration successful" 
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ error: "Registration failed" });
+    }
+  });
+
+  app.get("/api/user", async (req, res) => {
+    // For demo purposes, return the first user or demo user
+    try {
+      const users = Object.values((storage as any).users || {});
+      if (users.length > 0) {
+        const user = users[0] as any;
+        res.json({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          picture: user.picture
+        });
+      } else {
+        res.json({
+          id: 1,
+          name: "Demo User", 
+          email: "demo@example.com",
+          picture: null
+        });
+      }
+    } catch (error) {
+      res.json({
+        id: 1,
+        name: "Demo User",
+        email: "demo@example.com", 
+        picture: null
+      });
+    }
   });
 
   // Weather API using Tomorrow.io
