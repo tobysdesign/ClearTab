@@ -19,7 +19,8 @@ import {
   Shield,
   ArrowRight,
   Moon,
-  Sun
+  Sun,
+  Timer
 } from "lucide-react";
 
 export default function Landing() {
@@ -29,42 +30,42 @@ export default function Landing() {
   const features = [
     {
       icon: <FileText className="h-8 w-8" />,
-      title: "Smart Notes",
-      description: "Rich writing experience with styles, AI-powered organisation, and contextual highlighting for notes to be discussed or turned into tasks."
+      title: "Intelligent Writing",
+      description: "Powerful yet enjoyable writing experience that works as both a brain dump repository and structured content creator. Contextual highlighting transforms thoughts into actionable tasks."
     },
     {
       icon: <CheckSquare className="h-8 w-8" />,
-      title: "Task Management",
-      description: "Prioritise and track tasks with smart deadlines and progress monitoring."
-    },
-    {
-      icon: <Calendar className="h-8 w-8" />,
-      title: "Calendar Integration",
-      description: "Seamlessly sync with Google Calendar for unified schedule management."
-    },
-    {
-      icon: <TrendingUp className="h-8 w-8" />,
-      title: "Finance Tracking",
-      description: "Monitor income, expenses, and financial goals with intelligent insights."
-    },
-    {
-      icon: <Cloud className="h-8 w-8" />,
-      title: "Weather Insights",
-      description: "Real-time weather data to help plan your day effectively."
+      title: "Personal Productivity Board",
+      description: "Your unified dashboard for tasks, notes, and insights. Transform scattered thoughts into organised action items with contextual highlighting."
     },
     {
       icon: <Zap className="h-8 w-8" />,
-      title: "AI Assistant",
-      description: "Conversational AI that learns your preferences and optimises your workflow."
+      title: "Humanistic AI Companion",
+      description: "A wise ear that provides advice with emotional clarity. No ego inflation or false friendships—just thoughtful guidance when you need it."
+    },
+    {
+      icon: <Shield className="h-8 w-8" />,
+      title: "Privacy-Focused Memory",
+      description: "Optional contextual memory using Mem0 to retain only metadata. Cloud AI gets just enough context without making you identifiable."
+    },
+    {
+      icon: <Timer className="h-8 w-8" />,
+      title: "Auto-Deleting Chats",
+      description: "Conversations automatically delete after 3 days (customisable) with optional summaries. Your privacy is protected by design."
+    },
+    {
+      icon: <Users className="h-8 w-8" />,
+      title: "Community-Driven Roadmap",
+      description: "Chrome extension coming soon, then user votes steer development. Your feedback earns credits and shapes the product's evolution."
     }
   ];
 
   const benefits = [
-    "Increase productivity by 40% with AI-powered insights",
-    "Unified dashboard for all your productivity needs",
-    "Seamless integrations with Google Calendar and more",
-    "Advanced analytics and progress tracking",
-    "Enterprise-grade security and privacy"
+    "Early access completely free until official launch",
+    "Earn credits by providing feedback that shapes development",
+    "Privacy-first design with auto-deleting conversations",
+    "Humanistic AI that provides thoughtful guidance, not flattery",
+    "Community-driven roadmap where your votes matter"
   ];
 
   return (
@@ -111,8 +112,8 @@ export default function Landing() {
       </header>
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
-        <Badge variant="secondary" className="mb-4 bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100">
-          ✨ AI-Powered Productivity Platform
+        <Badge variant="secondary" className="mb-4 bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+          🚀 Early Access - Free Until Official Launch
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
@@ -121,8 +122,7 @@ export default function Landing() {
           </div>
         </h1>
         <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
-          Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimisation 
-          designed for the modern professional.
+          Your personal productivity board with a wise AI companion. A humanistic approach to AI assistance that provides advice with emotional clarity—not ego inflation or false friendships.
         </p>
         <div className="flex justify-center">
           <Button 
@@ -130,12 +130,12 @@ export default function Landing() {
             className="px-8 bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
             onClick={() => window.location.href = '/api/auth/google'}
           >
-            Start Free Trial with Google
+            Join Early Access with Google
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-200 mt-4">
-          Free 14-day trial • No credit card required • Cancel anytime
+          Early access is completely free • Provide feedback to earn credits • Help shape the product roadmap
         </p>
       </section>
       {/* Features Grid */}
@@ -190,7 +190,7 @@ export default function Landing() {
                   className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                   onClick={() => window.location.href = '/api/auth/google'}
                 >
-                  Start Your Free Trial
+                  Join Early Access
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -238,7 +238,7 @@ export default function Landing() {
               className="w-full sm:w-auto bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
               onClick={() => window.location.href = '/api/auth/google'}
             >
-              Start Free Trial
+              Join Early Access
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button 
