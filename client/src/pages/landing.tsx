@@ -150,7 +150,13 @@ export default function Landing() {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow rounded-lg bg-gray-50 dark:bg-slate-800 p-6 overflow-hidden">
+            <div 
+              key={index} 
+              className="border-0 shadow-lg hover:shadow-xl transition-shadow rounded-lg p-6 overflow-hidden"
+              style={{
+                backgroundColor: theme === 'dark' ? '#0f172a' : '#f9fafb'
+              }}
+            >
               <div className="flex flex-col space-y-1.5 mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gray-900 dark:bg-white rounded-lg">
