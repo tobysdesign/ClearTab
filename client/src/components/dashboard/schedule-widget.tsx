@@ -158,8 +158,8 @@ export default function ScheduleWidget() {
                     key={event.id}
                     className={`rounded-xl p-4 transition-all cursor-pointer relative ${
                       isCurrent 
-                        ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500' 
-                        : 'bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600/60'
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600' 
+                        : 'bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/60'
                     }`}
                   >
                     <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-gray-900 dark:text-white' : 'font-normal text-gray-800 dark:text-gray-200'}`}>

@@ -29,7 +29,7 @@ export default function CalendarWidget() {
   });
 
   const getEventColor = (index: number) => {
-    return index === 0 ? 'border-text-secondary' : 'border-text-muted';
+    return 'border-gray-300 dark:border-gray-600';
   };
 
   const handleEventClick = (event: CalendarEvent) => {
@@ -92,7 +92,7 @@ export default function CalendarWidget() {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 p-4 pt-0">
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
