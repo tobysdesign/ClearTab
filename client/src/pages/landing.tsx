@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/components/theme-provider";
-import blackLogo from "@/assets/logo/black_t0by.svg";
-import whiteLogo from "@/assets/logo/white_t0by.svg";
+import lightBgLogo from "@/assets/logo/Logo for light background.png";
+import darkBgLogo from "@/assets/logo/Logo for dark bg.png";
 import { 
   CheckCircle, 
   Calendar, 
@@ -73,7 +73,7 @@ export default function Landing() {
       <header className="border-b bg-white/80 dark:bg-black backdrop-blur-sm sticky top-0 z-50 transition-colors duration-300">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-8" />
+            <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-8" />
           </a>
           <div className="flex items-center space-x-4">
             <Button
@@ -117,7 +117,7 @@ export default function Landing() {
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
           Meet
           <div className="flex justify-center mt-4">
-            <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-16 md:h-20" />
+            <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-16 md:h-20" />
           </div>
         </h1>
         <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
@@ -257,7 +257,7 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src={theme === "dark" ? whiteLogo : blackLogo} alt="t0by" className="h-6" />
+              <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-6" />
             </div>
             <p className="text-gray-600 dark:text-gray-200">© 2025 t0by. All rights reserved.</p>
           </div>
