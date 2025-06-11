@@ -30,33 +30,33 @@ export default function Landing() {
   const features = [
     {
       icon: <FileText className="h-8 w-8" />,
-      title: "Intelligent Writing",
-      description: "Powerful yet enjoyable writing experience that works as both a brain dump repository and structured content creator. Contextual highlighting transforms thoughts into actionable tasks."
+      title: "Write freely, organise later",
+      description: "Brain dump without barriers. Rich text editor with contextual highlighting that turns scattered thoughts into structured tasks when you're ready."
     },
     {
       icon: <CheckSquare className="h-8 w-8" />,
-      title: "Personal Productivity Board",
-      description: "Your unified dashboard for tasks, notes, and insights. Transform scattered thoughts into organised action items with contextual highlighting."
+      title: "Everything in one view",
+      description: "Personal productivity board that adapts to how you work. Notes, tasks, calendar, and insights in a unified, resizable layout."
     },
     {
       icon: <Zap className="h-8 w-8" />,
-      title: "Humanistic AI Companion",
-      description: "A wise ear that provides advice with emotional clarity. No ego inflation or false friendships—just thoughtful guidance when you need it."
+      title: "Honest AI guidance",
+      description: "AI trained to be genuinely helpful, not endlessly encouraging. Provides clarity and perspective without inflating your ego or pretending to be your friend."
     },
     {
       icon: <Shield className="h-8 w-8" />,
-      title: "Privacy-Focused Memory",
-      description: "Optional contextual memory using Mem0 to retain only metadata. Cloud AI gets just enough context without making you identifiable."
+      title: "Privacy by design",
+      description: "Optional contextual memory stores only metadata, never raw content. Conversations auto-delete after 3 days (customisable). You remain unidentifiable."
     },
     {
       icon: <Timer className="h-8 w-8" />,
-      title: "Auto-Deleting Chats",
-      description: "Conversations automatically delete after 3 days (customisable) with optional summaries. Your privacy is protected by design."
+      title: "Your feedback shapes everything",
+      description: "Chrome extension coming soon, then your votes steer the roadmap. Early access feedback earns credits and directly influences development."
     },
     {
       icon: <Users className="h-8 w-8" />,
-      title: "Community-Driven Roadmap",
-      description: "Chrome extension coming soon, then user votes steer development. Your feedback earns credits and shapes the product's evolution."
+      title: "Early access advantage",
+      description: "Free until official launch. Be part of building something genuinely useful rather than feature-bloated. Quality over quantity."
     }
   ];
 
@@ -122,7 +122,7 @@ export default function Landing() {
           </div>
         </h1>
         <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
-          Your personal productivity board with a wise AI companion. A humanistic approach to AI assistance that provides advice with emotional clarity—not ego inflation or false friendships.
+          A personal productivity board with honest AI guidance. Brain dump freely, organise thoughtfully, act purposefully.
         </p>
         <div className="flex justify-center">
           <Button 
@@ -142,10 +142,10 @@ export default function Landing() {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            A thoughtful approach to productivity
+            Thoughtful productivity, not overwhelming features
           </h2>
           <p className="text-lg text-gray-700 dark:text-gray-100 max-w-2xl mx-auto">
-            Brain dump to structured action. Privacy by design. AI guidance without the gushing compliments.
+            Transform scattered thoughts into purposeful action. AI that gives honest guidance, not endless encouragement.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
