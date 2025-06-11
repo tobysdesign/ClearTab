@@ -76,9 +76,12 @@ export class GoogleCalendarService {
 
     const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
     
-    const now = new Date();
+    // Start from beginning of today to catch early morning events
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0); // Start from midnight today
+    
     const endDate = new Date();
-    endDate.setDate(now.getDate() + 30); // Next 30 days
+    endDate.setDate(startDate.getDate() + 30); // Next 30 days
 
     try {
       // Get authenticated user info
@@ -101,7 +104,7 @@ export class GoogleCalendarService {
           try {
             const response = await calendar.events.list({
               calendarId: cal.id,
-              timeMin: now.toISOString(),
+              timeMin: startDate.toISOString(),
               timeMax: endDate.toISOString(),
               maxResults: 50,
               singleEvents: true,
