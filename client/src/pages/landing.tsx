@@ -196,33 +196,100 @@ export default function Landing() {
               </div>
             </div>
             <div className="relative">
-              <div className="bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-8 text-gray-900 dark:text-white transition-colors duration-300">
-                <div className="flex items-center space-x-4 mb-6">
-                  <Users className="h-8 w-8 text-gray-900 dark:text-white" />
-                  <div>
-                    <p className="text-2xl font-bold">10,000+</p>
-                    <p className="text-gray-700 dark:text-gray-100">Active Users</p>
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 transition-colors duration-300">
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-gray-500" />
                   </div>
-                </div>
-                <div className="flex items-center space-x-4 mb-6">
-                  <Shield className="h-8 w-8 text-gray-900 dark:text-white" />
-                  <div>
-                    <p className="text-2xl font-bold">99.9%</p>
-                    <p className="text-gray-700 dark:text-gray-100">Uptime</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <TrendingUp className="h-8 w-8 text-gray-900 dark:text-white" />
-                  <div>
-                    <p className="text-2xl font-bold">40%</p>
-                    <p className="text-gray-700 dark:text-gray-100">Productivity Increase</p>
-                  </div>
+                  <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Product Screenshot</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Dashboard overview showing<br />notes, tasks, and AI chat</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+      
+      {/* Product Screenshots Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            See it in action
+          </h2>
+          <p className="text-lg text-gray-700 dark:text-gray-100 max-w-2xl mx-auto">
+            A glimpse of the thoughtful design and functionality you'll experience.
+          </p>
+        </div>
+        
+        <div className="space-y-16">
+          {/* Writing Experience Screenshot */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Rich writing that feels natural</h3>
+              <p className="text-gray-700 dark:text-gray-100 mb-6">
+                Write freely with our powerful editor. Contextual highlighting helps you spot important thoughts that could become tasks or projects.
+              </p>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Rich text formatting</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Contextual highlighting</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Brain dump to structure</span>
+                </li>
+              </ul>
+            </div>
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-gray-500" />
+                </div>
+                <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Writing Experience</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Rich text editor with<br />contextual highlighting</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* AI Chat Screenshot */}
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1 bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="flex flex-col items-center justify-center h-64 text-center">
+                <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-lg mb-4 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-gray-500" />
+                </div>
+                <p className="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">AI Conversation</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Honest guidance without<br />false encouragement</p>
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">AI that tells you the truth</h3>
+              <p className="text-gray-700 dark:text-gray-100 mb-6">
+                No endless positivity or fake friendships. Our AI provides thoughtful, honest guidance when you need clarity and perspective.
+              </p>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Emotional clarity</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Honest feedback</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Privacy-focused memory</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+      
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
