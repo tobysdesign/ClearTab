@@ -150,21 +150,21 @@ export default function Landing() {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-gray-900 backdrop-blur-sm">
-              <CardHeader>
+            <div key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow rounded-lg bg-gray-50 dark:bg-slate-800 p-6 overflow-hidden">
+              <div className="flex flex-col space-y-1.5 mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gray-900 dark:bg-white rounded-lg">
                     <div className="text-white dark:text-gray-900">
                       {feature.icon}
                     </div>
                   </div>
-                  <CardTitle className="text-lg text-gray-900 dark:text-white">{feature.title}</CardTitle>
+                  <h3 className="text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-white">{feature.title}</h3>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div>
                 <p className="text-gray-700 dark:text-gray-100">{feature.description}</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </section>
