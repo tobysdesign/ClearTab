@@ -87,6 +87,7 @@ export class GoogleCalendarService {
       // Get authenticated user info
       const userInfo = await this.getUserInfo(accessToken);
       console.log(`Calendar request for user: ${userInfo.email} (ID: ${userInfo.id})`);
+      console.log(`Fetching events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
       // List available calendars to find all accessible calendars
       const calendarList = await calendar.calendarList.list();
@@ -94,7 +95,8 @@ export class GoogleCalendarService {
       console.log(`Available calendars for ${userInfo.email}:`, calendars.map(cal => ({ 
         id: cal.id, 
         summary: cal.summary,
-        primary: cal.primary 
+        primary: cal.primary,
+        accessRole: cal.accessRole 
       })));
 
       // Fetch events from all accessible calendars, not just primary
@@ -124,10 +126,16 @@ export class GoogleCalendarService {
         }
       }
 
+      // Add detailed logging for all events found
+      console.log(`Total events found across all calendars: ${allEvents.length}`);
+      allEvents.forEach((event: any, index: number) => {
+        console.log(`Event ${index + 1}: "${event.summary}" at ${event.start?.dateTime || event.start?.date} from calendar: ${event.calendarSource}`);
+      });
+
       // Sort all events by start time
       allEvents.sort((a: any, b: any) => {
-        const aTime = new Date(a.start?.dateTime || a.start?.date || now);
-        const bTime = new Date(b.start?.dateTime || b.start?.date || now);
+        const aTime = new Date(a.start?.dateTime || a.start?.date || startDate);
+        const bTime = new Date(b.start?.dateTime || b.start?.date || startDate);
         return aTime.getTime() - bTime.getTime();
       });
 
@@ -135,8 +143,8 @@ export class GoogleCalendarService {
         id: event.id!,
         title: event.summary || 'No Title',
         description: event.description ?? undefined,
-        startTime: new Date(event.start?.dateTime || event.start?.date || now),
-        endTime: new Date(event.end?.dateTime || event.end?.date || now),
+        startTime: new Date(event.start?.dateTime || event.start?.date || startDate),
+        endTime: new Date(event.end?.dateTime || event.end?.date || startDate),
         location: event.location ?? undefined,
         attendees: event.attendees?.map(a => a.email!).filter(Boolean),
         htmlLink: event.htmlLink ?? undefined
