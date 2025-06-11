@@ -30,7 +30,7 @@ export default function Landing() {
     {
       icon: <FileText className="h-8 w-8 text-white" />,
       title: "Smart Notes",
-      description: "AI-powered note-taking with intelligent organization and search capabilities."
+      description: "Rich writing experience with styles, AI-powered organization, and contextual highlighting for notes to be discussed or turned into tasks."
     },
     {
       icon: <CheckSquare className="h-8 w-8 text-white" />,
