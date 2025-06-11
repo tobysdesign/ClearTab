@@ -431,11 +431,13 @@ export class MemStorage implements IStorage {
 
   async cleanupExpiredMessages(): Promise<void> {
     const now = new Date();
-    for (const [id, message] of this.chatMessages) {
+    const messagesToDelete: number[] = [];
+    this.chatMessages.forEach((message, id) => {
       if (message.expiresAt && message.expiresAt < now) {
-        this.chatMessages.delete(id);
+        messagesToDelete.push(id);
       }
-    }
+    });
+    messagesToDelete.forEach(id => this.chatMessages.delete(id));
   }
 
   async getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]> {
@@ -484,7 +486,7 @@ export class MemStorage implements IStorage {
   async incrementRetrievals(): Promise<MemoryUsage> {
     this.memoryUsageData = {
       ...this.memoryUsageData,
-      monthlyRetrievals: this.memoryUsageData.monthlyRetrievals + 1,
+      monthlyRetrievals: (this.memoryUsageData.monthlyRetrievals || 0) + 1,
       updatedAt: new Date()
     };
     return this.memoryUsageData;
@@ -678,9 +680,11 @@ export class DatabaseStorage implements IStorage {
 
   async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
     return await db.select().from(emotionalMetadata)
-      .where(eq(emotionalMetadata.userId, userId))
-      .where(eq(emotionalMetadata.createdAt, startDate))
-      .where(eq(emotionalMetadata.createdAt, endDate));
+      .where(and(
+        eq(emotionalMetadata.userId, userId),
+        gte(emotionalMetadata.createdAt, startDate),
+        lte(emotionalMetadata.createdAt, endDate)
+      ));
   }
 
   async getMemoryUsage(): Promise<MemoryUsage | undefined> {
@@ -700,7 +704,7 @@ export class DatabaseStorage implements IStorage {
     const [usage] = await db.select().from(memoryUsage);
     if (usage) {
       const [updated] = await db.update(memoryUsage)
-        .set({ monthlyRetrievals: usage.monthlyRetrievals + 1 })
+        .set({ monthlyRetrievals: (usage.monthlyRetrievals || 0) + 1 })
         .where(eq(memoryUsage.id, usage.id))
         .returning();
       return updated;
