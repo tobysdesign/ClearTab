@@ -21,7 +21,7 @@ export default function CalendarWidget() {
   });
 
   const getEventColor = (index: number) => {
-    return index === 0 ? 'border-text-secondary' : 'border-text-muted';
+    return index === 0 ? 'border-gray-600 dark:border-gray-400' : 'border-gray-400 dark:border-gray-600';
   };
 
   const handleEventClick = (event: CalendarEvent) => {
@@ -56,7 +56,11 @@ export default function CalendarWidget() {
             <div className="flex items-center justify-center space-x-1">
               <button
                 onClick={() => setActiveTab('today')}
-                className="px-2 py-1 text-xs font-normal transition-colors rounded bg-accent text-[#d4d4d4]"
+                className={`px-2 py-1 text-xs font-normal transition-colors rounded ${
+                  activeTab === 'today'
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
               >
                 Today
               </button>
@@ -64,8 +68,8 @@ export default function CalendarWidget() {
                 onClick={() => setActiveTab('tomorrow')}
                 className={`px-2 py-1 text-xs font-normal transition-colors rounded ${
                   activeTab === 'tomorrow'
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 Tomorrow
@@ -107,17 +111,17 @@ export default function CalendarWidget() {
                 <div 
                   key={event.id} 
                   onClick={() => handleEventClick(event)}
-                  className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-muted/50 rounded-r transition-colors cursor-pointer p-2 group flex items-center justify-between`}
+                  className={`border-l-2 ${getEventColor(index)} pl-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-r transition-colors cursor-pointer p-2 group flex items-center justify-between`}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-text-primary">
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {event.title}
                     </div>
-                    <div className="text-xs text-text-muted">
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
                       {event.time}
                     </div>
                   </div>
-                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
+                  <ExternalLink className="h-3 w-3 text-gray-600 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2" />
                 </div>
               ))}
             </div>
