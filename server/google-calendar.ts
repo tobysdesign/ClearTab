@@ -85,26 +85,50 @@ export class GoogleCalendarService {
       const userInfo = await this.getUserInfo(accessToken);
       console.log(`Calendar request for user: ${userInfo.email} (ID: ${userInfo.id})`);
 
-      // List available calendars first to verify access
+      // List available calendars to find all accessible calendars
       const calendarList = await calendar.calendarList.list();
-      console.log(`Available calendars for ${userInfo.email}:`, calendarList.data.items?.map(cal => ({ 
+      const calendars = calendarList.data.items || [];
+      console.log(`Available calendars for ${userInfo.email}:`, calendars.map(cal => ({ 
         id: cal.id, 
         summary: cal.summary,
         primary: cal.primary 
       })));
 
-      const response = await calendar.events.list({
-        calendarId: 'primary',
-        timeMin: now.toISOString(),
-        timeMax: endDate.toISOString(),
-        maxResults: 50,
-        singleEvents: true,
-        orderBy: 'startTime',
+      // Fetch events from all accessible calendars, not just primary
+      const allEvents: any[] = [];
+      for (const cal of calendars) {
+        if (cal.id && cal.accessRole && cal.accessRole !== 'freeBusyReader') {
+          try {
+            const response = await calendar.events.list({
+              calendarId: cal.id,
+              timeMin: now.toISOString(),
+              timeMax: endDate.toISOString(),
+              maxResults: 50,
+              singleEvents: true,
+              orderBy: 'startTime',
+            });
+            
+            const events = response.data.items || [];
+            // Add calendar source info to each event
+            events.forEach((event: any) => {
+              event.calendarSource = cal.summary || cal.id;
+              event.calendarId = cal.id;
+            });
+            allEvents.push(...events);
+          } catch (calError: any) {
+            console.log(`Could not access calendar ${cal.summary}: ${calError.message}`);
+          }
+        }
+      }
+
+      // Sort all events by start time
+      allEvents.sort((a: any, b: any) => {
+        const aTime = new Date(a.start?.dateTime || a.start?.date || now);
+        const bTime = new Date(b.start?.dateTime || b.start?.date || now);
+        return aTime.getTime() - bTime.getTime();
       });
 
-      const events = response.data.items || [];
-      
-      return events.map(event => ({
+      return allEvents.map((event: any) => ({
         id: event.id!,
         title: event.summary || 'No Title',
         description: event.description ?? undefined,
