@@ -85,7 +85,7 @@ export class GoogleCalendarService {
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
     
     const endDate = new Date();
-    endDate.setDate(startDate.getDate() + 7); // Next 7 days for faster response
+    endDate.setDate(startDate.getDate() + 14); // Next 14 days to catch more recurring events
 
     try {
       // Get authenticated user info
@@ -113,24 +113,38 @@ export class GoogleCalendarService {
         if (cal.id && cal.accessRole && cal.accessRole !== 'freeBusyReader') {
           try {
             console.log(`Checking calendar: ${cal.summary} (${cal.id})`);
-            const response = await calendar.events.list({
+            const response: any = await calendar.events.list({
               calendarId: cal.id,
               timeMin: yesterdayStart.toISOString(),
               timeMax: endDate.toISOString(),
-              maxResults: 50,
+              maxResults: 100,
               singleEvents: true,
               orderBy: 'startTime',
               showDeleted: false
             });
             
-            console.log(`Found ${response.data.items?.length || 0} events in calendar: ${cal.summary}`);
+            console.log(`Found ${response.data?.items?.length || 0} events in calendar: ${cal.summary}`);
             
-            const events = response.data.items || [];
-            // Log each event found in this calendar
+            const events = response.data?.items || [];
+            // Log each event found in this calendar with more detail
             events.forEach((event: any, idx: number) => {
-              console.log(`  Event ${idx + 1} in ${cal.summary}: "${event.summary}" - ${event.start?.dateTime || event.start?.date}`);
-              if (event.summary && event.summary.toLowerCase().includes('sotten')) {
-                console.log(`  --> Found Sotten event! Full details:`, JSON.stringify(event, null, 2));
+              const startTime = event.start?.dateTime || event.start?.date;
+              const hour = event.start?.dateTime ? new Date(event.start.dateTime).getHours() : null;
+              console.log(`  Event ${idx + 1} in ${cal.summary}: "${event.summary}" - ${startTime} (hour: ${hour})`);
+              
+              // Check for various possible matches including undefined/empty titles and 5am timing
+              if (
+                (event.summary && (
+                  event.summary.toLowerCase().includes('sotten') ||
+                  event.summary.toLowerCase().includes('5am') ||
+                  event.summary.toLowerCase().includes('morning')
+                )) ||
+                !event.summary ||
+                event.summary === 'undefined' ||
+                (hour !== null && (hour === 5 || hour === 4 || hour === 6)) // Check around 5am
+              ) {
+                console.log(`  --> POTENTIAL MATCH! Title: "${event.summary}", Time: ${startTime}, Hour: ${hour}`);
+                console.log(`  --> Full event details:`, JSON.stringify(event, null, 2));
               }
             });
             
