@@ -826,7 +826,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         } catch (error) {
           console.error("Google Calendar sync error:", error);
-          // Return empty array if Google Calendar fails - no fallback data
+          // If it's an API not enabled error, provide clear feedback
+          if (error.message && error.message.includes('Calendar API has not been used')) {
+            return res.status(503).json({ 
+              error: "Google Calendar API not enabled",
+              message: "Please enable the Google Calendar API in your Google Cloud Console",
+              helpUrl: "https://console.developers.google.com/apis/api/calendar-json.googleapis.com"
+            });
+          }
           events = [];
         }
       } else {
