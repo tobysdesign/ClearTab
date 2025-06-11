@@ -24,6 +24,7 @@ export interface IStorage {
     refreshToken?: string;
   }): Promise<User>;
   updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User>;
+  updateGoogleCalendarConnection(id: number, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User>;
   
   // Notes methods
   getNotesByUserId(userId: number): Promise<Note[]>;
@@ -278,6 +279,25 @@ export class MemStorage implements IStorage {
       accessToken,
       refreshToken: refreshToken || user.refreshToken,
       tokenExpiry: new Date(Date.now() + 3600 * 1000)
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateGoogleCalendarConnection(id: number, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    const updatedUser: User = {
+      ...user,
+      googleCalendarConnected: connected,
+      accessToken: accessToken || user.accessToken,
+      refreshToken: refreshToken || user.refreshToken,
+      tokenExpiry: accessToken ? new Date(Date.now() + 3600 * 1000) : user.tokenExpiry,
+      lastCalendarSync: connected ? new Date() : user.lastCalendarSync
     };
     
     this.users.set(id, updatedUser);
