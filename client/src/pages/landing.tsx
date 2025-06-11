@@ -266,19 +266,21 @@ export default function Landing() {
                 <div className="prose dark:prose-invert max-w-none">
                   <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Project Ideas for Q2</h2>
                   
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">
-                    Had some thoughts during my morning walk about what we should focus on next quarter. 
-                    <span className="bg-blue-100 dark:bg-blue-900 px-1 rounded relative">
-                      Need to discuss with team
-                      {/* Floating contextual menu */}
-                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg z-10 flex items-center gap-2">
-                        <button className="hover:bg-gray-700 px-2 py-1 rounded">💬 Discussion</button>
-                        <button className="hover:bg-gray-700 px-2 py-1 rounded">📋 Task</button>
-                        <button className="hover:bg-gray-700 px-2 py-1 rounded">📅 Schedule</button>
-                      </div>
-                    </span> 
-                    the feasibility of these ideas.
-                  </p>
+                  <div className="text-gray-700 dark:text-gray-300 mb-4 relative">
+                    <p className="mb-0">
+                      Had some thoughts during my morning walk about what we should focus on next quarter. 
+                      <span className="bg-blue-100 dark:bg-blue-900 px-1 rounded">
+                        Need to discuss with team
+                      </span> 
+                      the feasibility of these ideas.
+                    </p>
+                    {/* Floating contextual menu */}
+                    <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg z-10 flex items-center gap-2">
+                      <button className="hover:bg-gray-700 px-2 py-1 rounded">💬 Discussion</button>
+                      <button className="hover:bg-gray-700 px-2 py-1 rounded">📋 Task</button>
+                      <button className="hover:bg-gray-700 px-2 py-1 rounded">📅 Schedule</button>
+                    </div>
+                  </div>
                   
                   <ul className="list-disc pl-6 space-y-2 mb-4">
                     <li className="text-gray-700 dark:text-gray-300">
