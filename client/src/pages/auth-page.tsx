@@ -2,7 +2,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { loginSchema, registerSchema } from "@shared/schema";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"), 
+  password: z.string().min(1, "Password is required")
+});
+
+const registerSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters")
+});
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -12,7 +22,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Bot } from "lucide-react";
-import { z } from "zod";
 
 type LoginData = z.infer<typeof loginSchema>;
 type RegisterData = z.infer<typeof registerSchema>;
@@ -34,17 +43,27 @@ export default function AuthPage() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
+      console.log("Attempting login with:", data);
       const res = await apiRequest("POST", "/api/login", data);
-      return res.json();
+      const result = await res.json();
+      console.log("Login response:", result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Login successful:", data);
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${data.name}!`,
+        variant: "default",
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setLocation("/");
     },
     onError: (error: Error) => {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: error.message || "Please check your credentials and try again",
         variant: "destructive",
       });
     }
@@ -52,17 +71,27 @@ export default function AuthPage() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
+      console.log("Attempting registration with:", data);
       const res = await apiRequest("POST", "/api/register", data);
-      return res.json();
+      const result = await res.json();
+      console.log("Registration response:", result);
+      return result;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setLocation("/");
+    onSuccess: (data) => {
+      console.log("Registration successful:", data);
+      toast({
+        title: "Registration successful",
+        description: `Welcome, ${data.name}! You can now sign in.`,
+        variant: "default",
+      });
+      setActiveTab("login"); // Switch to login tab after successful registration
+      registerForm.reset(); // Clear the form
     },
     onError: (error: Error) => {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: error.message || "Please try again with different credentials",
         variant: "destructive",
       });
     }
