@@ -250,7 +250,7 @@ export default function Landing() {
                 </li>
               </ul>
             </div>
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg relative">
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -258,39 +258,29 @@ export default function Landing() {
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span className="ml-4 text-sm text-gray-500 dark:text-gray-400">Note Editor</span>
                 </div>
-                <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <strong className="text-xs">B</strong>
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <em className="text-xs">I</em>
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <span className="text-xs underline">U</span>
-                  </button>
-                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
-                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <span className="text-xs">#</span>
-                  </button>
-                  <button className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <span className="text-xs">•</span>
-                  </button>
-                </div>
               </div>
               
-              <div className="min-h-64 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <div className="min-h-64 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 relative">
                 <div className="prose dark:prose-invert max-w-none">
                   <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Project Ideas for Q2</h2>
                   
                   <p className="text-gray-700 dark:text-gray-300 mb-4">
                     Had some thoughts during my morning walk about what we should focus on next quarter. 
-                    <span className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">Need to discuss with team</span> 
+                    <span className="bg-blue-100 dark:bg-blue-900 px-1 rounded relative">
+                      Need to discuss with team
+                      {/* Floating contextual menu */}
+                      <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg z-10 flex items-center gap-2">
+                        <button className="hover:bg-gray-700 px-2 py-1 rounded">💬 Discussion</button>
+                        <button className="hover:bg-gray-700 px-2 py-1 rounded">📋 Task</button>
+                        <button className="hover:bg-gray-700 px-2 py-1 rounded">📅 Schedule</button>
+                      </div>
+                    </span> 
                     the feasibility of these ideas.
                   </p>
                   
                   <ul className="list-disc pl-6 space-y-2 mb-4">
                     <li className="text-gray-700 dark:text-gray-300">
-                      <span className="bg-blue-200 dark:bg-blue-800 px-1 rounded">Task: Research competitor pricing</span> - 
+                      <span className="bg-blue-200 dark:bg-blue-800 px-1 rounded">Research competitor pricing</span> - 
                       this could be crucial for our positioning
                     </li>
                     <li className="text-gray-700 dark:text-gray-300">
@@ -302,10 +292,37 @@ export default function Landing() {
                     </li>
                   </ul>
                   
-                  <p className="text-gray-700 dark:text-gray-300">
-                    The highlighting system automatically detects actionable items and potential tasks. 
-                    Just write naturally and organize later.
+                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                    <span className="text-gray-400">/</span> Type / for commands or just write naturally...
                   </p>
+                  
+                  {/* Slash command menu */}
+                  <div className="absolute bottom-16 left-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg p-2 w-64 z-20">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">Quick Commands</div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
+                        <span className="text-blue-500">📝</span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">Add Task</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Create a new task</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
+                        <span className="text-green-500">📅</span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">Schedule</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Add to calendar</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
+                        <span className="text-purple-500">💭</span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">AI Insight</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Get AI perspective</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-blue-500">
                     <p className="text-sm text-gray-600 dark:text-gray-400 italic">
