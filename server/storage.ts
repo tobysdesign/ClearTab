@@ -498,6 +498,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
   async getUserByGoogleId(googleId: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
     return user;
@@ -539,6 +544,29 @@ export class DatabaseStorage implements IStorage {
       accessToken,
       tokenExpiry: new Date(Date.now() + 3600 * 1000)
     };
+    if (refreshToken) {
+      updateData.refreshToken = refreshToken;
+    }
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateGoogleCalendarConnection(id: number, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User> {
+    const updateData: any = {
+      googleCalendarConnected: connected,
+      lastCalendarSync: connected ? new Date() : null
+    };
+    
+    if (accessToken) {
+      updateData.accessToken = accessToken;
+      updateData.tokenExpiry = new Date(Date.now() + 3600 * 1000);
+    }
+    
     if (refreshToken) {
       updateData.refreshToken = refreshToken;
     }
