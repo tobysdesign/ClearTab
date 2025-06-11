@@ -221,10 +221,10 @@ export default function Landing() {
       {/* Product Screenshots Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">
             See it in action
           </h2>
-          <p className="text-lg text-gray-700 dark:text-gray-100 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 dark:text-gray-400 max-w-2xl mx-auto">
             A glimpse of the thoughtful design and functionality you'll experience.
           </p>
         </div>
@@ -233,11 +233,11 @@ export default function Landing() {
           {/* Writing Experience Screenshot */}
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Rich writing that feels natural</h3>
-              <p className="text-gray-700 dark:text-gray-100 mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-300 mb-4">Rich writing that feels natural</h3>
+              <p className="text-gray-700 dark:text-gray-400 mb-6">
                 Write freely with our powerful editor. Contextual highlighting helps you spot important thoughts that could become tasks or projects.
               </p>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <span>Rich text formatting</span>
@@ -264,9 +264,9 @@ export default function Landing() {
               
               <div className="min-h-64 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 relative">
                 <div className="prose dark:prose-invert max-w-none">
-                  <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Project Ideas for Q2</h2>
+                  <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-300">Project Ideas for Q2</h2>
                   
-                  <div className="text-gray-700 dark:text-gray-300 mb-4 relative">
+                  <div className="text-gray-700 dark:text-gray-400 mb-4 relative">
                     <p className="mb-0">
                       Had some thoughts during my morning walk about what we should focus on next quarter. 
                       <span className="bg-blue-100 dark:bg-blue-900 px-1 rounded">
@@ -283,20 +283,20 @@ export default function Landing() {
                   </div>
                   
                   <ul className="list-disc pl-6 space-y-2 mb-4">
-                    <li className="text-gray-700 dark:text-gray-300">
+                    <li className="text-gray-700 dark:text-gray-400">
                       <span className="bg-blue-200 dark:bg-blue-800 px-1 rounded">Research competitor pricing</span> - 
                       this could be crucial for our positioning
                     </li>
-                    <li className="text-gray-700 dark:text-gray-300">
+                    <li className="text-gray-700 dark:text-gray-400">
                       User interview sessions - 
                       <span className="bg-green-200 dark:bg-green-800 px-1 rounded">Schedule for next week</span>
                     </li>
-                    <li className="text-gray-700 dark:text-gray-300">
+                    <li className="text-gray-700 dark:text-gray-400">
                       Mobile app prototype - still weighing the investment
                     </li>
                   </ul>
                   
-                  <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  <p className="text-gray-700 dark:text-gray-400 mb-4">
                     <span className="text-gray-400">/</span> Type / for commands or just write naturally...
                   </p>
                   
@@ -307,21 +307,21 @@ export default function Landing() {
                       <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <span className="text-blue-500">📝</span>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">Add Task</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-300">Add Task</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Create a new task</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <span className="text-green-500">📅</span>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">Schedule</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-300">Schedule</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Add to calendar</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer">
                         <span className="text-purple-500">💭</span>
                         <div>
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">AI Insight</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-300">AI Insight</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">Get AI perspective</div>
                         </div>
                       </div>
@@ -350,11 +350,11 @@ export default function Landing() {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">AI that tells you the truth</h3>
-              <p className="text-gray-700 dark:text-gray-100 mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-300 mb-4">AI that tells you the truth</h3>
+              <p className="text-gray-700 dark:text-gray-400 mb-6">
                 No endless positivity or fake friendships. Our AI provides thoughtful, honest guidance when you need clarity and perspective.
               </p>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <span>Emotional clarity</span>
