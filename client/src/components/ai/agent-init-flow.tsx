@@ -122,7 +122,7 @@ export default function AgentInitFlow({ isOpen, onClose }: AgentInitFlowProps) {
                 <ul className="space-y-2 text-xs text-text-secondary">
                   <li className="flex items-center space-x-2">
                     <Check className="h-3 w-3 text-text-muted" />
-                    <span>Create and organize notes and tasks</span>
+                    <span>Create and organise notes and tasks</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Check className="h-3 w-3 text-text-muted" />

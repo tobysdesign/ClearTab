@@ -121,7 +121,7 @@ export default function Landing() {
           </div>
         </h1>
         <p className="text-xl text-gray-700 dark:text-gray-100 mb-8 max-w-3xl mx-auto">
-          Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimization 
+          Your AI-powered productivity companion. Smart task management, intelligent scheduling, and seamless workflow optimisation 
           designed for the modern professional.
         </p>
         <div className="flex justify-center">
