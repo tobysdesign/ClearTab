@@ -376,10 +376,10 @@ export default function Landing() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-300 mb-6">
             Ready to experience mindful productivity?
           </h2>
-          <p className="text-lg text-gray-700 dark:text-gray-100 mb-8">
+          <p className="text-lg text-gray-700 dark:text-gray-400 mb-8">
             Be part of the early access community. Free access, earn credits through feedback, and help us build something genuinely useful.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -403,13 +403,13 @@ export default function Landing() {
         </div>
       </section>
       {/* Footer */}
-      <footer className="bg-gray-200 dark:bg-gray-950 text-gray-900 dark:text-white py-12 transition-colors duration-300">
+      <footer className="bg-gray-200 dark:bg-gray-950 text-gray-900 dark:text-gray-300 py-12 transition-colors duration-300">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <img src={theme === "dark" ? darkBgLogo : lightBgLogo} alt="t0by" className="h-6" />
             </div>
-            <p className="text-gray-600 dark:text-gray-200">© 2025 t0by. All rights reserved.</p>
+            <p className="text-gray-600 dark:text-gray-400">© 2025 t0by. All rights reserved.</p>
           </div>
         </div>
       </footer>
