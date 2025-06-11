@@ -150,7 +150,7 @@ export default function Landing() {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-gray-900 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-gray-900 dark:bg-white rounded-lg">
