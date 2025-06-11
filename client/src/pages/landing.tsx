@@ -28,32 +28,32 @@ export default function Landing() {
 
   const features = [
     {
-      icon: <FileText className="h-8 w-8 text-white" />,
+      icon: <FileText className="h-8 w-8" />,
       title: "Smart Notes",
       description: "Rich writing experience with styles, AI-powered organisation, and contextual highlighting for notes to be discussed or turned into tasks."
     },
     {
-      icon: <CheckSquare className="h-8 w-8 text-white" />,
+      icon: <CheckSquare className="h-8 w-8" />,
       title: "Task Management",
       description: "Prioritise and track tasks with smart deadlines and progress monitoring."
     },
     {
-      icon: <Calendar className="h-8 w-8 text-white" />,
+      icon: <Calendar className="h-8 w-8" />,
       title: "Calendar Integration",
       description: "Seamlessly sync with Google Calendar for unified schedule management."
     },
     {
-      icon: <TrendingUp className="h-8 w-8 text-white" />,
+      icon: <TrendingUp className="h-8 w-8" />,
       title: "Finance Tracking",
       description: "Monitor income, expenses, and financial goals with intelligent insights."
     },
     {
-      icon: <Cloud className="h-8 w-8 text-white" />,
+      icon: <Cloud className="h-8 w-8" />,
       title: "Weather Insights",
       description: "Real-time weather data to help plan your day effectively."
     },
     {
-      icon: <Zap className="h-8 w-8 text-white" />,
+      icon: <Zap className="h-8 w-8" />,
       title: "AI Assistant",
       description: "Conversational AI that learns your preferences and optimises your workflow."
     }
