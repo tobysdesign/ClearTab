@@ -80,8 +80,12 @@ export class GoogleCalendarService {
     const startDate = new Date();
     startDate.setHours(0, 0, 0, 0); // Start from midnight today
     
+    // Also check events from yesterday to catch any timezone issues
+    const yesterdayStart = new Date(startDate);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    
     const endDate = new Date();
-    endDate.setDate(startDate.getDate() + 30); // Next 30 days
+    endDate.setDate(startDate.getDate() + 7); // Next 7 days for faster response
 
     try {
       // Get authenticated user info
@@ -104,16 +108,28 @@ export class GoogleCalendarService {
       for (const cal of calendars) {
         if (cal.id && cal.accessRole && cal.accessRole !== 'freeBusyReader') {
           try {
+            console.log(`Checking calendar: ${cal.summary} (${cal.id})`);
             const response = await calendar.events.list({
               calendarId: cal.id,
-              timeMin: startDate.toISOString(),
+              timeMin: yesterdayStart.toISOString(),
               timeMax: endDate.toISOString(),
               maxResults: 50,
               singleEvents: true,
               orderBy: 'startTime',
+              showDeleted: false
             });
             
+            console.log(`Found ${response.data.items?.length || 0} events in calendar: ${cal.summary}`);
+            
             const events = response.data.items || [];
+            // Log each event found in this calendar
+            events.forEach((event: any, idx: number) => {
+              console.log(`  Event ${idx + 1} in ${cal.summary}: "${event.summary}" - ${event.start?.dateTime || event.start?.date}`);
+              if (event.summary && event.summary.toLowerCase().includes('sotten')) {
+                console.log(`  --> Found Sotten event! Full details:`, JSON.stringify(event, null, 2));
+              }
+            });
+            
             // Add calendar source info to each event
             events.forEach((event: any) => {
               event.calendarSource = cal.summary || cal.id;
