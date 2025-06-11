@@ -11,7 +11,6 @@ import { AIChatbotFace } from "@/components/ai-chatbot-face";
 import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
-import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 import StyleGuide from "@/pages/style-guide-fixed";
 import SilkTest from "@/pages/silk-test";
@@ -20,8 +19,7 @@ import SettingsModal from "@/components/settings-modal";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={AuthPage} />
-      <Route path="/landing" component={Landing} />
+      <Route path="/" component={Landing} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/style" component={StyleGuide} />
       <Route path="/silk" component={SilkTest} />
