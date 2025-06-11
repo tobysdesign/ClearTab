@@ -81,13 +81,20 @@ export class GoogleCalendarService {
     endDate.setDate(now.getDate() + 30); // Next 30 days
 
     try {
-      // First get the authenticated user's email to find their primary calendar
+      // Get authenticated user info
       const userInfo = await this.getUserInfo(accessToken);
-      const userEmail = userInfo.email;
-      console.log(`Fetching calendar for authenticated user: ${userEmail}`);
+      console.log(`Calendar request for user: ${userInfo.email} (ID: ${userInfo.id})`);
+
+      // List available calendars first to verify access
+      const calendarList = await calendar.calendarList.list();
+      console.log(`Available calendars for ${userInfo.email}:`, calendarList.data.items?.map(cal => ({ 
+        id: cal.id, 
+        summary: cal.summary,
+        primary: cal.primary 
+      })));
 
       const response = await calendar.events.list({
-        calendarId: 'primary', // Use 'primary' which should be the authenticated user's primary calendar
+        calendarId: 'primary',
         timeMin: now.toISOString(),
         timeMax: endDate.toISOString(),
         maxResults: 50,
