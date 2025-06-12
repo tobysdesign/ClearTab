@@ -14,25 +14,28 @@ export default function Dashboard() {
   const { isChatOpen, openChat, closeChat, initialMessage } = useKeyboardShortcuts();
   const { isChatOpen: chatContextOpen, setIsChatOpen } = useChatContext();
 
-  // Check authentication status
+  // Skip authentication in development mode
+  const isDevelopment = import.meta.env.DEV;
+  
   const { data: user, isLoading, error } = useQuery({
     queryKey: ["/api/user"],
     retry: false,
+    enabled: !isDevelopment, // Skip auth check in development
   });
 
   useEffect(() => {
     document.title = "AI Productivity Dashboard";
   }, []);
 
-  // Redirect to landing page if not authenticated
+  // Only redirect if not in development mode
   useEffect(() => {
-    if (!isLoading && (!user || error)) {
+    if (!isDevelopment && !isLoading && (!user || error)) {
       setLocation("/");
     }
-  }, [user, isLoading, error, setLocation]);
+  }, [user, isLoading, error, setLocation, isDevelopment]);
 
-  // Show loading while checking authentication
-  if (isLoading) {
+  // Show loading while checking authentication (skip in development)
+  if (!isDevelopment && isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-lg">Loading...</div>
@@ -40,8 +43,8 @@ export default function Dashboard() {
     );
   }
 
-  // Don't render dashboard if not authenticated
-  if (!user || error) {
+  // Don't render dashboard if not authenticated (skip in development)
+  if (!isDevelopment && (!user || error)) {
     return null;
   }
 

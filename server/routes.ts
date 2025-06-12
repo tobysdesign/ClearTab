@@ -878,6 +878,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Calendar sync status endpoint
   app.get("/api/calendar/status", async (req, res) => {
     try {
+      // Return mock connection status in development mode
+      if (process.env.NODE_ENV === 'development') {
+        const status: CalendarSyncStatus = {
+          connected: true,
+          lastSync: new Date(),
+          eventCount: 4
+        };
+        return res.json(status);
+      }
+
       const user = await storage.getUser(DEFAULT_USER_ID);
       const status: CalendarSyncStatus = {
         connected: user?.googleCalendarConnected || false,
@@ -905,6 +915,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Calendar events endpoint with Google Calendar integration
   app.get("/api/calendar", async (req, res) => {
     try {
+      // Return mock data in development mode for faster iteration
+      if (process.env.NODE_ENV === 'development') {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+
+        const mockEvents = [
+          {
+            id: "mock-1",
+            title: "Daily Standup",
+            date: today.toISOString().split('T')[0],
+            time: "09:00",
+            type: "meeting",
+            source: "mock",
+            description: "Daily team standup meeting",
+            location: "Conference Room A",
+            endTime: "09:30",
+            htmlLink: "#"
+          },
+          {
+            id: "mock-2", 
+            title: "Project Review",
+            date: today.toISOString().split('T')[0],
+            time: "14:00",
+            type: "meeting",
+            source: "mock",
+            description: "Review current project progress and blockers",
+            location: "Zoom",
+            endTime: "15:00",
+            htmlLink: "#"
+          },
+          {
+            id: "mock-3",
+            title: "Design Workshop",
+            date: tomorrow.toISOString().split('T')[0],
+            time: "10:30",
+            type: "workshop",
+            source: "mock",
+            description: "UI/UX design workshop for new features",
+            location: "Design Studio",
+            endTime: "12:00",
+            htmlLink: "#"
+          },
+          {
+            id: "mock-4",
+            title: "Client Presentation",
+            date: nextWeek.toISOString().split('T')[0],
+            time: "15:30",
+            type: "presentation",
+            source: "mock",
+            description: "Present final deliverables to client",
+            location: "Client Office",
+            endTime: "16:30",
+            htmlLink: "#"
+          }
+        ];
+
+        return res.json(mockEvents);
+      }
+
       const user = await storage.getUser(DEFAULT_USER_ID);
       let events: any[] = [];
 
