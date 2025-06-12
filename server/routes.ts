@@ -83,32 +83,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/user", async (req, res) => {
-    // For demo purposes, return the first user or demo user
     try {
-      const users = Object.values((storage as any).users || {});
-      if (users.length > 0) {
-        const user = users[0] as any;
-        res.json({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          picture: user.picture
-        });
-      } else {
-        res.json({
-          id: 1,
-          name: "Demo User", 
-          email: "demo@example.com",
-          picture: null
-        });
+      // Check if user is authenticated via session
+      const session = req.session as any;
+      
+      if (!session?.isAuthenticated || !session?.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
       }
-    } catch (error) {
+      
+      // Get authenticated user from storage
+      const user = await storage.getUser(session.userId);
+      
+      if (!user) {
+        return res.status(401).json({ error: "User not found" });
+      }
+      
       res.json({
-        id: 1,
-        name: "Demo User",
-        email: "demo@example.com", 
-        picture: null
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture
       });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -811,7 +809,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout endpoint
   app.post("/api/auth/logout", (req, res) => {
-    res.json({ message: "Logged out successfully" });
+    const session = req.session as any;
+    if (session) {
+      session.destroy((err: any) => {
+        if (err) {
+          console.error("Session destruction error:", err);
+          return res.status(500).json({ error: "Failed to logout" });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ message: "Logged out successfully" });
+      });
+    } else {
+      res.json({ message: "Logged out successfully" });
+    }
   });
 
   // Google Calendar authentication routes
@@ -833,19 +843,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user info from Google
       const googleUser = await googleCalendarService.getUserInfo(accessToken);
       
-      // For demo purposes, update the default user with Google Calendar connection
-      let user = await storage.getUser(DEFAULT_USER_ID);
+      // Check if user exists by Google ID or email
+      let user = await storage.getUserByGoogleId(googleUser.id);
+      if (!user) {
+        user = await storage.getUserByEmail(googleUser.email);
+      }
       
       if (!user) {
-        // Create default user if not exists
-        user = await storage.createUser({
+        // Create new Google user
+        user = await storage.createGoogleUser({
+          googleId: googleUser.id,
+          email: googleUser.email,
           name: googleUser.name,
-          email: googleUser.email
+          picture: googleUser.picture,
+          accessToken,
+          refreshToken
         });
+      } else {
+        // Update existing user with Google Calendar connection and tokens
+        user = await storage.updateGoogleCalendarConnection(user.id, true, accessToken, refreshToken);
       }
-
-      // Update the user with Google Calendar connection and tokens
-      user = await storage.updateGoogleCalendarConnection(user.id, true, accessToken, refreshToken);
+      
+      // Set session to remember authenticated user
+      (req.session as any).userId = user.id;
+      (req.session as any).isAuthenticated = true;
       
       res.redirect("/dashboard?connected=true");
     } catch (error) {
