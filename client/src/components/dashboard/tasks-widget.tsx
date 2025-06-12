@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus } from "lucide-react";
+import { Plus, X, Calendar, Clock, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,13 +11,16 @@ import { EmotionalStates } from "@/components/emotional-states";
 import type { Task } from "@shared/schema";
 import { format } from "date-fns";
 import TaskEditModal from "@/components/task-edit-modal";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function TasksWidget() {
   const queryClient = useQueryClient();
   const { openChatWithPrompt } = useChatContext();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expandedTask, setExpandedTask] = useState<Task | null>(null);
+  const [cardPosition, setCardPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const taskRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   
   const { data: tasks = [], isLoading } = useQuery<Task[]>({
@@ -65,10 +68,48 @@ export default function TasksWidget() {
     },
   });
 
+  const handleExpandTask = (task: Task, event: React.MouseEvent<HTMLDivElement>) => {
+    const element = event.currentTarget;
+    const rect = element.getBoundingClientRect();
+    
+    setCardPosition({
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height
+    });
+    
+    setExpandedTask(task);
+  };
+
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setIsModalOpen(true);
   };
+
+  const closeExpandedTask = () => {
+    setExpandedTask(null);
+  };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandedTask) {
+        closeExpandedTask();
+      }
+    };
+
+    if (expandedTask) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [expandedTask]);
 
   const handleSaveTask = (taskUpdate: Partial<Task>) => {
     if (taskUpdate.id) {
@@ -146,7 +187,8 @@ export default function TasksWidget() {
                 <div 
                   key={task.id} 
                   ref={(el) => { taskRefs.current[task.id] = el; }}
-                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group border border-solid border-transparent hover:border-[#333333]"
+                  className="flex items-start space-x-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group border border-solid border-transparent hover:border-[#333333] cursor-pointer"
+                  onClick={(e) => handleExpandTask(task, e)}
                 >
                   <Checkbox
                     checked={task.completed}
@@ -155,10 +197,7 @@ export default function TasksWidget() {
                     onClick={(e) => e.stopPropagation()}
                   />
                   <div className="flex-1 min-w-0">
-                    <p 
-                      className="text-sm mb-1 cursor-pointer hover:text-foreground transition-colors text-[#d4d4d4]"
-                      onClick={() => handleEditTask(task)}
-                    >
+                    <p className="text-sm mb-1 text-[#d4d4d4]">
                       {task.title}
                     </p>
                     {task.description && (
@@ -185,6 +224,148 @@ export default function TasksWidget() {
       </CardContent>
       {/* Blur fade effect */}
       <div className="blur-fade"></div>
+      
+      {/* Expandable Task Overlay */}
+      <AnimatePresence>
+        {expandedTask && (
+          <>
+            {/* Background overlay */}
+            <motion.div
+              className="fixed inset-0 bg-black/60 z-[9998]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeExpandedTask}
+            />
+            
+            {/* Expandable card */}
+            <motion.div
+              className="fixed z-[9999] bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
+              layoutId={`task-${expandedTask.id}`}
+              initial={{
+                x: cardPosition.x,
+                y: cardPosition.y,
+                width: cardPosition.width,
+                height: cardPosition.height,
+              }}
+              animate={{
+                x: "50%",
+                y: "50%",
+                width: "min(90vw, 600px)",
+                height: "min(80vh, 500px)",
+                translateX: "-50%",
+                translateY: "-50%",
+              }}
+              exit={{
+                x: cardPosition.x,
+                y: cardPosition.y,
+                width: cardPosition.width,
+                height: cardPosition.height,
+                translateX: 0,
+                translateY: 0,
+              }}
+              transition={{
+                type: "spring",
+                damping: 25,
+                stiffness: 300,
+                duration: 0.5
+              }}
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-border">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      checked={expandedTask.completed}
+                      onCheckedChange={(checked) => {
+                        toggleTaskStatus.mutate({ id: expandedTask.id, completed: checked as boolean });
+                        setExpandedTask({ ...expandedTask, completed: checked as boolean });
+                      }}
+                      className="mt-1"
+                    />
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground mb-2">
+                        {expandedTask.title}
+                      </h2>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className={getPriorityColor(expandedTask.priority)}>
+                          <Flag className="w-3 h-3 mr-1" />
+                          {expandedTask.priority}
+                        </Badge>
+                        {expandedTask.dueDate && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Due: {format(new Date(expandedTask.dueDate), 'MMM d, yyyy')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        closeExpandedTask();
+                        handleEditTask(expandedTask);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={closeExpandedTask}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                {expandedTask.description ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
+                      <p className="text-foreground whitespace-pre-wrap leading-relaxed">
+                        {expandedTask.description}
+                      </p>
+                    </div>
+                    
+                    {expandedTask.createdAt && (
+                      <div className="pt-4 border-t border-border">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Clock className="w-4 h-4 mr-1" />
+                          Created: {format(new Date(expandedTask.createdAt), 'MMM d, yyyy \'at\' h:mm a')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No description provided</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => {
+                        closeExpandedTask();
+                        handleEditTask(expandedTask);
+                      }}
+                    >
+                      Add Description
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      
       <TaskEditModal
         task={editingTask}
         isOpen={isModalOpen}
