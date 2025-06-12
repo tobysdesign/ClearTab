@@ -17,9 +17,11 @@ import SilkTest from "@/pages/silk-test";
 import SettingsModal from "@/components/settings-modal";
 
 function Router() {
+  const isDevelopment = import.meta.env.DEV;
+  
   return (
     <Switch>
-      <Route path="/" component={Landing} />
+      <Route path="/" component={isDevelopment ? Dashboard : Landing} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/style" component={StyleGuide} />
       <Route path="/silk" component={SilkTest} />
@@ -32,9 +34,10 @@ function DockContent() {
   const [location, setLocation] = useLocation();
   const { isChatOpen, setIsChatOpen } = useChatContext();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const isDevelopment = import.meta.env.DEV;
 
-  // Only show dock on dashboard page
-  const shouldShowDock = location === '/dashboard';
+  // Show dock on dashboard page (which could be at "/" in development)
+  const shouldShowDock = location === '/dashboard' || (isDevelopment && location === '/');
 
   const dockItems = [
     {
