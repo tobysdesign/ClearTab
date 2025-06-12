@@ -338,11 +338,11 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                   
                   {isSending && (
                     <div className="flex justify-start">
-                      <div className="bg-muted text-foreground rounded-lg px-3 py-2 mr-12">
+                      <div className="bg-gray-800 text-gray-200 rounded-lg px-3 py-2 mr-8">
                         <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                          <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                         </div>
                       </div>
                     </div>
@@ -351,7 +351,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-border p-3">
+                <div className="border-t border-gray-800 p-3">
                   <div className="flex space-x-2">
                     <textarea
                       ref={inputRef}
@@ -359,7 +359,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Type your message..."
-                      className="flex-1 resize-none border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent min-h-[40px] max-h-32"
+                      className="flex-1 resize-none border border-gray-700 rounded-lg px-3 py-2 text-xs bg-gray-900 text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600 focus:border-transparent min-h-[32px] max-h-24"
                       rows={1}
                       disabled={isSending}
                     />
@@ -367,12 +367,12 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                       onClick={handleSendMessage}
                       disabled={!message.trim() || isSending}
                       size="sm"
-                      className="px-3"
+                      className="px-2 bg-gray-700 hover:bg-gray-600 text-white border-gray-600"
                     >
-                      <Send className="h-4 w-4" />
+                      <Send className="h-3 w-3" />
                     </Button>
                   </div>
-                  <div className="mt-2 text-xs text-muted-foreground text-center">
+                  <div className="mt-2 text-xs text-gray-500 text-center">
                     <span className="italic">Try adding <strong>#note</strong> or <strong>#task</strong> in your message</span>
                   </div>
                 </div>
