@@ -252,7 +252,7 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
         <>
           {/* Overlay */}
           <motion.div 
-            className="fixed inset-0 bg-black/40 z-[9999]"
+            className="fixed inset-0 bg-black/50 z-[9999]"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -263,38 +263,38 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
           {/* Chat Content */}
           <motion.div 
             ref={modalRef}
-            className="bg-background border border-border rounded-t-[16px] shadow-2xl fixed bottom-20 left-0 right-0 h-[420px] max-w-sm mx-auto flex flex-col outline-none z-[10000]"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
+            className="bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl fixed bottom-20 left-0 right-0 h-[420px] max-w-sm mx-auto flex flex-col outline-none z-[10000]"
+            initial={{ scale: 0, opacity: 0, y: 100 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0, opacity: 0, y: 100 }}
             transition={{
               type: "spring",
-              damping: 30,
+              damping: 25,
               stiffness: 300,
               duration: 0.4
             }}
           >
             {/* Drag handle */}
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-muted-foreground/20 mt-[-4px] mb-[-4px]" />
+            <div className="mx-auto w-8 h-1 flex-shrink-0 rounded-full bg-gray-600 mt-2 mb-1" />
             
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border pt-[8px] pb-[8px]">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                <Bot className="h-4 w-4 text-primary" />
+            <div className="flex items-center justify-between p-3 border-b border-gray-800">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center">
+                <Bot className="h-3 w-3 text-white" />
               </div>
               <div>
-                <h3 className="font-medium text-foreground">{agentName}</h3>
-                <p className="text-xs text-muted-foreground">AI Assistant</p>
+                <h3 className="text-sm font-medium text-white">{agentName}</h3>
+                <p className="text-xs text-gray-400">AI Assistant</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-8 w-8 p-0 hover:bg-muted/50"
+              className="h-6 w-6 p-0 hover:bg-gray-800 text-gray-400 hover:text-white"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3 w-3" />
             </Button>
           </div>
 
@@ -309,10 +309,10 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-3">
                   {messages.length === 0 && (
-                    <div className="text-center py-6">
-                      <Bot className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                      <h3 className="text-sm font-medium text-foreground mb-1">How can I help you today?</h3>
-                      <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                    <div className="text-center py-4">
+                      <Bot className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                      <h3 className="text-sm font-medium text-white mb-1">How can I help you today?</h3>
+                      <p className="text-xs text-gray-400 max-w-xs mx-auto">
                         I can take notes, track your tasks, jot down thoughts, plan your day, or help think something through.
                       </p>
                     </div>
@@ -322,10 +322,10 @@ export default function ChatOverlay({ isOpen, onClose, onCloseAnimated, initialM
                     <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[80%] rounded-lg px-3 py-2 ${
                         msg.role === "user" 
-                          ? "bg-primary text-primary-foreground ml-12" 
-                          : "bg-muted text-foreground mr-12"
+                          ? "bg-gray-700 text-white ml-8" 
+                          : "bg-gray-800 text-gray-200 mr-8"
                       }`}>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        <p className="text-xs whitespace-pre-wrap">{msg.message}</p>
                         <p className="text-xs opacity-70 mt-1">
                           {new Date(msg.createdAt).toLocaleTimeString([], { 
                             hour: '2-digit', 
