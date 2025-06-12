@@ -107,48 +107,48 @@ export default function ScheduleWidget() {
   const redLinePosition = getRedLinePosition();
 
   return (
-    <Card className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 h-full flex flex-col relative overflow-hidden">
-      <CardHeader className="pb-2">
+    <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative overflow-hidden">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between h-4">
-          <CardTitle className="text-[13px] font-aileron-black text-gray-600 dark:text-gray-400 leading-none">
+          <CardTitle className="text-[13px] font-aileron-black text-muted-foreground leading-none">
             Schedule
           </CardTitle>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
             <MoreHorizontal className="h-3 w-3" />
           </Button>
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 flex p-4 pt-0">
+      <CardContent className="space-y-3 flex-1 flex overflow-hidden pb-0 p-4 pt-0">
         {/* Left side - Day and Date */}
         <div className="flex flex-col justify-start mr-6 min-w-0 flex-shrink-0">
-          <div className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">
+          <div className="text-muted-foreground text-sm font-medium mb-1">
             {dayName}
           </div>
-          <div className="text-gray-900 dark:text-white text-5xl font-light leading-none mb-4">
+          <div className="text-foreground text-5xl font-light leading-none mb-4">
             {dayNumber}
           </div>
-          <div className="text-gray-600 dark:text-gray-400 text-sm">
+          <div className="text-muted-foreground text-sm">
             {todaysEvents.length} Events
           </div>
         </div>
 
         {/* Right side - Events with vertical red line */}
-        <div className="flex-1 min-w-0 relative">
+        <div className="flex-1 min-w-0 relative overflow-y-auto">
           {/* Events */}
           <div className="space-y-3 relative">
             {isLoading ? (
               <div className="space-y-3">
                 {[...Array(2)].map((_, i) => (
-                  <div key={i} className="bg-gray-200 dark:bg-black/50 rounded-xl p-4 animate-pulse">
-                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                  <div key={i} className="bg-muted/50 rounded-xl p-4 animate-pulse">
+                    <div className="h-4 bg-muted rounded mb-2"></div>
+                    <div className="h-3 bg-muted rounded w-2/3"></div>
                   </div>
                 ))}
               </div>
             ) : todaysEvents.length === 0 ? (
               <div className="text-center py-8">
-                <div className="text-gray-600 dark:text-gray-400 text-sm">No events today</div>
+                <div className="text-muted-foreground text-sm">No events today</div>
               </div>
             ) : (
               todaysEvents.slice(0, 3).map((event) => {
@@ -158,14 +158,14 @@ export default function ScheduleWidget() {
                     key={event.id}
                     className={`rounded-xl p-4 transition-all cursor-pointer relative ${
                       isCurrent 
-                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600' 
-                        : 'bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700/60'
+                        ? 'bg-accent text-accent-foreground border border-border' 
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
-                    <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-gray-900 dark:text-white' : 'font-normal text-gray-800 dark:text-gray-200'}`}>
+                    <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-accent-foreground' : 'font-normal text-foreground'}`}>
                       {event.title}
                     </div>
-                    <div className={`text-sm ${isCurrent ? 'text-gray-700 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'}`}>
+                    <div className={`text-sm ${isCurrent ? 'text-accent-foreground/80' : 'text-muted-foreground'}`}>
                       {event.time}
                     </div>
                   </div>
