@@ -11,6 +11,15 @@
   font-display: swap;
 }
 
+/* Import Lotion-SemiBold font */
+@font-face {
+  font-family: 'Lotion-SemiBold';
+  src: url('./assets/woff2/Lotion-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Yoopta Editor Custom Styles */
 /* Action Menu (slash commands) styling */
 .yoopta-action-menu-list,
@@ -272,6 +281,19 @@ body > div[data-radix-portal] > div {
   body {
     @apply font-sans antialiased text-foreground bg-background;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Apply Lotion-SemiBold to all headings */
+  h1, h2, h3, h4, h5, h6,
+  .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl,
+  [class*="font-semibold"], [class*="font-bold"], [class*="font-black"],
+  .widget h3, .widget h4,
+  .card-title, [class*="CardTitle"], [class*="DialogTitle"],
+  .settings h2, .settings h3, .settings h4,
+  .chat-overlay h3, .chat-overlay h4,
+  button h3, button h4,
+  .dashboard h1, .dashboard h2, .dashboard h3 {
+    font-family: 'Lotion-SemiBold', 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
   @keyframes silk-flow {
