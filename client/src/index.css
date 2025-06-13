@@ -467,6 +467,35 @@ div[id*="yoopta"] div[style*="background"] {
     position: relative !important;
   }
 
+  /* Text sizing support in YooptaEditor */
+  .notes-editor-container .text-sm,
+  .notes-editor-container span.text-sm {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  .notes-editor-container .text-base,
+  .notes-editor-container span.text-base {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  .notes-editor-container .text-lg,
+  .notes-editor-container span.text-lg {
+    font-size: 1.125rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  /* Ensure text size spans inherit other formatting */
+  .notes-editor-container span[class*="text-"] {
+    display: inline !important;
+    background: inherit !important;
+    color: inherit !important;
+    font-weight: inherit !important;
+    font-style: inherit !important;
+    text-decoration: inherit !important;
+  }
+
   /* Fix YooptaEditor separator visibility - more compact */
   [data-yoopta-menu] hr,
   [data-yoopta-menu] .separator,

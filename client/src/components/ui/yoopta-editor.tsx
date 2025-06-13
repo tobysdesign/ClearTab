@@ -202,18 +202,48 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     }
   };
 
-  // Text sizing functionality - simplified approach
+  // Text sizing functionality with actual editor API
   const applyTextSize = (size: 'small' | 'medium' | 'large') => {
-    // For now, we'll use a simple approach that adds size indicators
-    const sizeMarkers = {
-      small: '[Small] ',
-      medium: '[Medium] ', 
-      large: '[Large] '
+    const sizeClasses = {
+      small: 'text-sm',
+      medium: 'text-base', 
+      large: 'text-lg'
     };
-    
-    // This is a placeholder implementation - YooptaEditor text sizing
-    // would require deeper integration with the editor's formatting system
-    console.log(`Text size ${size} selected`);
+
+    try {
+      // Get current selection
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) return;
+
+      // Create a span with the appropriate size class
+      const span = document.createElement('span');
+      span.className = sizeClasses[size];
+      
+      // Wrap the selected content
+      try {
+        range.surroundContents(span);
+      } catch (e) {
+        // If surroundContents fails, extract and wrap
+        const contents = range.extractContents();
+        span.appendChild(contents);
+        range.insertNode(span);
+      }
+
+      // Clear selection
+      selection.removeAllRanges();
+      
+      // Trigger editor change
+      const event = new Event('input', { bubbles: true });
+      const editorElement = span.closest('[contenteditable="true"]');
+      if (editorElement) {
+        editorElement.dispatchEvent(event);
+      }
+    } catch (error) {
+      console.warn('Text sizing failed:', error);
+    }
   };
 
   // Custom toolbar render with text sizing and task creation buttons
