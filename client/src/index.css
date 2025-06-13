@@ -25,13 +25,15 @@
 .yoopta-action-menu-list,
 [data-yoopta-action-menu-list],
 div[role="menu"],
-.yoo-action-menu-list {
+.yoo-action-menu-list,
+[data-element-type="action-menu-list"] {
   background: hsl(var(--card)) !important;
   border: 1px solid hsl(var(--border)) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   padding: 4px !important;
   max-width: 280px !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .yoopta-action-menu-list [data-element-type="action-menu-list-item"] {
@@ -178,6 +180,39 @@ body > div[data-radix-portal] > div {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
   border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Aggressive overrides for all possible YooptaEditor menu containers */
+div[style*="background"],
+div[style*="background-color"],
+[class*="menu"],
+[class*="popover"],
+[class*="dropdown"],
+[role="menu"],
+[role="listbox"],
+[data-floating-ui-portal] > div,
+[data-portal] > div {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Target all white backgrounds specifically */
+div[style*="background-color: white"],
+div[style*="background-color: #fff"],
+div[style*="background-color: #ffffff"],
+div[style*="background: white"],
+div[style*="background: #fff"],
+div[style*="background: #ffffff"] {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Yoopta-specific overrides */
+[data-yoopta-editor] div[style*="background"],
+[data-yoopta] div[style*="background"],
+div[id*="yoopta"] div[style*="background"] {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Target specific Yoopta elements */

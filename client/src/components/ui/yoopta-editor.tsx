@@ -10,6 +10,8 @@ import { Bold, Italic, CodeMark, Underline, Strike } from '@yoopta/marks';
 import Link from '@yoopta/link';
 import ActionMenuList, { DefaultActionMenuRender } from '@yoopta/action-menu-list';
 import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface YooptaEditorComponentProps {
   value?: string;
@@ -37,16 +39,76 @@ const plugins = [
   Link,
 ];
 
-const TOOLS = {
-  ActionMenu: {
-    render: DefaultActionMenuRender,
-    tool: ActionMenuList,
+// Custom action menu items
+const customActionMenuItems = (createTaskFn?: (text: string) => void) => [
+  {
+    title: 'Text',
+    description: 'Start writing with plain text',
+    icon: '📝',
+    command: 'paragraph',
   },
-  Toolbar: {
-    render: DefaultToolbarRender,
-    tool: Toolbar,
+  {
+    title: 'Heading 1',
+    description: 'Big section heading',
+    icon: 'H1',
+    command: 'heading-one',
   },
-};
+  {
+    title: 'Heading 2', 
+    description: 'Medium section heading',
+    icon: 'H2',
+    command: 'heading-two',
+  },
+  {
+    title: 'Heading 3',
+    description: 'Small section heading', 
+    icon: 'H3',
+    command: 'heading-three',
+  },
+  {
+    title: 'Bullet List',
+    description: 'Create a simple bullet list',
+    icon: '•',
+    command: 'bulleted-list',
+  },
+  {
+    title: 'Numbered List',
+    description: 'Create a list with numbering',
+    icon: '1.',
+    command: 'numbered-list',
+  },
+  {
+    title: 'Todo List',
+    description: 'Track tasks with a checklist',
+    icon: '☑',
+    command: 'todo-list',
+  },
+  {
+    title: 'Quote',
+    description: 'Capture a quote',
+    icon: '"',
+    command: 'blockquote',
+  },
+  {
+    title: 'Code',
+    description: 'Capture a code snippet',
+    icon: '</>', 
+    command: 'code',
+  },
+  {
+    title: 'Divider',
+    description: 'Visually divide blocks',
+    icon: '—',
+    command: 'divider',
+  },
+  ...(createTaskFn ? [{
+    title: 'Create Task',
+    description: 'Turn selected text into a task',
+    icon: '✓',
+    command: 'create-task',
+    action: createTaskFn,
+  }] : []),
+];
 
 const MARKS = [Bold, Italic, CodeMark, Underline, Strike];
 
@@ -60,6 +122,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   
   const editor = useMemo(() => createYooptaEditor(), []);
   const selectionRef = useRef(null);
+  const queryClient = useQueryClient();
   
   // Parse initial value
   const [editorValue, setEditorValue] = useState<YooptaContentValue>(() => {
@@ -69,6 +132,39 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
       return {};
     }
   });
+
+  // Create task mutation
+  const createTaskMutation = useMutation({
+    mutationFn: async (taskData: { title: string; description?: string }) => {
+      const res = await apiRequest("POST", "/api/tasks", taskData);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+    },
+  });
+
+  // Handle creating tasks from selected text
+  const handleCreateTask = (selectedText: string) => {
+    if (selectedText.trim()) {
+      createTaskMutation.mutate({
+        title: selectedText.trim(),
+        description: `Created from note: ${selectedText.substring(0, 100)}...`
+      });
+    }
+  };
+
+  // Create tools configuration with custom action menu
+  const TOOLS = useMemo(() => ({
+    ActionMenu: {
+      render: DefaultActionMenuRender,
+      tool: ActionMenuList,
+    },
+    Toolbar: {
+      render: DefaultToolbarRender,
+      tool: Toolbar,
+    },
+  }), []);
 
   // Update editor value when prop changes
   useEffect(() => {
