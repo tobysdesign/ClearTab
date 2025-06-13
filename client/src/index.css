@@ -452,12 +452,65 @@ div[id*="yoopta"] div[style*="background"] {
   .notes-editor-container [data-yoopta-block]:hover [data-yoopta-controls],
   .notes-editor-container [data-yoopta-block]:hover .yoopta-controls,
   .notes-editor-container [data-slate-node]:hover .slate-controls,
-  .notes-editor-container .yoopta-block:hover .block-controls {
+  .notes-editor-container .yoopta-block:hover .block-controls,
+  .notes-editor-container .yoopta-block-action-buttons,
+  .notes-editor-container [class*="yoopta-block-action"] {
     opacity: 1 !important;
     visibility: visible !important;
     background-color: hsl(var(--muted)) !important;
     border: 1px solid hsl(var(--border)) !important;
     color: hsl(var(--foreground)) !important;
+  }
+
+  /* Specific styling for block action buttons */
+  .notes-editor-container .yoopta-block-action-buttons,
+  .notes-editor-container [class*="yoopta-block-action"] {
+    border-radius: 4px !important;
+    padding: 2px !important;
+    margin: 0 2px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .notes-editor-container .yoopta-block-action-buttons:hover,
+  .notes-editor-container [class*="yoopta-block-action"]:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+    border-color: hsl(var(--accent-foreground) / 0.2) !important;
+  }
+
+  /* Block action button icons */
+  .notes-editor-container .yoopta-block-action-buttons svg,
+  .notes-editor-container [class*="yoopta-block-action"] svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: inherit !important;
+    fill: currentColor !important;
+  }
+
+  /* Additional targeting for YooptaEditor block action elements */
+  .notes-editor-container [data-yoopta-block-actions],
+  .notes-editor-container [data-yoopta-drag-handle],
+  .notes-editor-container [data-yoopta-block-options],
+  .notes-editor-container .yoopta-drag-handle,
+  .notes-editor-container .yoopta-block-options {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: hsl(var(--background)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 6px !important;
+    color: hsl(var(--foreground)) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Hover states for block actions */
+  .notes-editor-container [data-yoopta-block-actions]:hover,
+  .notes-editor-container [data-yoopta-drag-handle]:hover,
+  .notes-editor-container [data-yoopta-block-options]:hover,
+  .notes-editor-container .yoopta-drag-handle:hover,
+  .notes-editor-container .yoopta-block-options:hover {
+    background-color: hsl(var(--accent)) !important;
+    border-color: hsl(var(--accent-foreground) / 0.2) !important;
+    color: hsl(var(--accent-foreground)) !important;
   }
 
   /* Ensure YooptaEditor elements have proper positioning context */
