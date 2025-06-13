@@ -221,12 +221,14 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     };
 
     return (
-      <div className="flex items-center gap-2 p-2 border-b border-border bg-card">
-        <div className="flex items-center gap-1 border-r border-border pr-2 mr-2">
+      <div className="flex items-center gap-3 p-3 border-b border-border bg-card/50 backdrop-blur-sm">
+        {/* Text Size Controls */}
+        <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border border-border/50">
+          <span className="text-xs text-muted-foreground mr-2 font-medium">Size:</span>
           <button
             type="button"
             onClick={() => applyTextSize('small')}
-            className="px-2 py-1 text-xs hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            className="px-3 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
             title="Small text"
           >
             S
@@ -234,7 +236,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           <button
             type="button"
             onClick={() => applyTextSize('medium')}
-            className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            className="px-3 py-1 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
             title="Medium text"
           >
             M
@@ -242,24 +244,31 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           <button
             type="button"
             onClick={() => applyTextSize('large')}
-            className="px-2 py-1 text-base hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            className="px-3 py-1 text-base font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
             title="Large text"
           >
             L
           </button>
         </div>
-        <div className="flex items-center gap-1 border-r border-border pr-2 mr-2">
+        
+        {/* Task Creation */}
+        <div className="flex items-center">
           <button
             type="button"
             onClick={handleCreateTaskFromSelection}
-            className="px-2 py-1 text-xs hover:bg-accent hover:text-accent-foreground rounded transition-colors bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
-            title="Create task from selected text"
+            className="px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-md transition-colors bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 flex items-center gap-2"
+            title="Select text and create a task"
             disabled={createTaskMutation.isPending}
           >
-            ✓ Task
+            <span className="text-base">✓</span>
+            <span>Create Task</span>
           </button>
         </div>
-        <DefaultToolbarRender editor={editor} {...props} />
+        
+        {/* Original Toolbar */}
+        <div className="flex-1">
+          <DefaultToolbarRender editor={editor} {...props} />
+        </div>
       </div>
     );
   };
@@ -283,18 +292,20 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   }
 
   return (
-    <div className={`min-h-[200px] ${className}`}>
-      <YooptaEditor
-        editor={editor}
-        plugins={plugins}
-        tools={TOOLS}
-        marks={MARKS}
-        value={editorValue}
-        onChange={handleEditorChange}
-        selectionBoxRoot={selectionRef}
-        placeholder={placeholder}
-        readOnly={readOnly}
-      />
+    <div className={`notes-editor-container ${className}`}>
+      <div className="notes-editor-scrollable">
+        <YooptaEditor
+          editor={editor}
+          plugins={plugins}
+          tools={TOOLS}
+          marks={MARKS}
+          value={editorValue}
+          onChange={handleEditorChange}
+          selectionBoxRoot={selectionRef}
+          placeholder={placeholder}
+          readOnly={readOnly}
+        />
+      </div>
       <div ref={selectionRef} />
     </div>
   );

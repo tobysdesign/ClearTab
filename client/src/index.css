@@ -332,36 +332,55 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   /* YooptaEditor dark theme menus */
-  [data-yoopta-menu] {
+  [data-yoopta-menu],
+  .yoopta-action-menu,
+  .yoopta-toolbar {
     background-color: hsl(var(--popover)) !important;
     border: 1px solid hsl(var(--border)) !important;
     border-radius: 0.5rem !important;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
   }
 
-  [data-yoopta-menu-item] {
+  [data-yoopta-menu-item],
+  .yoopta-menu-item {
     color: hsl(var(--popover-foreground)) !important;
     background-color: transparent !important;
     border-radius: 0.375rem !important;
     padding: 0.5rem !important;
     margin: 0.125rem !important;
+    transition: all 0.2s ease !important;
   }
 
-  [data-yoopta-menu-item]:hover {
+  [data-yoopta-menu-item]:hover,
+  .yoopta-menu-item:hover {
     background-color: hsl(var(--accent)) !important;
     color: hsl(var(--accent-foreground)) !important;
   }
 
-  [data-yoopta-menu-item][data-selected="true"] {
+  [data-yoopta-menu-item][data-selected="true"],
+  .yoopta-menu-item[data-selected="true"] {
     background-color: hsl(var(--accent)) !important;
     color: hsl(var(--accent-foreground)) !important;
+  }
+
+  /* Ensure icons are visible */
+  [data-yoopta-menu-item] svg,
+  .yoopta-menu-item svg,
+  [data-yoopta-menu-item] .icon,
+  .yoopta-menu-item .icon {
+    opacity: 1 !important;
+    fill: currentColor !important;
+    color: inherit !important;
   }
 
   /* Fix YooptaEditor separator visibility */
   [data-yoopta-menu] hr,
-  [data-yoopta-menu] .separator {
+  [data-yoopta-menu] .separator,
+  .yoopta-menu hr,
+  .yoopta-menu .separator {
     border-color: hsl(var(--border)) !important;
     margin: 0.25rem 0 !important;
+    opacity: 1 !important;
   }
 
   /* Ensure proper scrolling in notes widget */
