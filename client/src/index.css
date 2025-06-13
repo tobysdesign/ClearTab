@@ -448,7 +448,7 @@ div[id*="yoopta"] div[style*="background"] {
     z-index: 10 !important;
   }
 
-  /* YooptaEditor block controls and indicators */
+  /* YooptaEditor block controls and indicators - bright styling like Plus buttons */
   .notes-editor-container [data-yoopta-block]:hover [data-yoopta-controls],
   .notes-editor-container [data-yoopta-block]:hover .yoopta-controls,
   .notes-editor-container [data-slate-node]:hover .slate-controls,
@@ -460,22 +460,29 @@ div[id*="yoopta"] div[style*="background"] {
     background-color: hsl(var(--muted)) !important;
     border: 1px solid hsl(var(--border)) !important;
     color: hsl(var(--foreground)) !important;
+    border-radius: 4px !important;
+    width: 24px !important;
+    height: 24px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
 
-  /* Specific styling for block action buttons */
+  /* Specific styling for block action buttons - matching Plus button appearance */
   .notes-editor-container .yoopta-block-action-buttons,
   .notes-editor-container [class*="yoopta-block-action"] {
-    border-radius: 4px !important;
     padding: 2px !important;
     margin: 0 2px !important;
     transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .notes-editor-container .yoopta-block-action-buttons:hover,
   .notes-editor-container [class*="yoopta-block-action"]:hover {
-    background-color: hsl(var(--accent)) !important;
-    color: hsl(var(--accent-foreground)) !important;
-    border-color: hsl(var(--accent-foreground) / 0.2) !important;
+    background-color: hsl(var(--muted) / 0.8) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+    transform: scale(1.05) !important;
   }
 
   /* Block action button icons */
@@ -487,7 +494,7 @@ div[id*="yoopta"] div[style*="background"] {
     fill: currentColor !important;
   }
 
-  /* Additional targeting for YooptaEditor block action elements */
+  /* Additional targeting for YooptaEditor block action elements - bright like Plus buttons */
   .notes-editor-container [data-yoopta-block-actions],
   .notes-editor-container [data-yoopta-drag-handle],
   .notes-editor-container [data-yoopta-block-options],
@@ -495,22 +502,27 @@ div[id*="yoopta"] div[style*="background"] {
   .notes-editor-container .yoopta-block-options {
     opacity: 1 !important;
     visibility: visible !important;
-    background-color: hsl(var(--background)) !important;
+    background-color: hsl(var(--muted)) !important;
     border: 1px solid hsl(var(--border)) !important;
-    border-radius: 6px !important;
+    border-radius: 4px !important;
     color: hsl(var(--foreground)) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    width: 24px !important;
+    height: 24px !important;
+    padding: 2px !important;
+    transition: all 0.2s ease !important;
   }
 
-  /* Hover states for block actions */
+  /* Hover states for block actions - matching Plus button hover */
   .notes-editor-container [data-yoopta-block-actions]:hover,
   .notes-editor-container [data-yoopta-drag-handle]:hover,
   .notes-editor-container [data-yoopta-block-options]:hover,
   .notes-editor-container .yoopta-drag-handle:hover,
   .notes-editor-container .yoopta-block-options:hover {
-    background-color: hsl(var(--accent)) !important;
-    border-color: hsl(var(--accent-foreground) / 0.2) !important;
-    color: hsl(var(--accent-foreground)) !important;
+    background-color: hsl(var(--muted) / 0.8) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+    transform: scale(1.05) !important;
   }
 
   /* Ensure YooptaEditor elements have proper positioning context */
