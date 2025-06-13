@@ -190,4 +190,34 @@
     background: hsl(var(--accent)) !important;
     color: hsl(var(--accent-foreground)) !important;
   }
+
+  /* Force all buttons to use black theme - no blue anywhere */
+  button,
+  [role="button"],
+  .button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    background: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  button:hover,
+  [role="button"]:hover,
+  .button:hover,
+  input[type="button"]:hover,
+  input[type="submit"]:hover,
+  input[type="reset"]:hover {
+    background: hsl(var(--primary) / 0.9) !important;
+  }
+
+  /* Override any blue color variations */
+  *[style*="blue"],
+  *[class*="blue"],
+  *[style*="#"],
+  *[style*="rgb"] {
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
 }
