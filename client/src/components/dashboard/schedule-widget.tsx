@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { useState, useEffect } from "react";
 
 interface CalendarEvent {
@@ -107,19 +107,15 @@ export default function ScheduleWidget() {
   const redLinePosition = getRedLinePosition();
 
   return (
-    <Card className="bg-card text-card-foreground border-border h-full flex flex-col relative overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between h-4">
-          <CardTitle className="text-[13px] font-aileron-black text-muted-foreground leading-none">
-            Schedule
-          </CardTitle>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
-            <MoreHorizontal className="h-3 w-3" />
-          </Button>
-        </div>
-      </CardHeader>
+    <div className="widget schedule-widget h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[13px] font-aileron-black text-muted-foreground leading-none flex items-center h-4">Schedule</h3>
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
+          <MoreHorizontal className="h-3 w-3" />
+        </Button>
+      </div>
       
-      <CardContent className="space-y-3 flex-1 flex overflow-hidden pb-0 p-4 pt-0">
+      <div className="flex-1 flex overflow-hidden">
         {/* Left side - Day and Date */}
         <div className="flex flex-col justify-start mr-6 min-w-0 flex-shrink-0">
           <div className="text-muted-foreground text-sm font-medium mb-1">
@@ -154,18 +150,21 @@ export default function ScheduleWidget() {
               todaysEvents.slice(0, 3).map((event, index) => {
                 const isCurrent = isCurrentEvent(event);
                 const isSecondItem = index === 1;
+                const isPreviousItem = index < 1;
                 return (
                   <div 
                     key={event.id}
-                    className={`rounded-xl p-4 transition-all cursor-pointer relative ${
+                    className={`rounded-xl p-4 transition-all cursor-pointer relative group ${
                       isCurrent 
                         ? 'bg-accent text-accent-foreground border border-border' 
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                        : isPreviousItem 
+                          ? 'bg-muted/60 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
                     {/* Red indicator for second item */}
                     {isSecondItem && (
-                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-red-500 rounded-full border-2 border-background"></div>
+                      <div className="absolute -left-2 -top-1 w-3 h-3 bg-red-500 rounded-full border-2 border-background transition-opacity group-hover:opacity-20"></div>
                     )}
                     <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-accent-foreground' : 'font-normal text-foreground'}`}>
                       {event.title}
@@ -192,7 +191,7 @@ export default function ScheduleWidget() {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
