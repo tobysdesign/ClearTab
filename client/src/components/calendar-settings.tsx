@@ -60,27 +60,27 @@ export default function CalendarSettings() {
   }
 
   return (
-    <Card>
+    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
           <Calendar className="h-5 w-5" />
           Calendar Integration
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-gray-500 dark:text-gray-400">
           Connect your Google Calendar to sync events with your schedule
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Google Calendar</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">Google Calendar</span>
             {status?.connected ? (
-              <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+              <Badge variant="default" className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Connected
               </Badge>
             ) : (
-              <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200">
+              <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Not Connected
               </Badge>
@@ -93,6 +93,7 @@ export default function CalendarSettings() {
               size="sm"
               onClick={handleDisconnect}
               disabled={disconnectMutation.isPending}
+              className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
             >
               Disconnect
             </Button>
@@ -100,7 +101,7 @@ export default function CalendarSettings() {
             <Button 
               size="sm"
               onClick={handleConnect}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600"
             >
               <ExternalLink className="h-4 w-4" />
               Connect Google Calendar
