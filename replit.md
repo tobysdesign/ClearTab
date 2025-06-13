@@ -142,6 +142,7 @@ GOOGLE_CLIENT_SECRET=google-oauth-secret
 Changelog:
 - June 13, 2025. Initial setup
 - June 13, 2025. Fixed Yoopta editor backgrounds - removed all blue colors and backgrounds with aggressive CSS overrides in index.css
+- June 13, 2025. Completely eliminated all blue colors from UI using nuclear CSS overrides targeting all blue variants, button components, and CSS variables
 ```
 
 ## User Preferences
