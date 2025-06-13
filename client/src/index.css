@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Import Aileron-Black font */
 @font-face {
   font-family: 'Aileron-Black';
@@ -131,19 +127,17 @@ div[role="toolbar"],
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   mask-image: linear-gradient(to top,
-    black 0%,
-    black 20%,
-    rgba(0, 0, 0, 0.85) 50%,
-    rgba(0, 0, 0, 0.4) 65%,
-    transparent 100%
-  );
+      black 0%,
+      black 20%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.4) 65%,
+      transparent 100%);
   -webkit-mask-image: linear-gradient(to top,
-    black 0%,
-    black 20%,
-    rgba(0, 0, 0, 0.85) 50%,
-    rgba(0, 0, 0, 0.4) 65%,
-    transparent 100%
-  );
+      black 0%,
+      black 20%,
+      rgba(0, 0, 0, 0.85) 50%,
+      rgba(0, 0, 0, 0.4) 65%,
+      transparent 100%);
 }
 
 /* Ensure selection area styling */
@@ -159,8 +153,8 @@ div[role="toolbar"],
 }
 
 /* Force dark theme on Yoopta popover components only */
-div[data-radix-popper-content-wrapper] > div[role="menu"],
-div[data-radix-portal] > div[role="menu"] {
+div[data-radix-popper-content-wrapper]>div[role="menu"],
+div[data-radix-portal]>div[role="menu"] {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
@@ -172,11 +166,11 @@ div[data-radix-portal] > div[role="menu"] {
 }
 
 /* Target any React portals that might contain white backgrounds */
-body > div[data-radix-portal] {
+body>div[data-radix-portal] {
   background: transparent !important;
 }
 
-body > div[data-radix-portal] > div {
+body>div[data-radix-portal]>div {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
   border: 1px solid hsl(var(--border)) !important;
@@ -190,8 +184,8 @@ div[style*="background-color"],
 [class*="dropdown"],
 [role="menu"],
 [role="listbox"],
-[data-floating-ui-portal] > div,
-[data-portal] > div {
+[data-floating-ui-portal]>div,
+[data-portal]>div {
   background: hsl(var(--card)) !important;
   color: hsl(var(--foreground)) !important;
 }
@@ -268,7 +262,7 @@ div[id*="yoopta"] div[style*="background"] {
   --input: 0 0% 89.8%;
   --ring: 0 0% 3.9%;
   --radius: 0.75rem;
-  
+
   --text-primary: 0 0% 9%;
   --text-secondary: 0 0% 45%;
   --text-muted: 0 0% 60%;
@@ -298,7 +292,7 @@ div[id*="yoopta"] div[style*="background"] {
   --border: 0 0% 14.9%;
   --input: 0 0% 14.9%;
   --ring: 0 0% 83.1%;
-  
+
   --text-primary: 0 0% 98%;
   --text-secondary: 0 0% 70%;
   --text-muted: 0 0% 40%;
@@ -339,15 +333,22 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   /* Apply Lotion-SemiBold to widget titles only */
-  .widget h3, .widget h4,
-  .settings h2, .settings h3, .settings h4,
-  .chat-overlay h3, .chat-overlay h4,
-  .dashboard h1, .dashboard h2, .dashboard h3 {
+  .widget h3,
+  .widget h4,
+  .settings h2,
+  .settings h3,
+  .settings h4,
+  .chat-overlay h3,
+  .chat-overlay h4,
+  .dashboard h1,
+  .dashboard h2,
+  .dashboard h3 {
     font-family: 'Lotion-SemiBold', 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
   /* Exclude note titles from special font */
-  .note-title, .card-title {
+  .note-title,
+  .card-title {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
@@ -770,19 +771,24 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   @keyframes silk-flow {
-    0%, 100% { 
+
+    0%,
+    100% {
       background-position: 0% 0%, 100% 100%, 100% 0%, 0% 100%;
       filter: brightness(1) contrast(1);
     }
-    25% { 
+
+    25% {
       background-position: 25% 25%, 75% 75%, 80% 20%, 20% 80%;
       filter: brightness(1.02) contrast(1.01);
     }
-    50% { 
+
+    50% {
       background-position: 50% 50%, 50% 50%, 60% 40%, 40% 60%;
       filter: brightness(1.01) contrast(1.02);
     }
-    75% { 
+
+    75% {
       background-position: 75% 25%, 25% 75%, 40% 60%, 60% 40%;
       filter: brightness(1.02) contrast(1);
     }
@@ -802,28 +808,33 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   /* First Row: Notes and Tasks */
-  .bento-grid > :nth-child(1) { /* Notes */
+  .bento-grid> :nth-child(1) {
+    /* Notes */
     grid-column: 1 / 3;
     grid-row: 1;
   }
-  
-  .bento-grid > :nth-child(2) { /* Tasks */
+
+  .bento-grid> :nth-child(2) {
+    /* Tasks */
     grid-column: 3;
     grid-row: 1;
   }
 
   /* Second Row: Weather, Finance, Events */
-  .bento-grid > :nth-child(3) { /* Weather */
+  .bento-grid> :nth-child(3) {
+    /* Weather */
     grid-column: 1;
     grid-row: 2;
   }
 
-  .bento-grid > :nth-child(4) { /* Finance */
+  .bento-grid> :nth-child(4) {
+    /* Finance */
     grid-column: 2;
     grid-row: 2;
   }
 
-  .bento-grid > :nth-child(5) { /* Calendar */
+  .bento-grid> :nth-child(5) {
+    /* Calendar */
     grid-column: 3;
     grid-row: 2;
   }
@@ -853,10 +864,12 @@ div[id*="yoopta"] div[style*="background"] {
       opacity: 0;
       transform: scale(0.1) translateY(40vh);
     }
+
     50% {
       opacity: 0.8;
       transform: scale(0.6) translateY(20vh);
     }
+
     100% {
       opacity: 1;
       transform: scale(1) translateY(0);
@@ -868,10 +881,12 @@ div[id*="yoopta"] div[style*="background"] {
       opacity: 1;
       transform: scale(1) translateY(0);
     }
+
     50% {
       opacity: 0.8;
       transform: scale(0.6) translateY(20vh);
     }
+
     100% {
       opacity: 0;
       transform: scale(0.1) translateY(40vh);
@@ -879,18 +894,37 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
   @keyframes pulseSubtle {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+
+    50% {
+      opacity: 1;
+    }
   }
 
   .animate-fade-in {
@@ -943,8 +977,8 @@ div[id*="yoopta"] div[style*="background"] {
   }
 
   /* Additional protection against layout issues that break scrolling */
-  .notes-widget-scrollable > div,
-  .tasks-widget-scrollable > div {
+  .notes-widget-scrollable>div,
+  .tasks-widget-scrollable>div {
     min-height: 0 !important;
   }
 
@@ -967,7 +1001,7 @@ div[id*="yoopta"] div[style*="background"] {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
@@ -1011,27 +1045,27 @@ div[id*="yoopta"] div[style*="background"] {
   .text-text-primary {
     color: hsl(var(--text-primary));
   }
-  
+
   .text-text-secondary {
     color: hsl(var(--text-secondary));
   }
-  
+
   .text-text-muted {
     color: hsl(var(--text-muted));
   }
-  
+
   .bg-dark-primary {
     background-color: hsl(var(--dark-primary));
   }
-  
+
   .bg-dark-secondary {
     background-color: hsl(var(--dark-secondary));
   }
-  
+
   .border-dark-border {
     border-color: hsl(var(--dark-border));
   }
-  
+
   .bg-dark-hover {
     background-color: hsl(var(--dark-hover));
   }
