@@ -109,7 +109,9 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   readOnly = false 
 }, ref) => {
   
-  const editor = useMemo(() => createYooptaEditor(), []);
+  const editor = useMemo(() => createYooptaEditor({
+    defaultBlock: 'heading-three'
+  }), []);
   const selectionRef = useRef(null);
   const queryClient = useQueryClient();
   
