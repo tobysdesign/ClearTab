@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { MoreHorizontal, Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import CalendarSettings from "@/components/calendar-settings";
 
 interface SettingsModalProps {
@@ -96,7 +96,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
           )}
 
           {activeSection === "account" && (
-            <div className="space-y-4">
+            <>
               <div>
                 <label className="text-xs font-medium text-foreground mb-1.5 block">
                   Theme Settings
@@ -159,7 +159,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
 
           {activeSection === "notifications" && (
@@ -194,6 +194,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
               </div>
             </div>
           )}
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button onClick={() => onOpenChange(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm">
+            Done
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
