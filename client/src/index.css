@@ -28,6 +28,44 @@
   background-color: transparent !important;
 }
 
+/* NUCLEAR OPTION: Remove ALL blue colors globally */
+* {
+  --blue: hsl(0 0% 15%) !important;
+  --blue-50: hsl(0 0% 15%) !important;
+  --blue-100: hsl(0 0% 15%) !important;
+  --blue-200: hsl(0 0% 15%) !important;
+  --blue-300: hsl(0 0% 15%) !important;
+  --blue-400: hsl(0 0% 15%) !important;
+  --blue-500: hsl(0 0% 15%) !important;
+  --blue-600: hsl(0 0% 15%) !important;
+  --blue-700: hsl(0 0% 15%) !important;
+  --blue-800: hsl(0 0% 15%) !important;
+  --blue-900: hsl(0 0% 15%) !important;
+}
+
+/* Override all blue classes */
+[class*="blue"],
+[style*="blue"],
+[style*="#3b82f6"],
+[style*="#2563eb"],
+[style*="#1d4ed8"],
+[style*="rgb(59, 130, 246)"],
+[style*="rgb(37, 99, 235)"] {
+  background-color: hsl(0 0% 15%) !important;
+  color: white !important;
+  border-color: hsl(0 0% 30%) !important;
+}
+
+/* Target specific UI library classes */
+.bg-primary,
+.btn-primary,
+button[data-variant="default"],
+.button-primary {
+  background-color: hsl(0 0% 15%) !important;
+  color: white !important;
+  border-color: hsl(0 0% 30%) !important;
+}
+
 /* Import Aileron-Black font */
 @font-face {
   font-family: 'Aileron-Black';
