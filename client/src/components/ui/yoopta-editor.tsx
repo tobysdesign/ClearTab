@@ -306,6 +306,32 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     );
   };
 
+  // Custom styles for black theme
+  const customStyles = {
+    // Editor container
+    '.yoopta-editor': {
+      background: 'hsl(0 0% 0%)',
+      color: 'hsl(0 0% 100%)',
+    },
+    // Selection styles
+    '.yoopta-editor ::selection': {
+      background: 'hsl(0 0% 12%)',
+      color: 'hsl(0 0% 100%)',
+    },
+    // Action menu
+    '.yoopta-action-menu-list': {
+      background: 'hsl(0 0% 5%)',
+      border: '1px solid hsl(0 0% 15%)',
+      color: 'hsl(0 0% 100%)',
+    },
+    // Toolbar
+    '.yoopta-toolbar': {
+      background: 'hsl(0 0% 5%)',
+      border: '1px solid hsl(0 0% 15%)',
+      color: 'hsl(0 0% 100%)',
+    },
+  };
+
   if (readOnly) {
     return (
       <div className={`min-h-[200px] p-3 border rounded-md bg-muted ${className}`}>
@@ -318,6 +344,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           onChange={handleEditorChange}
           selectionBoxRoot={selectionRef}
           readOnly={true}
+          style={customStyles}
         />
         <div ref={selectionRef} />
       </div>
@@ -337,6 +364,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           selectionBoxRoot={selectionRef}
           placeholder={placeholder}
           readOnly={readOnly}
+          style={customStyles}
         />
       </div>
       <div ref={selectionRef} />
