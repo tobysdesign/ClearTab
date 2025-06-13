@@ -318,17 +318,64 @@ div[id*="yoopta"] div[style*="background"] {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  /* Apply Lotion-SemiBold to all headings */
-  h1, h2, h3, h4, h5, h6,
-  .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl,
-  [class*="font-semibold"], [class*="font-bold"], [class*="font-black"],
+  /* Apply Lotion-SemiBold to widget titles only */
   .widget h3, .widget h4,
-  .card-title, [class*="CardTitle"], [class*="DialogTitle"],
   .settings h2, .settings h3, .settings h4,
   .chat-overlay h3, .chat-overlay h4,
-  button h3, button h4,
   .dashboard h1, .dashboard h2, .dashboard h3 {
     font-family: 'Lotion-SemiBold', 'Inter', system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* Exclude note titles from special font */
+  .note-title, .card-title {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* YooptaEditor dark theme menus */
+  [data-yoopta-menu] {
+    background-color: hsl(var(--popover)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  }
+
+  [data-yoopta-menu-item] {
+    color: hsl(var(--popover-foreground)) !important;
+    background-color: transparent !important;
+    border-radius: 0.375rem !important;
+    padding: 0.5rem !important;
+    margin: 0.125rem !important;
+  }
+
+  [data-yoopta-menu-item]:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+  }
+
+  [data-yoopta-menu-item][data-selected="true"] {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+  }
+
+  /* Fix YooptaEditor separator visibility */
+  [data-yoopta-menu] hr,
+  [data-yoopta-menu] .separator {
+    border-color: hsl(var(--border)) !important;
+    margin: 0.25rem 0 !important;
+  }
+
+  /* Ensure proper scrolling in notes widget */
+  .notes-editor-container {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notes-editor-scrollable {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
 
   @keyframes silk-flow {

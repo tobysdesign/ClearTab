@@ -154,18 +154,6 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     }
   };
 
-  // Create tools configuration with custom action menu
-  const TOOLS = useMemo(() => ({
-    ActionMenu: {
-      render: DefaultActionMenuRender,
-      tool: ActionMenuList,
-    },
-    Toolbar: {
-      render: DefaultToolbarRender,
-      tool: Toolbar,
-    },
-  }), []);
-
   // Update editor value when prop changes
   useEffect(() => {
     try {
@@ -189,12 +177,91 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     }
   }));
 
+  // Create tools configuration with custom toolbar and action menu
+  const TOOLS = useMemo(() => ({
+    ActionMenu: {
+      render: DefaultActionMenuRender,
+      tool: ActionMenuList,
+    },
+    Toolbar: {
+      render: CustomToolbarRender,
+      tool: Toolbar,
+    },
+  }), []);
+
   const handleEditorChange = (newValue: YooptaContentValue) => {
     setEditorValue(newValue);
     // Do not call onChange automatically - only on manual trigger
     if (onChange) {
       onChange(JSON.stringify(newValue));
     }
+  };
+
+  // Text sizing functionality - simplified approach
+  const applyTextSize = (size: 'small' | 'medium' | 'large') => {
+    // For now, we'll use a simple approach that adds size indicators
+    const sizeMarkers = {
+      small: '[Small] ',
+      medium: '[Medium] ', 
+      large: '[Large] '
+    };
+    
+    // This is a placeholder implementation - YooptaEditor text sizing
+    // would require deeper integration with the editor's formatting system
+    console.log(`Text size ${size} selected`);
+  };
+
+  // Custom toolbar render with text sizing and task creation buttons
+  const CustomToolbarRender = ({ editor, ...props }: any) => {
+    const handleCreateTaskFromSelection = () => {
+      const selectedText = window.getSelection()?.toString();
+      if (selectedText?.trim()) {
+        handleCreateTask(selectedText.trim());
+      }
+    };
+
+    return (
+      <div className="flex items-center gap-2 p-2 border-b border-border bg-card">
+        <div className="flex items-center gap-1 border-r border-border pr-2 mr-2">
+          <button
+            type="button"
+            onClick={() => applyTextSize('small')}
+            className="px-2 py-1 text-xs hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            title="Small text"
+          >
+            S
+          </button>
+          <button
+            type="button"
+            onClick={() => applyTextSize('medium')}
+            className="px-2 py-1 text-sm hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            title="Medium text"
+          >
+            M
+          </button>
+          <button
+            type="button"
+            onClick={() => applyTextSize('large')}
+            className="px-2 py-1 text-base hover:bg-accent hover:text-accent-foreground rounded transition-colors"
+            title="Large text"
+          >
+            L
+          </button>
+        </div>
+        <div className="flex items-center gap-1 border-r border-border pr-2 mr-2">
+          <button
+            type="button"
+            onClick={handleCreateTaskFromSelection}
+            className="px-2 py-1 text-xs hover:bg-accent hover:text-accent-foreground rounded transition-colors bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300"
+            title="Create task from selected text"
+            disabled={createTaskMutation.isPending}
+          >
+            ✓ Task
+          </button>
+        </div>
+        <DefaultToolbarRender editor={editor} {...props} />
+      </div>
+    );
   };
 
   if (readOnly) {
