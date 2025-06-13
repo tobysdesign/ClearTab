@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info } from "lucide-react";
+import { Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
@@ -81,7 +81,18 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl flex">
+            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl flex relative">
+              {/* Close Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="absolute right-4 top-4 z-10 h-8 w-8 p-0 hover:bg-gray-800 text-gray-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+              
               {/* Sidebar */}
               <div className="w-48 border-r border-gray-800 p-4">
                 <div className="mb-6">
