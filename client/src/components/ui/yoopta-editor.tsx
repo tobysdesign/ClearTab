@@ -113,32 +113,12 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   const selectionRef = useRef(null);
   const queryClient = useQueryClient();
   
-  // Parse initial value with H3 default for empty notes
+  // Parse initial value
   const [editorValue, setEditorValue] = useState<YooptaContentValue>(() => {
     try {
-      const parsed = value ? JSON.parse(value) : {};
-      // If empty editor, initialize with H3 block
-      if (!value || Object.keys(parsed).length === 0) {
-        return {
-          [crypto.randomUUID()]: {
-            id: crypto.randomUUID(),
-            type: 'heading-three',
-            value: [{ id: crypto.randomUUID(), type: 'text', children: [{ text: '' }] }],
-            meta: { order: 0, depth: 0 }
-          }
-        };
-      }
-      return parsed;
+      return value ? JSON.parse(value) : {};
     } catch {
-      // Fallback to H3 block for errors too
-      return {
-        [crypto.randomUUID()]: {
-          id: crypto.randomUUID(),
-          type: 'heading-three',
-          value: [{ id: crypto.randomUUID(), type: 'text', children: [{ text: '' }] }],
-          meta: { order: 0, depth: 0 }
-        }
-      };
+      return {};
     }
   });
 
