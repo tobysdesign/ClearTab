@@ -112,4 +112,40 @@
   .card-title {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+
+  /* Yoopta Editor styles - clean black theme */
+  .yoopta-editor {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  /* Yoopta selection styling */
+  .yoopta-editor ::selection,
+  .yoopta-editor ::-moz-selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Yoopta action menu */
+  .yoopta-action-menu-list,
+  [data-yoopta-action-menu-list] {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+
+  /* Yoopta toolbar */
+  .yoopta-toolbar {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+}
+
+yoopta-block-actions {
+  pointer-events: none;
+  background: #212121 !important;
+  color: #fff;
+  border-radius: 6px;
+  border: 1px solid #2f2f2f;
 }
