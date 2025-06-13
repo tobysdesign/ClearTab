@@ -41,14 +41,14 @@ export default function Settings() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+    <div className="min-h-screen bg-black p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+          <h1 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
             <SettingsIcon className="h-6 w-6" />
             Settings
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">Manage your preferences and integrations</p>
+          <p className="text-gray-300">Manage your preferences and integrations</p>
         </div>
 
         <div className="grid gap-6">
