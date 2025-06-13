@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatProvider, useChatContext } from "@/hooks/use-chat-context";
 import { FloatingDock } from "@/components/ui/floating-dock";
-import { Settings } from "lucide-react";
+import { Settings, X } from "lucide-react";
 import { AIChatbotFace } from "@/components/ai-chatbot-face";
 import { ThemeProvider } from "@/components/theme-provider";
 import Dashboard from "@/pages/dashboard";
@@ -41,13 +41,13 @@ function DockContent() {
 
   const dockItems = [
     {
-      title: "Settings",
-      icon: <Settings className="h-5 w-5" />,
-      onClick: () => setIsSettingsOpen(true)
+      title: isSettingsOpen ? "Close Settings" : "Settings",
+      icon: isSettingsOpen ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />,
+      onClick: () => setIsSettingsOpen(!isSettingsOpen)
     },
     {
-      title: "AI Assistant",
-      icon: <AIChatbotFace size="md" />,
+      title: isChatOpen ? "Close AI" : "AI Assistant",
+      icon: isChatOpen ? <X className="h-5 w-5" /> : <AIChatbotFace size="md" />,
       onClick: () => setIsChatOpen(!isChatOpen)
     }
   ];

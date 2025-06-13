@@ -133,22 +133,22 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     className="space-y-4"
                   >
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white">Account Settings</h3>
-                      <p className="text-sm text-gray-400">Manage your account preferences</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account preferences</p>
                     </div>
 
-                    <Card className="bg-gray-900/50 border-gray-800">
+                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
                       <CardContent className="p-4 space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                           <div className="flex items-center gap-3">
                             {theme === "dark" ? (
-                              <Moon className="h-4 w-4 text-white" />
+                              <Moon className="h-4 w-4 text-gray-900 dark:text-white" />
                             ) : (
-                              <Sun className="h-4 w-4 text-white" />
+                              <Sun className="h-4 w-4 text-gray-900 dark:text-white" />
                             )}
                             <div>
-                              <h4 className="text-sm font-medium text-white">Dark Mode</h4>
-                              <p className="text-xs text-gray-400">Toggle theme</p>
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Dark Mode</h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Toggle theme</p>
                             </div>
                           </div>
                           <Switch
@@ -157,33 +157,33 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                           />
                         </div>
                         
-                        <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                           <div>
-                            <h4 className="text-sm font-medium text-white">Sign Out</h4>
-                            <p className="text-xs text-gray-400">End current session</p>
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-white">Sign Out</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">End current session</p>
                           </div>
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={handleLogout}
                             disabled={logoutMutation.isPending}
-                            className="bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                            className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
                           >
                             <LogOut className="h-3 w-3 mr-1" />
                             {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
                           </Button>
                         </div>
                         
-                        <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                           <div>
-                            <h4 className="text-sm font-medium text-white">Switch Account</h4>
-                            <p className="text-xs text-gray-400">Choose different Google account</p>
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-white">Switch Account</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Choose different Google account</p>
                           </div>
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => window.location.href = '/api/auth/google'}
-                            className="bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                            className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
                           >
                             <User className="h-3 w-3 mr-1" />
                             Switch
@@ -201,12 +201,12 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     transition={{ duration: 0.3 }}
                   >
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white">Notifications</h3>
-                      <p className="text-sm text-gray-400">Configure notification preferences</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Configure notification preferences</p>
                     </div>
-                    <Card className="bg-gray-900/50 border-gray-800">
+                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
                       <CardContent className="p-4">
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           Notification preferences coming soon.
                         </div>
                       </CardContent>
@@ -221,18 +221,18 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                     transition={{ duration: 0.3 }}
                   >
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white">About</h3>
-                      <p className="text-sm text-gray-400">Application information and support</p>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">About</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Application information and support</p>
                     </div>
-                    <Card className="bg-gray-900/50 border-gray-800">
+                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
                       <CardContent className="p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-400">Version</span>
-                          <span className="text-sm font-medium text-white">1.0.0</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Version</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">1.0.0</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-400">Support</span>
-                          <Button variant="link" className="p-0 h-auto text-blue-400 hover:text-blue-300 text-sm">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">Support</span>
+                          <Button variant="link" className="p-0 h-auto text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm">
                             Contact Support
                           </Button>
                         </div>
