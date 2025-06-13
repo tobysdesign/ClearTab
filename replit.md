@@ -149,4 +149,6 @@ Changelog:
 
 ```
 Preferred communication style: Simple, everyday language.
+Styling preference: No aggressive CSS overrides or !important declarations - clean styling approach preferred.
+Color preference: No blue colors - use dark gray/black theme throughout.
 ```
