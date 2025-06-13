@@ -597,7 +597,7 @@ div[id*="yoopta"] div[style*="background"] {
     display: block !important;
   }
 
-  /* Make ALL interactive elements within the editor bright and visible */
+  /* Make ALL interactive elements within the editor VERY bright and visible */
   .notes-editor-container *[onclick],
   .notes-editor-container *[onmousedown],
   .notes-editor-container *[data-testid],
@@ -614,29 +614,56 @@ div[id*="yoopta"] div[style*="background"] {
     opacity: 1 !important;
     visibility: visible !important;
     display: inline-flex !important;
-    background-color: hsl(var(--muted)) !important;
-    border: 1px solid hsl(var(--border)) !important;
+    background-color: hsl(var(--background)) !important;
+    border: 2px solid hsl(var(--foreground) / 0.3) !important;
     color: hsl(var(--foreground)) !important;
-    border-radius: 4px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
-    padding: 2px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 6px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    padding: 4px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px hsl(var(--border)) !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
     z-index: 1000 !important;
     position: relative !important;
+    font-weight: 500 !important;
   }
 
-  /* Bright hover states */
+  /* Very bright hover states */
   .notes-editor-container *[onclick]:hover,
   .notes-editor-container button:hover,
   .notes-editor-container [role="button"]:hover {
     background-color: hsl(var(--accent)) !important;
     color: hsl(var(--accent-foreground)) !important;
-    transform: scale(1.1) !important;
-    border-color: hsl(var(--accent-foreground) / 0.3) !important;
+    transform: scale(1.15) !important;
+    border-color: hsl(var(--accent)) !important;
+    border-width: 3px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 2px hsl(var(--accent) / 0.5) !important;
+  }
+
+  /* Make block controls extremely bright - specific targeting */
+  .notes-editor-container [data-yoopta-block-actions],
+  .notes-editor-container [data-yoopta-controls],
+  .notes-editor-container [data-yoopta-drag-handle],
+  .notes-editor-container [data-yoopta-block-options] {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    border: 2px solid hsl(var(--primary)) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+  }
+
+  .notes-editor-container [data-yoopta-block-actions]:hover,
+  .notes-editor-container [data-yoopta-controls]:hover,
+  .notes-editor-container [data-yoopta-drag-handle]:hover,
+  .notes-editor-container [data-yoopta-block-options]:hover {
+    background-color: hsl(var(--destructive)) !important;
+    color: hsl(var(--destructive-foreground)) !important;
+    border-color: hsl(var(--destructive)) !important;
+    transform: scale(1.2) !important;
   }
 
   /* Text sizing support in YooptaEditor */
