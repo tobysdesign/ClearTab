@@ -642,59 +642,11 @@ div[id*="yoopta"] div[style*="background"] {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 2px hsl(var(--accent) / 0.5) !important;
   }
 
-  /* Nuclear option - target .yoopta-block-actions with maximum specificity */
-  div.notes-editor-container div.yoopta-block-actions,
-  div.notes-editor-container .yoopta-block-actions,
-  .notes-editor-container .yoopta-block-actions,
   .yoopta-block-actions {
-    background-color: #3b82f6 !important; /* Bright blue */
+    background-color: red !important;
     color: white !important;
-    border: 4px solid #1d4ed8 !important; /* Darker blue border */
-    border-radius: 8px !important;
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.8) !important; /* Blue glow */
     opacity: 1 !important;
     visibility: visible !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    max-width: 32px !important;
-    max-height: 32px !important;
-    padding: 8px !important;
-    margin: 2px !important;
-    z-index: 9999 !important;
-    position: relative !important;
-    outline: 2px solid yellow !important; /* Yellow outline for debugging */
-    outline-offset: 2px !important;
-  }
-
-  /* Bright hover states for yoopta-block-actions */
-  div.notes-editor-container div.yoopta-block-actions:hover,
-  div.notes-editor-container .yoopta-block-actions:hover,
-  .notes-editor-container .yoopta-block-actions:hover,
-  .yoopta-block-actions:hover {
-    background-color: #ef4444 !important; /* Bright red */
-    color: white !important;
-    border-color: #dc2626 !important; /* Darker red border */
-    transform: scale(1.3) !important;
-    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.9) !important; /* Red glow */
-    outline: 3px solid orange !important; /* Orange outline for debugging */
-    outline-offset: 3px !important;
-  }
-
-  /* Additional fallback targeting */
-  .notes-editor-container [data-yoopta-block-actions],
-  .notes-editor-container [data-yoopta-controls],
-  .notes-editor-container [data-yoopta-drag-handle],
-  .notes-editor-container [data-yoopta-block-options] {
-    background-color: hsl(var(--primary)) !important;
-    color: hsl(var(--primary-foreground)) !important;
-    border: 2px solid hsl(var(--primary)) !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
   }
 
   /* Text sizing support in YooptaEditor */
