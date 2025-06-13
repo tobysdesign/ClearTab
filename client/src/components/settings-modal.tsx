@@ -3,7 +3,7 @@ import { MoreHorizontal, Settings as SettingsIcon, LogOut, User, Moon, Sun, Cale
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer";
+import { Drawer } from "vaul";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
@@ -54,154 +54,169 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] [&>button]:hidden fixed right-4 top-1/2 -translate-y-1/2 left-auto transform-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-200">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0">
-          <DialogTitle className="text-lg flex items-center gap-2">
-            <SettingsIcon className="h-5 w-5" />
-            Settings
-          </DialogTitle>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {sections.map((section) => {
-                const Icon = section.icon;
-                return (
-                  <DropdownMenuItem key={section.id} onClick={() => setActiveSection(section.id)}>
-                    <Icon className="mr-2 h-4 w-4" />
-                    {section.label}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {activeSection === "calendar" && (
-            <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 block">
-                Calendar Integration
-              </label>
-              <CalendarSettings />
+    <Drawer.Root open={open} onOpenChange={onOpenChange}>
+      <Drawer.Portal>
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
+        <Drawer.Content className="bg-black border border-gray-800 flex flex-col rounded-t-[10px] h-[70vh] mt-24 fixed bottom-0 left-0 right-0 z-50">
+          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-600 mt-4 mb-6" />
+          
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pb-4 border-b border-gray-800">
+            <div className="flex items-center gap-2">
+              <SettingsIcon className="h-5 w-5 text-white" />
+              <h2 className="text-lg font-medium text-white">Settings</h2>
             </div>
-          )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 text-gray-200"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                {sections.map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <DropdownMenuItem 
+                      key={section.id} 
+                      onClick={() => setActiveSection(section.id)}
+                      className="text-gray-200 hover:bg-gray-800"
+                    >
+                      <Icon className="mr-2 h-4 w-4" />
+                      {section.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-          {activeSection === "account" && (
-            <>
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {activeSection === "calendar" && (
               <div>
-                <label className="text-xs font-medium text-foreground mb-1.5 block">
-                  Theme Settings
+                <label className="text-xs font-medium text-white mb-1.5 block">
+                  Calendar Integration
                 </label>
-                <div className="flex items-center justify-between p-3 border border-border rounded">
-                  <div className="flex items-center gap-3">
-                    {theme === "dark" ? (
-                      <Moon className="h-4 w-4 text-foreground" />
-                    ) : (
-                      <Sun className="h-4 w-4 text-foreground" />
-                    )}
-                    <div>
-                      <div className="text-xs font-medium text-foreground">Dark Mode</div>
-                      <div className="text-xs text-muted-foreground">Toggle theme</div>
+                <CalendarSettings />
+              </div>
+            )}
+
+            {activeSection === "account" && (
+              <>
+                <div>
+                  <label className="text-xs font-medium text-white mb-1.5 block">
+                    Theme Settings
+                  </label>
+                  <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
+                    <div className="flex items-center gap-3">
+                      {theme === "dark" ? (
+                        <Moon className="h-4 w-4 text-white" />
+                      ) : (
+                        <Sun className="h-4 w-4 text-white" />
+                      )}
+                      <div>
+                        <div className="text-xs font-medium text-white">Dark Mode</div>
+                        <div className="text-xs text-gray-400">Toggle theme</div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={theme === "dark"}
+                      onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-xs font-medium text-white mb-1.5 block">
+                    Account Actions
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
+                      <div>
+                        <div className="text-xs font-medium text-white">Sign Out</div>
+                        <div className="text-xs text-gray-400">End current session</div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => logoutMutation.mutate()}
+                        disabled={logoutMutation.isPending}
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600"
+                      >
+                        <LogOut className="h-3 w-3 mr-1" />
+                        {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
+                      <div>
+                        <div className="text-xs font-medium text-white">Switch Account</div>
+                        <div className="text-xs text-gray-400">Choose different Google account</div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = '/api/auth/google'}
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600"
+                      >
+                        <User className="h-3 w-3 mr-1" />
+                        Switch
+                      </Button>
                     </div>
                   </div>
-                  <Switch
-                    checked={theme === "dark"}
-                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                  />
+                </div>
+              </>
+            )}
+
+            {activeSection === "notifications" && (
+              <div>
+                <label className="text-xs font-medium text-white mb-1.5 block">
+                  Notification Preferences
+                </label>
+                <div className="p-3 border border-gray-700 rounded bg-gray-900">
+                  <div className="text-xs text-gray-400">
+                    Notification preferences coming soon.
+                  </div>
                 </div>
               </div>
-              
+            )}
+
+            {activeSection === "about" && (
               <div>
-                <label className="text-xs font-medium text-foreground mb-1.5 block">
-                  Account Actions
+                <label className="text-xs font-medium text-white mb-1.5 block">
+                  Application Info
                 </label>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-3 border border-border rounded">
-                    <div>
-                      <div className="text-xs font-medium text-foreground">Sign Out</div>
-                      <div className="text-xs text-muted-foreground">End current session</div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => logoutMutation.mutate()}
-                      disabled={logoutMutation.isPending}
-                      className="text-xs"
-                    >
-                      <LogOut className="h-3 w-3 mr-1" />
-                      {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                <div className="p-3 border border-gray-700 rounded bg-gray-900 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Version</span>
+                    <span className="text-xs font-medium text-white">1.0.0</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-400">Support</span>
+                    <Button variant="outline" size="sm" className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600">
+                      Contact Support
                     </Button>
                   </div>
-                  
-                  <div className="flex items-center justify-between p-3 border border-border rounded">
-                    <div>
-                      <div className="text-xs font-medium text-foreground">Switch Account</div>
-                      <div className="text-xs text-muted-foreground">Choose different Google account</div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.location.href = '/api/auth/google'}
-                      className="text-xs"
-                    >
-                      <User className="h-3 w-3 mr-1" />
-                      Switch
-                    </Button>
-                  </div>
                 </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
 
-          {activeSection === "notifications" && (
-            <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 block">
-                Notification Preferences
-              </label>
-              <div className="p-3 border border-border rounded">
-                <div className="text-xs text-muted-foreground">
-                  Notification preferences coming soon.
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeSection === "about" && (
-            <div>
-              <label className="text-xs font-medium text-foreground mb-1.5 block">
-                Application Info
-              </label>
-              <div className="p-3 border border-border rounded space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Version</span>
-                  <span className="text-xs font-medium text-foreground">1.0.0</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Support</span>
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Contact Support
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex justify-end mt-6">
-          <Button onClick={() => onOpenChange(false)} className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm">
-            Done
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          {/* Footer */}
+          <div className="border-t border-gray-800 p-4">
+            <Button 
+              onClick={() => onOpenChange(false)} 
+              className="w-full bg-gray-700 hover:bg-gray-600 text-white text-sm"
+            >
+              Done
+            </Button>
+          </div>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   );
 }
