@@ -318,6 +318,17 @@ div[id*="yoopta"] div[style*="background"] {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
+  /* Text selection styling */
+  ::selection {
+    color: #fff;
+    background-color: #ff79c6;
+  }
+
+  .dark ::selection {
+    color: #000;
+    background-color: #ff79c6;
+  }
+
   /* Apply Lotion-SemiBold to widget titles only */
   .widget h3, .widget h4,
   .settings h2, .settings h3, .settings h4,
