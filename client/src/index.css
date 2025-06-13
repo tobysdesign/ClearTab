@@ -342,18 +342,34 @@ div[id*="yoopta"] div[style*="background"] {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   }
 
-  /* YooptaEditor dark theme menus - ultra compact */
+  /* YooptaEditor action menu - ultra compact and borderless */
+  .yoopta-custom-menu,
+  .yoopta-custom-menu *,
   [data-yoopta-menu],
   .yoopta-action-menu,
   div[data-testid*="menu"],
   div[class*="ActionMenu"],
-  div[class*="action-menu"] {
-    background-color: hsl(var(--popover)) !important;
+  div[class*="action-menu"],
+  [data-slate-editor] div[role="menu"],
+  [data-slate-editor] div[class*="menu"],
+  div[style*="position: absolute"],
+  div[style*="position: fixed"] {
     border: none !important;
+    border-width: 0 !important;
+    border-style: none !important;
+    outline: none !important;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1) !important;
+  }
+
+  .yoopta-custom-menu {
+    background-color: hsl(var(--popover)) !important;
     border-radius: 0.25rem !important;
-    box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1) !important;
     padding: 0.125rem !important;
     gap: 0 !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
   }
 
   .yoopta-toolbar {
@@ -363,20 +379,26 @@ div[id*="yoopta"] div[style*="background"] {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
   }
 
+  .yoopta-custom-menu [data-yoopta-menu-item],
+  .yoopta-custom-menu .yoopta-menu-item,
+  .yoopta-custom-menu button,
   [data-yoopta-menu-item],
   .yoopta-menu-item,
   button[data-testid*="menu-item"],
   button[class*="menu-item"] {
     color: hsl(var(--popover-foreground)) !important;
     background-color: transparent !important;
-    border-radius: 0.1875rem !important;
-    padding: 0.25rem 0.375rem !important;
+    border: none !important;
+    border-radius: 0.125rem !important;
+    padding: 0.1875rem 0.25rem !important;
     margin: 0 !important;
-    transition: all 0.2s ease !important;
-    font-size: 0.8125rem !important;
-    line-height: 1.125rem !important;
+    transition: all 0.15s ease !important;
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
     min-height: unset !important;
     height: auto !important;
+    width: 100% !important;
+    text-align: left !important;
   }
 
   [data-yoopta-menu-item]:hover,
