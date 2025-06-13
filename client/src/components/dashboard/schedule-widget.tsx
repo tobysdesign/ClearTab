@@ -151,8 +151,9 @@ export default function ScheduleWidget() {
                 <div className="text-muted-foreground text-sm">No events today</div>
               </div>
             ) : (
-              todaysEvents.slice(0, 3).map((event) => {
+              todaysEvents.slice(0, 3).map((event, index) => {
                 const isCurrent = isCurrentEvent(event);
+                const isSecondItem = index === 1;
                 return (
                   <div 
                     key={event.id}
@@ -162,6 +163,10 @@ export default function ScheduleWidget() {
                         : 'bg-muted/50 text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
+                    {/* Red indicator for second item */}
+                    {isSecondItem && (
+                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3 h-3 bg-red-500 rounded-full border-2 border-background"></div>
+                    )}
                     <div className={`text-base mb-1 leading-tight ${isCurrent ? 'font-semibold text-accent-foreground' : 'font-normal text-foreground'}`}>
                       {event.title}
                     </div>
