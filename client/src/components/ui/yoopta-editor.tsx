@@ -202,7 +202,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     }
   };
 
-  // Text sizing functionality with actual editor API
+  // Text sizing functionality using DOM manipulation like slash menu
   const applyTextSize = (size: 'small' | 'medium' | 'large') => {
     const sizeClasses = {
       small: 'text-sm',
@@ -211,33 +211,42 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     };
 
     try {
-      // Get current selection
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) return;
 
       const range = selection.getRangeAt(0);
       if (range.collapsed) return;
 
-      // Create a span with the appropriate size class
-      const span = document.createElement('span');
-      span.className = sizeClasses[size];
-      
-      // Wrap the selected content
-      try {
-        range.surroundContents(span);
-      } catch (e) {
-        // If surroundContents fails, extract and wrap
-        const contents = range.extractContents();
-        span.appendChild(contents);
-        range.insertNode(span);
+      // Remove existing size classes from selected content
+      const selectedContent = range.cloneContents();
+      const walker = document.createTreeWalker(
+        selectedContent,
+        NodeFilter.SHOW_ELEMENT,
+        null
+      );
+
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node instanceof Element) {
+          node.classList.remove('text-sm', 'text-base', 'text-lg');
+        }
       }
 
-      // Clear selection
+      // Create wrapper with new size class
+      const wrapper = document.createElement('span');
+      wrapper.className = sizeClasses[size];
+      
+      // Extract and wrap content
+      const contents = range.extractContents();
+      wrapper.appendChild(contents);
+      range.insertNode(wrapper);
+
+      // Clear selection and trigger change
       selection.removeAllRanges();
       
-      // Trigger editor change
+      // Trigger editor update
       const event = new Event('input', { bubbles: true });
-      const editorElement = span.closest('[contenteditable="true"]');
+      const editorElement = wrapper.closest('[contenteditable="true"]');
       if (editorElement) {
         editorElement.dispatchEvent(event);
       }
