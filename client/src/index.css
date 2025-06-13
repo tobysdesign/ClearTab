@@ -423,6 +423,50 @@ div[id*="yoopta"] div[style*="background"] {
     color: inherit !important;
   }
 
+  /* YooptaEditor line hover element visibility - comprehensive targeting */
+  .notes-editor-container [data-yoopta-line]:hover,
+  .notes-editor-container [data-yoopta-line-hover],
+  .notes-editor-container .yoopta-line-hover,
+  .notes-editor-container [class*="line-hover"],
+  .notes-editor-container [data-slate-node]:hover::before,
+  .notes-editor-container [data-slate-node]:hover::after,
+  .notes-editor-container [data-slate-element]:hover::before,
+  .notes-editor-container .slate-block-element:hover::before,
+  .notes-editor-container div[role="textbox"]:hover::before,
+  .notes-editor-container [contenteditable="true"]:hover::before {
+    background-color: hsl(var(--accent)) !important;
+    opacity: 0.8 !important;
+    visibility: visible !important;
+    display: block !important;
+    content: "" !important;
+    position: absolute !important;
+    left: -2px !important;
+    top: 0 !important;
+    width: 2px !important;
+    height: 100% !important;
+    border-radius: 1px !important;
+    z-index: 10 !important;
+  }
+
+  /* YooptaEditor block controls and indicators */
+  .notes-editor-container [data-yoopta-block]:hover [data-yoopta-controls],
+  .notes-editor-container [data-yoopta-block]:hover .yoopta-controls,
+  .notes-editor-container [data-slate-node]:hover .slate-controls,
+  .notes-editor-container .yoopta-block:hover .block-controls {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: hsl(var(--muted)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* Ensure YooptaEditor elements have proper positioning context */
+  .notes-editor-container [data-slate-element],
+  .notes-editor-container [data-yoopta-block],
+  .notes-editor-container .yoopta-block {
+    position: relative !important;
+  }
+
   /* Fix YooptaEditor separator visibility - more compact */
   [data-yoopta-menu] hr,
   [data-yoopta-menu] .separator,
@@ -457,15 +501,20 @@ div[id*="yoopta"] div[style*="background"] {
     white-space: pre-wrap !important;
     max-width: 100% !important;
     width: 100% !important;
+    overflow-x: hidden !important;
   }
 
   .notes-editor-container p,
   .notes-editor-container div,
-  .notes-editor-container span {
+  .notes-editor-container span,
+  .notes-editor-container [data-slate-leaf],
+  .notes-editor-container [data-slate-text] {
     word-wrap: break-word !important;
     word-break: break-word !important;
     overflow-wrap: break-word !important;
     max-width: 100% !important;
+    overflow-x: hidden !important;
+    hyphens: auto !important;
   }
 
   /* Text selection in YooptaEditor */
