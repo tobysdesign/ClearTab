@@ -255,14 +255,14 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     };
 
     return (
-      <div className="flex items-center gap-3 p-3 border-b border-border bg-card/50 backdrop-blur-sm">
+      <div className="flex items-center gap-3 p-3">
         {/* Text Size Controls */}
-        <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md border border-border/50">
+        <div className="flex items-center gap-1 px-2 py-1">
           <span className="text-xs text-muted-foreground mr-2 font-medium">Size:</span>
           <button
             type="button"
             onClick={() => applyTextSize('small')}
-            className="px-3 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
+            className="px-3 py-1 text-xs font-medium hover:text-white/80 rounded transition-colors"
             title="Small text"
           >
             S
@@ -270,7 +270,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           <button
             type="button"
             onClick={() => applyTextSize('medium')}
-            className="px-3 py-1 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
+            className="px-3 py-1 text-sm font-medium hover:text-white/80 rounded transition-colors"
             title="Medium text"
           >
             M
@@ -278,7 +278,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           <button
             type="button"
             onClick={() => applyTextSize('large')}
-            className="px-3 py-1 text-base font-medium hover:bg-accent hover:text-accent-foreground rounded transition-colors border border-transparent hover:border-border"
+            className="px-3 py-1 text-base font-medium hover:text-white/80 rounded transition-colors"
             title="Large text"
           >
             L
@@ -309,7 +309,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
 
   if (readOnly) {
     return (
-      <div className={`min-h-[200px] p-3 border rounded-md bg-muted ${className}`}>
+      <div className={`min-h-[200px] ${className}`}>
         <YooptaEditor
           editor={editor}
           plugins={plugins}

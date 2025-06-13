@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force remove ALL backgrounds and override blue selection */
+.yoopta-editor,
+.yoopta-editor *,
+.yoopta-editor [class*="yoo"],
+.yoopta-editor [class*="Yoo"],
+.yoopta-editor div,
+.yoopta-editor span {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Override selection colors */
+.yoopta-editor ::selection,
+.yoopta-editor *::selection {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+/* Target specific blue background hex values */
+.yoopta-editor [style*="#c6ddf8"],
+.yoopta-editor [style*="rgb(198, 221, 248)"],
+.yoopta-editor [style*="rgba(198, 221, 248"] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* Import Aileron-Black font */
 @font-face {
   font-family: 'Aileron-Black';
