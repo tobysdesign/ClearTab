@@ -360,6 +360,34 @@ export default function NotesWidgetCollapsible() {
           <div className="h-full flex flex-col bg-muted/30">
             {selectedNote ? (
               <div className="p-6 h-full flex flex-col">
+                {/* Title Input Field */}
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    value={selectedNote.title || ""}
+                    onChange={(e) => {
+                      const newTitle = e.target.value;
+                      
+                      // Clear existing timeout
+                      if (saveTimeoutRef.current) {
+                        clearTimeout(saveTimeoutRef.current);
+                      }
+                      
+                      // Set new timeout for auto-save
+                      saveTimeoutRef.current = setTimeout(() => {
+                        updateNoteMutation.mutate({
+                          id: selectedNote.id,
+                          updates: { title: newTitle }
+                        });
+                      }, 500);
+                    }}
+                    placeholder="Note title..."
+                    className="w-full bg-transparent border-none outline-none text-xl font-semibold text-foreground placeholder-muted-foreground/60 resize-none"
+                    style={{ fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.6 }}
+                  />
+                </div>
+                
+                {/* Content Editor */}
                 <div className="flex-1">
                   <YooptaEditor
                     key={`${selectedNote?.id || 'empty'}-${editorKey}`}
@@ -379,9 +407,9 @@ export default function NotesWidgetCollapsible() {
                       
                       // Set new timeout for auto-save
                       saveTimeoutRef.current = setTimeout(() => {
-                        // Extract text content from Yoopta structure
+                        // Extract text content from Yoopta structure for content only
                         const blocks = Object.values(newValue);
-                        const textContent = blocks
+                        const content = blocks
                           .map((block: any) => {
                             if (block.value && Array.isArray(block.value)) {
                               return block.value
@@ -394,19 +422,14 @@ export default function NotesWidgetCollapsible() {
                           })
                           .filter(text => text.trim() !== '')
                           .join('\n');
-
-                        // Use first line as title, rest as content
-                        const lines = textContent.split('\n').filter(line => line.trim() !== '');
-                        const title = lines[0]?.trim() || "Untitled";
-                        const content = lines.slice(1).join('\n').trim();
                         
                         updateNoteMutation.mutate({
                           id: selectedNote.id,
-                          updates: { title, content }
+                          updates: { content: content.trim() }
                         });
                       }, 1000);
                     }}
-                    placeholder="Start typing your note here..."
+                    placeholder="Start typing your note content here..."
                   />
                 </div>
               </div>

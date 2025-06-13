@@ -649,22 +649,7 @@ div[id*="yoopta"] div[style*="background"] {
     visibility: visible !important;
   }
 
-  /* Make the first paragraph in notes editor look like H3 for title */
-  .notes-editor-container [data-yoopta-block]:first-child [data-yoopta-block-type="paragraph"],
-  .notes-editor-container .yoopta-block:first-child,
-  .notes-editor-container [data-yoopta-block]:first-child {
-    font-size: 1.25rem !important; /* H3 size */
-    font-weight: 600 !important;
-    line-height: 1.6 !important;
-    margin-bottom: 0.75rem !important;
-  }
 
-  .notes-editor-container [data-yoopta-block]:first-child [contenteditable],
-  .notes-editor-container [data-yoopta-block]:first-child div[contenteditable] {
-    font-size: 1.25rem !important;
-    font-weight: 600 !important;
-    line-height: 1.6 !important;
-  }
 
   /* Text sizing support in YooptaEditor */
   .notes-editor-container .text-sm,
