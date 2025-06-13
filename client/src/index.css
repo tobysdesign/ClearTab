@@ -447,6 +447,27 @@ div[id*="yoopta"] div[style*="background"] {
     min-height: 0;
   }
 
+  /* Fix text wrapping and responsiveness in YooptaEditor */
+  .notes-editor-container [data-slate-editor],
+  .notes-editor-container .yoopta-editor,
+  .notes-editor-container [contenteditable="true"] {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: pre-wrap !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .notes-editor-container p,
+  .notes-editor-container div,
+  .notes-editor-container span {
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
+  }
+
   /* Text selection in YooptaEditor */
   .yoopta-editor ::selection,
   [data-yoopta-editor] ::selection,

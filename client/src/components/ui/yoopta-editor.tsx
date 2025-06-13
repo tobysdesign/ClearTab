@@ -178,25 +178,8 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   }));
 
   // Custom action menu render with viewport detection
-  const CustomActionMenuRender = ({ editor, ...props }: any) => {
-    return (
-      <div 
-        className="yoopta-custom-menu"
-        style={{
-          position: 'fixed',
-          zIndex: 9999,
-          maxHeight: '60vh',
-          overflow: 'auto',
-          backgroundColor: 'hsl(var(--popover))',
-          border: 'none',
-          borderRadius: '0.25rem',
-          boxShadow: '0 2px 4px -1px rgb(0 0 0 / 0.1)',
-          padding: '0.125rem',
-        }}
-      >
-        <DefaultActionMenuRender editor={editor} {...props} />
-      </div>
-    );
+  const CustomActionMenuRender = (props: any) => {
+    return <DefaultActionMenuRender {...props} />;
   };
 
   // Create tools configuration with custom toolbar and action menu
