@@ -408,6 +408,23 @@ div[id*="yoopta"] div[style*="background"] {
     min-height: 0;
   }
 
+  /* Text selection in YooptaEditor */
+  .yoopta-editor ::selection,
+  [data-yoopta-editor] ::selection,
+  .notes-editor-container ::selection,
+  .yoopta-editor-content ::selection {
+    color: #fff !important;
+    background-color: #ff79c6 !important;
+  }
+
+  .dark .yoopta-editor ::selection,
+  .dark [data-yoopta-editor] ::selection,
+  .dark .notes-editor-container ::selection,
+  .dark .yoopta-editor-content ::selection {
+    color: #000 !important;
+    background-color: #ff79c6 !important;
+  }
+
   @keyframes silk-flow {
     0%, 100% { 
       background-position: 0% 0%, 100% 100%, 100% 0%, 0% 100%;
