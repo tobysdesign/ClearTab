@@ -582,30 +582,61 @@ div[id*="yoopta"] div[style*="background"] {
     visibility: visible !important;
   }
 
-  /* Make all YooptaEditor buttons visible with bright styling */
-  .notes-editor-container * button,
-  .notes-editor-container * [role="button"],
-  .notes-editor-container * [data-role="button"] {
+  /* Extreme override - force ALL elements in editor area to be visible on hover */
+  .notes-editor-container:hover * {
     opacity: 1 !important;
     visibility: visible !important;
+  }
+
+  /* Target ANY element that could be a block control with CSS attribute selectors */
+  .notes-editor-container [style*="opacity: 0"],
+  .notes-editor-container [style*="visibility: hidden"],
+  .notes-editor-container [style*="display: none"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+
+  /* Make ALL interactive elements within the editor bright and visible */
+  .notes-editor-container *[onclick],
+  .notes-editor-container *[onmousedown],
+  .notes-editor-container *[data-testid],
+  .notes-editor-container *.draggable,
+  .notes-editor-container *[draggable="true"],
+  .notes-editor-container button,
+  .notes-editor-container [role="button"],
+  .notes-editor-container [type="button"],
+  .notes-editor-container [class*="Button"],
+  .notes-editor-container [class*="button"],
+  .notes-editor-container [class*="Control"],
+  .notes-editor-container [class*="Handle"],
+  .notes-editor-container [class*="Action"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-flex !important;
     background-color: hsl(var(--muted)) !important;
     border: 1px solid hsl(var(--border)) !important;
     color: hsl(var(--foreground)) !important;
     border-radius: 4px !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    padding: 2px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
-    z-index: 100 !important;
+    z-index: 1000 !important;
+    position: relative !important;
   }
 
-  .notes-editor-container * button:hover,
-  .notes-editor-container * [role="button"]:hover {
-    background-color: hsl(var(--muted) / 0.8) !important;
-    transform: scale(1.05) !important;
+  /* Bright hover states */
+  .notes-editor-container *[onclick]:hover,
+  .notes-editor-container button:hover,
+  .notes-editor-container [role="button"]:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+    transform: scale(1.1) !important;
+    border-color: hsl(var(--accent-foreground) / 0.3) !important;
   }
 
   /* Text sizing support in YooptaEditor */
