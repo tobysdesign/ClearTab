@@ -12,6 +12,7 @@ import ActionMenuList, { DefaultActionMenuRender } from '@yoopta/action-menu-lis
 import Toolbar, { DefaultToolbarRender } from '@yoopta/toolbar';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import yooptaBlackTheme from "@/lib/yoopta-theme";
 
 interface YooptaEditorComponentProps {
   value?: string;
@@ -306,32 +307,6 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
     );
   };
 
-  // Custom styles for black theme
-  const customStyles = {
-    // Editor container
-    '.yoopta-editor': {
-      background: 'hsl(0 0% 0%)',
-      color: 'hsl(0 0% 100%)',
-    },
-    // Selection styles
-    '.yoopta-editor ::selection': {
-      background: 'hsl(0 0% 12%)',
-      color: 'hsl(0 0% 100%)',
-    },
-    // Action menu
-    '.yoopta-action-menu-list': {
-      background: 'hsl(0 0% 5%)',
-      border: '1px solid hsl(0 0% 15%)',
-      color: 'hsl(0 0% 100%)',
-    },
-    // Toolbar
-    '.yoopta-toolbar': {
-      background: 'hsl(0 0% 5%)',
-      border: '1px solid hsl(0 0% 15%)',
-      color: 'hsl(0 0% 100%)',
-    },
-  };
-
   if (readOnly) {
     return (
       <div className={`min-h-[200px] p-3 border rounded-md bg-muted ${className}`}>
@@ -344,7 +319,7 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           onChange={handleEditorChange}
           selectionBoxRoot={selectionRef}
           readOnly={true}
-          style={customStyles}
+          style={yooptaBlackTheme}
         />
         <div ref={selectionRef} />
       </div>
@@ -352,8 +327,8 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
   }
 
   return (
-    <div className={`notes-editor-container ${className}`}>
-      <div className="notes-editor-scrollable">
+    <div className={`h-full flex flex-col ${className}`}>
+      <div className="flex-1 min-h-0">
         <YooptaEditor
           editor={editor}
           plugins={plugins}
@@ -364,7 +339,8 @@ const YooptaEditorComponent = forwardRef<YooptaEditorRef, YooptaEditorComponentP
           selectionBoxRoot={selectionRef}
           placeholder={placeholder}
           readOnly={readOnly}
-          style={customStyles}
+          style={yooptaBlackTheme}
+          className="h-full"
         />
       </div>
       <div ref={selectionRef} />
