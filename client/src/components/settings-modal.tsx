@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CalendarSettings from "@/components/calendar-settings";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface SettingsModalProps {
   open: boolean;
@@ -48,10 +45,6 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
     }
   });
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
-
   const sections = [
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "account", label: "Account", icon: User },
@@ -60,191 +53,151 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   ];
 
   return (
-    <AnimatePresence>
-      {open && (
-        <>
-          {/* Overlay */}
-          <motion.div 
-            className="fixed inset-0 bg-black/50 z-[9999]"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] [&>button]:hidden fixed right-4 top-1/2 -translate-y-1/2 left-auto transform-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right duration-200">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+          <DialogTitle className="text-lg flex items-center gap-2">
+            <SettingsIcon className="h-5 w-5" />
+            Settings
+          </DialogTitle>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onOpenChange(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-          
-          {/* Modal Content */}
-          <motion.div 
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="h-8 w-8 p-0"
           >
-            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-black border border-gray-800 rounded-xl shadow-2xl flex">
-              {/* Sidebar */}
-              <div className="w-48 border-r border-gray-800 p-4">
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <SettingsIcon className="h-5 w-5" />
-                    Settings
-                  </h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage preferences</p>
+            <X className="h-4 w-4" />
+          </Button>
+        </DialogHeader>
+
+        <div className="flex gap-4">
+          {/* Sidebar */}
+          <div className="w-32 border-r border-border pr-4">
+            <nav className="space-y-1">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                return (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full text-left px-2 py-1.5 rounded text-xs transition-colors flex items-center gap-2 ${
+                      activeSection === section.id
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {section.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 space-y-4">
+            {activeSection === "calendar" && (
+              <div>
+                <CalendarSettings />
+              </div>
+            )}
+
+            {activeSection === "account" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground mb-3">Account Settings</h3>
                 </div>
-                
-                <nav className="space-y-1">
-                  {sections.map((section) => {
-                    const Icon = section.icon;
-                    return (
-                      <button
-                        key={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-                          activeSection === section.id
-                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {section.label}
-                      </button>
-                    );
-                  })}
-                </nav>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 border border-border rounded">
+                    <div className="flex items-center gap-3">
+                      {theme === "dark" ? (
+                        <Moon className="h-4 w-4 text-foreground" />
+                      ) : (
+                        <Sun className="h-4 w-4 text-foreground" />
+                      )}
+                      <div>
+                        <div className="text-xs font-medium text-foreground">Dark Mode</div>
+                        <div className="text-xs text-muted-foreground">Toggle theme</div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={theme === "dark"}
+                      onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border border-border rounded">
+                    <div>
+                      <div className="text-xs font-medium text-foreground">Sign Out</div>
+                      <div className="text-xs text-muted-foreground">End current session</div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => logoutMutation.mutate()}
+                      disabled={logoutMutation.isPending}
+                      className="text-xs"
+                    >
+                      <LogOut className="h-3 w-3 mr-1" />
+                      {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 border border-border rounded">
+                    <div>
+                      <div className="text-xs font-medium text-foreground">Switch Account</div>
+                      <div className="text-xs text-muted-foreground">Choose different Google account</div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.location.href = '/api/auth/google'}
+                      className="text-xs"
+                    >
+                      <User className="h-3 w-3 mr-1" />
+                      Switch
+                    </Button>
+                  </div>
+                </div>
               </div>
+            )}
 
-              {/* Main Content */}
-              <div className="flex-1 p-6 overflow-y-auto">
-                {activeSection === "calendar" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <CalendarSettings />
-                  </motion.div>
-                )}
-
-                {activeSection === "account" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account preferences</p>
-                    </div>
-
-                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
-                      <CardContent className="p-4 space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            {theme === "dark" ? (
-                              <Moon className="h-4 w-4 text-gray-900 dark:text-white" />
-                            ) : (
-                              <Sun className="h-4 w-4 text-gray-900 dark:text-white" />
-                            )}
-                            <div>
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-white">Dark Mode</h4>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">Toggle theme</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={theme === "dark"}
-                            onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                          />
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-white">Sign Out</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">End current session</p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={handleLogout}
-                            disabled={logoutMutation.isPending}
-                            className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
-                          >
-                            <LogOut className="h-3 w-3 mr-1" />
-                            {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
-                          <div>
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-white">Switch Account</h4>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Choose different Google account</p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => window.location.href = '/api/auth/google'}
-                            className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
-                          >
-                            <User className="h-3 w-3 mr-1" />
-                            Switch
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-
-                {activeSection === "notifications" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Configure notification preferences</p>
-                    </div>
-                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
-                      <CardContent className="p-4">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Notification preferences coming soon.
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-
-                {activeSection === "about" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">About</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Application information and support</p>
-                    </div>
-                    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">Version</span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">1.0.0</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">Support</span>
-                          <Button variant="link" className="p-0 h-auto text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm">
-                            Contact Support
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
+            {activeSection === "notifications" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground mb-3">Notifications</h3>
+                </div>
+                <div className="p-3 border border-border rounded">
+                  <div className="text-xs text-muted-foreground">
+                    Notification preferences coming soon.
+                  </div>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            )}
+
+            {activeSection === "about" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground mb-3">About</h3>
+                </div>
+                <div className="p-3 border border-border rounded space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Version</span>
+                    <span className="text-xs font-medium text-foreground">1.0.0</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Support</span>
+                    <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-foreground text-xs">
+                      Contact Support
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

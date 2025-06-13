@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, CheckCircle, AlertCircle, ExternalLink } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -45,42 +44,43 @@ export default function CalendarSettings() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-medium text-foreground mb-1 flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
             Calendar Integration
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">Loading...</div>
-        </CardContent>
-      </Card>
+          </h3>
+        </div>
+        <div className="p-3 border border-border rounded">
+          <div className="text-xs text-muted-foreground">Loading...</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-          <Calendar className="h-5 w-5" />
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-sm font-medium text-foreground mb-1 flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
           Calendar Integration
-        </CardTitle>
-        <CardDescription className="text-gray-500 dark:text-gray-400">
+        </h3>
+        <p className="text-xs text-muted-foreground">
           Connect your Google Calendar to sync events with your schedule
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
+        </p>
+      </div>
+      
+      <div className="space-y-3">
+        <div className="flex items-center justify-between p-3 border border-border rounded">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">Google Calendar</span>
+            <span className="text-xs font-medium text-foreground">Google Calendar</span>
             {status?.connected ? (
               <Badge variant="default" className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Connected
               </Badge>
             ) : (
-              <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700">
+              <Badge variant="secondary" className="bg-muted text-muted-foreground border-border">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Not Connected
               </Badge>
@@ -93,7 +93,7 @@ export default function CalendarSettings() {
               size="sm"
               onClick={handleDisconnect}
               disabled={disconnectMutation.isPending}
-              className="bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-800"
+              className="text-xs"
             >
               Disconnect
             </Button>
@@ -101,23 +101,23 @@ export default function CalendarSettings() {
             <Button 
               size="sm"
               onClick={handleConnect}
-              className="flex items-center gap-2 bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600"
+              className="text-xs flex items-center gap-2"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-3 w-3" />
               Connect Google Calendar
             </Button>
           )}
         </div>
 
         {status?.connected && status.lastSync && (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground p-3 border border-border rounded">
             Last synced: {new Date(status.lastSync).toLocaleDateString()} at {new Date(status.lastSync).toLocaleTimeString()}
           </div>
         )}
 
-        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Benefits of connecting:</h4>
-          <ul className="text-xs text-gray-800 dark:text-gray-200 space-y-1">
+        <div className="p-3 border border-border rounded">
+          <h4 className="text-xs font-medium text-foreground mb-2">Benefits of connecting:</h4>
+          <ul className="text-xs text-muted-foreground space-y-1">
             <li>• View your Google Calendar events in the dashboard</li>
             <li>• Automatic sync with your existing schedule</li>
             <li>• Click events to open in Google Calendar</li>
@@ -126,14 +126,14 @@ export default function CalendarSettings() {
         </div>
 
         {status?.error && (
-          <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-            <p className="text-sm text-red-800">
-              <AlertCircle className="h-4 w-4 inline mr-1" />
+          <div className="bg-red-50 p-3 rounded border border-red-200">
+            <p className="text-xs text-red-800">
+              <AlertCircle className="h-3 w-3 inline mr-1" />
               Sync Error: {status.error}
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
