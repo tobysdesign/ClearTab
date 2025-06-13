@@ -65,7 +65,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
         <>
           {/* Overlay */}
           <motion.div 
-            className="fixed inset-0 bg-black/60 z-[9999]"
+            className="fixed inset-0 bg-black/50 z-[9999]"
             onClick={() => onOpenChange(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -81,26 +81,15 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl flex relative">
-              {/* Close Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="absolute right-4 top-4 z-10 h-8 w-8 p-0 hover:bg-gray-800 text-gray-400 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </Button>
-              
+            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl flex">
               {/* Sidebar */}
-              <div className="w-48 border-r border-gray-800 p-4">
+              <div className="w-48 border-r border-gray-200 dark:border-gray-800 p-4">
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     <SettingsIcon className="h-5 w-5" />
                     Settings
                   </h2>
-                  <p className="text-xs text-gray-400 mt-1">Manage preferences</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Manage preferences</p>
                 </div>
                 
                 <nav className="space-y-1">
@@ -112,8 +101,8 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
                         onClick={() => setActiveSection(section.id)}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
                           activeSection === section.id
-                            ? "bg-gray-800 text-white"
-                            : "text-gray-400 hover:text-white hover:bg-gray-900"
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
