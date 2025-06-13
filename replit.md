@@ -144,6 +144,17 @@ Changelog:
 - June 13, 2025. Fixed Yoopta editor backgrounds - removed all blue colors and backgrounds with aggressive CSS overrides in index.css
 - June 13, 2025. Completely eliminated all blue colors from UI using nuclear CSS overrides targeting all blue variants, button components, and CSS variables
 - June 13, 2025. Settings modal converted to use VAUL pattern (framer-motion) matching AI chat drawer for unified theming and consistent black styling
+- June 13, 2025. Discovered Replit environment injects blue CSS that conflicts with custom black theme - user decided to migrate off Replit platform
+```
+
+## Migration Notes
+
+```
+Platform Migration Decision:
+- Replit's environment injects default blue styling that conflicts with custom black theme
+- User prefers clean CSS approach without aggressive overrides or !important declarations
+- Black theme implementation requires constant fighting against Replit's injected styles
+- Decision made to migrate to different hosting platform for cleaner theming control
 ```
 
 ## User Preferences
@@ -152,4 +163,5 @@ Changelog:
 Preferred communication style: Simple, everyday language.
 Styling preference: No aggressive CSS overrides or !important declarations - clean styling approach preferred.
 Color preference: No blue colors - use dark gray/black theme throughout.
+Platform preference: Moving away from Replit due to CSS theming conflicts.
 ```
