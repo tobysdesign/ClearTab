@@ -43,67 +43,56 @@ const plugins = [
 const customActionMenuItems = (createTaskFn?: (text: string) => void) => [
   {
     title: 'Text',
-    description: 'Start writing with plain text',
     icon: '📝',
     command: 'paragraph',
   },
   {
     title: 'Heading 1',
-    description: 'Big section heading',
     icon: 'H1',
     command: 'heading-one',
   },
   {
     title: 'Heading 2', 
-    description: 'Medium section heading',
     icon: 'H2',
     command: 'heading-two',
   },
   {
     title: 'Heading 3',
-    description: 'Small section heading', 
     icon: 'H3',
     command: 'heading-three',
   },
   {
     title: 'Bullet List',
-    description: 'Create a simple bullet list',
     icon: '•',
     command: 'bulleted-list',
   },
   {
     title: 'Numbered List',
-    description: 'Create a list with numbering',
     icon: '1.',
     command: 'numbered-list',
   },
   {
     title: 'Todo List',
-    description: 'Track tasks with a checklist',
     icon: '☑',
     command: 'todo-list',
   },
   {
     title: 'Quote',
-    description: 'Capture a quote',
     icon: '"',
     command: 'blockquote',
   },
   {
     title: 'Code',
-    description: 'Capture a code snippet',
     icon: '</>', 
     command: 'code',
   },
   {
     title: 'Divider',
-    description: 'Visually divide blocks',
     icon: '—',
     command: 'divider',
   },
   ...(createTaskFn ? [{
     title: 'Create Task',
-    description: 'Turn selected text into a task',
     icon: '✓',
     command: 'create-task',
     action: createTaskFn,
