@@ -81,11 +81,11 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
           >
-            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl flex">
+            <div className="w-full max-w-5xl h-full max-h-[85vh] bg-black border border-gray-800 rounded-xl shadow-2xl flex">
               {/* Sidebar */}
-              <div className="w-48 border-r border-gray-200 dark:border-gray-800 p-4">
+              <div className="w-48 border-r border-gray-800 p-4">
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
                     <SettingsIcon className="h-5 w-5" />
                     Settings
                   </h2>
