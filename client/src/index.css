@@ -318,140 +318,14 @@ div[id*="yoopta"] div[style*="background"] {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
-  /* Aggressively remove all blue colors */
-  * {
-    color: inherit !important;
-  }
 
-  /* Force buttons to use component styling only */
-  button:not([class*="bg-"]) {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
-    border: 1px solid hsl(var(--border)) !important;
-  }
 
-  /* Remove focus outlines */
-  *:focus,
-  *:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
+  /* Remove any blue colors from settings modal specifically */
+  [data-state="open"] .border-gray-800,
+  .settings-modal .border-gray-800,
+  div[role="dialog"] .border-gray-800 {
+    border-color: #374151 !important;
   }
-
-  /* Remove link colors */
-  a {
-    color: inherit !important;
-    text-decoration: none !important;
-  }
-
-  /* Force all elements to not use any browser default blue */
-  input, textarea, select, button {
-    border-color: hsl(var(--border)) !important;
-  }
-
-  /* Specifically target settings modal and remove any blue */
-  [data-state="open"] *,
-  .settings-modal *,
-  div[role="dialog"] *,
-  div[data-radix-dialog-content] * {
-    color: inherit !important;
-    background-color: transparent !important;
-  }
-
-  /* Force all button variants to neutral colors */
-  button[class*="bg-primary"],
-  .bg-primary {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
-  }
-
-  /* Remove any blue from focus states */
-  *[data-state="checked"],
-  *[aria-checked="true"] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
-  }
-
-  /* Nuclear option: remove all blue colors everywhere */
-  * {
-    border-color: hsl(var(--border)) !important;
-  }
-
-  *[style*="blue"],
-  *[style*="#0000FF"],
-  *[style*="#007BFF"],
-  *[style*="rgb(0, 123, 255)"],
-  *[class*="blue"] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-
-  /* Target any remaining Radix UI blue styling */
-  [data-radix-select-trigger],
-  [data-radix-switch-root],
-  [data-radix-checkbox-root] {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
-    border-color: hsl(var(--border)) !important;
-  }
-
-  /* Fix all gray colors that might be appearing blue */
-  .border-gray-200,
-  .dark\:border-gray-200 { border-color: #e5e7eb !important; }
-  
-  .border-gray-300,
-  .dark\:border-gray-300 { border-color: #d1d5db !important; }
-  
-  .border-gray-600,
-  .dark\:border-gray-600 { border-color: #4b5563 !important; }
-  
-  .border-gray-700,
-  .dark\:border-gray-700 { border-color: #374151 !important; }
-  
-  .border-gray-800,
-  .dark\:border-gray-800 { border-color: #1f2937 !important; }
-  
-  .bg-gray-50,
-  .dark\:bg-gray-50 { background-color: #f9fafb !important; }
-  
-  .bg-gray-100,
-  .dark\:bg-gray-100 { background-color: #f3f4f6 !important; }
-  
-  .bg-gray-600,
-  .dark\:bg-gray-600 { background-color: #4b5563 !important; }
-  
-  .bg-gray-700,
-  .dark\:bg-gray-700 { background-color: #374151 !important; }
-  
-  .bg-gray-800,
-  .dark\:bg-gray-800 { background-color: #1f2937 !important; }
-  
-  .bg-gray-900,
-  .dark\:bg-gray-900 { background-color: #111827 !important; }
-  
-  .bg-gray-950,
-  .dark\:bg-gray-950 { background-color: #030712 !important; }
-  
-  .text-gray-300,
-  .dark\:text-gray-300 { color: #d1d5db !important; }
-  
-  .text-gray-400,
-  .dark\:text-gray-400 { color: #9ca3af !important; }
-  
-  .text-gray-500,
-  .dark\:text-gray-500 { color: #6b7280 !important; }
-  
-  .text-gray-600,
-  .dark\:text-gray-600 { color: #4b5563 !important; }
-  
-  .text-gray-700,
-  .dark\:text-gray-700 { color: #374151 !important; }
-  
-  .text-gray-800,
-  .dark\:text-gray-800 { color: #1f2937 !important; }
-  
-  .text-gray-900,
-  .dark\:text-gray-900 { color: #111827 !important; }
 
   /* Text selection styling */
   ::selection {
