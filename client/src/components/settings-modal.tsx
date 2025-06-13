@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { MoreHorizontal, Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info } from "lucide-react";
+import { useState, useRef } from "react";
+import { MoreHorizontal, Settings as SettingsIcon, LogOut, User, Moon, Sun, Calendar, Bell, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Drawer } from "vaul";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/components/theme-provider";
@@ -19,6 +19,7 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const [activeSection, setActiveSection] = useState("calendar");
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -54,169 +55,157 @@ export default function SettingsModal({ open, onOpenChange }: SettingsModalProps
   ];
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange}>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-        <Drawer.Content className="bg-black border border-gray-800 flex flex-col rounded-t-[10px] h-[70vh] mt-24 fixed bottom-0 left-0 right-0 z-50">
-          <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-gray-600 mt-4 mb-6" />
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-black/40 z-[9999]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => onOpenChange(false)}
+          />
           
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 pb-4 border-b border-gray-800">
-            <div className="flex items-center gap-2">
-              <SettingsIcon className="h-5 w-5 text-white" />
-              <h2 className="text-lg font-medium text-white">Settings</h2>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 text-gray-200"
-                >
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                {sections.map((section) => {
-                  const Icon = section.icon;
-                  return (
-                    <DropdownMenuItem 
-                      key={section.id} 
-                      onClick={() => setActiveSection(section.id)}
-                      className="text-gray-200 hover:bg-gray-800"
-                    >
-                      <Icon className="mr-2 h-4 w-4" />
-                      {section.label}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {activeSection === "calendar" && (
-              <div>
-                <label className="text-xs font-medium text-white mb-1.5 block">
-                  Calendar Integration
-                </label>
-                <CalendarSettings />
-              </div>
-            )}
-
-            {activeSection === "account" && (
-              <>
-                <div>
-                  <label className="text-xs font-medium text-white mb-1.5 block">
-                    Theme Settings
-                  </label>
-                  <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
-                    <div className="flex items-center gap-3">
-                      {theme === "dark" ? (
-                        <Moon className="h-4 w-4 text-white" />
-                      ) : (
-                        <Sun className="h-4 w-4 text-white" />
-                      )}
-                      <div>
-                        <div className="text-xs font-medium text-white">Dark Mode</div>
-                        <div className="text-xs text-gray-400">Toggle theme</div>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={theme === "dark"}
-                      onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                    />
-                  </div>
+          {/* Settings Content */}
+          <motion.div 
+            ref={modalRef}
+            className="bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl fixed bottom-20 left-0 right-0 h-[420px] max-w-sm mx-auto flex flex-col outline-none z-[10000]"
+            initial={{ scale: 0, opacity: 0, y: 100 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0, opacity: 0, y: 100 }}
+            transition={{
+              type: "spring",
+              damping: 25,
+              stiffness: 300,
+              duration: 0.4
+            }}
+          >
+            {/* Drag handle */}
+            <div className="mx-auto w-8 h-1 flex-shrink-0 rounded-full bg-gray-600 mt-2 mb-1" />
+            
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b border-gray-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 bg-gray-800 rounded-full flex items-center justify-center">
+                  <SettingsIcon className="h-3 w-3 text-white" />
                 </div>
-                
                 <div>
-                  <label className="text-xs font-medium text-white mb-1.5 block">
-                    Account Actions
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
-                      <div>
-                        <div className="text-xs font-medium text-white">Sign Out</div>
-                        <div className="text-xs text-gray-400">End current session</div>
-                      </div>
-                      <Button 
-                        variant="outline" 
+                  <h3 className="text-sm font-medium text-white">Settings</h3>
+                  <p className="text-xs text-gray-400">Configure preferences</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                className="h-6 w-6 p-0 hover:bg-gray-800 text-gray-400 hover:text-white"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                {/* Section Navigation */}
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {sections.map((section) => {
+                    const Icon = section.icon;
+                    return (
+                      <Button
+                        key={section.id}
+                        onClick={() => setActiveSection(section.id)}
+                        variant={activeSection === section.id ? "default" : "ghost"}
                         size="sm"
-                        onClick={() => logoutMutation.mutate()}
-                        disabled={logoutMutation.isPending}
-                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600"
+                        className={`h-7 px-2 text-xs ${
+                          activeSection === section.id
+                            ? "bg-gray-700 text-white hover:bg-gray-600"
+                            : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                        }`}
                       >
-                        <LogOut className="h-3 w-3 mr-1" />
-                        {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+                        <Icon className="h-3 w-3 mr-1" />
+                        {section.label}
                       </Button>
+                    );
+                  })}
+                </div>
+
+                {/* Section Content */}
+                {activeSection === "calendar" && (
+                  <div className="space-y-3">
+                    <CalendarSettings />
+                  </div>
+                )}
+
+                {activeSection === "account" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
+                      <div className="flex items-center gap-2">
+                        {theme === "dark" ? (
+                          <Moon className="h-4 w-4 text-white" />
+                        ) : (
+                          <Sun className="h-4 w-4 text-white" />
+                        )}
+                        <div>
+                          <div className="text-xs font-medium text-white">Dark Mode</div>
+                          <div className="text-xs text-gray-400">Toggle theme</div>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={theme === "dark"}
+                        onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                      />
                     </div>
                     
-                    <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
-                      <div>
-                        <div className="text-xs font-medium text-white">Switch Account</div>
-                        <div className="text-xs text-gray-400">Choose different Google account</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 border border-gray-700 rounded bg-gray-900">
+                        <div>
+                          <div className="text-xs font-medium text-white">Sign Out</div>
+                          <div className="text-xs text-gray-400">End session</div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => logoutMutation.mutate()}
+                          disabled={logoutMutation.isPending}
+                          className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600"
+                        >
+                          <LogOut className="h-3 w-3" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.location.href = '/api/auth/google'}
-                        className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600"
-                      >
-                        <User className="h-3 w-3 mr-1" />
-                        Switch
+                    </div>
+                  </div>
+                )}
+
+                {activeSection === "notifications" && (
+                  <div className="p-3 border border-gray-700 rounded bg-gray-900">
+                    <div className="text-xs text-gray-400">
+                      Notification preferences coming soon.
+                    </div>
+                  </div>
+                )}
+
+                {activeSection === "about" && (
+                  <div className="p-3 border border-gray-700 rounded bg-gray-900 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Version</span>
+                      <span className="text-xs font-medium text-white">1.0.0</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">Support</span>
+                      <Button variant="outline" size="sm" className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600">
+                        Contact
                       </Button>
                     </div>
                   </div>
-                </div>
-              </>
-            )}
-
-            {activeSection === "notifications" && (
-              <div>
-                <label className="text-xs font-medium text-white mb-1.5 block">
-                  Notification Preferences
-                </label>
-                <div className="p-3 border border-gray-700 rounded bg-gray-900">
-                  <div className="text-xs text-gray-400">
-                    Notification preferences coming soon.
-                  </div>
-                </div>
+                )}
               </div>
-            )}
-
-            {activeSection === "about" && (
-              <div>
-                <label className="text-xs font-medium text-white mb-1.5 block">
-                  Application Info
-                </label>
-                <div className="p-3 border border-gray-700 rounded bg-gray-900 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-400">Version</span>
-                    <span className="text-xs font-medium text-white">1.0.0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-400">Support</span>
-                    <Button variant="outline" size="sm" className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-600">
-                      Contact Support
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-800 p-4">
-            <Button 
-              onClick={() => onOpenChange(false)} 
-              className="w-full bg-gray-700 hover:bg-gray-600 text-white text-sm"
-            >
-              Done
-            </Button>
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
