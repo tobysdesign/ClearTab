@@ -235,7 +235,8 @@ export default function NotesWidgetCollapsible() {
                 </CardHeader>
                 
                 <CardContent className="p-6 pt-0 flex-1 flex flex-col space-y-3 pb-3 pl-[12px] pr-[12px] overflow-hidden">
-                  <div className="flex-1 space-y-2 overflow-y-auto min-h-0 widget-scrollable">
+                  {/* CRITICAL: notes-widget-scrollable class enables scrolling - DO NOT REMOVE */}
+                  <div className="flex-1 space-y-2 notes-widget-scrollable widget-scrollable">
                     {isLoading ? (
                       <div className="space-y-2 p-1">
                         {[...Array(4)].map((_, i) => (

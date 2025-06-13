@@ -883,7 +883,15 @@ div[id*="yoopta"] div[style*="background"] {
     animation: pulseSubtle 2s ease-in-out infinite;
   }
 
-  /* Custom scrollbar styling for widget lists */
+  /* Custom scrollbar styling for widget lists - IMPORTANT: DO NOT REMOVE */
+  .widget-scrollable {
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+    min-height: 0 !important;
+    flex: 1 !important;
+  }
+
   .widget-scrollable::-webkit-scrollbar {
     width: 4px;
   }
@@ -901,10 +909,29 @@ div[id*="yoopta"] div[style*="background"] {
     background: hsl(var(--muted-foreground) / 0.4);
   }
 
-  /* Firefox scrollbar styling */
-  .widget-scrollable {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.2) transparent;
+  /* Force scrolling for notes and tasks widgets - CRITICAL: DO NOT REMOVE OR MODIFY */
+  .notes-widget-scrollable,
+  .tasks-widget-scrollable {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+    flex: 1 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  /* Additional protection against layout issues that break scrolling */
+  .notes-widget-scrollable > div,
+  .tasks-widget-scrollable > div {
+    min-height: 0 !important;
+  }
+
+  /* Ensure parent containers support flex scrolling */
+  .widget-scrollable-container {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
 
   .line-clamp-2 {

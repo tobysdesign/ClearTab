@@ -176,7 +176,8 @@ export default function TasksWidget() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3 flex-1 flex flex-col overflow-hidden pb-0">
-        <div className="flex-1 overflow-y-auto min-h-0 widget-scrollable">
+        {/* CRITICAL: tasks-widget-scrollable class enables scrolling - DO NOT REMOVE */}
+        <div className="flex-1 tasks-widget-scrollable widget-scrollable">
           <div className="space-y-2 p-1 max-h-full">
             {isLoading ? (
               <EmotionalStates.LoadingTasks />
