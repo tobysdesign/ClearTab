@@ -1,0 +1,247 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 8.2%; /* #151515 */
+    --foreground: 0 0% 76%; /* #c2c2c2 */
+    --card: 0 0% 8.2%; /* #151515 */
+    --card-foreground: 0 0% 76%; /* #c2c2c2 */
+    --popover: 0 0% 8.2%; /* #151515 */
+    --popover-foreground: 0 0% 76%; /* #c2c2c2 */
+    --primary: 0 0% 76%; /* #c2c2c2 */
+    --primary-foreground: 0 0% 8.2%; /* #151515 */
+    --secondary: 0 0% 75%; /* #bfbfbf */
+    --secondary-foreground: 0 0% 8.2%; /* #151515 */
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 38%; /* #616161 */
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 76%; /* #c2c2c2 */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 76%; /* #c2c2c2 */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.5rem;
+    --shadow-input: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
+      0px 1px 0px 0px rgba(25, 28, 33, 0.02),
+      0px 0px 0px 1px rgba(25, 28, 33, 0.08);
+    
+    /* Pink Color Palette */
+    --almost-pink: 322 29% 92%; /* #efd8ec */
+    --light-pink: 312 100% 85%; /* #ffb1ef */
+    --dark-pink: 310 58% 5%; /* #16030d */
+    --brand-pink: 326 97% 66%; /* #fd5fa8 */
+  }
+
+  .dark {
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Pink Color Utilities */
+  .text-almost-pink { color: hsl(var(--almost-pink)); }
+  .text-light-pink { color: hsl(var(--light-pink)); }
+  .text-dark-pink { color: hsl(var(--dark-pink)); }
+  .text-brand-pink { color: hsl(var(--brand-pink)); }
+  
+  .bg-almost-pink { background-color: hsl(var(--almost-pink)); }
+  .bg-light-pink { background-color: hsl(var(--light-pink)); }
+  .bg-dark-pink { background-color: hsl(var(--dark-pink)); }
+  .bg-brand-pink { background-color: hsl(var(--brand-pink)); }
+  
+  .border-almost-pink { border-color: hsl(var(--almost-pink)); }
+  .border-light-pink { border-color: hsl(var(--light-pink)); }
+  .border-dark-pink { border-color: hsl(var(--dark-pink)); }
+  .border-brand-pink { border-color: hsl(var(--brand-pink)); }
+  
+  .hover\:bg-almost-pink:hover { background-color: hsl(var(--almost-pink)); }
+  .hover\:bg-light-pink:hover { background-color: hsl(var(--light-pink)); }
+  .hover\:bg-dark-pink:hover { background-color: hsl(var(--dark-pink)); }
+  .hover\:bg-brand-pink:hover { background-color: hsl(var(--brand-pink)); }
+}
+
+body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
+  overflow: hidden;
+}
+
+/* YooptaEditor Dark Theme Styles */
+.yoopta-dark-theme {
+  /* Editor container */
+  --yoopta-editor-background: #151515;
+  --yoopta-editor-color: #c2c2c2;
+  
+  /* Block elements */
+  --yoopta-block-background: transparent;
+  --yoopta-block-color: #c2c2c2;
+  --yoopta-block-border: #27272a;
+  
+  /* Toolbar */
+  --yoopta-toolbar-background: #151515;
+  --yoopta-toolbar-border: #27272a;
+  --yoopta-toolbar-color: #c2c2c2;
+  
+  /* Buttons */
+  --yoopta-button-background: #27272a;
+  --yoopta-button-hover-background: #3f3f46;
+  --yoopta-button-color: #c2c2c2;
+  
+  /* Selection */
+  --yoopta-selection-background: rgba(59, 130, 246, 0.3);
+  
+  /* Placeholder */
+  --yoopta-placeholder-color: #71717a;
+}
+
+/* YooptaEditor Dark Theme Implementation */
+.yoopta-dark-theme .yoopta-editor,
+.yoopta-editor-dark {
+  background-color: transparent !important;
+  color: var(--yoopta-editor-color) !important;
+}
+
+/* Block styling */
+.yoopta-dark-theme [data-yoopta-block],
+.yoopta-editor-dark [data-yoopta-block] {
+  background-color: var(--yoopta-block-background) !important;
+  color: var(--yoopta-block-color) !important;
+  border-color: var(--yoopta-block-border) !important;
+}
+
+/* Paragraph styling */
+.yoopta-dark-theme [data-yoopta-block="Paragraph"] p,
+.yoopta-editor-dark [data-yoopta-block="Paragraph"] p {
+  color: #c2c2c2 !important;
+}
+
+/* Heading styling */
+.yoopta-dark-theme [data-yoopta-block^="Heading"] h1,
+.yoopta-dark-theme [data-yoopta-block^="Heading"] h2,
+.yoopta-dark-theme [data-yoopta-block^="Heading"] h3,
+.yoopta-editor-dark [data-yoopta-block^="Heading"] h1,
+.yoopta-editor-dark [data-yoopta-block^="Heading"] h2,
+.yoopta-editor-dark [data-yoopta-block^="Heading"] h3 {
+  color: #c2c2c2 !important;
+}
+
+/* Blockquote styling */
+.yoopta-dark-theme [data-yoopta-block="Blockquote"] blockquote,
+.yoopta-editor-dark [data-yoopta-block="Blockquote"] blockquote {
+  color: #a1a1aa !important;
+  border-left-color: #3f3f46 !important;
+  background-color: #151515 !important;
+}
+
+/* List styling */
+.yoopta-dark-theme [data-yoopta-block="BulletedList"] ul,
+.yoopta-dark-theme [data-yoopta-block="NumberedList"] ol,
+.yoopta-editor-dark [data-yoopta-block="BulletedList"] ul,
+.yoopta-editor-dark [data-yoopta-block="NumberedList"] ol {
+  color: #c2c2c2 !important;
+}
+
+.yoopta-dark-theme [data-yoopta-block="BulletedList"] li,
+.yoopta-dark-theme [data-yoopta-block="NumberedList"] li,
+.yoopta-editor-dark [data-yoopta-block="BulletedList"] li,
+.yoopta-editor-dark [data-yoopta-block="NumberedList"] li {
+  color: #c2c2c2 !important;
+}
+
+/* Toolbar styling */
+.yoopta-dark-theme [data-yoopta-toolbar],
+.yoopta-editor-dark [data-yoopta-toolbar] {
+  background-color: var(--yoopta-toolbar-background) !important;
+  border-color: var(--yoopta-toolbar-border) !important;
+  color: var(--yoopta-toolbar-color) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Toolbar buttons */
+.yoopta-dark-theme [data-yoopta-toolbar] button,
+.yoopta-editor-dark [data-yoopta-toolbar] button {
+  background-color: var(--yoopta-button-background) !important;
+  color: var(--yoopta-button-color) !important;
+  border-color: var(--yoopta-toolbar-border) !important;
+}
+
+.yoopta-dark-theme [data-yoopta-toolbar] button:hover,
+.yoopta-editor-dark [data-yoopta-toolbar] button:hover {
+  background-color: var(--yoopta-button-hover-background) !important;
+}
+
+/* Placeholder styling */
+.yoopta-dark-theme [data-yoopta-placeholder],
+.yoopta-editor-dark [data-yoopta-placeholder] {
+  color: var(--yoopta-placeholder-color) !important;
+}
+
+/* Selection styling */
+.yoopta-dark-theme ::selection,
+.yoopta-editor-dark ::selection {
+  background-color: var(--yoopta-selection-background) !important;
+}
+
+/* Mark styling (Bold, Italic, etc.) */
+.yoopta-dark-theme [data-yoopta-mark="bold"],
+.yoopta-dark-theme [data-yoopta-mark="italic"],
+.yoopta-dark-theme [data-yoopta-mark="underline"],
+.yoopta-dark-theme [data-yoopta-mark="strike"],
+.yoopta-editor-dark [data-yoopta-mark="bold"],
+.yoopta-editor-dark [data-yoopta-mark="italic"],
+.yoopta-editor-dark [data-yoopta-mark="underline"],
+.yoopta-editor-dark [data-yoopta-mark="strike"] {
+  color: #fafafa !important;
+}
+
+/* Code mark styling */
+.yoopta-dark-theme [data-yoopta-mark="code"],
+.yoopta-editor-dark [data-yoopta-mark="code"] {
+  background-color: #27272a !important;
+  color: #fbbf24 !important;
+  border-radius: 4px !important;
+  padding: 2px 4px !important;
+}
+
+/* Focus and active states */
+.yoopta-dark-theme [data-yoopta-block]:focus-within,
+.yoopta-editor-dark [data-yoopta-block]:focus-within {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Dropdown and menu styling */
+.yoopta-dark-theme [data-yoopta-dropdown],
+.yoopta-dark-theme [data-yoopta-menu],
+.yoopta-editor-dark [data-yoopta-dropdown],
+.yoopta-editor-dark [data-yoopta-menu] {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+  color: #fafafa !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Menu items */
+.yoopta-dark-theme [data-yoopta-menu-item],
+.yoopta-editor-dark [data-yoopta-menu-item] {
+  color: #fafafa !important;
+}
+
+.yoopta-dark-theme [data-yoopta-menu-item]:hover,
+.yoopta-editor-dark [data-yoopta-menu-item]:hover {
+  background-color: #27272a !important;
+} 

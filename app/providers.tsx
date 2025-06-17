@@ -5,6 +5,8 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { ChatProvider } from '@/hooks/use-chat-context'
 import { Toaster } from '@/components/ui/toaster'
 import { useState } from 'react'
+import React from 'react'
+import { SessionProvider } from 'next-auth/react'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -16,13 +18,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }))
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ChatProvider>
-          <Toaster />
-          {children}
-        </ChatProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <ChatProvider>
+            <Toaster />
+            {children}
+          </ChatProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </SessionProvider>
   )
 }

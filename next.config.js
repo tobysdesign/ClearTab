@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['drizzle-orm', '@neondatabase/serverless']
-  },
+  serverExternalPackages: ['drizzle-orm', '@neondatabase/serverless'],
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
@@ -12,4 +10,4 @@ const nextConfig = {
   }
 }
 
-module.exports = nextConfig
+export default nextConfig

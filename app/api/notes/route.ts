@@ -1,32 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { storage } from '@/server/storage'
-import { insertNoteSchema } from '@shared/schema'
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { insertNoteSchema, Note, yooptaContentSchema } from '@/shared/schema'
+import { MOCK_NOTES, addMockNote } from '@/lib/mock-data'
 
-const DEFAULT_USER_ID = 1
+const postBodySchema = insertNoteSchema.pick({ title: true, content: true }).extend({
+  content: yooptaContentSchema.default({})
+});
 
 export async function GET() {
-  try {
-    const notes = await storage.getNotesByUserId(DEFAULT_USER_ID)
-    return NextResponse.json(notes)
-  } catch (error) {
-    console.error('Error fetching notes:', error)
-    return NextResponse.json({ error: 'Failed to fetch notes' }, { status: 500 })
-  }
+  return NextResponse.json(MOCK_NOTES);
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const validatedNote = insertNoteSchema.parse(body)
-    
-    const note = await storage.createNote({
-      ...validatedNote,
-      userId: DEFAULT_USER_ID
+    const json = await request.json()
+    const body = postBodySchema.parse(json)
+
+    // TODO: Replace with actual user ID from session/auth
+    const userId = 1
+
+    const newNote = addMockNote({
+      userId,
+      title: body.title,
+      content: body.content,
+      updatedAt: new Date(),
     })
-    
-    return NextResponse.json(note)
+
+    console.log('Note created:', newNote)
+
+    return NextResponse.json(newNote, { status: 201 })
   } catch (error) {
-    console.error('Error creating note:', error)
-    return NextResponse.json({ error: 'Failed to create note' }, { status: 500 })
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+
+    console.error(error)
+    return NextResponse.json(
+      { error: 'An unexpected error occurred.' },
+      { status: 500 }
+    )
   }
-}
+} 

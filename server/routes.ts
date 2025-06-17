@@ -2,11 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 // Google auth will be replaced with Supabase auth
-import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "../shared/schema";
 import OpenAI from "openai";
 import { mem0Service } from "./mem0-service";
 import { googleCalendarService } from "./google-calendar";
-import type { GoogleCalendarEvent, CalendarSyncStatus } from "@shared/calendar-types";
+import type { GoogleCalendarEvent, CalendarSyncStatus } from "../shared/calendar-types";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -335,6 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tasks = await storage.getTasksByUserId(DEFAULT_USER_ID);
       res.json(tasks);
     } catch (error) {
+      console.error("Error fetching tasks:", error);
       res.status(500).json({ error: "Failed to fetch tasks" });
     }
   });

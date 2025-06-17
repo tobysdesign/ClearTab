@@ -2,6 +2,9 @@ import { pgTable, text, varchar, serial, integer, boolean, timestamp, jsonb, ind
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Simple, permissive schema that allows any structure
+export const yooptaContentSchema = z.record(z.any());
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -22,7 +25,8 @@ export const notes = pgTable("notes", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   title: text("title").notNull(),
-  content: text("content").notNull(),
+  content: jsonb("content").default({}).$type<YooptaContentValue>().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const tasks = pgTable("tasks", {
@@ -30,7 +34,7 @@ export const tasks = pgTable("tasks", {
   userId: integer("user_id").notNull(),
   title: text("title").notNull(),
   description: text("description"),
-  priority: text("priority").notNull().default("medium"), // low, medium, high
+  isImportant: boolean("is_important").default(false).notNull(),
   completed: boolean("completed").default(false).notNull(),
   dueDate: timestamp("due_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -130,6 +134,7 @@ export const insertEmotionalMetadataSchema = createInsertSchema(emotionalMetadat
 });
 
 // Types
+export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertNote = z.infer<typeof insertNoteSchema>;
