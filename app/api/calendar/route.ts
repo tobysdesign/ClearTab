@@ -49,10 +49,11 @@ export async function GET(
       !currentUser.googleCalendarConnected ||
       !currentUser.accessToken
     ) {
-      return NextResponse.json(
-        { success: false, error: 'User not connected to Google Calendar' },
-        { status: 403 }
-      )
+      // Return empty events array when Google Calendar is not connected
+      return NextResponse.json({
+        success: true,
+        data: []
+      })
     }
 
     oauth2Client.setCredentials({
@@ -94,13 +95,10 @@ export async function GET(
     })
   } catch (error) {
     console.error('Calendar API error:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch calendar events',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
+    // Return empty events array on error instead of failing
+    return NextResponse.json({
+      success: true,
+      data: []
+    })
   }
 }

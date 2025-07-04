@@ -6,7 +6,8 @@ import { format, parseISO, isPast, isToday, isAfter, isBefore } from 'date-fns'
 
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Building } from 'lucide-react'
+import { Building, Calendar } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import { WidgetLoader } from './widget-loader'
 
@@ -195,38 +196,7 @@ function DaySection({
 }
 
 export function ScheduleWidget() {
-  // Get today's date for mock data
-  const today = format(new Date(), 'yyyy-MM-dd')
-  
-  // Temporary mock data for testing
-  const mockEvents: CalendarEvent[] = [
-    {
-      id: '1',
-      title: 'Office',
-      start: today,
-      end: today
-    },
-    {
-      id: '2',
-      title: 'Focus Session',
-      start: `${today}T09:30:00`,
-      end: `${today}T10:15:00`
-    },
-    {
-      id: '3',
-      title: 'Client Sync: Feedback',
-      start: `${today}T12:30:00`,
-      end: `${today}T13:15:00`
-    },
-    {
-      id: '4',
-      title: 'Tech Talk',
-      start: `${today}T14:30:00`,
-      end: `${today}T16:00:00`
-    }
-  ]
-
-  const { data: events = mockEvents, isLoading, error } = useQuery<CalendarEvent[]>({
+  const { data: events = [], isLoading, error } = useQuery<CalendarEvent[]>({
     queryKey: ['schedule'],
     queryFn: async () => {
       const res = await fetch('/api/calendar')
@@ -328,9 +298,12 @@ export function ScheduleWidget() {
                 </div>
               ))}
               {sortedDays.length === 0 && (
-                <div className="flex items-center justify-center h-full pt-20 text-center">
-                  <p className="text-muted-foreground text-sm">No events scheduled.</p>
-                </div>
+                <EmptyState
+                  icon={Calendar}
+                  title="No events scheduled"
+                  description="Your calendar is clear. Connect your Google Calendar to see upcoming events and appointments."
+                  className="pt-20"
+                />
               )}
           </div>
         </ScrollArea>

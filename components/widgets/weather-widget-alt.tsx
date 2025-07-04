@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { WidgetLoader } from './widget-loader'
+import { EmptyState } from '@/components/ui/empty-state'
+import { CloudOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react'
 import dynamic from 'next/dynamic'
@@ -384,10 +386,12 @@ function TimeSlotCard({
         <motion.div
           initial={false}
           animate={{
-            opacity: isExpanded ? 0 : 1,
+            opacity: isExpanded ? 0 : 1
+          }}
+          style={{
             bottom: "100px",
             left: "50%",
-            translateX: "-50%"
+            transform: "translateX(-50%)"
           }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="absolute font-tiny font-light italic text-white text-xl sm:text-2xl md:text-[30px] leading-none z-10"
@@ -510,15 +514,16 @@ export function WeatherWidgetAlt({ className }: { className?: string }) {
   if (error) {
     return (
       <Card className="dashCard min-h-[16rem] flex items-center justify-center">
-        <div className="text-center space-y-2 p-4">
-          <p className="text-[#FF7A33] text-sm md:text-base">Unable to load weather data</p>
-          <button 
-            onClick={handleRetry}
-            className="text-xs md:text-sm text-[#8C8C8C] hover:text-white transition-colors"
-          >
-            Try again
-          </button>
-        </div>
+        <EmptyState
+          icon={CloudOff}
+          title="Weather unavailable"
+          description="Unable to load weather data. Check your connection and try again."
+          action={{
+            label: "Retry",
+            onClick: handleRetry
+          }}
+          className="py-8"
+        />
       </Card>
     )
   }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Plus, GripVertical, FileText, Trash2, MoreHorizontal } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import type { Note, YooptaContentValue } from '@/shared/schema'
 import { ListHeader } from '@/components/ui/list-header'
@@ -447,23 +448,33 @@ export function NotesWidget() {
               </div>
               
               {/* Saved notes */}
-              {notes.map((note) => {
-                const displayNote = getCurrentNote(note.id as string) || note
-                return (
-                  <div key={note.id} className="group">
-                    <NoteListItem
-                      note={displayNote}
-                      isSelected={selectedNoteId === note.id}
-                      onClick={() => setSelectedNoteId(note.id as string)}
-                      onDelete={(e) => { 
-                        e.stopPropagation(); 
-                        handleDeleteNote(note.id as string); 
-                      }}
-                      collapsed={collapsed}
-                    />
-                      </div>
+              {notes.length > 0 ? (
+                notes.map((note) => {
+                  const displayNote = getCurrentNote(note.id as string) || note
+                  return (
+                    <div key={note.id} className="group">
+                      <NoteListItem
+                        note={displayNote}
+                        isSelected={selectedNoteId === note.id}
+                        onClick={() => setSelectedNoteId(note.id as string)}
+                        onDelete={(e) => { 
+                          e.stopPropagation(); 
+                          handleDeleteNote(note.id as string); 
+                        }}
+                        collapsed={collapsed}
+                      />
+                    </div>
+                  )
+                })
+              ) : (
+                !collapsed && (
+                  <div className="text-center py-8 px-2">
+                    <p className="text-xs text-muted-foreground">
+                      No saved notes yet. Start writing in the draft above.
+                    </p>
+                  </div>
                 )
-              })}
+              )}
               </div>
             </ScrollArea>
         </div>
@@ -507,9 +518,12 @@ export function NotesWidget() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <p>Select a note to view or start writing in the draft.</p>
-              </div>
+            <EmptyState
+              icon={FileText}
+              title="No note selected"
+              description="Select a note from the sidebar to view and edit it, or start writing in the draft note."
+              className="h-full"
+            />
             )}
         </div>
       </ResizablePanels>

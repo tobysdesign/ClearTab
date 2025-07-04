@@ -13,6 +13,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ActionsMenu } from '@/components/ui/actions-menu'
 import { ExpandingModal } from '@/components/ui/expanding-modal'
 import { WidgetLoader } from './widget-loader'
+import { EmptyState } from '@/components/ui/empty-state'
+import { CheckSquare } from 'lucide-react'
 
 interface TasksWidgetProps {
   searchQuery?: string
@@ -200,9 +202,16 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
       <ScrollArea className="h-[calc(100%-var(--widget-header-height))]">
         <div className="p-[var(--widget-padding)]">
           {tasks.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No tasks yet. Click + to add one.
-            </div>
+            <EmptyState
+              icon={CheckSquare}
+              title="No tasks yet"
+              description="Stay organized and boost your productivity by creating your first task."
+              action={{
+                label: "Create Task",
+                onClick: handleAddTask
+              }}
+              className="h-full"
+            />
           ) : (
     <motion.div 
               className="space-y-[var(--widget-list-spacing)]"
