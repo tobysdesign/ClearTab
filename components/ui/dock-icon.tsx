@@ -1,29 +1,85 @@
 'use client'
-import * as React from 'react'
-import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion'
+import React from 'react'
+import { motion, type MotionValue, useMotionValue, useTransform, useSpring, MotionProps } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-interface DockIconProps extends React.PropsWithChildren {
-  mouseX: MotionValue
+interface DockIconProps extends Omit<MotionProps, 'children'> {
+  children?: React.ReactNode
+  size?: number
+  magnification?: number
+  distance?: number
+  mouseX?: MotionValue<number>
+  className?: string
+  label?: string;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+  onPointerDown?: React.PointerEventHandler<HTMLDivElement>;
 }
 
-export function DockIcon({ mouseX, children }: DockIconProps) {
+export const DockIcon = ({ 
+  children, 
+  mouseX: propsMouseX,
+  size = 40,
+  magnification = 60,
+  distance = 140,
+  className,
+  label,
+  ...props 
+}: DockIconProps) => {
   const ref = React.useRef<HTMLDivElement>(null)
+  
+  const localMouseX = useMotionValue(Infinity)
+  const mouseX = propsMouseX ?? localMouseX
 
-  const distance = useTransform(mouseX, (val) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
-    return val - bounds.x - bounds.width / 2
-  })
+  const distanceCalc = useTransform(mouseX, (val: number) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [40, 80, 40])
-  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 })
+  const widthSync = useTransform(
+    distanceCalc,
+    [-distance, 0, distance], 
+    [size, magnification, size],
+  );
+
+  const width = useSpring(widthSync, {
+    mass: 0.1,
+    stiffness: 150,
+    damping: 12,
+  });
 
   return (
-    <motion.div
-      ref={ref}
-      style={{ width }}
-      className="flex items-center justify-center aspect-square rounded-full bg-secondary cursor-pointer"
-    >
-      {children}
-    </motion.div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <motion.div
+            ref={ref}
+            style={{ width, height: width }}
+            className={cn(
+              "flex cursor-pointer items-center justify-center rounded-full text-white/80 hover:bg-neutral-900/50 hover:text-white",
+              className
+            )}
+            {...props}
+          >
+            {children}
+          </motion.div>
+        </TooltipTrigger>
+        {label && (
+          <TooltipContent 
+            side="top" 
+            className="rounded-full bg-neutral-800/90 text-white/90 border-white/10"
+          >
+            {label}
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
   )
 } 
+
+DockIcon.displayName = 'DockIcon' 

@@ -1,142 +1,284 @@
-import { pgTable, text, varchar, serial, integer, boolean, timestamp, jsonb, index, real } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgEnum,
+  pgPolicy,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { createInsertSchema } from "drizzle-zod"
+import { z } from "zod"
+import type { AdapterAccount } from 'next-auth/adapters'
+import { authenticatedRole } from 'drizzle-orm/supabase'
+import crypto from 'crypto'
 
-// Simple, permissive schema that allows any structure
-export const yooptaContentSchema = z.record(z.any());
+// Define a strict schema for Yoopta content
+export const yooptaNodeSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  children: z.array(z.object({
+    text: z.string(),
+  })),
+  props: z.object({
+    nodeType: z.string(),
+  }),
+})
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  password: text("password"),
-  name: text("name").notNull(),
-  picture: text("picture"),
-  googleId: text("google_id").unique(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  tokenExpiry: timestamp("token_expiry"),
-  googleCalendarConnected: boolean("google_calendar_connected").default(false),
-  lastCalendarSync: timestamp("last_calendar_sync"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const yooptaContentSchema = z.object({
+  root: z.object({
+    id: z.string(),
+    type: z.string(),
+    value: z.array(yooptaNodeSchema),
+    meta: z.object({
+      order: z.number(),
+      depth: z.number(),
+    }),
+  }),
+})
 
-export const notes = pgTable("notes", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  title: text("title").notNull(),
-  content: jsonb("content").default({}).$type<YooptaContentValue>().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+// Standard empty content structure
+export const EMPTY_CONTENT = {
+  'root': {
+    id: 'root',
+    type: 'paragraph',
+    value: [{
+      id: 'initial',
+      type: 'paragraph',
+      children: [{ text: '' }],
+      props: {
+        nodeType: 'block',
+      },
+    }],
+    meta: {
+      order: 0,
+      depth: 0,
+    },
+  },
+} as const
 
-export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  isImportant: boolean("is_important").default(false).notNull(),
-  completed: boolean("completed").default(false).notNull(),
-  dueDate: timestamp("due_date"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
 
-export const userPreferences = pgTable("user_preferences", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
-  agentName: text("agent_name").notNull().default("Alex"),
-  userName: text("user_name").notNull().default("User"),
-  initialized: boolean("initialized").default(false).notNull(),
-  paydayDate: timestamp("payday_date"),
-  paydayFrequency: text("payday_frequency").default("bi-weekly"), // weekly, bi-weekly, monthly
-  salary: integer("salary").default(0), // monthly salary before expenses
-  expenses: integer("expenses").default(2000), // monthly expenses
-  location: text("location").default("San Francisco, CA"),
-});
+export const user = pgTable(
+  'user',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text('name'),
+    email: text('email').notNull(),
+    emailVerified: timestamp('emailVerified', { mode: 'date' }),
+    image: text('image'),
+    password: text('password'),
+    googleId: text('google_id').unique(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    tokenExpiry: timestamp('token_expiry', { mode: 'date' }),
+    googleCalendarConnected: boolean('google_calendar_connected').default(false),
+    lastCalendarSync: timestamp('last_calendar_sync', { mode: 'date' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('user RLS policy', {
+      using: sql`auth.uid() = ${table.id}`,
+      withCheck: sql`auth.uid() = ${table.id}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
 
-export const chatMessages = pgTable("chat_messages", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  message: text("message").notNull(),
-  role: text("role").notNull(), // user, assistant
-  sessionId: text("session_id"), // for grouping conversations
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  expiresAt: timestamp("expires_at").notNull(), // auto-delete after few days
-});
+export const notes = pgTable(
+  'notes',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    content: jsonb('content').default({}).$type<YooptaContentValue>().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    rls: pgPolicy('notes RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: jsonb('description').$type<YooptaContentValue>(),
+    status: text('status', { enum: ["pending", "completed", "important"] }).default("pending").notNull(),
+    dueDate: timestamp('due_date', { mode: 'date' }),
+    order: integer('order'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    rls: pgPolicy('tasks RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const userPreferences = pgTable(
+  'user_preferences',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' })
+      .unique(),
+    agentName: text('agent_name').notNull().default('Alex'),
+    userName: text('user_name').notNull().default('User'),
+    initialized: boolean('initialized').default(false).notNull(),
+    paydayDate: timestamp('payday_date', { mode: 'date' }),
+    paydayFrequency: varchar('payday_frequency', {
+      enum: ['weekly', 'fortnightly', 'monthly'],
+    }),
+    salary: integer('salary').default(0), // monthly salary before expenses
+    expenses: integer('expenses').default(2000), // monthly expenses
+    location: text('location').default('San Francisco, CA'),
+    openaiApiKey: text('openai_api_key'),
+    theme: text('theme').default('dark'),
+    currency: text('currency').default('USD'),
+  },
+  (table) => ({
+    rls: pgPolicy('user_preferences RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const chatMessages = pgTable(
+  'chat_messages',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    message: text('message').notNull(),
+    role: text('role').notNull(), // user, assistant
+    sessionId: text('session_id'), // for grouping conversations
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    expiresAt: timestamp('expires_at').notNull(), // auto-delete after few days
+  },
+  (table) => ({
+    rls: pgPolicy('chat_messages RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
 
 // Emotional metadata stored locally for querying/visualization
-export const emotionalMetadata = pgTable("emotional_metadata", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  sourceType: text("source_type").notNull(), // "note", "task", "chat"
-  sourceId: integer("source_id"), // reference to note/task id if applicable
-  emotion: text("emotion").notNull(), // joy, sadness, anger, fear, etc.
-  tone: text("tone").notNull(), // positive, negative, neutral, excited, etc.
-  intent: text("intent").notNull(), // goal-setting, venting, planning, etc.
-  confidence: integer("confidence").notNull(), // 0-100 score
-  insights: text("insights"), // AI-generated insights
-  suggestedActions: text("suggested_actions").array(), // ["revisit", "journal", "save_insight"]
-  mem0MemoryId: text("mem0_memory_id"), // reference to mem0 memory
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const emotionalMetadata = pgTable(
+  'emotional_metadata',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    sourceType: text('source_type').notNull(), // "note", "task", "chat"
+    sourceId: uuid('source_id'), // reference to note/task id if applicable
+    emotion: text('emotion').notNull(), // joy, sadness, anger, fear, etc.
+    tone: text('tone').notNull(), // positive, negative, neutral, excited, etc.
+    intent: text('intent').notNull(), // goal-setting, venting, planning, etc.
+    confidence: integer('confidence').notNull(), // 0-100 score
+    insights: text('insights'), // AI-generated insights
+    suggestedActions: text('suggested_actions').array(), // ["revisit", "journal", "save_insight"]
+    mem0MemoryId: text('mem0_memory_id'), // reference to mem0 memory
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('emotional_metadata RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
 
 // Global memory usage tracking table
-export const memoryUsage = pgTable("memory_usage", {
-  id: serial("id").primaryKey(),
-  totalMemories: integer("total_memories").default(0),
-  monthlyRetrievals: integer("monthly_retrievals").default(0),
-  lastRetrievalReset: timestamp("last_retrieval_reset").defaultNow(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const memoryUsage = pgTable(
+  'memory_usage',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    totalMemories: integer('total_memories').default(0),
+    monthlyRetrievals: integer('monthly_retrievals').default(0),
+    lastRetrievalReset: timestamp('last_retrieval_reset').defaultNow(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  }
+)
 
-// Zod schemas for validation
-export const insertUserSchema = createInsertSchema(users).pick({
-  email: true,
-  name: true,
-  password: true,
-});
+export const memories = pgTable(
+  'memories',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    tags: text('tags').array().default([]),
+    source: text('source'),
+    embedding: jsonb('embedding'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('memories RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
 
-export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"), 
-  password: z.string().min(1, "Password is required")
+// Schemas for validation
+export const insertUserSchema = createInsertSchema(user);
+export const insertNoteSchema = createInsertSchema(notes, {
+  content: yooptaContentSchema,
 });
-
-export const registerSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters")
+export const insertTaskSchema = createInsertSchema(tasks, {
+  description: yooptaContentSchema.optional(),
 });
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences);
+export const insertChatMessageSchema = createInsertSchema(chatMessages);
+export const insertEmotionalMetadataSchema = createInsertSchema(emotionalMetadata);
+export const insertMemorySchema = createInsertSchema(memories);
 
-export const insertNoteSchema = createInsertSchema(notes).omit({
-  id: true,
-  userId: true,
-});
-
-export const insertTaskSchema = createInsertSchema(tasks).omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-});
-
-export const insertUserPreferencesSchema = createInsertSchema(userPreferences).omit({
-  id: true,
-  userId: true,
-});
-
-export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertEmotionalMetadataSchema = createInsertSchema(emotionalMetadata).omit({
-  id: true,
-  userId: true,
-  createdAt: true,
-});
-
-// Types
-export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
+// Inferred types
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type User = typeof user.$inferSelect;
 export type InsertNote = z.infer<typeof insertNoteSchema>;
 export type Note = typeof notes.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
@@ -149,3 +291,70 @@ export type InsertEmotionalMetadata = z.infer<typeof insertEmotionalMetadataSche
 export type EmotionalMetadata = typeof emotionalMetadata.$inferSelect;
 export type MemoryUsage = typeof memoryUsage.$inferSelect;
 export type InsertMemoryUsage = typeof memoryUsage.$inferInsert;
+export type InsertMemory = z.infer<typeof insertMemorySchema>;
+export type Memory = typeof memories.$inferSelect;
+// Adapter table types
+export type Account = typeof account.$inferSelect;
+export type Session = typeof session.$inferSelect;
+
+// --- NextAuth tables -------------------------------------------------
+export const account = pgTable(
+  'account',
+  {
+    userId: uuid('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccount['type']>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+    rls: pgPolicy('account RLS policy', {
+      using: sql`auth.uid() = ${account.userId}`,
+      withCheck: sql`auth.uid() = ${account.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const session = pgTable(
+  'session',
+  {
+    sessionToken: text('sessionToken').notNull().primaryKey(),
+    userId: uuid('userId')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('session RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const verificationTokens = pgTable(
+  'verification_tokens',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+)

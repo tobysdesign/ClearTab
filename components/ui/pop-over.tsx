@@ -1,119 +1,60 @@
 'use client'
 
 import * as React from 'react'
-import { Drawer as DrawerPrimitive } from 'vaul'
+import * as PopoverPrimitive from '@radix-ui/react-popover'
 
 import { cn } from '@/lib/utils'
 
-const PopOver = ({
-  shouldScaleBackground = true,
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root
-    shouldScaleBackground={shouldScaleBackground}
-    {...props}
-  />
-)
-PopOver.displayName = 'PopOver'
+const Popover = PopoverPrimitive.Root
 
-const PopOverTrigger = DrawerPrimitive.Trigger
+const PopoverTrigger = PopoverPrimitive.Trigger
 
-const PopOverPortal = DrawerPrimitive.Portal
-
-const PopOverClose = DrawerPrimitive.Close
-
-const PopOverOverlay = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Overlay
-    ref={ref}
-    className={cn('fixed inset-0 z-50', className)}
-    {...props}
-  />
-))
-PopOverOverlay.displayName = DrawerPrimitive.Overlay.displayName
-
-const PopOverContent = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <PopOverPortal>
-    <PopOverOverlay />
-    <DrawerPrimitive.Content
+const PopoverContent = React.forwardRef<
+  React.ElementRef<typeof PopoverPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
+>(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
+  <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Content
       ref={ref}
+      align={align}
+      sideOffset={sideOffset}
       className={cn(
-        'fixed bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background',
+        'z-50 w-72 rounded-md border p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
         className
       )}
-      data-pop-over="true"
       {...props}
-    >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
-      {children}
-    </DrawerPrimitive.Content>
-  </PopOverPortal>
+    />
+  </PopoverPrimitive.Portal>
 ))
-PopOverContent.displayName = DrawerPrimitive.Content.displayName
+PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
-const PopOverHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn('grid gap-1.5 p-4 text-center sm:text-left', className)}
-    {...props}
-  />
+const PopoverHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn('flex flex-col space-y-1.5 pb-3', className)} {...props} />
 )
-PopOverHeader.displayName = 'PopOverHeader'
+PopoverHeader.displayName = 'PopoverHeader'
 
-const PopOverFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn('mt-auto flex flex-col gap-2 p-4', className)}
-    {...props}
-  />
-)
-PopOverFooter.displayName = 'PopOverFooter'
-
-const PopOverTitle = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Title>
+const PopoverTitle = React.forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Title
+  <h3
     ref={ref}
-    className={cn(
-      'text-lg font-semibold leading-none tracking-tight',
-      className
-    )}
+    className={cn('font-semibold leading-none tracking-tight', className)}
     {...props}
   />
 ))
-PopOverTitle.displayName = DrawerPrimitive.Title.displayName
+PopoverTitle.displayName = 'PopoverTitle'
 
-const PopOverDescription = React.forwardRef<
-  React.ElementRef<typeof DrawerPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Description>
+const PopoverDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <DrawerPrimitive.Description
+  <p
     ref={ref}
     className={cn('text-sm text-muted-foreground', className)}
     {...props}
   />
 ))
-PopOverDescription.displayName = DrawerPrimitive.Description.displayName
+PopoverDescription.displayName = 'PopoverDescription'
 
-export {
-  PopOver,
-  PopOverPortal,
-  PopOverOverlay,
-  PopOverTrigger,
-  PopOverClose,
-  PopOverContent,
-  PopOverHeader,
-  PopOverFooter,
-  PopOverTitle,
-  PopOverDescription,
-} 
+export { Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverTitle, PopoverDescription }

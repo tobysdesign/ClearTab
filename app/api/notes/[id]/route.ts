@@ -1,48 +1,130 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { insertNoteSchema, Note, yooptaContentSchema } from '@/shared/schema'
-import { updateMockNote } from '@/lib/mock-data'
+import { notes, yooptaContentSchema } from '@/shared/schema'
+import { db } from '@/server/db'
+import { and, eq } from 'drizzle-orm'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../auth/[...nextauth]/route'
 
 export const runtime = 'nodejs';
 
-// PUT /api/notes/:id - Update a note
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const noteId = parseInt(id, 10);
-  if (isNaN(noteId)) {
-    return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user.id;
+
+  if (!userId) {
+    return NextResponse.json(
+      { success: false, error: 'User not authenticated' },
+      { status: 401 }
+    );
+  }
+
+  const params = await context.params
+  const id = params.id
+  if (!id || typeof id !== 'string') {
+    return Response.json({ success: false, error: 'Invalid ID' }, { status: 400 });
   }
 
   try {
-    const body = await req.json();
-    console.log('Updating note:', noteId, 'with data:', body);
+    const note = await db.query.notes.findFirst({
+      where: and(eq(notes.id, id), eq(notes.userId, userId))
+    });
 
-    // Only allow title and content to be updated (both optional)
-    const validation = insertNoteSchema.pick({ title: true, content: true }).partial().extend({
-      content: yooptaContentSchema.optional()
-    }).safeParse(body);
+    if (!note) {
+      return Response.json({ success: false, error: 'Note not found' }, { status: 404 });
+    }
+
+    return Response.json({ success: true, data: note });
+  } catch (error) {
+    console.error('Error fetching note:', error);
+    return Response.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// PUT /api/notes/:id - Update a note
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user.id;
+
+  if (!userId) {
+    return NextResponse.json(
+      { success: false, error: 'User not authenticated' },
+      { status: 401 }
+    );
+  }
+
+  const params = await context.params
+  const id = params.id
+  if (!id || typeof id !== 'string') {
+    return Response.json({ success: false, error: 'Invalid ID' }, { status: 400 });
+  }
+
+  try {
+    const body = await request.json()
+    delete body.id // Don't allow changing the ID
+
+    // Ensure updatedAt is always current
+    const updateData = {
+        ...body,
+        updatedAt: new Date(),
+    }
     
-    if (!validation.success) {
-      console.error('Validation failed:', validation.error);
-      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    const result = await db
+      .update(notes)
+      .set(updateData)
+      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
+      .returning();
+
+    if (!result.length) {
+      return Response.json({ success: false, error: 'Note not found' }, { status: 404 });
     }
 
-    // Update the note using shared store
-    const updatedNote = updateMockNote(noteId, validation.data);
-    if (!updatedNote) {
-      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
-    }
-
-    console.log('Note updated successfully:', updatedNote);
-    return NextResponse.json(updatedNote);
+    return Response.json({ success: true, data: result[0] });
   } catch (error) {
     console.error('Error updating note:', error);
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
-    }
+    return Response.json({ success: false, error: 'Failed to update note' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user.id;
+
+  if (!userId) {
     return NextResponse.json(
-      { error: 'An unexpected error occurred.' },
-      { status: 500 }
+      { success: false, error: 'User not authenticated' },
+      { status: 401 }
     );
+  }
+  
+  const params = await context.params
+  const id = params.id
+  if (!id || typeof id !== 'string') {
+    return Response.json({ success: false, error: 'Invalid ID' }, { status: 400 });
+  }
+
+  try {
+    const result = await db
+      .delete(notes)
+      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
+      .returning();
+
+    if (!result.length) {
+      return Response.json({ error: 'Note not found' }, { status: 404 });
+    }
+
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

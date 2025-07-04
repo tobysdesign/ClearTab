@@ -1,55 +1,351 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 222.2 84% 4.9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 222.2 84% 4.9%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 222.2 84% 4.9%;
+  --color-primary: 222.2 47.4% 11.2%;
+  --color-primary-foreground: 210 40% 98%;
+  --color-secondary: 210 40% 96%;
+  --color-secondary-foreground: 222.2 84% 4.9%;
+  --color-muted: 210 40% 96%;
+  --color-muted-foreground: 215.4 16.3% 46.9%;
+  --color-accent: 210 40% 96%;
+  --color-accent-foreground: 222.2 84% 4.9%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-border: 214.3 31.8% 91.4%;
+  --color-input: 214.3 31.8% 91.4%;
+  --color-ring: 222.2 84% 4.9%;
+  
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 3rem;
+}
+
+.dark {
+  --color-background: 0 0% 0% / 0.05;
+  --color-foreground: 210 40% 98%;
+  --color-card: 0 0% 0% / 0.1;
+  --color-card-foreground: 210 40% 98%;
+  --color-popover: 0 0% 0% / 0.15;
+  --color-popover-foreground: 210 40% 98%;
+  --color-primary: 210 40% 98%;
+  --color-primary-foreground: 222.2 47.4% 11.2%;
+  --color-secondary: 0 0% 100% / 0.05;
+  --color-secondary-foreground: 210 40% 98%;
+  --color-muted: 0 0% 100% / 0.03;
+  --color-muted-foreground: 215 20.2% 65.1%;
+  --color-accent: 0 0% 100% / 0.05;
+  --color-accent-foreground: 210 40% 98%;
+  --color-destructive: 0 62.8% 30.6%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-border: 0 0% 100% / 0.08;
+  --color-input: 0 0% 100% / 0.05;
+  --color-ring: 212.7 26.8% 83.9%;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--color-border));
+  }
+  body {
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-foreground));
+  }
+}
+
+/* Utility classes for Tailwind v4 compatibility with transparency */
+.bg-background { background-color: hsl(var(--color-background)); backdrop-filter: blur(8px); }
+.bg-foreground { background-color: hsl(var(--color-foreground)); }
+.bg-card { background-color: hsl(var(--color-card)); backdrop-filter: blur(8px); }
+.bg-card-foreground { background-color: hsl(var(--color-card-foreground)); }
+.bg-popover { background-color: hsl(var(--color-popover)); backdrop-filter: blur(12px); }
+.bg-popover-foreground { background-color: hsl(var(--color-popover-foreground)); }
+.bg-primary { background-color: hsl(var(--color-primary)); }
+.bg-primary-foreground { background-color: hsl(var(--color-primary-foreground)); }
+.bg-secondary { background-color: hsl(var(--color-secondary)); backdrop-filter: blur(6px); }
+.bg-secondary-foreground { background-color: hsl(var(--color-secondary-foreground)); }
+.bg-muted { background-color: hsl(var(--color-muted)); backdrop-filter: blur(4px); }
+.bg-muted-foreground { background-color: hsl(var(--color-muted-foreground)); }
+.bg-accent { background-color: hsl(var(--color-accent)); backdrop-filter: blur(6px); }
+.bg-accent-foreground { background-color: hsl(var(--color-accent-foreground)); }
+.bg-destructive { background-color: hsl(var(--color-destructive)); }
+.bg-destructive-foreground { background-color: hsl(var(--color-destructive-foreground)); }
+
+.text-background { color: hsl(var(--color-background)); }
+.text-foreground { color: hsl(var(--color-foreground)); }
+.text-card { color: hsl(var(--color-card)); }
+.text-card-foreground { color: hsl(var(--color-card-foreground)); }
+.text-popover { color: hsl(var(--color-popover)); }
+.text-popover-foreground { color: hsl(var(--color-popover-foreground)); }
+.text-primary { color: hsl(var(--color-primary)); }
+.text-primary-foreground { color: hsl(var(--color-primary-foreground)); }
+.text-secondary { color: hsl(var(--color-secondary)); }
+.text-secondary-foreground { color: hsl(var(--color-secondary-foreground)); }
+.text-muted { color: hsl(var(--color-muted)); }
+.text-muted-foreground { color: hsl(var(--color-muted-foreground)); }
+.text-accent { color: hsl(var(--color-accent)); }
+.text-accent-foreground { color: hsl(var(--color-accent-foreground)); }
+.text-destructive { color: hsl(var(--color-destructive)); }
+.text-destructive-foreground { color: hsl(var(--color-destructive-foreground)); }
+
+.border-background { border-color: hsl(var(--color-background)); }
+.border-foreground { border-color: hsl(var(--color-foreground)); }
+.border-card { border-color: hsl(var(--color-card)); }
+.border-card-foreground { border-color: hsl(var(--color-card-foreground)); }
+.border-popover { border-color: hsl(var(--color-popover)); }
+.border-popover-foreground { border-color: hsl(var(--color-popover-foreground)); }
+.border-primary { border-color: hsl(var(--color-primary)); }
+.border-primary-foreground { border-color: hsl(var(--color-primary-foreground)); }
+.border-secondary { border-color: hsl(var(--color-secondary)); }
+.border-secondary-foreground { border-color: hsl(var(--color-secondary-foreground)); }
+.border-muted { border-color: hsl(var(--color-muted)); }
+.border-muted-foreground { border-color: hsl(var(--color-muted-foreground)); }
+.border-accent { border-color: hsl(var(--color-accent)); }
+.border-accent-foreground { border-color: hsl(var(--color-accent-foreground)); }
+.border-destructive { border-color: hsl(var(--color-destructive)); }
+.border-destructive-foreground { border-color: hsl(var(--color-destructive-foreground)); }
+
+.border-border { border-color: hsl(var(--color-border)); }
+.border-input { border-color: hsl(var(--color-input)); }
+.border-ring { border-color: hsl(var(--color-ring)); }
+
+/* Rounded utilities */
+.rounded-2xl { border-radius: var(--radius-2xl); }
+.rounded-3xl { border-radius: var(--radius-3xl); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-md { border-radius: var(--radius); }
+
+/* Weather widget styles */
+.weather-widget {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+}
+
+.weather-icon {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* Task widget styles */
+.task-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.task-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Bento grid layout */
+.bento-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--color-muted));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--color-muted-foreground));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--color-border));
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  src: url('/fonts/ppeiko/ppeiko-lightitalic-webfont.woff2') format('woff2'),
+       url('/fonts/ppeiko/ppeiko-lightitalic-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  src: url('/fonts/ppeiko/ppeiko-regularitalic-webfont.woff2') format('woff2'),
+       url('/fonts/ppeiko/ppeiko-regularitalic-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Thin.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Book.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Freight Display Pro';
+  src: url('/fonts/FreightDispPro-Book.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @layer base {
   :root {
-    --background: 0 0% 8.2%; /* #151515 */
-    --foreground: 0 0% 76%; /* #c2c2c2 */
-    --card: 0 0% 8.2%; /* #151515 */
-    --card-foreground: 0 0% 76%; /* #c2c2c2 */
-    --popover: 0 0% 8.2%; /* #151515 */
-    --popover-foreground: 0 0% 76%; /* #c2c2c2 */
-    --primary: 0 0% 76%; /* #c2c2c2 */
-    --primary-foreground: 0 0% 8.2%; /* #151515 */
-    --secondary: 0 0% 75%; /* #bfbfbf */
-    --secondary-foreground: 0 0% 8.2%; /* #151515 */
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 38%; /* #616161 */
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 76%; /* #c2c2c2 */
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 76%; /* #c2c2c2 */
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --font-inter-display: 'Inter Display', system-ui, sans-serif;
+    --font-tiny: 'Tiny', serif;
+    
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
     --radius: 0.5rem;
     --shadow-input: 0px 2px 3px -1px rgba(0, 0, 0, 0.1),
       0px 1px 0px 0px rgba(25, 28, 33, 0.02),
       0px 0px 0px 1px rgba(25, 28, 33, 0.08);
     
     /* Pink Color Palette */
-    --almost-pink: 322 29% 92%; /* #efd8ec */
-    --light-pink: 312 100% 85%; /* #ffb1ef */
-    --dark-pink: 310 58% 5%; /* #16030d */
-    --brand-pink: 326 97% 66%; /* #fd5fa8 */
+    --almost-pink: 322 29% 92%;
+    --light-pink: 312 100% 85%;
+    --dark-pink: 310 58% 5%;
+    --brand-pink: 326 97% 66%;
+
+    /* Notes Widget Variables */
+    --notes-font-size: 14px;
+    --notes-line-height: 1.4;
+    --notes-paragraph-spacing: 0.75rem;
+    --notes-title-size: 1.125rem;
+    --notes-border-color: hsl(var(--border));
+    --notes-text-color: hsl(var(--foreground));
+    --notes-bg-color: hsl(var(--background));
+
+    /* Widget Common Variables */
+    --widget-padding: 1rem;
+    --widget-header-height: 3rem;
+    --widget-border-color: hsl(var(--border));
+    --widget-list-spacing: 0.5rem;
+    --widget-sidebar-width: 250px;
+    --widget-item-padding: 0.75rem;
   }
 
   .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 224 71.4% 4.1%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 224 71.4% 4.1%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 224 71.4% 4.1%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -74,6 +370,10 @@
   .hover\:bg-light-pink:hover { background-color: hsl(var(--light-pink)); }
   .hover\:bg-dark-pink:hover { background-color: hsl(var(--dark-pink)); }
   .hover\:bg-brand-pink:hover { background-color: hsl(var(--brand-pink)); }
+
+  .bg-card-gradient {
+    background: linear-gradient(to bottom, #1F1F1F, #171414) !important;
+  }
 }
 
 body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
@@ -102,7 +402,7 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
   --yoopta-button-color: #c2c2c2;
   
   /* Selection */
-  --yoopta-selection-background: rgba(59, 130, 246, 0.3);
+  --yoopta-selection-background: transparent;
   
   /* Placeholder */
   --yoopta-placeholder-color: #71717a;
@@ -218,10 +518,12 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
 }
 
 /* Focus and active states */
+/* Keep subtle background highlight without blue outline */
 .yoopta-dark-theme [data-yoopta-block]:focus-within,
 .yoopta-editor-dark [data-yoopta-block]:focus-within {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 2px !important;
+  background: #222 !important;
+  outline: none !important;
+  outline-offset: 0 !important;
 }
 
 /* Dropdown and menu styling */
@@ -244,4 +546,807 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
 .yoopta-dark-theme [data-yoopta-menu-item]:hover,
 .yoopta-editor-dark [data-yoopta-menu-item]:hover {
   background-color: #27272a !important;
+}
+
+.yoopta-editor-dark [data-yoopta-menu-item] {
+  padding: 10px;
+}
+
+.yoopta-editor-dark [data-yoopta-menu-item]:hover {
+  background-color: #27272a !important;
+}
+
+/* === Yoopta Editor Custom Styling === */
+
+/* Remove unwanted focus ring on the editor */
+.yoopta-editor-themed [contenteditable='true']:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Reposition block controls (drag handle) to the right */
+.yoopta-editor-themed [data-yoopta-block-container] {
+  flex-direction: row-reverse;
+}
+
+/* Add padding to the right of paragraphs to not overlap with controls */
+.yoopta-paragraph {
+  padding-right: 40px;
+}
+
+/* === Yoopta Editor Dark Theme Styles === */
+
+/* Set variables for the entire editor when in dark mode */
+.yoopta-editor-themed.dark {
+  --yoo-primary-color: #6366f1;
+  --yoo-secondary-color: #a1a1aa;
+  --yoo-background-color: #18181b;
+  --yoo-surface-color: #27272a;
+  --yoo-border-color: #3f3f46;
+  --yoo-text-color: #fafafa;
+  --yoo-text-secondary-color: #a1a1aa;
+}
+
+/* FINAL ATTEMPT: Force dark theme on Yoopta ActionMenu portal */
+html.dark .yoopta-portal > div {
+  background-color: #18181b !important;
+  border: 1px solid #3f3f46 !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+html.dark .yoopta-portal [data-yoopta-menu-item] {
+  color: #fafafa !important;
+}
+
+html.dark .yoopta-portal [data-yoopta-menu-item] > div:last-child {
+  color: #a1a1aa !important;
+}
+
+html.dark .yoopta-portal [data-yoopta-menu-item]:hover {
+  background-color: #27272a !important;
+}
+
+html.dark .yoopta-portal [data-yoopta-menu-item] > div > svg,
+html.dark .yoopta-portal svg {
+  color: var(--yoo-text-color) !important;
+} 
+
+.yoopta-block-action-buttons {background-color: #212121 !important; border-radius: 10px; color: #fff; border:1px solid #444 !important;}
+.yoopta-block-actions-drag, .yoopta-block-actions-plus {color:#efd8ec !important;}
+.yoopta-block-actions-drag:hover, .yoopta-block-actions-plus:hover {color: #fff !important;}
+.yoopta-action-menu-list-content {background: #212121 !important;border: 1px solid hsl(var(--border));}
+.aria-selected\:yoo-action-menu-bg-\[\#f0f0f0\][aria-selected=true] {background: #282828 !important;}
+
+.glow-button {
+  position: relative;
+  background: #1a1a1a;
+}
+
+.glow-button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at var(--x) var(--y),
+    transparent,
+    #8f44fd,
+    transparent
+  );
+  background-size: 200% 200%;
+  background-position: center;
+  border-radius: 0.5rem; /* Matches rounded-lg */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.glow-button:hover::before {
+  opacity: 0.2;
+}
+
+.yoopta-toolbar-button {
+  background-color: transparent !important;
+  color: hsl(var(--foreground)) !important;
+  border-radius: var(--radius) !important;
+}
+
+.yoopta-toolbar-button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.yoopta-toolbar-button[data-state='active'] {
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* Shiny CTA Button styles - from user request */
+:root {
+  --shiny-cta-bg: #000000;
+  --shiny-cta-bg-subtle: #1a0e12;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #b03a66;
+  --shiny-cta-highlight-subtle: #d66a8f;
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+@property --gradient-shine {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+.shiny-cta {
+  --animation: gradient-angle linear infinite;
+  --duration: 3s;
+  --shadow-size: 2px;
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: 4px;
+  border: 1px solid transparent;
+  color: var(--shiny-cta-fg);
+  background: linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg))
+      padding-box,
+    conic-gradient(
+        from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+        transparent,
+        var(--shiny-cta-highlight) var(--gradient-percent),
+        var(--gradient-shine) calc(var(--gradient-percent) * 2),
+        var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+        transparent calc(var(--gradient-percent) * 4)
+      )
+      border-box;
+  box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 9999px;
+}
+
+.shiny-cta::before,
+.shiny-cta::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+.shiny-cta:active {
+  translate: 0 1px;
+}
+
+.shiny-cta::before {
+  --size: calc(100% - var(--shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      white calc(var(--position) / 4),
+      transparent 0
+    )
+    padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(
+    from calc(var(--gradient-angle) + 45deg),
+    black,
+    transparent 10% 90%,
+    black
+  );
+  border-radius: inherit;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.shiny-cta::after {
+  --animation: shimmer linear infinite;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    -50deg,
+    transparent,
+    var(--shiny-cta-highlight),
+    transparent
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.6;
+}
+
+.shiny-cta {
+  --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+  transition: var(--transition);
+  transition-property: --gradient-angle-offset, --gradient-percent,
+    --gradient-shine;
+}
+
+.shiny-cta,
+.shiny-cta::before,
+.shiny-cta::after {
+  animation: var(--animation) var(--duration),
+    var(--animation) calc(var(--duration) / 0.4) reverse paused;
+  animation-composition: add;
+}
+
+.shiny-cta:is(:hover, :focus-visible) {
+  --gradient-percent: 20%;
+  --gradient-angle-offset: 95deg;
+  --gradient-shine: var(--shiny-cta-highlight-subtle);
+}
+
+.shiny-cta:is(:hover, :focus-visible),
+.shiny-cta:is(:hover, :focus-visible)::before,
+.shiny-cta:is(:hover, :focus-visible)::after {
+  animation-play-state: running;
+}
+
+@keyframes gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    rotate: 360deg;
+  }
+}
+
+/* Clean text selection styling for textareas and inputs */
+textarea::selection,
+input[type="text"]::selection,
+input[type="textarea"]::selection,
+.editable-text::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Select focus styles */
+[data-radix-select-trigger] {
+  outline: none !important;
+}
+
+[data-radix-select-trigger]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
+textarea::-moz-selection,
+input[type="text"]::-moz-selection,
+input[type="textarea"]::-moz-selection,
+.editable-text::-moz-selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Removed custom text selection styles to avoid conflicts with Yoopta */
+
+/* Prevent text selection during drag operations, but allow it for inputs and textareas */
+body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: grabbing !important;
+}
+
+/* Drop zone styles */
+[data-droppable="true"] {
+  opacity: 1 !important;
+  transition: all 0.2s ease-in-out;
+  box-shadow: inset 0 0 0 2px hsl(var(--primary));
+}
+
+/* Weather Widget Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes rain {
+  0% { transform: translateY(-4px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(4px); opacity: 0; }
+}
+
+@keyframes breeze {
+  0% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(-2px); }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-rain { animation: rain 1.5s linear infinite; }
+.animate-breeze { animation: breeze 2s ease-in-out infinite; }
+.animate-flash { animation: flash 2s ease-in-out infinite; }
+
+.no-select:not(input):not(textarea):not([contenteditable="true"]) {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+/* ========== GLASSMORPHIC BUTTON STYLES ========== */
+
+/* CSS Custom Properties */
+@property --angle-1 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -75deg;
+}
+
+@property --angle-2 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -45deg;
+}
+
+/* Button Wrap Container */
+.glow-button-wrap {
+  position: relative;
+  z-index: 2;
+  border-radius: 999vw;
+  background: transparent;
+  pointer-events: none;
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Button Shadow Container */
+.glow-button-shadow {
+  --shadow-cuttoff-fix: 0.5em;
+  position: absolute;
+  width: calc(100% + var(--shadow-cuttoff-fix));
+  height: calc(100% + var(--shadow-cuttoff-fix));
+  top: calc(0% - var(--shadow-cuttoff-fix) / 2);
+  left: calc(0% - var(--shadow-cuttoff-fix) / 2);
+  filter: blur(clamp(1px, 0.125em, 6px));
+  -webkit-filter: blur(clamp(1px, 0.125em, 6px));
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Shadow */
+.glow-button-shadow::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 999vw;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+  width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+  height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
+  left: calc(var(--shadow-cuttoff-fix) - 0.875em);
+  padding: 0.125em;
+  box-sizing: border-box;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: visible;
+  opacity: 1;
+}
+
+/* Button Base Styles - using new class name to avoid conflicts */
+.glow-button-glassmorphic {
+  --border-width: clamp(1px, 0.0625em, 4px);
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  pointer-events: auto;
+  z-index: 3;
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.05)
+  );
+  border-radius: 999vw;
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+    0 0 0 0 rgba(255, 255, 255, 1);
+  backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100%;
+  display: block;
+}
+
+.glow-button-glassmorphic:hover {
+  transform: scale(0.975);
+  backdrop-filter: blur(0.01em);
+  -webkit-backdrop-filter: blur(0.01em);
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
+    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5),
+    0 0 0 0 rgba(255, 255, 255, 1);
+}
+
+/* Button Text */
+.glow-button-glassmorphic span {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: "Inter", sans-serif;
+  letter-spacing: -0.05em;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #000000;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+  padding-inline: 1.5em;
+  padding-block: 0.6em;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.glow-button-glassmorphic:hover span {
+  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
+}
+
+/* Text Highlight Effect */
+.glow-button-glassmorphic span::after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 1;
+  width: calc(100% - var(--border-width));
+  height: calc(100% - var(--border-width));
+  top: calc(0% + var(--border-width) / 2);
+  left: calc(0% + var(--border-width) / 2);
+  box-sizing: border-box;
+  border-radius: 999vw;
+  overflow: clip;
+  background: linear-gradient(
+    var(--angle-2),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 40% 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  z-index: 3;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  transition: background-position 500ms cubic-bezier(0.25, 1, 0.5, 1),
+    --angle-2 500ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.glow-button-glassmorphic:hover span::after {
+  background-position: 25% 50%;
+}
+
+.glow-button-glassmorphic:active span::after {
+  background-position: 50% 15%;
+  --angle-2: -15deg;
+}
+
+/* Button Outline */
+.glow-button-glassmorphic::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: 999vw;
+  width: calc(100% + var(--border-width));
+  height: calc(100% + var(--border-width));
+  top: calc(0% - var(--border-width) / 2);
+  left: calc(0% - var(--border-width) / 2);
+  padding: var(--border-width);
+  box-sizing: border-box;
+  background: conic-gradient(
+      from var(--angle-1) at 50% 50%,
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0) 5% 40%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0) 60% 95%,
+      rgba(0, 0, 0, 0.5)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1),
+    --angle-1 500ms ease;
+  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
+}
+
+.glow-button-glassmorphic:hover::after {
+  --angle-1: -125deg;
+}
+
+.glow-button-glassmorphic:active::after {
+  --angle-1: -75deg;
+}
+
+/* Shadow Hover Effects */
+.glow-button-wrap:has(.glow-button-glassmorphic:hover) .glow-button-shadow {
+  filter: blur(clamp(2px, 0.0625em, 6px));
+  -webkit-filter: blur(clamp(2px, 0.0625em, 6px));
+  transition: filter 400ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.glow-button-wrap:has(.glow-button-glassmorphic:hover) .glow-button-shadow::after {
+  top: calc(var(--shadow-cuttoff-fix) - 0.875em);
+  opacity: 1;
+}
+
+/* Active State Effects */
+.glow-button-wrap:has(.glow-button-glassmorphic:active) {
+  transform: rotate3d(1, 0, 0, 25deg);
+}
+
+.glow-button-wrap:has(.glow-button-glassmorphic:active) .glow-button-glassmorphic {
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+    0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
+    0 0.25em 0 0 rgba(255, 255, 255, 0.75),
+    inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
+}
+
+.glow-button-wrap:has(.glow-button-glassmorphic:active) .glow-button-shadow {
+  filter: blur(clamp(2px, 0.125em, 12px));
+  -webkit-filter: blur(clamp(2px, 0.125em, 12px));
+}
+
+.glow-button-wrap:has(.glow-button-glassmorphic:active) .glow-button-shadow::after {
+  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
+  opacity: 0.75;
+}
+
+.glow-button-wrap:has(.glow-button-glassmorphic:active) span {
+  text-shadow: 0.025em 0.25em 0.05em rgba(0, 0, 0, 0.12);
+}
+
+/* Touch Device Adjustments */
+@media (hover: none) and (pointer: coarse) {
+  .glow-button-glassmorphic span::after,
+  .glow-button-glassmorphic:active span::after {
+    --angle-2: -45deg;
+  }
+  
+  .glow-button-glassmorphic::after,
+  .glow-button-glassmorphic:hover::after,
+  .glow-button-glassmorphic:active::after {
+    --angle-1: -75deg;
+  }
+}
+/* Add any common component styles here */
+
+html[data-vaul-drawer-visible="true"] {
+    overflow: hidden;
+}
+
+[data-vaul-drawer][data-pop-over="true"]:not([data-vaul-custom-container=true])::after {
+    background: none;
+}
+
+.yoopta-paragraph {
+    padding: 0 5px;
+    font-size: 14px !important;
+}
+
+/* Yoopta Editor Dark Mode Toolbar Styles */
+.dark .yoopta-toolbar-root {
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
+    color: hsl(var(--card-foreground));
+}
+
+.dark .yoopta-toolbar-button {
+    color: hsl(var(--card-foreground));
+}
+
+.dark .yoopta-toolbar-button:hover {
+    background-color: hsl(var(--accent));
+}
+
+.dark .yoopta-toolbar-button[data-state="active"] {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+}
+
+.yoopta-dnd-layer {
+    display: none !important;
+}
+
+[data-slate-drag-block] {
+  background-color: transparent !important;
+}
+
+.dashCard {
+  @apply flex flex-col bg-transparent border-[#2A2A2A]/30 rounded-2xl backdrop-blur-sm;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.dashCard:hover {
+  @apply border-[#3C3C3C]/50;
+}
+
+.dashCard.finance {
+  @apply bg-transparent border-transparent;
+}
+
+.ybot {background: linear-gradient(to bottom, #1F1F1F, #171414) !important;}
+
+/* Remove redundant schedule styles as .dashCard now handles it */
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+.time-indicator {
+    margin: 12px 0;
+    position: absolute;
+    height: 16px;
+    width: 100%;
+}
+
+/* Weather Widget Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes rain {
+  0% { transform: translateY(-4px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(4px); opacity: 0; }
+}
+
+@keyframes breeze {
+  0% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(-2px); }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-rain { animation: rain 1.5s linear infinite; }
+.animate-breeze { animation: breeze 2s ease-in-out infinite; }
+.animate-flash { animation: flash 2s ease-in-out infinite; }
+
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.95); opacity: 0.9; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-sun-pulse {
+  animation: sun-pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+.widget-list-item {
+  @apply px-3 py-2 flex items-center justify-between rounded-lg cursor-pointer border border-[#2A2A2A]/30 bg-transparent backdrop-blur-sm transition-all duration-200;
+}
+
+.widget-list-item:hover {
+  @apply bg-[#313131]/20 border-[#3C3C3C]/40;
+}
+
+.widget-list-item.active {
+  @apply bg-[#313131]/30 border-[#3C3C3C]/50;
+}
+
+/* Override the specific Tailwind class that's causing issues */
+.hover\:bg-accent\/50:hover {
+  background-color: transparent !important;
+}
+
+/* Simple list item class for notes */
+.listItem {
+  padding: 12px 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid rgba(60, 60, 60, 0.3);
+  background-color: rgba(49, 49, 49, 0.2);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.listItem:hover {
+  background-color: rgba(60, 60, 60, 0.3);
+  border-color: rgba(74, 74, 74, 0.4);
+}
+
+.listItem.active {
+  background-color: rgba(74, 74, 74, 0.4);
+  border-color: rgba(85, 85, 85, 0.5);
+}
+
+/* Notes use the lighter background as default (same as tasks' hover/active state) */
+/* Nuclear option - maximum specificity to override Tailwind */
+div[class*="widget-list-item"][class*="notes"],
+div.widget-list-item.notes,
+motion.div[class*="widget-list-item"][class*="notes"],
+motion.div.widget-list-item.notes,
+[class*="widget-list-item"][class*="notes"] {
+  background-color: #313131 !important;
+  border-color: #3C3C3C !important;
+}
+
+div[class*="widget-list-item"][class*="notes"]:hover,
+div.widget-list-item.notes:hover,
+motion.div[class*="widget-list-item"][class*="notes"]:hover,
+motion.div.widget-list-item.notes:hover,
+[class*="widget-list-item"][class*="notes"]:hover {
+  background-color: #3C3C3C !important;
+  border-color: #4A4A4A !important;
+}
+
+div[class*="widget-list-item"][class*="notes"][class*="active"],
+div.widget-list-item.notes.active,
+motion.div[class*="widget-list-item"][class*="notes"][class*="active"],
+motion.div.widget-list-item.notes.active,
+[class*="widget-list-item"][class*="notes"][class*="active"] {
+  background-color: #4A4A4A !important;
+  border-color: #555555 !important;
+}
+
+.dashCard > .p-4 > h2 {
+  @apply text-lg font-bold;
+  font-size: 14px !important;
+}
+
+.listItem h3 {
+  font-size: 14px;
 } 

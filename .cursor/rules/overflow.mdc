@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+The viewport should not be exceeded however the widgets within the dashboard should be allowed to scroll the content, either the lists or the notes widget. Ovverdlow must be set to scroll y if needed.
+
+

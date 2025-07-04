@@ -1,9 +1,0 @@
-/* Add any common component styles here */
-
-html[data-vaul-drawer-visible="true"] {
-    overflow: hidden;
-}
-
-[data-vaul-drawer][data-pop-over="true"]:not([data-vaul-custom-container=true])::after {
-    background: none;
-} 

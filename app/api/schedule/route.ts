@@ -1,40 +1,34 @@
+import { google } from 'googleapis'
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../auth/[...nextauth]/route'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-
-  if (!session || !session.accessToken) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const accessToken = session.accessToken
-  const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + new Date().toISOString() + '&maxResults=10&singleEvents=true&orderBy=startTime'
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       },
+      scopes: ['https://www.googleapis.com/auth/calendar.events.readonly'],
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      console.error('Google Calendar API error:', errorData)
-      return NextResponse.json(
-        { error: 'Failed to fetch calendar events.' },
-        { status: response.status }
-      )
-    }
+    const calendar = google.calendar({ version: 'v3', auth })
+    const today = new Date()
+    const nextWeek = new Date(today)
+    nextWeek.setDate(nextWeek.getDate() + 7)
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    const response = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: today.toISOString(),
+      timeMax: nextWeek.toISOString(),
+      maxResults: 10,
+      singleEvents: true,
+      orderBy: 'startTime',
+    })
+
+    const items = response.data.items || []
+    return NextResponse.json({ items })
   } catch (error) {
     console.error('Error fetching calendar events:', error)
-    return NextResponse.json(
-      { error: 'An internal server error occurred.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch calendar events' }, { status: 500 })
   }
 } 

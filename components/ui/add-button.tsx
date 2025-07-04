@@ -15,7 +15,7 @@ interface AddButtonProps extends ButtonProps {
 
 export function AddButton({ tooltip, ...props }: AddButtonProps) {
   const button = (
-    <Button size="icon" variant="ghost" {...props}>
+    <Button size="icon" variant="ghost-icon" {...props}>
       <PlusIcon className="h-4 w-4" />
     </Button>
   )

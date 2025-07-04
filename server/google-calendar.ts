@@ -1,5 +1,6 @@
-import { google } from 'googleapis';
+import { google, calendar_v3 } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
+import { GoogleCalendarEvent } from '../shared/calendar-types';
 
 export interface CalendarEvent {
   id: string;
@@ -15,16 +16,14 @@ export interface CalendarEvent {
 export class GoogleCalendarService {
   private oauth2Client: OAuth2Client;
 
-  constructor() {
-    // Use production domain t0.by, fallback to Replit domain for development
-    const productionDomain = 't0.by';
-    const replitDomain = process.env.REPLIT_DEV_DOMAIN || '6831cd48-e927-4fba-879d-0649453b1e2a-00-10wxp596mzofb.spock.replit.dev';
-    const domain = process.env.NODE_ENV === 'production' ? productionDomain : replitDomain;
-    const redirectUri = `https://${domain}/api/auth/google/callback`;
-      
+  constructor(
+    clientId: string,
+    clientSecret: string,
+    redirectUri: string
+  ) {
     this.oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
+      clientId,
+      clientSecret,
       redirectUri
     );
   }
@@ -54,18 +53,45 @@ export class GoogleCalendarService {
     };
   }
 
-  async getUserInfo(accessToken: string): Promise<{ id: string; email: string; name: string; picture?: string }> {
+  async getUserInfo(accessToken: string): Promise<{ email: string; name: string }> {
     this.oauth2Client.setCredentials({ access_token: accessToken });
+    const oauth2 = google.oauth2('v2');
+    const userInfo = await oauth2.userinfo.get({ auth: this.oauth2Client });
     
-    const oauth2 = google.oauth2({ version: 'v2', auth: this.oauth2Client });
-    const { data } = await oauth2.userinfo.get();
-    
+    if (!userInfo.data.email || !userInfo.data.name) {
+      throw new Error('Failed to get user info from Google');
+    }
+
     return {
-      id: data.id!,
-      email: data.email!,
-      name: data.name!,
-      picture: data.picture || undefined
+      email: userInfo.data.email,
+      name: userInfo.data.name
     };
+  }
+
+  async getEvents(accessToken: string, timeMin: Date, timeMax: Date): Promise<GoogleCalendarEvent[]> {
+    this.oauth2Client.setCredentials({ access_token: accessToken });
+    const calendar = google.calendar('v3');
+    const response = await calendar.events.list({
+      auth: this.oauth2Client,
+      calendarId: 'primary',
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
+      singleEvents: true,
+      orderBy: 'startTime'
+    });
+
+    return (response.data.items || []).map((event: calendar_v3.Schema$Event) => ({
+      id: event.id || '',
+      title: event.summary || '',
+      description: event.description || '',
+      start: event.start?.dateTime || event.start?.date || '',
+      end: event.end?.dateTime || event.end?.date || '',
+      location: event.location || '',
+      attendees: event.attendees?.map(attendee => attendee.email || '') || [],
+      startTime: event.start?.dateTime || event.start?.date || '',
+      endTime: event.end?.dateTime || event.end?.date || '',
+      source: 'google'
+    }));
   }
 
   async getCalendarEvents(accessToken: string, refreshToken?: string): Promise<CalendarEvent[]> {
@@ -241,4 +267,8 @@ export class GoogleCalendarService {
   }
 }
 
-export const googleCalendarService = new GoogleCalendarService();
+export const googleCalendarService = new GoogleCalendarService(
+  process.env.GOOGLE_CLIENT_ID!,
+  process.env.GOOGLE_CLIENT_SECRET!,
+  `${process.env.NODE_ENV === 'production' ? 'https://t0.by' : `http://${process.env.REPLIT_DEV_DOMAIN || 'localhost:3000'}`}/api/auth/google/callback`
+);

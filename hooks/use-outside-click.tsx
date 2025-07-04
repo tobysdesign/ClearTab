@@ -6,6 +6,15 @@ export const useOutsideClick = (
 ) => {
   useEffect(() => {
     const listener = (event: any) => {
+      // Ignore clicks on text inputs and textareas
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target.isContentEditable
+      ) {
+        return;
+      }
+
       // DO NOTHING if the element being clicked is the target element or their children
       if (!ref.current || ref.current.contains(event.target)) {
         return;

@@ -1,40 +1,108 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-// Google auth will be replaced with Supabase auth
-import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from "../shared/schema";
-import OpenAI from "openai";
-import { mem0Service } from "./mem0-service";
-import { googleCalendarService } from "./google-calendar";
-import type { GoogleCalendarEvent, CalendarSyncStatus } from "../shared/calendar-types";
+import { Express, Request, Response } from 'express'
+import { createServer, Server } from 'http'
+import { z } from 'zod'
+import { storage } from './storage'
+import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from '@/shared/schema'
+import OpenAI from 'openai'
+import { mem0Service } from './mem0-service'
+import { googleCalendarService } from './services/google-calendar'
+import type { GoogleCalendarEvent, CalendarSyncStatus } from '../shared/calendar-types'
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "your-openai-key"
-});
+})
+
+interface WeatherData {
+  temperature: number
+  description: string
+  high: number
+  low: number
+  humidity: number
+  rainChance: number
+  location: string
+}
+
+interface WeatherForecast {
+  time: number
+  temperature: number
+  rainChance: number
+  weatherCode: number
+}
+
+interface CityWeatherData extends WeatherData {
+  city: string
+  forecast: WeatherForecast[]
+}
+
+interface Session {
+  isAuthenticated?: boolean
+  userId?: number
+  destroy: (callback: (err: Error | null) => void) => void
+}
+
+interface GoogleUser {
+  id: string
+  email: string
+  name: string
+  picture: string
+}
+
+interface GoogleCalendarEvent {
+  id: string
+  title: string
+  start: string
+  end: string
+  description?: string
+  location?: string
+  allDay?: boolean
+  color?: string
+  source: 'google' | 'local'
+}
+
+interface CalendarInterval {
+  startTime: string
+  values: {
+    temperature: number
+    precipitationProbability: number
+    weatherCode: number
+  }
+}
+
+interface CalendarEvent {
+  id: string
+  title: string
+  description?: string
+  startTime: Date
+  endTime: Date
+  location?: string
+  attendees?: string[]
+  htmlLink?: string
+  source: 'google' | 'local'
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  const DEFAULT_USER_ID = 1; // Demo user
+  const DEFAULT_USER_ID = 1
 
   // Authentication endpoints
   app.post("/api/login", async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { username, password } = req.body
       
       if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required" });
+        return res.status(400).json({ error: "Username and password are required" })
       }
 
       // For demo purposes, use username as email for lookup
-      const user = await storage.getUserByEmail(username);
+      const user = await storage.getUserByEmail(username)
       
       if (!user || !user.password) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ error: "Invalid credentials" })
       }
 
       // For demo purposes, simple password check (in production use bcrypt)
       if (user.password !== password) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ error: "Invalid credentials" })
       }
 
       res.json({ 
@@ -42,25 +110,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: user.name, 
         email: user.email,
         message: "Login successful" 
-      });
+      })
     } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Login failed" });
+      console.error("Login error:", error)
+      res.status(500).json({ error: "Login failed" })
     }
-  });
+  })
 
   app.post("/api/register", async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { username, password } = req.body
       
       if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required" });
+        return res.status(400).json({ error: "Username and password are required" })
       }
 
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(username);
+      const existingUser = await storage.getUserByEmail(username)
       if (existingUser) {
-        return res.status(400).json({ error: "User already exists" });
+        return res.status(400).json({ error: "User already exists" })
       }
 
       // Create new user (using username as both email and name for demo)
@@ -68,34 +136,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: username,
         name: username,
         password: password
-      });
+      })
 
       res.json({ 
         id: newUser.id, 
         name: newUser.name, 
         email: newUser.email,
         message: "Registration successful" 
-      });
+      })
     } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ error: "Registration failed" });
+      console.error("Registration error:", error)
+      res.status(500).json({ error: "Registration failed" })
     }
-  });
+  })
 
-  app.get("/api/user", async (req, res) => {
+  app.get("/api/user", async (req: Request, res: Response) => {
     try {
       // Check if user is authenticated via session
-      const session = req.session as any;
+      const session = req.session as Session
       
       if (!session?.isAuthenticated || !session?.userId) {
-        return res.status(401).json({ error: "Not authenticated" });
+        return res.status(401).json({ error: "Not authenticated" })
       }
       
       // Get authenticated user from storage
-      const user = await storage.getUser(session.userId);
+      const user = await storage.getUser(session.userId)
       
       if (!user) {
-        return res.status(401).json({ error: "User not found" });
+        return res.status(401).json({ error: "User not found" })
       }
       
       res.json({
@@ -103,41 +171,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: user.name,
         email: user.email,
         picture: user.picture
-      });
+      })
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ error: "Internal server error" });
+      console.error("Error fetching user:", error)
+      res.status(500).json({ error: "Internal server error" })
     }
-  });
+  })
 
   // Weather API using Tomorrow.io
-  app.get("/api/weather", async (req, res) => {
+  app.get("/api/weather", async (req: Request, res: Response) => {
     try {
-      const location = req.query.location as string || "San Francisco,CA";
-      const apiKey = process.env.TOMORROW_IO_API_KEY;
+      const location = req.query.location as string || "San Francisco,CA"
+      const apiKey = process.env.TOMORROW_IO_API_KEY
       
       if (!apiKey) {
         return res.status(500).json({ 
           error: "Weather API key not configured",
           message: "Please provide a valid Tomorrow.io API key"
-        });
+        })
       }
       
       // Use a default coordinate for San Francisco if no specific location provided
-      const lat = 37.7749;
-      const lon = -122.4194;
+      const lat = 37.7749
+      const lon = -122.4194
       
       const response = await fetch(
         `https://api.tomorrow.io/v4/weather/realtime?location=${lat},${lon}&apikey=${apiKey}&units=metric`
-      );
+      )
       
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Weather API error: ${response.status} - ${errorData}`);
+        const errorData = await response.text()
+        throw new Error(`Weather API error: ${response.status} - ${errorData}`)
       }
       
-      const data = await response.json();
-      const weather = data.data.values;
+      const data = await response.json()
+      const weather = data.data.values
       
       res.json({
         temperature: Math.round(weather.temperature),
@@ -147,18 +215,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         humidity: Math.round(weather.humidity),
         rainChance: Math.round(weather.precipitationProbability || 0),
         location: "San Francisco, CA"
-      });
+      })
     } catch (error) {
-      console.error("Weather API error:", error);
+      console.error("Weather API error:", error)
       res.status(500).json({ 
         error: "Failed to fetch weather data",
         message: error instanceof Error ? error.message : "Unknown error"
-      });
+      })
     }
-  });
+  })
 
   // Multi-city weather API
-  app.get("/api/weather/cities", async (req, res) => {
+  app.get("/api/weather/cities", async (req: Request, res: Response) => {
     try {
       const apiKey = process.env.TOMORROW_IO_API_KEY;
       
@@ -202,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             rainChance: Math.round(weather.precipitationProbability || 0),
             high: Math.round(weather.temperatureMax || weather.temperature + 5),
             low: Math.round(weather.temperatureMin || weather.temperature - 5),
-            forecast: forecast.map((interval: any) => ({
+            forecast: forecast.map((interval: CalendarInterval) => ({
               time: new Date(interval.startTime).getHours(),
               temperature: Math.round(interval.values.temperature),
               rainChance: Math.round(interval.values.precipitationProbability || 0),
@@ -216,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const weatherData = await Promise.all(weatherPromises);
-      const validWeatherData = weatherData.filter(data => data !== null);
+      const validWeatherData = weatherData.filter((data): data is CityWeatherData => data !== null);
       
       res.json(validWeatherData);
     } catch (error) {
@@ -330,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tasks endpoints
-  app.get("/api/tasks", async (req, res) => {
+  app.get("/api/tasks", async (req: Request, res: Response) => {
     try {
       const tasks = await storage.getTasksByUserId(DEFAULT_USER_ID);
       res.json(tasks);
@@ -340,10 +408,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tasks", async (req, res) => {
+  app.post("/api/tasks", async (req: Request, res: Response) => {
     try {
       const taskData = insertTaskSchema.parse(req.body);
-      const task = await storage.createTask({ ...taskData, userId: DEFAULT_USER_ID });
+      const task = await storage.createTask({ 
+        ...taskData, 
+        userId: DEFAULT_USER_ID,
+        status: taskData.status || 'pending',
+        dueDate: taskData.dueDate ? new Date(taskData.dueDate) : undefined
+      });
       res.json(task);
     } catch (error) {
       res.status(400).json({ error: "Invalid task data" });
@@ -914,139 +987,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Calendar events endpoint with Google Calendar integration
-  app.get("/api/calendar", async (req, res) => {
+  app.get("/api/calendar", async (req: Request, res: Response) => {
     try {
-      // Return mock data in development mode for faster iteration
-      if (process.env.NODE_ENV === 'development') {
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-
-        const mockEvents = [
-          {
-            id: "mock-1",
-            title: "Daily Standup",
-            date: today.toISOString().split('T')[0],
-            time: "09:00",
-            type: "meeting",
-            source: "mock",
-            description: "Daily team standup meeting",
-            location: "Conference Room A",
-            endTime: "09:30",
-            htmlLink: "#"
-          },
-          {
-            id: "mock-2", 
-            title: "Project Review",
-            date: today.toISOString().split('T')[0],
-            time: "14:00",
-            type: "meeting",
-            source: "mock",
-            description: "Review current project progress and blockers",
-            location: "Zoom",
-            endTime: "15:00",
-            htmlLink: "#"
-          },
-          {
-            id: "mock-3",
-            title: "Design Workshop",
-            date: tomorrow.toISOString().split('T')[0],
-            time: "10:30",
-            type: "workshop",
-            source: "mock",
-            description: "UI/UX design workshop for new features",
-            location: "Design Studio",
-            endTime: "12:00",
-            htmlLink: "#"
-          },
-          {
-            id: "mock-4",
-            title: "Client Presentation",
-            date: nextWeek.toISOString().split('T')[0],
-            time: "15:30",
-            type: "presentation",
-            source: "mock",
-            description: "Present final deliverables to client",
-            location: "Client Office",
-            endTime: "16:30",
-            htmlLink: "#"
-          }
-        ];
-
-        return res.json(mockEvents);
-      }
-
       const user = await storage.getUser(DEFAULT_USER_ID);
-      let events: any[] = [];
+      let events: CalendarEvent[] = [];
 
       if (user?.googleCalendarConnected && user.accessToken) {
         try {
           // Fetch Google Calendar events
           const googleEvents = await googleCalendarService.getCalendarEvents(
-            user.accessToken, 
-            user.refreshToken || undefined
+            user.accessToken
           );
-          
-          // Convert to calendar widget format with proper timezone handling
-          events = googleEvents.map(event => {
-            // Use original Google Calendar datetime strings to preserve timezone
-            const extractTimeFromOriginal = (originalTime: any) => {
-              if (originalTime?.dateTime) {
-                // Handle datetime with timezone: "2025-06-12T11:00:00+10:00"
-                const timePart = originalTime.dateTime.split('T')[1];
-                if (timePart) {
-                  const time = timePart.split('+')[0].split('-')[0].split('Z')[0];
-                  return time.substring(0, 5); // Return HH:MM
-                }
-              } else if (originalTime?.date) {
-                // All-day event
-                return "00:00";
-              }
-              return "00:00";
-            };
-
-            const extractDateFromOriginal = (originalTime: any) => {
-              if (originalTime?.dateTime) {
-                return originalTime.dateTime.split('T')[0];
-              } else if (originalTime?.date) {
-                return originalTime.date;
-              }
-              return new Date().toISOString().split('T')[0];
-            };
-            
-            return {
-              id: event.id,
-              title: event.title,
-              date: extractDateFromOriginal(event.startTime),
-              time: extractTimeFromOriginal(event.startTime),
-              type: "google-event",
-              source: "google",
-              description: event.description,
-              location: event.location,
-              endTime: extractTimeFromOriginal(event.endTime),
-              htmlLink: event.htmlLink
-            };
-          });
-
+          events = googleEvents;
         } catch (error) {
-          console.error("Google Calendar sync error:", error);
-          // If it's an API not enabled error, provide clear feedback
-          if (error instanceof Error && error.message && error.message.includes('Calendar API has not been used')) {
-            return res.status(503).json({ 
-              error: "Google Calendar API not enabled",
-              message: "Please enable the Google Calendar API in your Google Cloud Console",
-              helpUrl: "https://console.developers.google.com/apis/api/calendar-json.googleapis.com"
-            });
-          }
-          events = [];
+          console.error("Google Calendar API error:", error);
+          // Continue with mock data if Google Calendar fails
         }
-      } else {
-        // Return empty array if not connected - no synthetic data
-        events = [];
       }
-      
+
+      // If no Google Calendar events or not connected, use mock data
+      if (events.length === 0) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+
+        events = [
+          {
+            id: "mock-1",
+            title: "Team Meeting",
+            description: "Weekly sync with the team",
+            startTime: new Date(today.setHours(10, 0)),
+            endTime: new Date(today.setHours(11, 0)),
+            location: "Conference Room A",
+            source: "local",
+            htmlLink: "#"
+          },
+          {
+            id: "mock-2",
+            title: "Project Review",
+            description: "Review project milestones",
+            startTime: new Date(tomorrow.setHours(14, 0)),
+            endTime: new Date(tomorrow.setHours(15, 0)),
+            location: "Virtual",
+            source: "local",
+            htmlLink: "#"
+          },
+          {
+            id: "mock-3",
+            title: "Lunch with Client",
+            description: "Discuss new requirements",
+            startTime: new Date(nextWeek.setHours(12, 30)),
+            endTime: new Date(nextWeek.setHours(13, 30)),
+            location: "Restaurant",
+            source: "local",
+            htmlLink: "#"
+          }
+        ];
+      }
+
       res.json(events);
     } catch (error) {
       console.error("Calendar API error:", error);
@@ -1054,6 +1054,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return createServer(app).listen(process.env.PORT || 3000);
 }

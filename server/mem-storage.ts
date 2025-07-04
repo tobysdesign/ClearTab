@@ -1,11 +1,80 @@
 import { 
-  users, notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
+  notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
   type User, type InsertUser, type Note, type InsertNote, 
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
   type ChatMessage, type InsertChatMessage, type EmotionalMetadata, type InsertEmotionalMetadata,
-  type MemoryUsage, type InsertMemoryUsage
+  type MemoryUsage, type InsertMemoryUsage, type Memory
 } from "../shared/schema";
 import { IStorage } from "./storage";
+import { Note, Task } from '../shared/types';
+
+interface MemoryStore {
+  notes: Map<string, Note>;
+  tasks: Map<string, Task>;
+}
+
+class MemoryStorage {
+  private store: MemoryStore = {
+    notes: new Map(),
+    tasks: new Map()
+  };
+
+  // Notes
+  async getNotes(): Promise<Note[]> {
+    return Array.from(this.store.notes.values());
+  }
+
+  async getNote(id: string): Promise<Note | null> {
+    return this.store.notes.get(id) || null;
+  }
+
+  async createNote(note: Note): Promise<Note> {
+    this.store.notes.set(note.id, note);
+    return note;
+  }
+
+  async updateNote(id: string, note: Partial<Note>): Promise<Note | null> {
+    const existingNote = this.store.notes.get(id);
+    if (!existingNote) return null;
+
+    const updatedNote = { ...existingNote, ...note };
+    this.store.notes.set(id, updatedNote);
+    return updatedNote;
+  }
+
+  async deleteNote(id: string): Promise<boolean> {
+    return this.store.notes.delete(id);
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return Array.from(this.store.tasks.values());
+  }
+
+  async getTask(id: string): Promise<Task | null> {
+    return this.store.tasks.get(id) || null;
+  }
+
+  async createTask(task: Task): Promise<Task> {
+    this.store.tasks.set(task.id, task);
+    return task;
+  }
+
+  async updateTask(id: string, task: Partial<Task>): Promise<Task | null> {
+    const existingTask = this.store.tasks.get(id);
+    if (!existingTask) return null;
+
+    const updatedTask = { ...existingTask, ...task };
+    this.store.tasks.set(id, updatedTask);
+    return updatedTask;
+  }
+
+  async deleteTask(id: string): Promise<boolean> {
+    return this.store.tasks.delete(id);
+  }
+}
+
+export const memoryStorage = new MemoryStorage();
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
@@ -13,8 +82,9 @@ export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   private userPreferences: Map<number, UserPreferences>;
   private chatMessages: Map<number, ChatMessage>;
-  private memoryUsageData: MemoryUsage;
-  private emotionalMetadataMap: Map<number, EmotionalMetadata>;
+  private emotionalMetadata: Map<number, EmotionalMetadata>;
+  private memoryUsage: MemoryUsage | null;
+  private memories: Map<number, Memory>;
   private currentUserId: number;
   private currentNoteId: number;
   private currentTaskId: number;
@@ -28,21 +98,15 @@ export class MemStorage implements IStorage {
     this.tasks = new Map();
     this.userPreferences = new Map();
     this.chatMessages = new Map();
-    this.emotionalMetadataMap = new Map();
+    this.emotionalMetadata = new Map();
+    this.memoryUsage = null;
+    this.memories = new Map();
     this.currentUserId = 1;
     this.currentNoteId = 1;
     this.currentTaskId = 1;
     this.currentPrefsId = 1;
     this.currentMessageId = 1;
     this.currentEmotionalId = 1;
-    this.memoryUsageData = {
-      id: 1,
-      totalMemories: 0,
-      monthlyRetrievals: 0,
-      lastRetrievalReset: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
 
     // Create two dummy users for testing
     const user1: User = {
@@ -58,7 +122,8 @@ export class MemStorage implements IStorage {
       googleCalendarConnected: false,
       lastCalendarSync: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      emailVerified: null
     };
     
     const user2: User = {
@@ -74,7 +139,8 @@ export class MemStorage implements IStorage {
       googleCalendarConnected: false,
       lastCalendarSync: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      emailVerified: null
     };
     
     this.users.set(1, user1);
@@ -200,7 +266,8 @@ export class MemStorage implements IStorage {
       googleCalendarConnected: false,
       lastCalendarSync: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      emailVerified: null
     };
     this.users.set(id, user);
     return user;
@@ -228,7 +295,8 @@ export class MemStorage implements IStorage {
       googleCalendarConnected: !!(userData.accessToken && userData.refreshToken),
       lastCalendarSync: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      emailVerified: null
     };
     this.users.set(id, user);
     return user;
@@ -365,7 +433,7 @@ export class MemStorage implements IStorage {
   }
 
   async getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]> {
-    return Array.from(this.emotionalMetadataMap.values()).filter(
+    return Array.from(this.emotionalMetadata.values()).filter(
       (metadata) => metadata.userId === userId,
     );
   }
@@ -377,12 +445,12 @@ export class MemStorage implements IStorage {
       ...metadataData,
       createdAt: new Date(),
     };
-    this.emotionalMetadataMap.set(id, metadata);
+    this.emotionalMetadata.set(id, metadata);
     return metadata;
   }
 
   async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
-    return Array.from(this.emotionalMetadataMap.values()).filter(
+    return Array.from(this.emotionalMetadata.values()).filter(
       (metadata) =>
         metadata.userId === userId &&
         metadata.createdAt >= startDate &&
@@ -391,26 +459,124 @@ export class MemStorage implements IStorage {
   }
 
   async getMemoryUsage(): Promise<MemoryUsage | undefined> {
-    return this.memoryUsageData;
+    return this.memoryUsage;
   }
 
   async updateMemoryUsage(totalMemories: number, monthlyRetrievals?: number): Promise<MemoryUsage> {
-    this.memoryUsageData.totalMemories = totalMemories;
-    if (monthlyRetrievals) {
-      this.memoryUsageData.monthlyRetrievals = monthlyRetrievals;
+    if (!this.memoryUsage) {
+      throw new Error("Memory usage data not initialized");
     }
-    this.memoryUsageData.updatedAt = new Date();
-    return this.memoryUsageData;
+    this.memoryUsage.totalMemories = totalMemories;
+    if (monthlyRetrievals) {
+      this.memoryUsage.monthlyRetrievals = monthlyRetrievals;
+    }
+    this.memoryUsage.updatedAt = new Date();
+    return this.memoryUsage;
   }
 
   async incrementRetrievals(): Promise<MemoryUsage> {
-    const now = new Date();
-    if (now.getMonth() !== this.memoryUsageData.lastRetrievalReset.getMonth()) {
-      this.memoryUsageData.monthlyRetrievals = 0;
-      this.memoryUsageData.lastRetrievalReset = now;
+    if (!this.memoryUsage) {
+      throw new Error("Memory usage data not initialized");
     }
-    this.memoryUsageData.monthlyRetrievals++;
-    this.memoryUsageData.updatedAt = new Date();
-    return this.memoryUsageData;
+    const now = new Date();
+    if (now.getMonth() !== this.memoryUsage.lastRetrievalReset.getMonth()) {
+      this.memoryUsage.monthlyRetrievals = 0;
+      this.memoryUsage.lastRetrievalReset = now;
+    }
+    this.memoryUsage.monthlyRetrievals++;
+    this.memoryUsage.updatedAt = new Date();
+    return this.memoryUsage;
+  }
+
+  public async initUsers() {
+    // Create two dummy users for testing
+    const user1: User = {
+      id: 1,
+      email: 'user@example.com',
+      name: "Demo User",
+      password: null,
+      googleId: null,
+      picture: null,
+      accessToken: null,
+      refreshToken: null,
+      tokenExpiry: null,
+      googleCalendarConnected: false,
+      lastCalendarSync: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      emailVerified: null
+    };
+    const user2: User = {
+      id: 2,
+      email: 'test@example.com',
+      name: "Bob Smith",
+      password: null,
+      googleId: null,
+      picture: null,
+      accessToken: null,
+      refreshToken: null,
+      tokenExpiry: null,
+      googleCalendarConnected: false,
+      lastCalendarSync: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      emailVerified: null
+    };
+    this.users.set(1, user1);
+    this.users.set(2, user2);
+  }
+
+  public async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  public async getUserByEmail(email: string): Promise<User | undefined> {
+    for (const user of Array.from(this.users.values())) {
+      if (user.email === email) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  public async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    for (const user of Array.from(this.users.values())) {
+      if (user.googleId === googleId) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  public async createUser(data: Partial<User>): Promise<User> {
+    const id = this.users.size + 1;
+    const user: User = {
+      id,
+      name: data.name || 'New User',
+      email: data.email!,
+      password: data.password || null,
+      googleId: data.googleId || null,
+      picture: data.picture || null,
+      accessToken: data.accessToken || null,
+      refreshToken: data.refreshToken || null,
+      tokenExpiry: data.tokenExpiry || null,
+      googleCalendarConnected: !!(data.accessToken && data.refreshToken),
+      lastCalendarSync: data.lastCalendarSync || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      emailVerified: null
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  public async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (user) {
+      const updatedUser = { ...user, ...data };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
   }
 } 

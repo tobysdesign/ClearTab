@@ -1,5 +1,14 @@
-import DashboardLoader from "@/components/dashboard/dashboard-loader"
+import { DashboardClient } from '@/components/dashboard/dashboard-client'
+import { NotesWidget } from '@/components/widgets/notes-widget'
+import { TasksWidget } from '@/components/widgets/tasks-widget'
 
-export default function DashboardPage() {
-  return <DashboardLoader />
+export default function Home() {
+  return (
+    <main>
+      <DashboardClient 
+        notes={<NotesWidget />}
+        tasks={<TasksWidget searchQuery="" />} 
+      />
+    </main>
+  )
 }

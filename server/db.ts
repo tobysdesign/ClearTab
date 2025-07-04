@@ -1,15 +1,33 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "../shared/schema";
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
+import * as schema from '@/shared/schema'
 
-neonConfig.webSocketConstructor = ws;
+// Use connection string from environment variable
+const connectionString = process.env.DATABASE_URL
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set')
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Create postgres connection with edge compatibility
+const client = postgres(connectionString, { ssl: 'prefer' })
+
+// Create drizzle database instance with schema
+export const db = drizzle(client, { schema })
+
+// Export the client for use in migrations
+export const migrationClient = postgres(connectionString, { max: 1 })
+
+// Run migrations (only used in development/deployment)
+export async function runMigrations() {
+  const { migrate } = await import('drizzle-orm/postgres-js/migrator')
+  try {
+    await migrate(db, { migrationsFolder: './drizzle' })
+    console.log('Migrations completed successfully')
+  } catch (error) {
+    console.error('Failed to run migrations:', error)
+    throw error
+  } finally {
+    await migrationClient.end()
+  }
+}

@@ -1,7 +1,7 @@
 import { Note } from '@/shared/schema'
 
 // Shared mock data store - in a real app this would be a database
-export let MOCK_NOTES: Note[] = [
+export const MOCK_NOTES: Note[] = [
   {
     id: 1,
     userId: 1,

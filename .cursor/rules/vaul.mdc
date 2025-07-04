@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+when using a modal or drawer or popover use the vaul component.

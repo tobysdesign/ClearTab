@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Whenever a new compoent is to be created, first check the style guide @style-guide
+and if already present that should be used. 
+
+If its not in the style guide it should be added, adhering to the theme and mimicing any similar components already present. 

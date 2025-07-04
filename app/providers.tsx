@@ -1,32 +1,35 @@
 'use client'
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ChatProvider } from '@/hooks/use-chat-context'
-import { Toaster } from '@/components/ui/toaster'
-import { useState } from 'react'
 import React from 'react'
-import { SessionProvider } from 'next-auth/react'
+import ChatOverlay from '@/components/ai/chat-overlay'
+import QueryProvider from '@/app/query-provider'
+import ClientProviders from './client-providers'
+import type { Session } from 'next-auth'
+import { usePathname } from 'next/navigation'
+import Loading from './loading'
 
-export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 60 * 1000,
-      },
-    },
-  }))
+export default function Providers({ 
+    children,
+    session 
+}: { 
+    children: React.ReactNode,
+    session: Session | null
+}) {
+  const pathname = usePathname()
+  const isAuthPage = pathname === '/login'
 
   return (
-    <SessionProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ChatProvider>
-            <Toaster />
-            {children}
-          </ChatProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </SessionProvider>
+    <QueryProvider>
+        <ClientProviders session={session}>
+            <TooltipProvider>
+                <ChatProvider>
+                    {children}
+            {!isAuthPage && <ChatOverlay />}
+                </ChatProvider>
+            </TooltipProvider>
+        </ClientProviders>
+    </QueryProvider>
   )
 }

@@ -1,11 +1,270 @@
 'use client'
 
-import { ResizableBentoGrid } from "./resizable-bento-grid";
+import { useEffect, useRef, useState, Suspense, useCallback } from 'react'
+import { motion, PanInfo, useAnimationControls } from 'framer-motion'
+import { cn } from '@/lib/utils'
+import { GripVertical } from 'lucide-react'
+import { DockContent } from '../dashboard/dock-content'
+import { ResizableBentoGrid } from './resizable-bento-grid'
+import { SettingsModal } from '@/components/settings/settings-modal'
+import { PieGuide } from './pie-guide'
+import { type ReactNode } from 'react'
+import Image from 'next/image'
 
-export default function DashboardClient() {
-    return (
-        <div className="h-screen w-full">
-            <ResizableBentoGrid />
+interface DashboardClientProps {
+  notes: ReactNode
+  tasks: ReactNode
+}
+
+interface DropZone {
+  id: 'top' | 'left' | 'right' | 'bottom'
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+function LoadingState() {
+  return (
+    <div className="flex items-center justify-center w-full h-full min-h-screen">
+      <div className="relative w-[90px] h-[50px]">
+        <Image
+          src="/assets/looading.gif"
+          alt="Loading..."
+          fill
+          className="object-contain"
+          priority
+        />
+      </div>
+    </div>
+  )
+}
+
+export function DashboardClient({ notes, tasks }: DashboardClientProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controls = useAnimationControls()
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
+  const [dragOrigin, setDragOrigin] = useState<{ x: number, y: number } | null>(null)
+  
+  const [position, setPosition] = useState<'top' | 'left' | 'right' | 'bottom'>('bottom')
+  const [dropZones, setDropZones] = useState<DropZone[]>([])
+
+  // Sync isDragging state with body class
+  useEffect(() => {
+    if (isDragging) {
+      document.body.classList.add('dragging')
+    } else {
+      document.body.classList.remove('dragging')
+    }
+    return () => {
+      document.body.classList.remove('dragging')
+    }
+  }, [isDragging])
+
+  const isVertical = position === 'left' || position === 'right'
+
+  const calculateDropZones = useCallback(() => {
+    const { innerWidth: windowWidth, innerHeight: windowHeight } = window
+    
+    const horizontalWidth = showSearch ? 320 : 180
+    const horizontalHeight = 52
+    const verticalWidth = 52 
+    const verticalHeight = showSearch ? 220 : 160
+    const EDGE_MARGIN = 20
+
+    const newZones: DropZone[] = [
+      {
+        id: 'top',
+        x: (windowWidth - horizontalWidth) / 2,
+        y: EDGE_MARGIN,
+        width: horizontalWidth,
+        height: horizontalHeight,
+      },
+      {
+        id: 'bottom',
+        x: (windowWidth - horizontalWidth) / 2,
+        y: windowHeight - horizontalHeight - EDGE_MARGIN,
+        width: horizontalWidth,
+        height: horizontalHeight,
+      },
+      {
+        id: 'left',
+        x: EDGE_MARGIN,
+        y: (windowHeight - verticalHeight) / 2,
+        width: verticalWidth,
+        height: verticalHeight,
+      },
+      {
+        id: 'right',
+        x: windowWidth - verticalWidth - EDGE_MARGIN,
+        y: (windowHeight - verticalHeight) / 2,
+        width: verticalWidth,
+        height: verticalHeight,
+      },
+    ]
+    setDropZones(newZones)
+  }, [showSearch])
+
+  const currentZone = dropZones.find(zone => zone.id === position)
+
+  useEffect(() => {
+    calculateDropZones()
+    window.addEventListener('resize', calculateDropZones)
+    return () => window.removeEventListener('resize', calculateDropZones)
+  }, [calculateDropZones])
+
+  useEffect(() => {
+    if (currentZone) {
+      controls.start({
+        x: currentZone.x,
+        y: currentZone.y,
+        width: currentZone.width,
+        height: currentZone.height,
+      }, { type: 'spring', stiffness: 500, damping: 40 })
+    }
+  }, [currentZone, controls])
+  
+
+  const handleDragStart = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(true)
+    if (currentZone) {
+      setDragOrigin({
+        x: currentZone.x + currentZone.width / 2,
+        y: currentZone.y + currentZone.height / 2,
+      })
+    }
+  }
+
+  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    let closestZone: DropZone | null = null
+    let minDistance = Infinity
+
+    const validZones = dropZones.filter(z => z.id !== position);
+
+    for (const zone of validZones) {
+      const zoneCenterX = zone.x + zone.width / 2
+      const zoneCenterY = zone.y + zone.height / 2
+      const distance = Math.sqrt(
+        Math.pow(info.point.x - zoneCenterX, 2) + Math.pow(info.point.y - zoneCenterY, 2),
+      )
+
+      if (distance < minDistance) {
+        minDistance = distance
+        closestZone = zone
+      }
+    }
+    
+    if (closestZone && minDistance < 600) {
+      setNearestZoneId(closestZone.id);
+    } else {
+      setNearestZoneId(null);
+    }
+  }
+
+  const handleDragEnd = () => {
+    setIsDragging(false)
+    if (nearestZoneId) {
+      setPosition(nearestZoneId)
+    } else if (currentZone) {
+        // Snap back
+        controls.start({
+            x: currentZone.x,
+            y: currentZone.y,
+            width: currentZone.width,
+            height: currentZone.height,
+        }, { type: 'spring', stiffness: 500, damping: 40 })
+    }
+    setNearestZoneId(null)
+    setDragOrigin(null)
+  }
+
+  if (!currentZone) {
+    return <LoadingState />
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative h-screen w-screen overflow-hidden bg-background"
+    >
+      <SettingsModal 
+        open={showSettings} 
+        onOpenChange={setShowSettings} 
+      />
+      <PieGuide 
+        isDragging={isDragging} 
+        hoveredSlice={nearestZoneId} 
+        position={dragOrigin} 
+        originPosition={position} 
+      />
+      
+      <div className="absolute inset-0">
+        <Suspense fallback={<LoadingState />}>
+          <ResizableBentoGrid notes={notes} tasks={tasks} searchQuery={searchQuery} dockPosition={position} />
+        </Suspense>
+      </div>
+      
+      {isDragging && dropZones.map(zone => {
+        if (zone.id === position) return null; // Don't show the origin zone
+        return (
+          <div
+            key={zone.id}
+            className={cn(
+              'absolute border-2 border-dashed rounded-lg transition-colors duration-200',
+              nearestZoneId === zone.id ? 'border-emerald-500 bg-emerald-500/20' : 'border-muted bg-transparent'
+            )}
+            style={{
+              left: zone.x,
+              top: zone.y,
+              width: zone.width,
+              height: zone.height,
+            }}
+          />
+        )
+      })}
+
+      <motion.div
+        drag
+        dragConstraints={containerRef}
+        onDragStart={handleDragStart}
+        onDrag={handleDrag}
+        onDragEnd={handleDragEnd}
+        dragMomentum={false}
+        className="select-none touch-none absolute z-50 rounded-xl bg-black/40 border border-white/20 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-black/30"
+        style={{
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
+        }}
+        animate={controls}
+      >
+        <div className={cn(
+          "flex h-full w-full p-2",
+          isVertical ? "flex-col items-center justify-center gap-2" : "items-center gap-2"
+        )}>
+            <DockContent
+              showSearch={showSearch}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              showSettings={showSettings}
+              setShowSettings={setShowSettings}
+              setShowSearch={setShowSearch}
+              isVertical={isVertical}
+            />
+            
+            <div
+              className="rounded-lg p-2 hover:bg-white/20 cursor-grab active:cursor-grabbing transition-all duration-200 text-white/60 hover:text-white/80"
+              onPointerDown={(e) => {
+                const target = e.currentTarget as HTMLDivElement
+                target.setPointerCapture(e.pointerId)
+              }}
+            >
+              <GripVertical className="h-4 w-4" />
+            </div>
         </div>
-    )
-} 
+      </motion.div>
+    </div>
+  )
+}
