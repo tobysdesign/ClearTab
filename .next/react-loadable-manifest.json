@@ -1,8 +1,9 @@
 {
-  "components/widgets/edit-task-form.tsx -> @/components/ui/editor": {
-    "id": "components/widgets/edit-task-form.tsx -> @/components/ui/editor",
+  "components/ui/editor.tsx -> @/components/ui/block-note-editor": {
+    "id": "components/ui/editor.tsx -> @/components/ui/block-note-editor",
     "files": [
-      "static/chunks/_app-pages-browser_components_ui_editor_tsx.js"
+      "static/css/_app-pages-browser_components_ui_block-note-editor_tsx.css",
+      "static/chunks/_app-pages-browser_components_ui_block-note-editor_tsx.js"
     ]
   },
   "components/widgets/weather-widget-alt.tsx -> @/public/animations/ClearSun.json": {

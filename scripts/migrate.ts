@@ -1,27 +1,26 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
+import * as schema from '../shared/schema'
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set in environment variables.')
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set')
 }
 
-const main = async () => {
-  try {
-    console.log('Preparing migration client...')
-    const migrationClient = postgres(process.env.DATABASE_URL!, { max: 1 })
-    const db = drizzle(migrationClient)
+const client = postgres(connectionString, { ssl: 'prefer' })
 
-    console.log('Running migrations...')
-    await migrate(db, { migrationsFolder: 'migrations' })
+const db = drizzle(client, { schema })
 
-    console.log('Migrations applied successfully!')
-    await migrationClient.end()
-    process.exit(0)
-  } catch (error) {
-    console.error('Error running migrations:', error)
-    process.exit(1)
-  }
+async function main() {
+  console.log("Running migrations")
+  await migrate(db, { migrationsFolder: './drizzle' })
+  console.log("Migrations finished")
+  process.exit(0)
 }
 
-main() 
+main().catch((err) => {
+  console.error("Migration failed", err)
+  process.exit(1)
+}) 

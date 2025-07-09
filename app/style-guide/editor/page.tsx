@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import type { YooptaContentValue } from '@yoopta/editor'
+import type { YooptaContentValue } from '@/types/yoopta'
+import { EMPTY_YOO_CONTENT } from '@/types/yoopta'
 import { Card } from '@/components/ui/card'
 import YooptaEditor, { createYooptaEditor } from '@yoopta/editor'
 import {
@@ -16,7 +17,6 @@ import Code from '@yoopta/code'
 import Link from '@yoopta/link'
 import { HeadingOne, HeadingTwo, HeadingThree } from '@yoopta/headings'
 import { NumberedList, BulletedList, TodoList } from '@yoopta/lists'
-import { EMPTY_CONTENT } from '@/shared/schema'
 
 const plugins = [
   Blockquote,
@@ -32,8 +32,12 @@ const plugins = [
 const marks = [Bold, Italic, Underline, Strike, CodeMark]
 
 export default function EditorStyleGuidePage() {
-  const [value, setValue] = useState<YooptaContentValue>(EMPTY_CONTENT)
+  const [value, setValue] = useState<YooptaContentValue>(EMPTY_YOO_CONTENT)
   const editor = useMemo(() => createYooptaEditor(), [])
+
+  const handleEditorChange = (newValue: YooptaContentValue, options: any) => {
+    setValue(newValue);
+  };
 
   return (
     <div className="p-8 h-screen bg-background text-foreground">
@@ -43,7 +47,7 @@ export default function EditorStyleGuidePage() {
           <YooptaEditor 
             editor={editor}
             value={value} 
-            onChange={setValue} 
+            onChange={handleEditorChange} 
             plugins={plugins}
             marks={marks}
             placeholder="This is the editor style guide."

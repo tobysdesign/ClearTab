@@ -2,11 +2,30 @@ import { Express, Request, Response } from 'express'
 import { createServer, Server } from 'http'
 import { z } from 'zod'
 import { storage } from './storage'
-import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema } from '@/shared/schema'
+import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema, type YooptaContentValue } from '@/shared/schema'
 import OpenAI from 'openai'
 import { mem0Service } from './mem0-service'
-import { googleCalendarService } from './services/google-calendar'
-import type { GoogleCalendarEvent, CalendarSyncStatus } from '../shared/calendar-types'
+import { GoogleCalendarService } from './google-calendar'
+import type { CalendarSyncStatus } from '../shared/calendar-types'
+
+// Utility to convert string to YooptaContentValue
+function stringToYoopta(text: string): YooptaContentValue {
+  const blocks = text.split('\n').map((line, index) => ({
+    id: `block-${index}`,
+    type: 'paragraph',
+    children: [{ text: line }],
+    props: { nodeType: 'block' },
+  }))
+
+  return {
+    root: {
+      id: 'root',
+      type: 'paragraph',
+      value: blocks,
+      meta: { order: 0, depth: 0 },
+    },
+  }
+}
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -37,7 +56,7 @@ interface CityWeatherData extends WeatherData {
 
 interface Session {
   isAuthenticated?: boolean
-  userId?: number
+  userId?: string // Changed to string for UUID
   destroy: (callback: (err: Error | null) => void) => void
 }
 
@@ -46,18 +65,6 @@ interface GoogleUser {
   email: string
   name: string
   picture: string
-}
-
-interface GoogleCalendarEvent {
-  id: string
-  title: string
-  start: string
-  end: string
-  description?: string
-  location?: string
-  allDay?: boolean
-  color?: string
-  source: 'google' | 'local'
 }
 
 interface CalendarInterval {
@@ -82,7 +89,7 @@ interface CalendarEvent {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  const DEFAULT_USER_ID = 1
+  const DEFAULT_USER_ID = "00000000-0000-0000-0000-000000000000"; // Changed to a placeholder UUID
 
   // Authentication endpoints
   app.post("/api/login", async (req, res) => {
@@ -170,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         name: user.name,
         email: user.email,
-        picture: user.picture
+        picture: user.image // Corrected from user.picture to user.image
       })
     } catch (error) {
       console.error("Error fetching user:", error)
@@ -179,117 +186,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
   })
 
   // Weather API using Tomorrow.io
-  app.get("/api/weather", async (req: Request, res: Response) => {
+  app.get("/api/weather", async (req, res) => {
     try {
-      const location = req.query.location as string || "San Francisco,CA"
-      const apiKey = process.env.TOMORROW_IO_API_KEY
-      
-      if (!apiKey) {
-        return res.status(500).json({ 
-          error: "Weather API key not configured",
-          message: "Please provide a valid Tomorrow.io API key"
-        })
-      }
-      
-      // Use a default coordinate for San Francisco if no specific location provided
-      const lat = 37.7749
-      const lon = -122.4194
-      
+      const userPreferences = await storage.getUserPreferences(DEFAULT_USER_ID);
+      const location = userPreferences?.location || "San Francisco, CA";
+
       const response = await fetch(
-        `https://api.tomorrow.io/v4/weather/realtime?location=${lat},${lon}&apikey=${apiKey}&units=metric`
-      )
+        `https://api.tomorrow.io/v4/weather/forecast?location=${encodeURIComponent(location)}&units=imperial&timesteps=1h&apikey=${process.env.TOMORROW_API_KEY}`
+      );
       
       if (!response.ok) {
-        const errorData = await response.text()
-        throw new Error(`Weather API error: ${response.status} - ${errorData}`)
+        throw new Error(`Error fetching weather: ${response.statusText}`);
       }
       
-      const data = await response.json()
-      const weather = data.data.values
-      
-      res.json({
-        temperature: Math.round(weather.temperature),
-        description: getWeatherDescription(weather.weatherCode),
-        high: Math.round(weather.temperatureMax || weather.temperature + 5),
-        low: Math.round(weather.temperatureMin || weather.temperature - 5),
-        humidity: Math.round(weather.humidity),
-        rainChance: Math.round(weather.precipitationProbability || 0),
-        location: "San Francisco, CA"
-      })
-    } catch (error) {
-      console.error("Weather API error:", error)
-      res.status(500).json({ 
-        error: "Failed to fetch weather data",
-        message: error instanceof Error ? error.message : "Unknown error"
-      })
-    }
-  })
+      const data = await response.json();
 
-  // Multi-city weather API
-  app.get("/api/weather/cities", async (req: Request, res: Response) => {
+      const weatherData: WeatherData = {
+        temperature: data.timelines.hourly[0].values.temperature,
+        description: getWeatherDescription(data.timelines.hourly[0].values.weatherCode),
+        high: data.timelines.daily[0].values.temperatureMax,
+        low: data.timelines.daily[0].values.temperatureMin,
+        humidity: data.timelines.hourly[0].values.humidity,
+        rainChance: data.timelines.hourly[0].values.precipitationProbability,
+        location,
+      };
+
+      const forecast: WeatherForecast[] = data.timelines.hourly.slice(0, 24).map((hour: any) => ({
+        time: new Date(hour.time).getTime(),
+        temperature: hour.values.temperature,
+        rainChance: hour.values.precipitationProbability,
+        weatherCode: hour.values.weatherCode,
+      }));
+      
+      res.json({ ...weatherData, forecast });
+
+    } catch (error) {
+      console.error("Weather API error:", error);
+      res.status(500).json({ error: "Failed to fetch weather data" });
+    }
+  });
+
+  app.post("/api/weather/multi-city", async (req, res) => {
     try {
-      const apiKey = process.env.TOMORROW_IO_API_KEY;
-      
-      if (!apiKey) {
-        return res.status(500).json({ 
-          error: "Weather API key not configured",
-          message: "Please provide a valid Tomorrow.io API key"
-        });
+      const { cities } = req.body;
+      if (!Array.isArray(cities) || cities.length === 0) {
+        return res.status(400).json({ error: "Cities array is required" });
       }
-      
-      const cities = [
-        { name: "San Francisco", lat: 37.7749, lon: -122.4194 },
-        { name: "New York", lat: 40.7128, lon: -74.0060 },
-        { name: "London", lat: 51.5074, lon: -0.1278 }
-      ];
-      
-      const weatherPromises = cities.map(async (city) => {
-        try {
-          // Get current weather and 12-hour forecast
-          const [currentResponse, forecastResponse] = await Promise.all([
-            fetch(`https://api.tomorrow.io/v4/weather/realtime?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric`),
-            fetch(`https://api.tomorrow.io/v4/weather/forecast?location=${city.lat},${city.lon}&apikey=${apiKey}&units=metric&timesteps=1h`)
-          ]);
-          
-          if (!currentResponse.ok || !forecastResponse.ok) {
-            throw new Error(`Weather API error for ${city.name}`);
-          }
-          
-          const [currentData, forecastData] = await Promise.all([
-            currentResponse.json(),
-            forecastResponse.json()
-          ]);
-          
-          const weather = currentData.data.values;
-          const forecast = forecastData.data?.timelines?.[0]?.intervals?.slice(1, 13) || [];
-          
-          return {
-            city: city.name,
-            temperature: Math.round(weather.temperature),
-            description: getWeatherDescription(weather.weatherCode),
-            rainChance: Math.round(weather.precipitationProbability || 0),
-            high: Math.round(weather.temperatureMax || weather.temperature + 5),
-            low: Math.round(weather.temperatureMin || weather.temperature - 5),
-            forecast: forecast.map((interval: CalendarInterval) => ({
-              time: new Date(interval.startTime).getHours(),
-              temperature: Math.round(interval.values.temperature),
-              rainChance: Math.round(interval.values.precipitationProbability || 0),
-              weatherCode: interval.values.weatherCode
-            }))
-          };
-        } catch (error) {
-          console.error(`Weather API error for ${city.name}:`, error);
-          return null;
+
+      const weatherPromises = cities.map(async (city: string) => {
+        const response = await fetch(
+          `https://api.tomorrow.io/v4/weather/forecast?location=${encodeURIComponent(city)}&units=imperial&timesteps=1h&apikey=${process.env.TOMORROW_API_KEY}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`Error fetching weather for ${city}: ${response.statusText}`);
         }
+        
+        const data = await response.json();
+
+        const weatherData: CityWeatherData = {
+          city,
+          temperature: data.timelines.hourly[0].values.temperature,
+          description: getWeatherDescription(data.timelines.hourly[0].values.weatherCode),
+          high: data.timelines.daily[0].values.temperatureMax,
+          low: data.timelines.daily[0].values.temperatureMin,
+          humidity: data.timelines.hourly[0].values.humidity,
+          rainChance: data.timelines.hourly[0].values.precipitationProbability,
+          location: city,
+          forecast: data.timelines.hourly.slice(0, 24).map((hour: any) => ({
+            time: new Date(hour.time).getTime(),
+            temperature: hour.values.temperature,
+            rainChance: hour.values.precipitationProbability,
+            weatherCode: hour.values.weatherCode,
+          })),
+        };
+        return weatherData;
       });
-      
-      const weatherData = await Promise.all(weatherPromises);
-      const validWeatherData = weatherData.filter((data): data is CityWeatherData => data !== null);
-      
-      res.json(validWeatherData);
+
+      const allWeatherData = await Promise.all(weatherPromises);
+      res.json(allWeatherData);
+
     } catch (error) {
       console.error("Multi-city weather API error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to fetch multi-city weather data",
         message: error instanceof Error ? error.message : "Unknown error"
       });
@@ -352,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/notes/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const noteData = insertNoteSchema.partial().parse(req.body);
       const note = await storage.updateNote(id, noteData);
       
@@ -368,7 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/notes/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const noteData = insertNoteSchema.partial().parse(req.body);
       const note = await storage.updateNote(id, noteData);
       
@@ -384,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/notes/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const deleted = await storage.deleteNote(id);
       
       if (!deleted) {
@@ -425,7 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/tasks/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const taskData = insertTaskSchema.partial().parse(req.body);
       const task = await storage.updateTask(id, taskData);
       
@@ -441,7 +420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/tasks/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const taskData = insertTaskSchema.partial().parse(req.body);
       const task = await storage.updateTask(id, taskData);
       
@@ -457,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/tasks/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id; // Changed to string
       const deleted = await storage.deleteTask(id);
       
       if (!deleted) {
@@ -540,63 +519,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user preferences for context
       const prefs = await storage.getUserPreferences(DEFAULT_USER_ID);
-      const agentName = prefs?.agentName || "t0by";
+      const agentName = prefs?.agentName || "Alex";
       const userName = prefs?.userName || "User";
-      const isInitialized = prefs?.initialized || false;
 
-      // Get recent chat history for context
+      // Fetch recent chat history for context
       const recentMessages = await storage.getChatMessagesByUserId(DEFAULT_USER_ID);
-      const contextMessages = recentMessages.slice(-10).map(msg => ({
-        role: msg.role as "user" | "assistant",
-        content: msg.message
-      }));
+      const contextMessages = recentMessages.map(msg => ({ role: msg.role as "user" | "assistant", content: msg.message }));
 
-      // Retrieve relevant memories if using memory
-      let memoryContext = "";
-      if (useMemory) {
-        try {
-          const userId = DEFAULT_USER_ID.toString();
-          const relevantMemories = await mem0Service.searchMemories(message, userId);
-          if (relevantMemories && relevantMemories.length > 0) {
-            memoryContext = "\n\nRelevant memories:\n" + 
-              relevantMemories.map((mem: any) => `- ${mem.memory}`).join("\n");
-          }
-        } catch (error) {
-          console.error("Memory retrieval error:", error);
-          // Continue without memory if service fails
-        }
-      }
-
-      // Handle setup flow for uninitialized users
-      if (!isInitialized) {
-        const setupSystemPrompt = `You are helping a user set up their AI assistant. The user needs to provide two names:
-        1. What they want to be called (their name)
-        2. What they want to call their AI assistant
-        
-        Analyze their message and extract these names if provided. If both names are found, respond with JSON:
-        {
-          "setupComplete": true,
-          "userName": "extracted user name",
-          "agentName": "extracted agent name",
-          "message": "Welcome message using both names"
-        }
-        
-        If names are missing or unclear, respond with JSON:
-        {
-          "setupComplete": false,
-          "message": "Ask for the missing information in a friendly way"
-        }`;
-
-        const setupCompletion = await openai.chat.completions.create({
+      // If it's a first-time user, guide through onboarding
+      if (!prefs?.initialized) {
+        const completion = await openai.chat.completions.create({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: setupSystemPrompt },
+            { role: "system", content: `You are a friendly AI assistant helping a new user set up their profile. Guide them through naming you, then asking their name, then explaining notes/tasks via hashtags, and finally offering setup modules. The response should be JSON in the format { "message": "Your message", "setupComplete": boolean, "userName"?: string, "agentName"?: string }. Keep messages concise.` },
+            ...contextMessages,
             { role: "user", content: message }
           ],
+          max_tokens: 200,
           response_format: { type: "json_object" }
         });
 
-        const content = setupCompletion.choices[0].message.content;
+        const content = completion.choices[0].message.content;
         if (!content) {
           throw new Error("No response from AI");
         }
@@ -637,7 +580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const noteContent = message.replace('#note', '').replace('#task', '').trim();
           const note = await storage.createNote({
             title: noteContent.substring(0, 50) || "Untitled Note",
-            content: noteContent,
+            content: stringToYoopta(noteContent), // Ensure content is YooptaContentValue
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'note', data: note });
@@ -727,8 +670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const task = await storage.createTask({
             title: responseData.actionData.title || "New Task",
             description: responseData.actionData.description || "",
-            priority: responseData.actionData.priority || "low",
-            dueDate: responseData.actionData.dueDate ? new Date(responseData.actionData.dueDate) : null,
+            priority: "low",
             userId: DEFAULT_USER_ID
           });
           responseData.task = task;
@@ -742,7 +684,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const note = await storage.createNote({
             title: responseData.actionData.title || "New Note",
-            content: responseData.actionData.content || "",
+            content: stringToYoopta(responseData.actionData.content || ""), // Convert string to YooptaContentValue
             userId: DEFAULT_USER_ID
           });
           responseData.note = note;
@@ -797,11 +739,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(responseData);
     } catch (error) {
-      console.error("Chat API error:", error);
-      res.status(500).json({ 
-        error: "Failed to process chat message",
-        message: error instanceof Error ? error.message : "Unknown error"
-      });
+      console.error("AI chat endpoint error:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
@@ -900,7 +839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Google Calendar authentication routes
   app.get("/api/auth/google", (req, res) => {
-    const authUrl = googleCalendarService.getAuthUrl();
+    const authUrl = GoogleCalendarService.getAuthUrl();
     res.redirect(authUrl);
   });
 
@@ -912,10 +851,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Exchange code for tokens
-      const { accessToken, refreshToken } = await googleCalendarService.exchangeCodeForTokens(code);
+      const { accessToken, refreshToken } = await GoogleCalendarService.exchangeCodeForTokens(code);
       
       // Get user info from Google
-      const googleUser = await googleCalendarService.getUserInfo(accessToken);
+      const googleUser = await GoogleCalendarService.getUserInfo(accessToken);
       
       // Check if user exists by Google ID or email
       let user = await storage.getUserByGoogleId(googleUser.id);
@@ -995,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user?.googleCalendarConnected && user.accessToken) {
         try {
           // Fetch Google Calendar events
-          const googleEvents = await googleCalendarService.getCalendarEvents(
+          const googleEvents = await GoogleCalendarService.getCalendarEvents(
             user.accessToken
           );
           events = googleEvents;

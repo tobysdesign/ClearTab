@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/card'
 import Image from 'next/image'
 
 interface WidgetLoaderProps {
@@ -8,17 +7,17 @@ interface WidgetLoaderProps {
 
 export function WidgetLoader({ className = '', minHeight = 'min-h-[16rem]' }: WidgetLoaderProps) {
   return (
-    <Card className={`dashCard flex items-center justify-center ${minHeight} ${className} animate-pulse`}>
-      <div className="relative w-[90px] h-[50px]">
+    <div className={`flex items-center justify-center ${className} animate-pulse`}>
+      <div className="relative w-[60px] h-[50px]">
         <Image
-          src="/assets/looading.gif"
+          src="/assets/loading.gif"
           alt="Loading..."
           fill
           className="object-contain"
-          sizes="100vw"
+          sizes="60px"
           priority
         />
       </div>
-    </Card>
+    </div>
   )
 } 

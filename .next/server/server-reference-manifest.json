@@ -1,13 +1,13 @@
 {
   "node": {
-    "70275f39bee403fe6654bfb2e12b7a30eaf7d938ec": {
+    "7032f16297ae99ba380a7747145ac41534b0096fc7": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09155f509e6eb93ecc0995dbdee10f3765f3db69%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f91862b9e0ff2c59593155ed40802aa2009d739f1%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227032f16297ae99ba380a7747145ac41534b0096fc7%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         },
         "app/_not-found/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227032f16297ae99ba380a7747145ac41534b0096fc7%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
@@ -15,52 +15,8 @@
         "app/page": "action-browser",
         "app/_not-found/page": "action-browser"
       }
-    },
-    "7f09155f509e6eb93ecc0995dbdee10f3765f3db69": {
-      "workers": {
-        "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09155f509e6eb93ecc0995dbdee10f3765f3db69%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f91862b9e0ff2c59593155ed40802aa2009d739f1%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
-    "7f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e": {
-      "workers": {
-        "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09155f509e6eb93ecc0995dbdee10f3765f3db69%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f91862b9e0ff2c59593155ed40802aa2009d739f1%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
-    "7f91862b9e0ff2c59593155ed40802aa2009d739f1": {
-      "workers": {
-        "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09155f509e6eb93ecc0995dbdee10f3765f3db69%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f91862b9e0ff2c59593155ed40802aa2009d739f1%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
-    "7fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb": {
-      "workers": {
-        "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%2270275f39bee403fe6654bfb2e12b7a30eaf7d938ec%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09155f509e6eb93ecc0995dbdee10f3765f3db69%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227f4c84d4d5f1b6e93dce15ee55142a2b36eacdd59e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f91862b9e0ff2c59593155ed40802aa2009d739f1%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fde91dbb9c61e68e75ce9d89a9c65cbf0351314bb%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
     }
   },
   "edge": {},
-  "encryptionKey": "MGODyNNc1PNzkCTxGOVeguLJIi2/D/cMOyXe4jiuidc="
+  "encryptionKey": "Yz72rFzLr6FqpsWtRFPntKacHwiB4AYBWY3f2gq/4Pk="
 }

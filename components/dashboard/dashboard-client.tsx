@@ -29,7 +29,7 @@ function LoadingState() {
     <div className="flex items-center justify-center w-full h-full min-h-screen">
       <div className="relative w-[90px] h-[50px]">
         <Image
-          src="/assets/looading.gif"
+          src="/assets/loading.gif"
           alt="Loading..."
           fill
           className="object-contain"
@@ -52,6 +52,24 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   
   const [position, setPosition] = useState<'top' | 'left' | 'right' | 'bottom'>('bottom')
   const [dropZones, setDropZones] = useState<DropZone[]>([])
+
+  const initialPosition = 'bottom' as DropZone['id']
+  const initialHorizontalWidth = false ? 320 : 180
+  const initialHorizontalHeight = 52
+  const initialVerticalWidth = 52 
+  const initialVerticalHeight = false ? 220 : 160
+  const EDGE_MARGIN = 20
+
+  // Calculate initial currentZoneState based on a default position
+  const initialCurrentZoneState = typeof window !== 'undefined' ? {
+    id: initialPosition,
+    x: (window.innerWidth - initialHorizontalWidth) / 2,
+    y: window.innerHeight - initialHorizontalHeight - EDGE_MARGIN,
+    width: initialHorizontalWidth,
+    height: initialHorizontalHeight,
+  } : null;
+
+  const [currentZoneState, setCurrentZoneState] = useState<DropZone | null>(initialCurrentZoneState);
 
   // Sync isDragging state with body class
   useEffect(() => {
@@ -189,7 +207,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   return (
     <div
       ref={containerRef}
-      className="relative h-screen w-screen overflow-hidden bg-background"
+      className="relative h-screen w-screen bg-background"
     >
       <SettingsModal 
         open={showSettings} 
@@ -208,6 +226,16 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         </Suspense>
       </div>
       
+      {/* <DockContent 
+        isVertical={isVertical} 
+        showSearch={showSearch}
+        setShowSearch={setShowSearch}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+      /> */}
+
       {isDragging && dropZones.map(zone => {
         if (zone.id === position) return null; // Don't show the origin zone
         return (

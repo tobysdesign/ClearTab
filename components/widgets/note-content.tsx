@@ -2,37 +2,18 @@
 
 import type { Note } from '@/shared/schema'
 import { Input } from '@/components/ui/input'
-import type { YooptaContentValue } from '@yoopta/editor'
 import { useEffect, useState, useRef, type ReactNode } from 'react'
-import { useDebouncedCallback } from 'use-debounce'
-import { SimpleEditor as Editor } from '@/components/ui/simple-editor'
+import { Editor } from '@/components/ui/editor'
 
-// Empty content structure that matches Yoopta's types
-export const EMPTY_CONTENT: YooptaContentValue = {
-  'root': {
-    id: 'root',
-    type: 'paragraph',
-    value: [{
-      id: 'initial',
-        type: 'paragraph',
-        children: [{ text: '' }],
-        props: {
-          nodeType: 'block',
-        },
-    }],
-    meta: {
-      order: 0,
-      depth: 0,
-    },
-  },
-}
+// Define empty content constant for compatibility
+const EMPTY_CONTENT = ''
 
 interface NoteContentProps {
   note: Note | null
   children?: ReactNode
   isNewNote?: boolean
   onTitleChange?: (title: string) => void
-  onContentChange?: (content: YooptaContentValue) => void
+  onContentChange?: (content: any, options: any) => void
 }
 
 export function NoteContent({
@@ -43,39 +24,78 @@ export function NoteContent({
   onContentChange,
 }: NoteContentProps) {
   const [currentTitle, setCurrentTitle] = useState(note?.title || '')
-  const [currentContent, setCurrentContent] = useState<YooptaContentValue>(note?.content as YooptaContentValue || EMPTY_CONTENT)
+  const [currentContent, setCurrentContent] = useState<string>(extractTextContent(note?.content) || EMPTY_CONTENT)
   const titleInputRef = useRef<HTMLInputElement>(null)
 
-  const debouncedTitleUpdate = useDebouncedCallback((title: string) => {
-    onTitleChange?.(title)
-  }, 1000)
+  // Extract text content from structured content
+  function extractTextContent(content: any): string {
+    if (!content) return '';
+    
+    try {
+      // If it's already a string, return it
+      if (typeof content === 'string') return content;
+      
+      // If it's an object, try to extract text
+      if (typeof content === 'object') {
+        // For Yoopta-style content objects
+        if (content['paragraph-1'] && content['paragraph-1'].value) {
+          let extractedText = '';
+          
+          Object.values(content).forEach((block: any) => {
+            if (block.value && Array.isArray(block.value)) {
+              block.value.forEach((element: any) => {
+                if (element.children) {
+                  element.children.forEach((child: any) => {
+                    extractedText += typeof child === 'string' ? child : (child.text || '');
+                  });
+                }
+              });
+              extractedText += '\n';
+            }
+          });
+          
+          return extractedText;
+        }
+      }
+      
+      // Fallback to string representation
+      return String(content);
+    } catch (error) {
+      console.error("Error extracting text content:", error);
+      return '';
+    }
+  }
 
-  const debouncedContentUpdate = useDebouncedCallback((content: YooptaContentValue) => {
-    onContentChange?.(content)
-  }, 1000)
-
+  // Update title and content when note changes
   useEffect(() => {
     if (note) {
       setCurrentTitle(note.title)
-      setCurrentContent(note.content as YooptaContentValue || EMPTY_CONTENT)
+      setCurrentContent(extractTextContent(note.content) || EMPTY_CONTENT)
     }
   }, [note])
   
+  // Focus title input for new notes
   useEffect(() => {
     if (isNewNote && titleInputRef.current) {
       titleInputRef.current.focus()
     }
   }, [isNewNote])
 
+  // Handle title changes
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value
     setCurrentTitle(newTitle)
-    debouncedTitleUpdate(newTitle)
+    if (onTitleChange) {
+      onTitleChange(newTitle)
+    }
   }
 
-  const handleContentChange = (newContent: YooptaContentValue) => {
+  // Handle content changes
+  const handleContentChange = (newContent: string) => {
     setCurrentContent(newContent)
-    debouncedContentUpdate(newContent)
+    if (onContentChange) {
+      onContentChange(newContent, {})
+    }
   }
 
   if (!note) {
@@ -89,22 +109,26 @@ export function NoteContent({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-4 px-6 py-4">
+        {isNewNote ? (
           <Input
-          ref={titleInputRef}
-          type="text"
-          placeholder="Untitled Note"
-          value={currentTitle}
-          onChange={handleTitleChange}
-          className="text-lg font-medium bg-transparent border-none shadow-none focus-visible:ring-0 px-0"
+            ref={titleInputRef}
+            type="text"
+            placeholder="Untitled Note"
+            value={currentTitle}
+            onChange={handleTitleChange}
+            className="border-0 bg-transparent p-0 text-xl font-bold !outline-none !ring-0 placeholder:text-muted-foreground/50"
           />
+        ) : (
+          <h2 className="text-xl font-bold mb-2 p-2">{currentTitle}</h2>
+        )}
         {children}
       </div>
-      <div className="flex-1 min-h-0">
+      <div className="flex-grow overflow-y-auto px-2">
         <Editor
-          key={note.id?.toString()}
           value={currentContent}
           onChange={handleContentChange}
-          placeholder="Start writing..."
+          editable={isNewNote || !!note}
+          className="h-full"
         />
       </div>
     </div>

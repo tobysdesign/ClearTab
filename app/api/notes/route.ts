@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { notes, type Note } from '@/shared/schema'
+import { notes, type Note, EMPTY_CONTENT } from '@/shared/schema'
 import { db } from '@/server/db'
 import { desc, eq } from 'drizzle-orm'
 import { ActionResponse } from '@/types/actions'
@@ -9,15 +9,7 @@ import { authOptions } from '../auth/[...nextauth]/route'
 
 const postBodySchema = z.object({
   title: z.string().default('Untitled Note'),
-  content: z.any().optional().default({
-    type: 'doc',
-    content: [
-      {
-        type: 'paragraph',
-        content: [{ type: 'text', text: ' ' }],
-      },
-    ],
-  }),
+  content: z.any().optional().default(EMPTY_CONTENT),
 })
 
 export async function GET(): Promise<NextResponse<ActionResponse<Note[]>>> {
@@ -26,6 +18,7 @@ export async function GET(): Promise<NextResponse<ActionResponse<Note[]>>> {
   const userId = session?.user.id;
 
   if (!userId) {
+    console.log("GET /api/notes: User not authenticated");
     return NextResponse.json(
       { success: false, error: 'User not authenticated' },
       { status: 401 }
@@ -34,6 +27,7 @@ export async function GET(): Promise<NextResponse<ActionResponse<Note[]>>> {
 
   try {
     const data = await db.select().from(notes).where(eq(notes.userId, userId)).orderBy(desc(notes.updatedAt))
+    console.log("GET /api/notes: Fetched notes data for userId", userId, data);
     return NextResponse.json({ success: true, data })
   } catch (error) {
     console.error('Failed to fetch notes:', error)

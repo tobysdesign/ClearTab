@@ -1,0 +1,165 @@
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import type { AuthOptions } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { type ActionResponse } from '@/types/actions'
+import { userCalendars, connectedAccounts } from '@/shared/schema'
+import { eq, and } from 'drizzle-orm'
+import { google } from 'googleapis'
+import { db } from '@/server/db'
+
+interface GoogleCalendar {
+  id: string
+  summary: string
+  description?: string
+  backgroundColor?: string
+  accessRole: string
+  primary?: boolean
+  connectedAccountId: string
+}
+
+interface CalendarWithStatus extends GoogleCalendar {
+  isEnabled: boolean
+  isConfigured: boolean
+}
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+)
+
+export async function GET(): Promise<NextResponse<ActionResponse<CalendarWithStatus[]>>> {
+  try {
+    const session = await getServerSession(authOptions as AuthOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Unauthorized' 
+      }, { status: 401 })
+    }
+
+    const userId = session.user.id;
+
+    const accounts = await db
+        .select()
+        .from(connectedAccounts)
+        .where(and(
+            eq(connectedAccounts.userId, userId),
+            eq(connectedAccounts.provider, 'google')
+        ));
+    
+    if (accounts.length === 0) {
+        return NextResponse.json({ success: true, data: [] });
+    }
+    
+    const allGoogleCalendars: GoogleCalendar[] = [];
+
+    for (const account of accounts) {
+        if (!account.accessToken) continue;
+
+        oauth2Client.setCredentials({
+            access_token: account.accessToken,
+            refresh_token: account.refreshToken,
+        });
+
+        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+        const response = await calendar.calendarList.list();
+        
+        const googleCalendars: GoogleCalendar[] = response.data.items?.map(cal => ({
+            id: cal.id || '',
+            summary: cal.summary || 'Untitled Calendar',
+            description: cal.description || '',
+            backgroundColor: cal.backgroundColor || '',
+            accessRole: cal.accessRole || 'reader',
+            primary: cal.primary || false,
+            connectedAccountId: account.id
+        })) || [];
+
+        allGoogleCalendars.push(...googleCalendars);
+    }
+
+    const savedCalendars = await db
+      .select()
+      .from(userCalendars)
+      .where(eq(userCalendars.userId, userId))
+
+    const calendarsWithStatus: CalendarWithStatus[] = allGoogleCalendars.map(gcal => {
+      const saved = savedCalendars.find(sc => sc.calendarId === gcal.id && sc.connectedAccountId === gcal.connectedAccountId);
+      return {
+        ...gcal,
+        isEnabled: saved?.isEnabled ?? (gcal.primary || false),
+        isConfigured: !!saved,
+      }
+    })
+
+    return NextResponse.json({ 
+      success: true, 
+      data: calendarsWithStatus 
+    })
+  } catch (error) {
+    console.error('Calendars API error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to fetch calendars' 
+    }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request): Promise<NextResponse<ActionResponse<string>>> {
+  try {
+    const session = await getServerSession(authOptions as AuthOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Unauthorized' 
+      }, { status: 401 })
+    }
+    const userId = session.user.id;
+
+    const body = await request.json()
+    const { calendarId, name, isEnabled, color, accessRole, connectedAccountId } = body
+
+    if (!calendarId || !name || !connectedAccountId) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Calendar ID, name, and connectedAccountId are required' 
+      }, { status: 400 })
+    }
+
+    await db
+      .insert(userCalendars)
+      .values({
+        userId,
+        connectedAccountId,
+        calendarId,
+        name,
+        color: color || null,
+        isEnabled: isEnabled ?? true,
+        accessRole: accessRole || 'reader',
+      })
+      .onConflictDoUpdate({
+        target: [userCalendars.connectedAccountId, userCalendars.calendarId],
+        set: {
+          name,
+          color: color || null,
+          isEnabled: isEnabled ?? true,
+          accessRole: accessRole || 'reader',
+          updatedAt: new Date(),
+        },
+      })
+
+    return NextResponse.json({ 
+      success: true, 
+      data: 'Calendar preference saved' 
+    })
+  } catch (error) {
+    console.error('Save calendar API error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to save calendar preference' 
+    }, { status: 500 })
+  }
+} 

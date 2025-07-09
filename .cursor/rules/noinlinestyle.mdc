@@ -1,0 +1,7 @@
+---
+description: Avoid long inline Tailwind class lists in JSX. Define reusable CSS classes with @apply or wrap styles in a reusable component instead.
+globs:
+  - '**/*.tsx'
+  - '**/*.jsx'
+alwaysApply: true
+---

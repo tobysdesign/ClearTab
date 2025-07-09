@@ -3,20 +3,22 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Note } from '@/shared/schema'
 import { NoteList } from './note-list'
-import { NoteContent, EMPTY_CONTENT } from './note-content'
+import { NoteContent } from './note-content'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Card } from '@/components/ui/card'
 import { AddButton } from '@/components/ui/add-button'
 import { useNotes } from '@/hooks/use-notes'
 import { ListHeader } from '@/components/ui/list-header'
 import { cn } from '@/lib/utils'
-import { YooptaContentValue } from '@yoopta/editor'
+import { YooptaContentValue, YooptaOnChangeOptions, EMPTY_CONTENT } from '@/types/yoopta'
 
 export function NotesView({ searchQuery }: { searchQuery: string }) {
   const { notes, isLoadingNotes, createNote, updateNote } = useNotes()
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isNewNote, setIsNewNote] = useState(false)
+
+  console.log("Notes from useNotes:", notes)
 
   // Auto-select the first note if one exists and none is selected
   useEffect(() => {
@@ -51,6 +53,8 @@ export function NotesView({ searchQuery }: { searchQuery: string }) {
     return filteredNotes.find(n => n.id === selectedNoteId) ?? null
   }, [filteredNotes, selectedNoteId])
 
+  console.log("Selected Note:", selectedNote)
+
   const handleSelectNote = (noteId: string) => {
     setSelectedNoteId(noteId)
     setIsNewNote(false)
@@ -60,7 +64,7 @@ export function NotesView({ searchQuery }: { searchQuery: string }) {
     try {
       const newNote = await createNote.mutateAsync({
         title: 'Untitled Note',
-        content: EMPTY_CONTENT as any,
+        content: EMPTY_CONTENT,
       })
       setSelectedNoteId(newNote.id)
       setIsNewNote(true)
@@ -75,7 +79,7 @@ export function NotesView({ searchQuery }: { searchQuery: string }) {
     }
   }
 
-  const handleContentChange = (content: YooptaContentValue) => {
+  const handleContentChange = (content: YooptaContentValue, options: YooptaOnChangeOptions) => {
     if (selectedNote) {
       updateNote.mutate({ id: selectedNote.id, content })
     }
@@ -107,6 +111,7 @@ export function NotesView({ searchQuery }: { searchQuery: string }) {
               selectedNoteId={selectedNoteId}
               onSelectNote={handleSelectNote}
               isCollapsed={isCollapsed}
+              isSaving={isLoadingNotes}
             />
           </div>
         </Panel>

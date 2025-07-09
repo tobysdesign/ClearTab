@@ -5,7 +5,8 @@ import type { Task } from '@/shared/schema'
 import { useDebouncedCallback } from 'use-debounce'
 import { Input } from '@/components/ui/input'
 import dynamic from 'next/dynamic'
-import type { YooptaContentValue } from '@yoopta/editor'
+import { YooptaContentValue, EMPTY_CONTENT } from '@/types/yoopta'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -20,8 +21,16 @@ import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { motion } from 'framer-motion'
+import { Editor } from '@/components/ui/editor'
+import { useActionState } from 'react'
+import { updateTask, createTask } from '@/lib/actions/tasks'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { StatusDropdown } from '@/components/ui/status-dropdown'
+import type { ActionResponse } from '@/types/actions'
 
-const Editor = dynamic(
+const EditorComponent = dynamic(
   () => import('@/components/ui/editor').then(mod => mod.Editor),
   {
     ssr: false,
@@ -29,138 +38,193 @@ const Editor = dynamic(
   },
 )
 
-const EMPTY_CONTENT: YooptaContentValue = {
-  'initial-node': {
-    id: 'initial-node',
-    type: 'Paragraph',
-    value: [
-      {
-        id: 'initial-element',
-        type: 'paragraph',
-        children: [{ text: '' }],
-        props: {
-          nodeType: 'block',
-        },
-      },
-    ],
-    meta: {
-      order: 0,
-      depth: 0,
-    },
-  },
-}
-
 interface EditTaskFormProps {
-  task: Task
-  onSave: (updatedTask: Partial<Task>) => void
+  task?: Task | null
+  onClose?: () => void
+  onSave?: () => void
+  initialDescription?: string; // Add prop for initial description from editor selection
 }
 
-export function EditTaskForm({ task, onSave }: EditTaskFormProps) {
-  const [title, setTitle] = useState(task.title)
-  const [description, setDescription] = useState<YooptaContentValue>(
-    (task.description as unknown as YooptaContentValue) || EMPTY_CONTENT,
-  )
-  const [status, setStatus] = useState(task.status)
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    task.dueDate ? new Date(task.dueDate) : undefined,
-  )
+const taskSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.any().optional(),
+  status: z.enum(['pending', 'completed', 'important']),
+  dueDate: z.date().optional().nullable(),
+})
 
-  const debouncedSave = useDebouncedCallback((updatedData: Partial<Task>) => {
-    onSave({ id: task.id, ...updatedData })
-  }, 500)
+type TaskFormValues = z.infer<typeof taskSchema>
+
+// Helper function to convert plain text to Yoopta format
+function textToYooptaContent(text: string): YooptaContentValue {
+  try {
+    // Try to parse if it's already in JSON format
+    const parsed = JSON.parse(text);
+    if (typeof parsed === 'object' && parsed !== null) {
+      return parsed;
+    }
+  } catch (e) {
+    // Not JSON, continue with text conversion
+  }
+
+  // Create a simple paragraph content structure
+  const content = {
+    'paragraph-1': {
+      id: 'paragraph-1',
+      type: 'paragraph',
+      value: [{
+        id: 'paragraph-1-element',
+        type: 'paragraph',
+        children: [{ text }],
+        props: { nodeType: 'block' },
+      }],
+      meta: { order: 0, depth: 0 },
+    },
+  };
+
+  return content;
+}
+
+export function EditTaskForm({
+  task,
+  onClose,
+  onSave,
+  initialDescription = ''
+}: EditTaskFormProps) {
+  const [formState, formAction] = useActionState<ActionResponse<Task | null>, TaskFormValues & { id?: string }>(task ? updateTask : createTask, null)
+  
+  // Initialize description with either the task description or the selected text from editor
+  const initialDescriptionContent = task?.description || 
+    (initialDescription ? textToYooptaContent(initialDescription) : EMPTY_CONTENT);
+  
+  const [currentDescription, setCurrentDescription] = useState<YooptaContentValue>(
+    JSON.parse(JSON.stringify(initialDescriptionContent))
+  );
+
+  // Generate initial title from the first line of the description if available
+  const getInitialTitle = () => {
+    if (task?.title) return task.title;
+    if (initialDescription) {
+      // Extract first line or first 50 chars for title
+      const firstLine = initialDescription.split('\n')[0];
+      return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine;
+    }
+    return '';
+  };
+
+  const form = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: getInitialTitle(),
+      description: initialDescriptionContent,
+      status: task?.status || 'pending',
+      dueDate: task?.dueDate || null,
+    },
+  })
 
   useEffect(() => {
-    setTitle(task.title)
-    setDescription(
-      (task.description as unknown as YooptaContentValue) || EMPTY_CONTENT,
-    )
-    setStatus(task.status)
-    setDueDate(task.dueDate ? new Date(task.dueDate) : undefined)
-  }, [task])
+    if (task) {
+      form.reset({
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        dueDate: task.dueDate || null,
+      })
+      setCurrentDescription(JSON.parse(JSON.stringify(task.description || EMPTY_CONTENT)))
+    } else if (initialDescription) {
+      // For new tasks with initial description from editor selection
+      form.reset({
+        title: getInitialTitle(),
+        description: initialDescriptionContent,
+        status: 'pending',
+        dueDate: null,
+      });
+    }
+  }, [task, initialDescription, form, initialDescriptionContent])
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value
-    setTitle(newTitle)
-    debouncedSave({ title: newTitle })
+  useEffect(() => {
+    if (formState?.success) {
+      onSave?.()
+    } else if (formState?.error) {
+      console.error('Server error:', formState.error)
+    }
+  }, [formState, onSave])
+
+  const onSubmit = (values: TaskFormValues) => {
+    const dataToSend = {
+      ...values,
+      id: task?.id,
+      description: currentDescription,
+    }
+    formAction(dataToSend)
   }
 
-  const handleDescriptionChange = (newDescription: YooptaContentValue) => {
-    setDescription(newDescription)
-    debouncedSave({ description: newDescription as unknown as Task['description'] })
-  }
-
-  const handleStatusChange = (newStatus: Task['status']) => {
-    setStatus(newStatus)
-    debouncedSave({ status: newStatus })
-  }
-
-  const handleDueDateChange = (date: Date | undefined) => {
-    setDueDate(date)
-    debouncedSave({ dueDate: date })
+  const handleDescriptionChange = (value: YooptaContentValue) => {
+    setCurrentDescription(value)
   }
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center gap-3">
-        <Checkbox
-          id={`checkbox-${task.id}`}
-          checked={status === 'completed'}
-          onCheckedChange={(checked) => handleStatusChange(checked ? 'completed' : 'pending')}
-        />
-        <motion.div layoutId={`title-${task.id}`} className="flex-1">
+    <form onSubmit={form.handleSubmit(onSubmit)} className="p-4">
+      <h2 className="text-xl font-bold mb-4">{task ? 'Edit Task' : 'Create Task'}</h2>
+      <div className="mb-4">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
         <Input
-          value={title}
-          onChange={handleTitleChange}
-          placeholder="New task"
-          className="border-0 bg-transparent p-0 text-xl font-bold !outline-none !ring-0 placeholder:text-muted-foreground/50"
+          id="title"
+          {...form.register('title')}
+          className="mt-1 block w-full"
         />
-        </motion.div>
+        {form.formState.errors.title && (
+          <p className="text-red-500 text-xs mt-1">{form.formState.errors.title.message}</p>
+        )}
       </div>
 
-      <div className="flex-grow overflow-y-auto pl-7">
+      <div className="mb-4">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
         <Editor
-          value={description}
+          value={currentDescription}
           onChange={handleDescriptionChange}
-          placeholder='Add details here, you can style by using "/" or by highlighting text.'
+          className="mt-1 block w-full border rounded-md min-h-[150px]"
         />
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-border">
-        <div className="flex items-center space-x-2 scale-110 origin-left">
-          <Switch
-            id={`important-switch-${task.id}`}
-            checked={status === 'important'}
-            onCheckedChange={checked =>
-              handleStatusChange(checked ? 'important' : 'pending')
-            }
-          />
-          <Label htmlFor={`important-switch-${task.id}`}>Important</Label>
-        </div>
+      <div className="mb-4">
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+        <StatusDropdown
+          currentStatus={form.watch('status')}
+          onSelectStatus={(status: TaskFormValues['status']) => form.setValue('status', status)}
+        />
+      </div>
 
+      <div className="mb-4">
+        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date</label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant={'ghost-icon'}
-              className={cn(
-                'justify-start text-left font-normal',
-                !dueDate && 'text-[#8c8c8c]',
-                dueDate && 'text-white'
-              )}
+              variant={"outline"}
+              className={
+                `w-[240px] justify-start text-left font-normal ${!form.watch('dueDate') && "text-muted-foreground"}`
+              }
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {dueDate ? format(dueDate, 'PPP') : <span>Set due date</span>}
+              {form.watch('dueDate') ? format(form.watch('dueDate')!, "PPP") : "Pick a date"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0">
             <Calendar
               mode="single"
-              selected={dueDate}
-              onSelect={handleDueDateChange}
+              selected={form.watch('dueDate') || undefined}
+              onSelect={(date) => form.setValue('dueDate', date || null)}
               initialFocus
             />
           </PopoverContent>
         </Popover>
       </div>
-    </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {task ? 'Save Changes' : 'Create Task'}
+        </Button>
+      </div>
+    </form>
   )
 } 

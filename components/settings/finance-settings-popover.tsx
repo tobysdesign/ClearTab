@@ -198,7 +198,7 @@ export function FinanceSettingsPopover() {
           {isSubmitting ? (
             <div className="relative w-[45px] h-[25px] mr-2">
               <Image
-                src="/assets/looading.gif"
+                src="/assets/loading.gif"
                 alt="Loading..."
                 fill
                 className="object-contain"

@@ -9,7 +9,7 @@ export default function Loading() {
       <Card className="w-full max-w-md p-6 shadow-lg border border-border flex flex-col items-center gap-4">
         <div className="relative w-[90px] h-[50px]">
           <Image
-            src="/assets/looading.gif"
+            src="/assets/loading.gif"
             alt="Loading..."
             fill
             className="object-contain"

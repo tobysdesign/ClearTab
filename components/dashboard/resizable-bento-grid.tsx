@@ -23,7 +23,7 @@ const WidgetSkeleton = () => (
   <Card className="h-full w-full flex items-center justify-center">
     <div className="relative w-[90px] h-[50px]">
       <Image
-        src="/assets/looading.gif"
+        src="/assets/loading.gif"
         alt="Loading..."
         fill
         className="object-contain"
@@ -85,30 +85,28 @@ export function ResizableBentoGrid({
                 </motion.div>
               </Panel>
               <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 hover:bg-[#FF4F4F]" />
-                    <Panel>
-                <motion.div {...motionProps(1.0)}>
-                  <FinanceWidget />
-                </motion.div>
-              </Panel>
+              {/* <BentoGridItem id="finance" className="col-span-1 min-h-[200px]">
+                <FinanceWidget />
+              </BentoGridItem> */}
             </PanelGroup>
-                    </Panel>
-                </PanelGroup>
-            </Panel>
+          </Panel>
+        </PanelGroup>
+      </Panel>
       <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 hover:bg-[#FF4F4F]" />
       <Panel defaultSize={33} minSize={20}>
         <PanelGroup direction="vertical" className="h-full w-full">
           <Panel defaultSize={50} minSize={25}>
             <motion.div {...motionProps(0.5)}>{tasks}</motion.div>
-                    </Panel>
+          </Panel>
           <PanelResizeHandle className="my-2 h-px bg-border transition-colors duration-300 hover:bg-[#FF4F4F]" />
           <Panel defaultSize={50} minSize={25}>
             <motion.div {...motionProps(1.25)}>
               <ScheduleWidget />
             </motion.div>
-                    </Panel>
-                </PanelGroup>
-            </Panel>
+          </Panel>
         </PanelGroup>
+      </Panel>
+    </PanelGroup>
     </motion.div>
   )
 } 

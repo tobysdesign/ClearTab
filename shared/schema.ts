@@ -19,36 +19,51 @@ import { authenticatedRole } from 'drizzle-orm/supabase'
 import crypto from 'crypto'
 
 // Define a strict schema for Yoopta content
-export const yooptaNodeSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  children: z.array(z.object({
-    text: z.string(),
-  })),
-  props: z.object({
-    nodeType: z.string(),
-  }),
-})
+const yooptaTextNodeSchema = z.object({
+  text: z.string(),
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  code: z.boolean().optional(),
+  strike: z.boolean().optional(),
+  highlight: z.any().optional(),
+});
 
-export const yooptaContentSchema = z.object({
-  root: z.object({
+export const yooptaNodeSchema: z.ZodSchema<any> = z.lazy(() => z.union([
+  yooptaTextNodeSchema,
+  z.object({
     id: z.string(),
     type: z.string(),
-    value: z.array(yooptaNodeSchema),
-    meta: z.object({
-      order: z.number(),
-      depth: z.number(),
-    }),
-  }),
-})
+    children: z.array(z.lazy(() => yooptaNodeSchema)),
+    props: z.record(z.string(), z.any()).optional(),
+  }).passthrough(),
+]));
 
-// Standard empty content structure
-export const EMPTY_CONTENT = {
-  'root': {
-    id: 'root',
+const yooptaBlockBaseMetaSchema = z.object({
+  order: z.number(),
+  depth: z.number(),
+  align: z.union([z.literal('left'), z.literal('center'), z.literal('right')]).optional(),
+});
+
+export const yooptaBlockDataSchema = z.object({
+  id: z.string(),
+  value: z.array(yooptaNodeSchema),
+  type: z.string(),
+  meta: yooptaBlockBaseMetaSchema,
+});
+
+export type YooptaBlockData = z.infer<typeof yooptaBlockDataSchema>;
+
+// Corrected YooptaContentValue to be a Record of block IDs to block data
+export const yooptaContentSchema = z.record(z.string(), yooptaBlockDataSchema);
+
+// Standard empty content structure aligned with Yoopta Editor expectations
+export const EMPTY_CONTENT: YooptaContentValue = {
+  'paragraph-1': {
+    id: 'paragraph-1',
     type: 'paragraph',
     value: [{
-      id: 'initial',
+      id: 'paragraph-1-element',
       type: 'paragraph',
       children: [{ text: '' }],
       props: {
@@ -60,7 +75,7 @@ export const EMPTY_CONTENT = {
       depth: 0,
     },
   },
-} as const
+};
 
 export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
 
@@ -102,7 +117,7 @@ export const notes = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
-    content: jsonb('content').default({}).$type<YooptaContentValue>().notNull(),
+    content: jsonb('content').default(EMPTY_CONTENT).$type<YooptaContentValue>().notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
   },
@@ -144,7 +159,9 @@ export const tasks = pgTable(
 export const userPreferences = pgTable(
   'user_preferences',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' })
@@ -176,7 +193,9 @@ export const userPreferences = pgTable(
 export const chatMessages = pgTable(
   'chat_messages',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),

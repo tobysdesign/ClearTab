@@ -1,16 +1,16 @@
-import { 
-  users, notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
-  type User, type InsertUser, type Note, type InsertNote, 
+import {
+  user, notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
+  type User, type InsertUser, type Note, type InsertNote,
   type Task, type InsertTask, type UserPreferences, type InsertUserPreferences,
   type ChatMessage, type InsertChatMessage, type EmotionalMetadata, type InsertEmotionalMetadata,
   type MemoryUsage, type InsertMemoryUsage
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
@@ -23,35 +23,35 @@ export interface IStorage {
     accessToken?: string;
     refreshToken?: string;
   }): Promise<User>;
-  updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User>;
-  updateGoogleCalendarConnection(id: number, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User>;
+  updateUserTokens(id: string, accessToken: string, refreshToken?: string): Promise<User>;
+  updateGoogleCalendarConnection(id: string, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User>;
   
   // Notes methods
-  getNotesByUserId(userId: number): Promise<Note[]>;
-  createNote(note: InsertNote & { userId: number }): Promise<Note>;
-  updateNote(id: number, note: Partial<InsertNote>): Promise<Note | undefined>;
-  deleteNote(id: number): Promise<boolean>;
+  getNotesByUserId(userId: string): Promise<Note[]>;
+  createNote(note: InsertNote & { userId: string }): Promise<Note>;
+  updateNote(id: string, note: Partial<InsertNote>): Promise<Note | undefined>;
+  deleteNote(id: string): Promise<boolean>;
   
   // Tasks methods
-  getTasksByUserId(userId: number): Promise<Task[]>;
-  createTask(task: InsertTask & { userId: number }): Promise<Task>;
-  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
-  deleteTask(id: number): Promise<boolean>;
+  getTasksByUserId(userId: string): Promise<Task[]>;
+  createTask(task: InsertTask & { userId: string }): Promise<Task>;
+  updateTask(id: string, task: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: string): Promise<boolean>;
   
   // User preferences methods
-  getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
-  createUserPreferences(prefs: InsertUserPreferences & { userId: number }): Promise<UserPreferences>;
-  updateUserPreferences(userId: number, prefs: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
+  getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
+  createUserPreferences(prefs: InsertUserPreferences & { userId: string }): Promise<UserPreferences>;
+  updateUserPreferences(userId: string, prefs: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
   
   // Chat messages methods (temporary storage)
-  getChatMessagesByUserId(userId: number): Promise<ChatMessage[]>;
-  createChatMessage(message: InsertChatMessage & { userId: number }): Promise<ChatMessage>;
+  getChatMessagesByUserId(userId: string): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage & { userId: string }): Promise<ChatMessage>;
   cleanupExpiredMessages(): Promise<void>;
   
   // Emotional metadata methods
-  getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]>;
-  createEmotionalMetadata(metadata: InsertEmotionalMetadata & { userId: number }): Promise<EmotionalMetadata>;
-  getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]>;
+  getEmotionalMetadata(userId: string): Promise<EmotionalMetadata[]>;
+  createEmotionalMetadata(metadata: InsertEmotionalMetadata & { userId: string }): Promise<EmotionalMetadata>;
+  getEmotionalMetadataByTimeRange(userId: string, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]>;
   
   // Memory usage tracking methods
   getMemoryUsage(): Promise<MemoryUsage | undefined>;
@@ -61,32 +61,32 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+  async getUser(id: string): Promise<User | undefined> {
+    const [foundUser] = await db.select().from(user).where(eq(user.id, id));
+    return foundUser;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, username));
-    return user;
+    const [foundUser] = await db.select().from(user).where(eq(user.email, username));
+    return foundUser;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    const [foundUser] = await db.select().from(user).where(eq(user.email, email));
+    return foundUser;
   }
 
   async getUserByGoogleId(googleId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
-    return user;
+    const [foundUser] = await db.select().from(user).where(eq(user.googleId, googleId));
+    return foundUser;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
+    const [newUser] = await db
+      .insert(user)
       .values(insertUser)
       .returning();
-    return user;
+    return newUser;
   }
 
   async createGoogleUser(userData: {
@@ -97,22 +97,22 @@ export class DatabaseStorage implements IStorage {
     accessToken?: string;
     refreshToken?: string;
   }): Promise<User> {
-    const [user] = await db
-      .insert(users)
+    const [newUser] = await db
+      .insert(user)
       .values({
         googleId: userData.googleId,
         email: userData.email,
         name: userData.name,
-        picture: userData.picture || null,
+        image: userData.picture || null, // Changed from 'picture' to 'image'
         accessToken: userData.accessToken || null,
         refreshToken: userData.refreshToken || null,
         tokenExpiry: userData.accessToken ? new Date(Date.now() + 3600 * 1000) : null
       })
       .returning();
-    return user;
+    return newUser;
   }
 
-  async updateUserTokens(id: number, accessToken: string, refreshToken?: string): Promise<User> {
+  async updateUserTokens(id: string, accessToken: string, refreshToken?: string): Promise<User> {
     const updateData: any = {
       accessToken,
       tokenExpiry: new Date(Date.now() + 3600 * 1000)
@@ -121,15 +121,15 @@ export class DatabaseStorage implements IStorage {
       updateData.refreshToken = refreshToken;
     }
 
-    const [user] = await db
-      .update(users)
+    const [updatedUser] = await db
+      .update(user)
       .set(updateData)
-      .where(eq(users.id, id))
+      .where(eq(user.id, id))
       .returning();
-    return user;
+    return updatedUser;
   }
 
-  async updateGoogleCalendarConnection(id: number, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User> {
+  async updateGoogleCalendarConnection(id: string, connected: boolean, accessToken?: string, refreshToken?: string): Promise<User> {
     const updateData: any = {
       googleCalendarConnected: connected,
       lastCalendarSync: connected ? new Date() : null
@@ -144,25 +144,25 @@ export class DatabaseStorage implements IStorage {
       updateData.refreshToken = refreshToken;
     }
 
-    const [user] = await db
-      .update(users)
+    const [updatedUser] = await db
+      .update(user)
       .set(updateData)
-      .where(eq(users.id, id))
+      .where(eq(user.id, id))
       .returning();
-    return user;
+    return updatedUser;
   }
 
   // Notes operations
-  async getNotesByUserId(userId: number): Promise<Note[]> {
+  async getNotesByUserId(userId: string): Promise<Note[]> {
     return await db.select().from(notes).where(eq(notes.userId, userId));
   }
 
-  async createNote(noteData: InsertNote & { userId: number }): Promise<Note> {
+  async createNote(noteData: InsertNote & { userId: string }): Promise<Note> {
     const [note] = await db.insert(notes).values(noteData).returning();
     return note;
   }
 
-  async updateNote(id: number, noteData: Partial<InsertNote>): Promise<Note | undefined> {
+  async updateNote(id: string, noteData: Partial<InsertNote>): Promise<Note | undefined> {
     const [note] = await db
       .update(notes)
       .set(noteData)
@@ -171,22 +171,22 @@ export class DatabaseStorage implements IStorage {
     return note;
   }
 
-  async deleteNote(id: number): Promise<boolean> {
-    const result = await db.delete(notes).where(eq(notes.id, id));
-    return (result.rowCount ?? 0) > 0;
+  async deleteNote(id: string): Promise<boolean> {
+    const result = await db.delete(notes).where(eq(notes.id, id)).returning();
+    return result.length > 0;
   }
 
   // Tasks operations
-  async getTasksByUserId(userId: number): Promise<Task[]> {
+  async getTasksByUserId(userId: string): Promise<Task[]> {
     return await db.select().from(tasks).where(eq(tasks.userId, userId));
   }
 
-  async createTask(taskData: InsertTask & { userId: number }): Promise<Task> {
+  async createTask(taskData: InsertTask & { userId: string }): Promise<Task> {
     const [task] = await db.insert(tasks).values(taskData).returning();
     return task;
   }
 
-  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
+  async updateTask(id: string, taskData: Partial<InsertTask>): Promise<Task | undefined> {
     const [task] = await db
       .update(tasks)
       .set(taskData)
@@ -195,23 +195,23 @@ export class DatabaseStorage implements IStorage {
     return task;
   }
 
-  async deleteTask(id: number): Promise<boolean> {
-    const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return (result.rowCount ?? 0) > 0;
+  async deleteTask(id: string): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
+    return result.length > 0;
   }
 
   // User preferences operations
-  async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
     const [prefs] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
     return prefs;
   }
 
-  async createUserPreferences(prefsData: InsertUserPreferences & { userId: number }): Promise<UserPreferences> {
+  async createUserPreferences(prefsData: InsertUserPreferences & { userId: string }): Promise<UserPreferences> {
     const [prefs] = await db.insert(userPreferences).values(prefsData).returning();
     return prefs;
   }
 
-  async updateUserPreferences(userId: number, prefsData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
+  async updateUserPreferences(userId: string, prefsData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
     const [prefs] = await db
       .update(userPreferences)
       .set(prefsData)
@@ -221,11 +221,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Chat messages operations
-  async getChatMessagesByUserId(userId: number): Promise<ChatMessage[]> {
+  async getChatMessagesByUserId(userId: string): Promise<ChatMessage[]> {
     return await db.select().from(chatMessages).where(eq(chatMessages.userId, userId));
   }
 
-  async createChatMessage(messageData: InsertChatMessage & { userId: number }): Promise<ChatMessage> {
+  async createChatMessage(messageData: InsertChatMessage & { userId: string }): Promise<ChatMessage> {
     const [message] = await db.insert(chatMessages).values(messageData).returning();
     return message;
   }
@@ -235,43 +235,34 @@ export class DatabaseStorage implements IStorage {
     await db.delete(chatMessages).where(eq(chatMessages.expiresAt, now));
   }
 
-  async getEmotionalMetadata(userId: number): Promise<EmotionalMetadata[]> {
+  async getEmotionalMetadata(userId: string): Promise<EmotionalMetadata[]> {
     return await db.select().from(emotionalMetadata).where(eq(emotionalMetadata.userId, userId));
   }
 
-  async createEmotionalMetadata(metadataData: InsertEmotionalMetadata & { userId: number }): Promise<EmotionalMetadata> {
+  async createEmotionalMetadata(metadataData: InsertEmotionalMetadata & { userId: string }): Promise<EmotionalMetadata> {
     const [metadata] = await db.insert(emotionalMetadata).values(metadataData).returning();
     return metadata;
   }
 
-  async getEmotionalMetadataByTimeRange(userId: number, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
+  async getEmotionalMetadataByTimeRange(userId: string, startDate: Date, endDate: Date): Promise<EmotionalMetadata[]> {
     return await db.select().from(emotionalMetadata)
       .where(eq(emotionalMetadata.userId, userId));
   }
 
+  // Memory usage tracking methods
   async getMemoryUsage(): Promise<MemoryUsage | undefined> {
     const [usage] = await db.select().from(memoryUsage);
     return usage;
   }
 
   async updateMemoryUsage(totalMemories: number, monthlyRetrievals?: number): Promise<MemoryUsage> {
-    const [usage] = await db.insert(memoryUsage)
-      .values({ totalMemories, monthlyRetrievals: monthlyRetrievals || 0 })
-      .onConflictDoUpdate({ target: memoryUsage.id, set: { totalMemories, monthlyRetrievals: monthlyRetrievals || 0 } })
-      .returning();
+    const [usage] = await db.update(memoryUsage).set({ totalMemories, monthlyRetrievals, updatedAt: new Date() }).returning();
     return usage;
   }
 
   async incrementRetrievals(): Promise<MemoryUsage> {
-    const [usage] = await db.select().from(memoryUsage);
-    if (usage) {
-      const [updated] = await db.update(memoryUsage)
-        .set({ monthlyRetrievals: (usage.monthlyRetrievals || 0) + 1 })
-        .where(eq(memoryUsage.id, usage.id))
-        .returning();
-      return updated;
-    }
-    return this.updateMemoryUsage(0, 1);
+    const [usage] = await db.update(memoryUsage).set({ monthlyRetrievals: sql`monthly_retrievals + 1`, updatedAt: new Date() }).returning();
+    return usage;
   }
 }
 

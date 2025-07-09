@@ -34,11 +34,11 @@ export function ShinyAiButton({
           autoplay
           speed={0.5}
           style={{
-            width: '135%',
-            height: '74%',
+            width: '100%',
+            height: '100%',
             lineHeight: 0,
             aspectRatio: '421 / 233',
-            left: '-2px',
+            left: '0',
             position: 'relative',
           }}
         />
