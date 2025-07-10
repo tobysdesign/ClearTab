@@ -1,0 +1,9 @@
+.container{ @apply relative; }
+.editorContent{ @apply min-h-[200px] p-4 focus:outline-none prose prose-invert max-w-none editor-content; }
+.toolbar{ @apply absolute bg-background border border-border rounded-md shadow-md p-1 flex items-center gap-1 z-10; }
+.toolButton{ @apply h-8 w-8 p-0; }
+.toolbarDivider{ @apply h-4 w-px bg-border mx-1; }
+.askButton{ @apply h-8 px-2 text-xs flex items-center gap-1; }
+.createButton{ @apply h-8 px-2 text-xs flex items-center gap-1; }
+.iconSmall{ @apply h-4 w-4; }
+.iconTiny{ @apply h-3 w-3; }
