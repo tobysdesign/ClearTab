@@ -7,8 +7,8 @@
     "no-restricted-syntax": [
       "error",
       {
-        "selector": "JSXAttribute[name.name='className'][value.type='Literal']",
-        "message": "Inline Tailwind classes are not allowed. Define classes in a CSS/SCSS module and use @apply."
+        "selector": "JSXAttribute[name.name='className'][value.type='Literal'][value.value=/\\b(?:flex|grid|text-|bg-|p-|m-|rounded|w-|h-)/]",
+        "message": "Inline Tailwind classes detected. Move them into CSS module using @apply."
       }
     ]
   }

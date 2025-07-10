@@ -1,0 +1,2 @@
+.root{ @apply flex-shrink-0 flex items-center justify-between p-4; }
+.actions{ @apply flex items-center gap-2; }

@@ -69,6 +69,7 @@
     "react-resizable-panels": "^3.0.3",
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
+    "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   },
