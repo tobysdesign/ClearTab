@@ -1,6 +1,8 @@
 "use client";
 
+import React from "react";
 import dynamic from "next/dynamic";
+import styles from './dynamic-editor.module.css';
 
 // Define the prop types for the Editor component
 interface EditorProps {
@@ -15,8 +17,8 @@ interface EditorProps {
 export const Editor = dynamic<EditorProps>(() => import("./Editor"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[200px] p-4 border border-gray-200 rounded-md flex items-center justify-center">
-      <p className="text-muted-foreground animate-pulse">Loading editor...</p>
+    <div className={styles.loadingContainer}>
+      <p className={styles.loadingText}>Loading editor...</p>
     </div>
   ),
 }); 
