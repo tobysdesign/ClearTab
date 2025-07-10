@@ -5,7 +5,7 @@ import { storage } from './storage'
 import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema, type YooptaContentValue } from '@/shared/schema'
 import OpenAI from 'openai'
 import { mem0Service } from './mem0-service'
-import { GoogleCalendarService } from './google-calendar'
+import { googleCalendarService } from './google-calendar'
 import type { CalendarSyncStatus } from '../shared/calendar-types'
 
 // Utility to convert string to YooptaContentValue
@@ -839,7 +839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Google Calendar authentication routes
   app.get("/api/auth/google", (req, res) => {
-    const authUrl = GoogleCalendarService.getAuthUrl();
+    const authUrl = googleCalendarService.getAuthUrl();
     res.redirect(authUrl);
   });
 
@@ -851,10 +851,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Exchange code for tokens
-      const { accessToken, refreshToken } = await GoogleCalendarService.exchangeCodeForTokens(code);
+      const { accessToken, refreshToken } = await googleCalendarService.exchangeCodeForTokens(code);
       
       // Get user info from Google
-      const googleUser = await GoogleCalendarService.getUserInfo(accessToken);
+      const googleUser = await googleCalendarService.getUserInfo(accessToken);
       
       // Check if user exists by Google ID or email
       let user = await storage.getUserByGoogleId(googleUser.id);
@@ -934,7 +934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (user?.googleCalendarConnected && user.accessToken) {
         try {
           // Fetch Google Calendar events
-          const googleEvents = await GoogleCalendarService.getCalendarEvents(
+          const googleEvents = await googleCalendarService.getCalendarEvents(
             user.accessToken
           );
           events = googleEvents;
