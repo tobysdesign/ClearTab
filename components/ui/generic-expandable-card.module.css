@@ -1,0 +1,8 @@
+.trigger{ @apply cursor-pointer; }
+.overlay{ @apply fixed inset-0 bg-black/30 h-full w-full z-10; }
+.wrapper{ @apply fixed inset-0 grid place-items-center z-50; }
+.closeBtn{ @apply flex absolute top-2 right-2 items-center justify-center border border-border rounded-full h-6 w-6; }
+.modal{ @apply w-full max-w-[500px] md:h-fit md:max-h-[90%] flex flex-col bg-[#212121] border border-border sm:rounded-3xl overflow-hidden shadow-2xl; }
+.content{ @apply p-4 h-full; }
+.closeIcon{ @apply h-4 w-4 text-foreground; }
+.expandIcon{ @apply text-muted-foreground; }

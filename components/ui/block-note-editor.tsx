@@ -321,7 +321,7 @@ export function BlockNoteEditor({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 text-xs flex items-center gap-1" 
+              className={styles.askButton} 
               onClick={handleAskAI}
             >
               <Bot className={styles.iconTiny} />
@@ -332,7 +332,7 @@ export function BlockNoteEditor({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 text-xs flex items-center gap-1" 
+              className={styles.createButton} 
               onClick={handleCreateTask}
             >
               <CheckSquare className={styles.iconTiny} />
