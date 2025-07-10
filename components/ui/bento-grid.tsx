@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { ComponentPropsWithoutRef, ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import styles from './bento-grid.module.css'
