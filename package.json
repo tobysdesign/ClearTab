@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "export": "next export",
+    "generate-icons": "node scripts/generate-icons.js",
+    "build-extension": "node scripts/build-extension.js",
+    "package-extension": "cd dist/extension && zip -r ../bye-extension.zip ."
   },
   "dependencies": {
     "@blocknote/core": "^0.33.0",
