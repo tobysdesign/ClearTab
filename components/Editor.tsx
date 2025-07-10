@@ -4,6 +4,7 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useState, useCallback } from "react";
+import styles from './Editor.module.css';
 import { Bot, Sparkles, Wand2, ListTodo } from "lucide-react";
 import { getAiResponse, aiCommands } from "@/components/ai-editor-integration";
 
@@ -105,7 +106,7 @@ export default function Editor({
 
   // Renders the editor instance using a React component.
   return (
-    <div className="editor-container relative">
+    <div className={styles.editorContainer}>
       <BlockNoteView 
         editor={editor} 
         editable={!readOnly}
@@ -118,16 +119,16 @@ export default function Editor({
         }}
       />
       {isAiLoading && (
-        <div className="absolute top-2 right-2 bg-primary/10 text-primary px-2 py-1 rounded-md flex items-center gap-1">
+        <div className={styles.aiThinking}>
           <Sparkles size={14} className="animate-pulse" />
           <span className="text-xs">AI thinking...</span>
         </div>
       )}
-      <div className="absolute bottom-2 right-2 flex gap-2">
+      <div className={styles.buttonsContainer}>
         <button 
           onClick={handleAskAiChat}
           disabled={isAiLoading || !onOpenAiChat}
-          className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary px-2 py-1 rounded-md text-xs"
+          className={styles.actionButton}
         >
           <Bot size={12} />
           Ask AI
@@ -135,7 +136,7 @@ export default function Editor({
         <button 
           onClick={handleCreateTask}
           disabled={isAiLoading || !onCreateTask}
-          className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary px-2 py-1 rounded-md text-xs"
+          className={styles.actionButton}
         >
           <ListTodo size={12} />
           Create Task
@@ -143,7 +144,7 @@ export default function Editor({
         <button 
           onClick={handleSummarize}
           disabled={isAiLoading}
-          className="flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary px-2 py-1 rounded-md text-xs"
+          className={styles.actionButton}
         >
           <Wand2 size={12} />
           Summarize
