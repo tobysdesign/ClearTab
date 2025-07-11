@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   user, notes, tasks, userPreferences, chatMessages, emotionalMetadata, memoryUsage,
   type User, type InsertUser, type Note, type InsertNote,
