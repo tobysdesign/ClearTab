@@ -1,0 +1,9 @@
+.overlay{ @apply fixed inset-0 bg-black/20 h-full w-full z-10; }
+.container{ @apply fixed inset-0 grid place-items-center z-[100]; }
+.modal{ @apply w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden; }
+.closeBtn{ @apply flex absolute top-2 right-2 lg:hidden items-center justify-center bg-white rounded-full h-6 w-6; }
+.image{ @apply w-full h-80 lg:h-80 sm:rounded-tr-lg sm:rounded-tl-lg object-cover object-top; }
+.title{ @apply font-bold text-neutral-700 dark:text-neutral-200; }
+.description{ @apply text-neutral-600 dark:text-neutral-400; }
+.cta{ @apply px-4 py-3 text-sm rounded-full font-bold bg-green-500 text-white; }
+.content{ @apply text-neutral-600 text-xs md:text-sm lg:text-base h-40 md:h-fit pb-10 flex flex-col items-start gap-4 overflow-auto dark:text-neutral-400; }

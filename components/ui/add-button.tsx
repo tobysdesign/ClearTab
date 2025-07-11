@@ -1,6 +1,7 @@
 'use client'
 
 import { PlusIcon } from 'lucide-react'
+import styles from './add-button.module.css'
 import { Button, type ButtonProps } from '@/components/ui/button'
 import {
   Tooltip,
@@ -16,7 +17,7 @@ interface AddButtonProps extends ButtonProps {
 export function AddButton({ tooltip, ...props }: AddButtonProps) {
   const button = (
     <Button size="icon" variant="ghost-icon" {...props}>
-      <PlusIcon className="h-4 w-4" />
+      <PlusIcon className={styles.icon} />
     </Button>
   )
 

@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import styles from './list-header.module.css'
 import { CardTitle } from '@/components/ui/card'
 
 interface ListHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -13,15 +14,12 @@ const ListHeader = React.forwardRef<HTMLDivElement, ListHeaderProps>(
   ({ className, title, children, ...props }, ref) => {
     return (
       <div
-        className={cn(
-          'flex-shrink-0 flex items-center justify-between p-4',
-          className,
-        )}
+        className={cn(styles.root, className)}
         ref={ref}
         {...props}
       >
         <CardTitle>{title}</CardTitle>
-        <div className="flex items-center gap-2">{children}</div>
+        <div className={styles.actions}>{children}</div>
       </div>
     )
   },

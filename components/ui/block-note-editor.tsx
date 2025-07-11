@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import './block-note-custom.css'
 import { Button } from '@/components/ui/button'
-import { Bold, Italic, Underline, Code, AlignLeft, AlignCenter, AlignRight, Type, Bot, CheckSquare } from 'lucide-react'
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Type, Bot, CheckSquare } from 'lucide-react'
+import styles from './block-note-editor.module.css'
 
 interface BlockNoteEditorProps {
   value?: any
@@ -233,11 +234,11 @@ export function BlockNoteEditor({
   }, [onCreateTask, selectedText]);
   
   return (
-    <div className="relative">
+    <div className={styles.container}>
       <div
         ref={editorRef}
         contentEditable={editable}
-        className="min-h-[200px] p-4 focus:outline-none prose prose-invert max-w-none editor-content"
+        className={styles.editorContent}
         onInput={handleInput}
         onBlur={handleBlur}
         data-placeholder={placeholder}
@@ -251,7 +252,7 @@ export function BlockNoteEditor({
       {showToolbar && (
         <div 
           ref={toolbarRef}
-          className="absolute bg-background border border-border rounded-md shadow-md p-1 flex items-center gap-1 z-10"
+          className={styles.toolbar}
           style={{ 
             top: Math.max(0, toolbarPosition.top),
             left: toolbarPosition.left,
@@ -261,69 +262,69 @@ export function BlockNoteEditor({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('bold')}
           >
-            <Bold className="h-4 w-4" />
+            <Bold className={styles.iconSmall} />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('italic')}
           >
-            <Italic className="h-4 w-4" />
+            <Italic className={styles.iconSmall} />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('underline')}
           >
-            <Underline className="h-4 w-4" />
+            <Underline className={styles.iconSmall} />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('formatBlock', '<h1>')}
           >
-            <Type className="h-4 w-4" />
+            <Type className={styles.iconSmall} />
           </Button>
-          <div className="h-4 w-px bg-border mx-1" />
+          <div className={styles.toolbarDivider} />
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('justifyLeft')}
           >
-            <AlignLeft className="h-4 w-4" />
+            <AlignLeft className={styles.iconSmall} />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('justifyCenter')}
           >
-            <AlignCenter className="h-4 w-4" />
+            <AlignCenter className={styles.iconSmall} />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-8 w-8 p-0" 
+            className={styles.toolButton} 
             onClick={() => executeCommand('justifyRight')}
           >
-            <AlignRight className="h-4 w-4" />
+            <AlignRight className={styles.iconSmall} />
           </Button>
-          <div className="h-4 w-px bg-border mx-1" />
+          <div className={styles.toolbarDivider} />
           {onAskAI && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 text-xs flex items-center gap-1" 
+              className={styles.askButton} 
               onClick={handleAskAI}
             >
-              <Bot className="h-3 w-3" />
+              <Bot className={styles.iconTiny} />
               <span>Ask AI</span>
             </Button>
           )}
@@ -331,10 +332,10 @@ export function BlockNoteEditor({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 px-2 text-xs flex items-center gap-1" 
+              className={styles.createButton} 
               onClick={handleCreateTask}
             >
-              <CheckSquare className="h-3 w-3" />
+              <CheckSquare className={styles.iconTiny} />
               <span>Create Task</span>
             </Button>
           )}

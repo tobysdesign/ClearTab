@@ -6,6 +6,7 @@ import { useOutsideClick } from '@/hooks/use-outside-click'
 import { cn } from '@/lib/utils'
 import { GlowButton } from './glow-button'
 import { X } from 'lucide-react'
+import styles from './expanding-modal.module.css'
 
 export interface ExpandingModalProps {
   children: React.ReactNode
@@ -38,9 +39,7 @@ export function ExpandingModal({
         <motion.div
           layoutId={layoutId}
           className={cn(
-            'fixed inset-0 z-50 flex justify-center p-4',
-            position === 'center' && 'items-center',
-            position === 'bottom' && 'items-end pb-24',
+            position === 'center' ? styles.wrapperCenter : styles.wrapperBottom,
             className,
           )}
           initial={{ opacity: 0, scale: 0.95 }}
@@ -49,7 +48,7 @@ export function ExpandingModal({
         >
           <motion.div
             ref={ref}
-            className="relative w-full h-full md:h-fit md:max-h-[90%] md:max-w-lg bg-[#141414] rounded-2xl overflow-hidden border border-[#252525]"
+            className={styles.modal}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ 
               scale: 1, 
@@ -74,13 +73,13 @@ export function ExpandingModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-              className="absolute top-6 right-6 z-10"
+              className={styles.closeContainer}
             >
               <GlowButton
             onClick={() => setIsOpen(false)}
-                className="!p-0 h-8 w-8 flex items-center justify-center"
+                className={styles.closeBtn}
               >
-                <X className="h-4 w-4" />
+                <X className={styles.closeIcon} />
               </GlowButton>
             </motion.div>
             {children}

@@ -3,6 +3,7 @@
 import React, { useState, useRef, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useOutsideClick } from '@/hooks/use-outside-click'
+import styles from './generic-expandable-card.module.css'
 
 interface GenericExpandableCardProps {
   trigger: ReactNode
@@ -31,7 +32,7 @@ export function GenericExpandableCard({
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)} className="cursor-pointer">
+      <div onClick={() => setIsOpen(true)} className={styles.trigger}>
         {trigger}
       </div>
 
@@ -42,14 +43,14 @@ export function GenericExpandableCard({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/30 h-full w-full z-10"
+              className={styles.overlay}
             />
-            <div className="fixed inset-0 grid place-items-center z-50">
+            <div className={styles.wrapper}>
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex absolute top-2 right-2 items-center justify-center border border-border rounded-full h-6 w-6"
+                className={styles.closeBtn}
                 onClick={() => setIsOpen(false)}
               >
                 <CloseIcon />
@@ -58,9 +59,9 @@ export function GenericExpandableCard({
               <motion.div
                 ref={ref}
                   layoutId={trigger.props.layoutId}
-                className="w-full max-w-[500px] md:h-fit md:max-h-[90%] flex flex-col bg-[#212121] border border-border sm:rounded-3xl overflow-hidden shadow-2xl"
+                className={styles.modal}
               >
-                  <div className="p-4 h-full">{content}</div>
+                  <div className={styles.cardContent}>{content}</div>
               </motion.div>
               )}
             </div>
@@ -83,7 +84,7 @@ export const CloseIcon = () => {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4 text-foreground"
+      className={styles.closeIcon}
     >
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
@@ -98,7 +99,7 @@ export const ExpandIcon = () => (
     viewBox="0 0 14 14"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="text-muted-foreground"
+    className={styles.expandIcon}
   >
     <path
       d="M5.13125 1.86875L1.86875 5.13125M1.86875 5.13125L1.86875 1.5M1.86875 5.13125L5.5 5.13125"
