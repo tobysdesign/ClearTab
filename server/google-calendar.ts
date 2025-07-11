@@ -53,18 +53,20 @@ export class GoogleCalendarService {
     };
   }
 
-  async getUserInfo(accessToken: string): Promise<{ email: string; name: string }> {
+  async getUserInfo(accessToken: string): Promise<{ id: string; email: string; name: string; picture?: string }> {
     this.oauth2Client.setCredentials({ access_token: accessToken });
     const oauth2 = google.oauth2('v2');
     const userInfo = await oauth2.userinfo.get({ auth: this.oauth2Client });
     
-    if (!userInfo.data.email || !userInfo.data.name) {
+    if (!userInfo.data.id || !userInfo.data.email || !userInfo.data.name) {
       throw new Error('Failed to get user info from Google');
     }
 
     return {
+      id: userInfo.data.id as string,
       email: userInfo.data.email,
-      name: userInfo.data.name
+      name: userInfo.data.name,
+      picture: userInfo.data.picture ?? undefined,
     };
   }
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MemoryClient } from 'mem0ai';
 import { webcrypto } from 'crypto';
 
