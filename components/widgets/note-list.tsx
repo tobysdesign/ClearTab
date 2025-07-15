@@ -87,6 +87,22 @@ export function NoteList({
     new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )
 
+  function getContentPreview(content: any): string {
+    if (!content) return ''
+    if (typeof content === 'string') return content
+    if (typeof content === 'object') {
+      try {
+        const firstBlock = Object.values(content)[0] as any
+        if (firstBlock && firstBlock.value && firstBlock.value[0] && firstBlock.value[0].children) {
+          return firstBlock.value[0].children.map((c: any) => c.text || '').join('')
+        }
+      } catch (e) {
+        return ''
+      }
+    }
+    return ''
+  }
+
   return (
     <div 
       className={cn(
@@ -97,6 +113,7 @@ export function NoteList({
     >
       <AnimatePresence initial={false}>
         {sortedNotes.map((note) => {
+          const preview = getContentPreview(note.content)
           // Always show initials if collapsed
           if (isCollapsed) {
             return (
@@ -167,6 +184,9 @@ export function NoteList({
                   )}
                   {panelSize > 18 && formatShortDate(note.updatedAt)}
                 </span>
+              </div>
+              <div className="text-sm text-muted-foreground w-full overflow-hidden text-ellipsis [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
+                  {preview || "Empty note"}
               </div>
             </motion.div>
           )

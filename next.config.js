@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const isExtensionBuild = process.env.IS_EXTENSION === 'true';
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -16,7 +18,7 @@ const nextConfig = {
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
     SESSION_SECRET: process.env.SESSION_SECRET || 'your-secret-key',
-    IS_EXTENSION: process.env.IS_EXTENSION || false
+    IS_EXTENSION: String(isExtensionBuild)
   },
   compress: true,
   poweredByHeader: false,
@@ -24,17 +26,17 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    unoptimized: process.env.IS_EXTENSION === 'true', // Disable image optimization for extension build
+    unoptimized: isExtensionBuild, // Disable image optimization for extension build
   },
   // Support for Chrome extension static export
-  output: process.env.IS_EXTENSION === 'true' ? 'export' : undefined,
-  distDir: process.env.IS_EXTENSION === 'true' ? 'out' : '.next',
+  output: isExtensionBuild ? 'export' : undefined,
+  distDir: isExtensionBuild ? 'out' : '.next',
   // Adjust asset prefix for extension
-  assetPrefix: process.env.IS_EXTENSION === 'true' ? '.' : undefined,
-  basePath: process.env.IS_EXTENSION === 'true' ? '' : undefined,
+  assetPrefix: isExtensionBuild ? '.' : undefined,
+  basePath: isExtensionBuild ? '' : undefined,
   async headers() {
     // Skip headers for extension build
-    if (process.env.IS_EXTENSION === 'true') {
+    if (isExtensionBuild) {
       return [];
     }
     
@@ -85,7 +87,7 @@ const nextConfig = {
     }
     
     // Add support for Chrome extension environment
-    if (process.env.IS_EXTENSION === 'true') {
+    if (isExtensionBuild) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
