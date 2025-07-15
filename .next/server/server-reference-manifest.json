@@ -1,17 +1,5 @@
 {
-  "node": {
-    "7032f16297ae99ba380a7747145ac41534b0096fc7": {
-      "workers": {
-        "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227032f16297ae99ba380a7747145ac41534b0096fc7%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    }
-  },
+  "node": {},
   "edge": {},
   "encryptionKey": "Yz72rFzLr6FqpsWtRFPntKacHwiB4AYBWY3f2gq/4Pk="
 }
