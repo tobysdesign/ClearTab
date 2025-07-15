@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .container{ @apply relative; }
 .editorContent{ @apply min-h-[200px] p-4 focus:outline-none prose prose-invert max-w-none editor-content; }
 .toolbar{ @apply absolute bg-background border border-border rounded-md shadow-md p-1 flex items-center gap-1 z-10; }

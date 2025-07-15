@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .item{ @apply p-4 flex flex-col md:flex-row justify-between items-center hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-xl cursor-pointer gap-4 mb-4; }
 .image{ @apply h-40 w-40 md:h-14 md:w-14 rounded-lg object-cover object-top; }
 .title{ @apply font-medium text-neutral-800 dark:text-neutral-200 text-center md:text-left; }

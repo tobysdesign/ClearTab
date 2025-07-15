@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .loadingContainer {
   @apply min-h-[200px] p-4 border border-gray-200 rounded-md flex items-center justify-center;
 }

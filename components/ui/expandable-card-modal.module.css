@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .overlay{ @apply fixed inset-0 bg-black/20 h-full w-full z-10; }
 .container{ @apply fixed inset-0 grid place-items-center z-[100]; }
 .modal{ @apply w-full max-w-[500px] h-full md:h-fit md:max-h-[90%] flex flex-col bg-white dark:bg-neutral-900 sm:rounded-3xl overflow-hidden; }
