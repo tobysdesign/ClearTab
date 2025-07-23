@@ -74,7 +74,7 @@ export default function BrandPage() {
                 <AnimatedTobyLogo mode="brand" color="#ffffff" />
               </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 border rounded-lg p-6 flex items-center justify-center">
+            <div className="bg-gradient-to-br from-neutral-700 to-neutral-900 border rounded-lg p-6 flex items-center justify-center">
               <div className="w-24">
                 <AnimatedTobyLogo mode="brand" color="#ffffff" />
               </div>

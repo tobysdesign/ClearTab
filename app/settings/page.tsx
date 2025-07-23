@@ -1,19 +1,11 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { SettingsModal } from '@/components/settings/settings-modal'
+import { SettingsDrawer } from '@/components/settings/settings-drawer'
 
 export default function SettingsPage() {
-  const router = useRouter()
-
   return (
-    <SettingsModal 
-      open={true} 
-      onOpenChange={(open) => {
-        if (!open) {
-          router.back()
-        }
-      }} 
-    />
+    <div className="flex items-center justify-center h-screen">
+      <SettingsDrawer />
+    </div>
   )
 }

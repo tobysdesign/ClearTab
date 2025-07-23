@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import type { AuthOptions } from 'next-auth'
+import { getServerSession, type Session } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { type ActionResponse } from '@/types/actions'
 import { userCalendars, connectedAccounts } from '@/shared/schema'
 import { eq, and } from 'drizzle-orm'
 import { google } from 'googleapis'
 import { db } from '@/server/db'
+import { getGoogleOAuth2Client } from '@/server/google-calendar'
 
 interface GoogleCalendar {
   id: string
@@ -23,15 +23,9 @@ interface CalendarWithStatus extends GoogleCalendar {
   isConfigured: boolean
 }
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
-)
-
 export async function GET(): Promise<NextResponse<ActionResponse<CalendarWithStatus[]>>> {
   try {
-    const session = await getServerSession(authOptions as AuthOptions)
+    const session = await getServerSession(authOptions) as Session
     
     if (!session?.user?.id) {
       return NextResponse.json({ 
@@ -59,10 +53,7 @@ export async function GET(): Promise<NextResponse<ActionResponse<CalendarWithSta
     for (const account of accounts) {
         if (!account.accessToken) continue;
 
-        oauth2Client.setCredentials({
-            access_token: account.accessToken,
-            refresh_token: account.refreshToken,
-        });
+        const oauth2Client = getGoogleOAuth2Client(account.accessToken, account.refreshToken ?? undefined)
 
         const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
         const response = await calendar.calendarList.list();
@@ -109,7 +100,7 @@ export async function GET(): Promise<NextResponse<ActionResponse<CalendarWithSta
 
 export async function POST(request: Request): Promise<NextResponse<ActionResponse<string>>> {
   try {
-    const session = await getServerSession(authOptions as AuthOptions)
+    const session = await getServerSession(authOptions) as Session
     
     if (!session?.user?.id) {
       return NextResponse.json({ 

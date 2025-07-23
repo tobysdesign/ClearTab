@@ -1,0 +1,126 @@
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  container-type: size;
+
+}
+
+.card {
+  width: calc(85% - 20px);
+  height: calc(85% - 20px);
+  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
+  border: 1px solid #323235;
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  font-family: 'Inter Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+}
+
+
+
+/* Row 1 - Header aligned right */
+.cardHeader {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.date {
+  color: #C4C4C4;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(9px, 2.5cqw);
+  font-weight: 400;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.location {
+  color: #555454;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(9px, 2.5cqw);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* Row 2 - Weather icon area */
+.cardCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  margin-bottom: 20px;
+}
+
+.weatherIcon {
+  width: 60px;
+  height: 60px;
+  opacity: 0.8;
+}
+
+/* Row 3 - 3 column layout */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+/* Col 1 - Big temperature */
+.mainTempCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.temperature {
+  color: #C4C4C4;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(48px, 12cqw);
+  font-weight: 300;
+  line-height: 0.9;
+  margin-bottom: 4px;
+}
+
+.condition {
+  color: #555454;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(10px, 2.8cqw);
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+/* Col 2 & 3 - High/Low temps grouped together */
+.tempGroup {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.tempCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.highTemp,
+.lowTemp {
+  color: #C4C4C4;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(15px, 4cqw);
+  font-weight: 300;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.tempLabel {
+  color: #555454;
+  font-family: 'Inter Display', sans-serif;
+  font-size: max(10px, 2.8cqw);
+  font-weight: 300;
+  line-height: 1;
+} 

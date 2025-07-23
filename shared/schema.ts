@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   boolean,
   integer,
@@ -11,15 +10,48 @@ import {
   timestamp,
   uuid,
   varchar,
+  index,
+  uniqueIndex
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
-import { createInsertSchema } from "drizzle-zod"
 import { z } from "zod"
 import type { AdapterAccount } from 'next-auth/adapters'
 import { authenticatedRole } from 'drizzle-orm/supabase'
 import crypto from 'crypto'
+import { Block } from '@blocknote/core'
 
-// Define a strict schema for Yoopta content
+// BlockNote Content Schemas
+const BlockNoteTextNodeSchema = z.object({
+  type: z.literal("text"),
+  text: z.string(),
+  styles: z.record(z.any()).optional(), // Styles can be any object
+});
+
+const BlockNoteBlockPropsSchema = z.record(z.any()); // Block properties can be any object
+
+export const BlockNoteBlockSchema = z.lazy(() => z.object({
+  id: z.string(),
+  type: z.string(),
+  props: BlockNoteBlockPropsSchema.optional(),
+  content: z.array(z.union([BlockNoteTextNodeSchema, z.lazy(() => BlockNoteBlockSchema)])).optional(), // Blocks can contain text nodes or other blocks
+  children: z.array(z.string()).optional(), // BlockNote blocks also have a 'children' array of string IDs
+  data: z.record(z.any()).optional(), // Generic data field
+}));
+
+export const BlockNoteContentSchema = z.array(BlockNoteBlockSchema);
+
+// Standard empty content structure for BlockNote
+export const EMPTY_BLOCKNOTE_CONTENT = [
+  {
+    id: "default-paragraph",
+    type: "paragraph",
+    content: [],
+    props: {},
+  },
+];
+
+// Remove Yoopta-related schemas and EMPTY_CONTENT
+/*
 const yooptaTextNodeSchema = z.object({
   text: z.string(),
   bold: z.boolean().optional(),
@@ -30,7 +62,7 @@ const yooptaTextNodeSchema = z.object({
   highlight: z.any().optional(),
 });
 
-export const yooptaNodeSchema: z.ZodSchema<any> = z.lazy(() => z.union([
+export const yooptaNodeSchema = z.lazy(() => z.union([
   yooptaTextNodeSchema,
   z.object({
     id: z.string(),
@@ -59,7 +91,7 @@ export type YooptaBlockData = z.infer<typeof yooptaBlockDataSchema>;
 export const yooptaContentSchema = z.record(z.string(), yooptaBlockDataSchema);
 
 // Standard empty content structure aligned with Yoopta Editor expectations
-export const EMPTY_CONTENT: YooptaContentValue = {
+export const EMPTY_CONTENT = {
   'paragraph-1': {
     id: 'paragraph-1',
     type: 'paragraph',
@@ -79,6 +111,7 @@ export const EMPTY_CONTENT: YooptaContentValue = {
 };
 
 export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
+*/
 
 export const user = pgTable(
   'user',
@@ -110,15 +143,125 @@ export const user = pgTable(
   })
 ).enableRLS()
 
-export const notes = pgTable(
-  'notes',
+export const account = pgTable(
+  "account",
+  {
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").
+      $type<AdapterAccount["type"]>()
+      .notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => ({
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
+    rls: pgPolicy('account RLS policy', {
+      using: sql`auth.uid() = ${account.userId}`,
+      withCheck: sql`auth.uid() = ${account.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const session = pgTable(
+  "session",
+  {
+    sessionToken: text("sessionToken").notNull().primaryKey(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('session RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
+
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (vt) => ({
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  })
+)
+
+export const connectedAccounts = pgTable(
+  'connected_accounts',
   {
     id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    providerAccountId: text('provider_account_id').notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    tokenExpiry: timestamp('token_expiry', { mode: 'date' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    providerAccount: uniqueIndex('connected_accounts_provider_account_id_unique').on(table.provider, table.providerAccountId), // Changed to uniqueIndex
+    userIdIndex: index('connected_accounts_user_id_index').on(table.userId),
+  })
+).enableRLS()
+
+export const userCalendars = pgTable(
+  'user_calendars',
+  {
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    connectedAccountId: uuid('connected_account_id')
+      .notNull()
+      .references(() => connectedAccounts.id, { onDelete: 'cascade' }),
+    calendarId: text('calendar_id').notNull(),
+    name: text('name').notNull(),
+    color: text('color'),
+    isEnabled: boolean('is_enabled').default(true).notNull(),
+    accessRole: text('access_role'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    calendarUnique: uniqueIndex('user_calendars_unique_calendar').on(table.connectedAccountId, table.calendarId), // Changed to uniqueIndex
+    userIdIndex: index('user_calendars_user_id_index').on(table.userId),
+  })
+).enableRLS()
+
+export const notes = pgTable(
+  'notes',
+  {
+    id: uuid('id')
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
-    content: jsonb('content').default(EMPTY_CONTENT).$type<YooptaContentValue>().notNull(),
+    content: jsonb('content').$type<z.infer<typeof BlockNoteContentSchema>>().default([]),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
   },
@@ -140,10 +283,11 @@ export const tasks = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
-    description: jsonb('description').$type<YooptaContentValue>(),
-    status: text('status', { enum: ["pending", "completed", "important"] }).default("pending").notNull(),
+    content: jsonb('content').default(EMPTY_BLOCKNOTE_CONTENT).$type<typeof BlockNoteContentSchema._type>().notNull(), // Use BlockNote content schema
+    isCompleted: boolean('is_completed').default(false).notNull(), // New field for completion status
+    isHighPriority: boolean('is_high_priority').default(false).notNull(), // New field for high priority (boolean)
     dueDate: timestamp('due_date', { mode: 'date' }),
-    order: integer('order'),
+    order: integer('order'), // Remove .nullable() - columns are nullable by default
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull().$onUpdate(() => new Date()),
   },
@@ -157,12 +301,16 @@ export const tasks = pgTable(
   })
 ).enableRLS()
 
+// Explicitly define Task type to ensure correct content typing and new isHighPriority field
+export type Task = Omit<typeof tasks.$inferSelect, 'content' | 'priority'> & {
+  content: Block[];
+  isHighPriority: boolean;
+};
+
 export const userPreferences = pgTable(
   'user_preferences',
   {
-    id: uuid('id')
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' })
@@ -194,9 +342,7 @@ export const userPreferences = pgTable(
 export const chatMessages = pgTable(
   'chat_messages',
   {
-    id: uuid('id')
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -250,13 +396,22 @@ export const memoryUsage = pgTable(
   'memory_usage',
   {
     id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-    totalMemories: integer('total_memories').default(0),
-    monthlyRetrievals: integer('monthly_retrievals').default(0),
-    lastRetrievalReset: timestamp('last_retrieval_reset').defaultNow(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  }
-)
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    timestamp: timestamp('timestamp').defaultNow().notNull(),
+    totalTokens: integer('total_tokens').notNull(),
+    totalCost: text('total_cost').notNull(),
+  },
+  (table) => ({
+    rls: pgPolicy('memory_usage RLS policy', {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: 'all',
+    }),
+  })
+).enableRLS()
 
 export const memories = pgTable(
   'memories',
@@ -265,13 +420,10 @@ export const memories = pgTable(
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    title: text('title').notNull(),
-    content: text('content').notNull(),
-    tags: text('tags').array().default([]),
-    source: text('source'),
-    embedding: jsonb('embedding'),
+    memoryVector: text('memory_vector').notNull(),
+    summary: text('summary').notNull(),
+    type: text('type').notNull(), // e.g., 'episodic', 'semantic', 'declarative'
     createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
     rls: pgPolicy('memories RLS policy', {
@@ -283,98 +435,20 @@ export const memories = pgTable(
   })
 ).enableRLS()
 
-// Schemas for validation
-export const insertUserSchema = createInsertSchema(user);
-export const insertNoteSchema = createInsertSchema(notes, {
-  content: yooptaContentSchema,
-});
-export const insertTaskSchema = createInsertSchema(tasks, {
-  description: yooptaContentSchema.optional(),
-});
-export const insertUserPreferencesSchema = createInsertSchema(userPreferences);
-export const insertChatMessageSchema = createInsertSchema(chatMessages);
-export const insertEmotionalMetadataSchema = createInsertSchema(emotionalMetadata);
-export const insertMemorySchema = createInsertSchema(memories);
-
-// Inferred types
-export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof user.$inferSelect;
-export type InsertNote = z.infer<typeof insertNoteSchema>;
-export type Note = typeof notes.$inferSelect;
-export type InsertTask = z.infer<typeof insertTaskSchema>;
-export type Task = typeof tasks.$inferSelect;
-export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+
+// Explicitly define Note type to ensure correct content typing
+export type Note = Omit<typeof notes.$inferSelect, 'content'> & {
+  content: Block[];
+};
+
 export type UserPreferences = typeof userPreferences.$inferSelect;
-export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
-export type InsertEmotionalMetadata = z.infer<typeof insertEmotionalMetadataSchema>;
 export type EmotionalMetadata = typeof emotionalMetadata.$inferSelect;
 export type MemoryUsage = typeof memoryUsage.$inferSelect;
-export type InsertMemoryUsage = typeof memoryUsage.$inferInsert;
-export type InsertMemory = z.infer<typeof insertMemorySchema>;
 export type Memory = typeof memories.$inferSelect;
-// Adapter table types
 export type Account = typeof account.$inferSelect;
 export type Session = typeof session.$inferSelect;
-
-// --- NextAuth tables -------------------------------------------------
-export const account = pgTable(
-  'account',
-  {
-    userId: uuid('userId')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    type: text('type').$type<AdapterAccount['type']>().notNull(),
-    provider: text('provider').notNull(),
-    providerAccountId: text('providerAccountId').notNull(),
-    refresh_token: text('refresh_token'),
-    access_token: text('access_token'),
-    expires_at: integer('expires_at'),
-    token_type: text('token_type'),
-    scope: text('scope'),
-    id_token: text('id_token'),
-    session_state: text('session_state'),
-  },
-  (account) => ({
-    compoundKey: primaryKey({
-      columns: [account.provider, account.providerAccountId],
-    }),
-    rls: pgPolicy('account RLS policy', {
-      using: sql`auth.uid() = ${account.userId}`,
-      withCheck: sql`auth.uid() = ${account.userId}`,
-      to: authenticatedRole,
-      for: 'all',
-    }),
-  })
-).enableRLS()
-
-export const session = pgTable(
-  'session',
-  {
-    sessionToken: text('sessionToken').notNull().primaryKey(),
-    userId: uuid('userId')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  (table) => ({
-    rls: pgPolicy('session RLS policy', {
-      using: sql`auth.uid() = ${table.userId}`,
-      withCheck: sql`auth.uid() = ${table.userId}`,
-      to: authenticatedRole,
-      for: 'all',
-    }),
-  })
-).enableRLS()
-
-export const verificationTokens = pgTable(
-  'verification_tokens',
-  {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
-)
+export type ConnectedAccount = typeof connectedAccounts.$inferSelect;
+export type UserCalendar = typeof userCalendars.$inferSelect;
+export type VerificationToken = typeof verificationTokens.$inferSelect;

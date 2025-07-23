@@ -5,25 +5,18 @@ import { cn } from '@/lib/utils'
 import styles from './list-header.module.css'
 import { CardTitle } from '@/components/ui/card'
 
-interface ListHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: string
-  children?: React.ReactNode
+interface ListHeaderProps {
+  title: string;
+  children?: React.ReactNode;
+  className?: string;
+  titleClassName?: string;
 }
 
-const ListHeader = React.forwardRef<HTMLDivElement, ListHeaderProps>(
-  ({ className, title, children, ...props }, ref) => {
-    return (
-      <div
-        className={cn(styles.root, className)}
-        ref={ref}
-        {...props}
-      >
-        <CardTitle>{title}</CardTitle>
-        <div className={styles.actions}>{children}</div>
-      </div>
-    )
-  },
-)
-ListHeader.displayName = 'ListHeader'
-
-export { ListHeader } 
+export function ListHeader({ title, children, className }: ListHeaderProps) {
+  return (
+    <div className={cn("flex items-center justify-between h-12", className)}>
+      <h2 className="WidgeTit">{title}</h2>
+      {children}
+    </div>
+  )
+} 

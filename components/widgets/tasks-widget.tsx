@@ -11,16 +11,20 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { EditTaskForm } from './edit-task-form'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ActionsMenu } from '@/components/ui/actions-menu'
-import { ExpandingModal } from '@/components/ui/expanding-modal'
 import { WidgetLoader } from './widget-loader'
 import { EmptyState } from '@/components/ui/empty-state'
-import { CheckSquare } from 'lucide-react'
+import { useTaskModal } from '@/app/client-providers'
+import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema' // Corrected import path
+import styles from './widget.module.css'
+import { ScrollShadows } from '@/components/ui/scroll-shadows'
+import { ClientOnly } from '@/components/ui/safe-motion'
+import X from 'lucide-react/dist/esm/icons/x'
 
 interface TasksWidgetProps {
   searchQuery?: string
 }
 
-// API functions
+// API functions (these should now use isCompleted and priority for updates)
 async function fetchTasks(): Promise<Task[]> {
   const res = await fetch('/api/tasks')
   if (!res.ok) throw new Error('Failed to fetch tasks')
@@ -44,12 +48,17 @@ async function deleteTask(taskId: string): Promise<void> {
   if (!res.ok) throw new Error('Failed to delete task')
 }
 
-async function createTask(title: string): Promise<Task> {
+async function createTask(title: string, isCompleted: boolean, isHighPriority: boolean, content: any): Promise<Task> {
   console.log("API: Creating task with title:", title);
   const res = await fetch('/api/tasks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, status: 'pending' }),
+    body: JSON.stringify({ 
+      title, 
+      isCompleted, // Use passed isCompleted
+      isHighPriority, // Use passed high priority flag
+      content, // Use passed content
+    }),
   })
   if (!res.ok) {
     const errorBody = await res.json();
@@ -79,7 +88,8 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         title, 
-        status: 'pending',
+        isCompleted: false, // Default for new tasks from text
+        priority: 'none', // Default for new tasks from text
         // We'll handle the description formatting in the edit form
       }),
     });
@@ -100,8 +110,7 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
 
 export function TasksWidget({ searchQuery }: TasksWidgetProps) {
   const queryClient = useQueryClient()
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
-  const [newTaskText, setNewTaskText] = useState<string | null>(null)
+  const { setActiveTaskId, setNewTaskText, activeTask } = useTaskModal() // Ensure activeTask is destructured
 
   const { data, isLoading, isError } = useQuery<Task[]>({
     queryKey: ['tasks'],
@@ -163,7 +172,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     },
     onSuccess: () => {
       console.log("Mutation: deleteTask - onSuccess");
-      setActiveTaskId(null)
+      // Removed setActiveTaskId(null) - now handled by context's onClose
     },
     onSettled: () => {
       console.log("Mutation: deleteTask - onSettled");
@@ -172,18 +181,19 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
   })
 
   const createTaskMutation = useMutation({
-    mutationFn: createTask,
-    onMutate: async (title) => {
-      console.log("Mutation: createTask - onMutate, title:", title);
+    mutationFn: (newTaskData: { title: string; isCompleted: boolean; isHighPriority: boolean; content: any }) => createTask(newTaskData.title, newTaskData.isCompleted, newTaskData.isHighPriority, newTaskData.content), // Update mutationFn to accept high priority flag
+    onMutate: async (newTaskData) => {
+      console.log("Mutation: createTask - onMutate, newTaskData:", newTaskData);
       await queryClient.cancelQueries({ queryKey: ['tasks'] })
       const previousTasks = queryClient.getQueryData<Task[]>(['tasks'])
       
       // Create temporary task for optimistic update
       const tempTask: Task = {
         id: `temp-${Date.now()}`,
-        title,
-        status: 'pending' as const,
-        description: null,
+        title: newTaskData.title, // Use newTaskData.title
+        isCompleted: newTaskData.isCompleted, // Use newTaskData.isCompleted
+        isHighPriority: newTaskData.isHighPriority, // Use newTaskData.isHighPriority
+        content: newTaskData.content, // Use newTaskData.content
         dueDate: null,
         order: null,
         userId: '',
@@ -209,6 +219,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
         old.map(task => task.id === context?.tempTask.id ? newTask : task)
       )
       console.log("Mutation: createTask - onSuccess, replaced tempTask with real task");
+      setActiveTaskId(newTask.id); // Open the new task in the modal
     },
     onSettled: () => {
       console.log("Mutation: createTask - onSettled");
@@ -216,17 +227,16 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     },
   })
 
-  const handleTaskStatusChange = useCallback((taskId: string, status: Task['status']) => {
+  const handleTaskStatusChange = useCallback((taskId: string, isCompleted: boolean) => {
     // Prevent multiple rapid calls for the same task
     if (updateTaskMutation.isPending) return
-    console.log("handleTaskStatusChange: Updating task status for ID:", taskId, "to:", status);
-    updateTaskMutation.mutate({ id: taskId, status })
+    console.log("handleTaskStatusChange: Updating task completion for ID:", taskId, "to:", isCompleted);
+    updateTaskMutation.mutate({ id: taskId, isCompleted }) // Update isCompleted field
   }, [updateTaskMutation])
 
   function handleTaskSave(updatedTask: Partial<Task>) {
-    if (!activeTask) return
-    console.log("handleTaskSave: Saving task:", updatedTask);
-    updateTaskMutation.mutate({ id: activeTask.id, ...updatedTask })
+    // Removed activeTask check and direct mutation - now handled by EditTaskForm's onSave
+    // The EditTaskForm now directly calls updateTask server action
   }
 
   function handleTaskDelete(taskId: string) {
@@ -236,18 +246,46 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
 
   function handleAddTask() {
     console.log("handleAddTask: Creating new task");
-    createTaskMutation.mutate('New Task')
+    createTaskMutation.mutate({
+      title: 'New Task',
+      isCompleted: false,
+      isHighPriority: false,
+      content: EMPTY_BLOCKNOTE_CONTENT, // Use BlockNote's empty content structure
+    });
   }
   
   // Function to handle creating a task from editor text
   function handleCreateTaskFromEditorText(text: string) {
     console.log("Creating task from editor text:", text);
+    // We now just set the initial text, the modal open and form creation is handled by ClientProviders
     setNewTaskText(text);
-    // Create a basic task and then open the edit form
-    createTaskMutation.mutate(text.split('\n')[0] || 'New Task');
+    // Create a basic task to get an ID, then rely on the modal to open it with description
+    createTaskMutation.mutate({
+      title: text.split('\n')[0] || 'New Task',
+      isCompleted: false,
+      isHighPriority: false,
+      content: {
+        'paragraph-1': {
+          id: 'paragraph-1',
+          type: 'paragraph',
+          value: [{
+            id: 'paragraph-1-element',
+            type: 'paragraph',
+            children: [{ text: text || '' }], // Use the full text as content
+            props: {
+              nodeType: 'block',
+            },
+          }],
+          meta: {
+            order: 0,
+            depth: 0,
+          },
+        },
+      },
+    });
   }
 
-  const activeTask = tasks.find(task => task.id === activeTaskId)
+  // Removed activeTask calculation from here, it's now handled by the context
 
   if (isLoading) {
     return <WidgetLoader minHeight="h-[280px]" />
@@ -255,7 +293,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
 
   if (isError) {
     return (
-      <Card className="dashCard h-full">
+      <Card className="rounded-lg border border-border bg-card text-card-foreground shadow-sm h-full">
         <div className="flex items-center justify-center h-full text-destructive">
           Failed to load tasks. Please try again later.
         </div>
@@ -264,73 +302,84 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
   }
 
   return (
-    <Card className="dashCard h-full">
-      <ListHeader title="Tasks" className="p-[var(--widget-padding)] flex-shrink-0">
-        <AddButton onClick={handleAddTask} />
-      </ListHeader>
-      <ScrollArea className="h-[calc(100%-var(--widget-header-height))]">
-        <div className="p-[var(--widget-padding)]">
-          {tasks.length === 0 ? (
-            <EmptyState
-              icon={CheckSquare}
-              title="No tasks yet"
-              description="Stay organized and boost your productivity by creating your first task."
-              action={{
-                label: "Create Task",
-                onClick: handleAddTask
-              }}
-              className="h-full"
-            />
-          ) : (
-            <motion.div 
-              className="space-y-[var(--widget-list-spacing)]"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.1 }
-                }
-              }}
-            >
-              {/* Task items would be here */}
-              <AnimatePresence>
-                {tasks.map(task => (
+    <div className={styles.widgetContainer}>
+      <div className={styles.widgetContent}>
+        <div className="flex h-full flex-col">
+          <ListHeader
+            title="Tasks"
+            className="widgetHead"
+            titleClassName="widget-heading"
+          >
+            <AddButton onClick={handleAddTask} />
+          </ListHeader>
+          <ScrollShadows className="flex-1 custom-scrollbar">
+            <div className="taskEmpty">
+              {tasks.length === 0 ? (
+                <EmptyState
+                  renderIcon={() => <X className="h-6 w-6 text-gray-400" />}
+                  title="Not a care"
+                  description="Could your first task be to add a task?"
+                  action={{
+                    label: "Add Task",
+                    onClick: handleAddTask
+                  }}
+                  className="h-full"
+                />
+              ) : (
+                <ClientOnly>
                   <motion.div
-                    key={task.id}
-                    layoutId={`card-${task.id}`}
+                    className="space-y-[var(--widget-list-spacing)]"
+                    initial="hidden"
+                    animate="visible"
                     variants={{
-                      hidden: { y: 20, opacity: 0 },
-                      visible: { y: 0, opacity: 1 },
-                      exit: { x: -50, opacity: 0 }
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: { staggerChildren: 0.1 },
+                      },
                     }}
-                    onClick={() => setActiveTaskId(task.id)}
-                    className="group listItem"
                   >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Checkbox
-                        id={`task-${task.id}`}
-                        checked={task.status === 'completed'}
-                        onCheckedChange={(checked) =>
-                          handleTaskStatusChange(task.id, checked ? 'completed' : 'pending')
-                        }
-                        onClick={e => e.stopPropagation()}
-                      />
-                      <motion.h3
-                        className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        {task.title}
-                      </motion.h3>
-                      <ActionsMenu onDelete={() => handleTaskDelete(task.id)} />
-                    </div>
+                    <AnimatePresence>
+                      {tasks.map((task) => (
+                        <motion.div
+                          key={task.id}
+                          layoutId={`card-${task.id}`}
+                          initial={{ y: 20, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ x: -50, opacity: 0 }}
+                          onClick={() => setActiveTaskId(task.id)}
+                          className="group listItem"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <Checkbox
+                              id={`task-${task.id}`}
+                              checked={task.isCompleted}
+                              onCheckedChange={(checked) =>
+                                handleTaskStatusChange(task.id, checked as boolean)
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <h3
+                              className={`task header flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                                task.isCompleted
+                                  ? 'line-through text-muted-foreground'
+                                  : ''
+                              }`}
+                            >
+                              {task.title}
+                            </h3>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
+                </ClientOnly>
+              )}
+            </div>
+          </ScrollShadows>
+          {/* Removed ExpandingModal and EditTaskForm rendering from here as it's now in client-providers.tsx */}
         </div>
-      </ScrollArea>
-    </Card>
+      </div>
+    </div>
   )
 }

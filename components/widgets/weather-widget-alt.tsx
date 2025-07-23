@@ -5,26 +5,9 @@ import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { WidgetLoader } from './widget-loader'
 import { EmptyState } from '@/components/ui/empty-state'
-import { CloudOff } from 'lucide-react'
+import CloudOff from 'lucide-react/dist/esm/icons/cloud-off'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useRef, useEffect, useMemo, useCallback, lazy, Suspense } from 'react'
-import dynamic from 'next/dynamic'
-
-// Lazy load Lottie for better performance
-const Lottie = dynamic(() => import('lottie-react'), {
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-})
-
-// Lazy load animations to reduce initial bundle size
-const animationLoaders = {
-  clearSun: () => import('@/public/animations/ClearSun.json'),
-  clearNight: () => import('@/public/animations/clearNight.json'),
-  clouded: () => import('@/public/animations/clouded.json'),
-  rain: () => import('@/public/animations/rain.json'),
-  wind: () => import('@/public/animations/wind.json'),
-  storm: () => import('@/public/animations/storm.json'),
-}
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 
 interface WeatherData {
   temperature: number;
@@ -51,222 +34,6 @@ interface TimeSlot {
   time: string;
 }
 
-// Custom hook for lazy loading animations
-function useAnimation(animationType: keyof typeof animationLoaders) {
-  const [animationData, setAnimationData] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    let mounted = true
-    
-    animationLoaders[animationType]().then((module) => {
-      if (mounted) {
-        setAnimationData(module.default)
-        setIsLoading(false)
-      }
-    }).catch(() => {
-      if (mounted) {
-        setIsLoading(false)
-      }
-    })
-
-    return () => {
-      mounted = false
-    }
-  }, [animationType])
-
-  return { animationData, isLoading }
-}
-
-const WeatherIcons = {
-  Clear: ({ isExpanded, timeSlot }: { isExpanded: boolean; timeSlot?: string }) => {
-    const lottieRef = useRef<any>(null)
-    const isNightTime = timeSlot === 'evening' || timeSlot === 'night'
-    const animationType = isNightTime ? 'clearNight' : 'clearSun'
-    const { animationData, isLoading } = useAnimation(animationType)
-    
-    useEffect(() => {
-      if (lottieRef.current && animationData) {
-        lottieRef.current.setSpeed(isNightTime ? 0.3 : 0.5)
-      }
-    }, [isNightTime, animationData])
-
-    if (isLoading || !animationData) {
-      return (
-        <div className="absolute -inset-1 bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-      )
-    }
-
-    return (
-    <div className="absolute -inset-1 mix-blend-overlay">
-        <Suspense fallback={<div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />}>
-      <Lottie 
-            lottieRef={lottieRef}
-            animationData={animationData}
-        loop={true}
-        autoplay={true}
-        style={{ 
-              width: isNightTime ? 'calc(50% + 4px)' : 'calc(100% + 8px)',
-              height: isNightTime ? 'calc(50% + 4px)' : 'calc(100% + 8px)',
-          position: 'absolute',
-              top: isNightTime ? 'calc(25% - 2px)' : '-4px',
-              left: isNightTime ? 'calc(25% - 2px)' : '-4px'
-        }}
-      />
-        </Suspense>
-    </div>
-    )
-  },
-
-  Clouds: ({ isExpanded }: { isExpanded: boolean }) => {
-    const lottieRef = useRef<any>(null)
-    const { animationData, isLoading } = useAnimation('clouded')
-    
-    useEffect(() => {
-      if (lottieRef.current && animationData) {
-        lottieRef.current.setSpeed(0.3)
-      }
-    }, [animationData])
-
-    if (isLoading || !animationData) {
-      return (
-        <div className="absolute -inset-1 bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-      )
-    }
-
-    return (
-    <div className="absolute -inset-1 mix-blend-overlay">
-        <Suspense fallback={<div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />}>
-      <Lottie 
-            lottieRef={lottieRef}
-            animationData={animationData}
-        loop={true}
-        autoplay={true}
-        style={{ 
-          width: 'calc(100% + 8px)',
-          height: 'calc(100% + 8px)',
-          position: 'absolute',
-          top: '-4px',
-          left: '-4px'
-        }}
-      />
-        </Suspense>
-    </div>
-    )
-  },
-
-  Rain: ({ isExpanded }: { isExpanded: boolean }) => {
-    const lottieRef = useRef<any>(null)
-    const { animationData, isLoading } = useAnimation('rain')
-    
-    useEffect(() => {
-      if (lottieRef.current && animationData) {
-        lottieRef.current.setSpeed(0.7)
-      }
-    }, [animationData])
-
-    if (isLoading || !animationData) {
-      return (
-        <div className="absolute -inset-1 bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-      )
-    }
-
-    return (
-    <div className="absolute -inset-1 mix-blend-overlay">
-        <Suspense fallback={<div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />}>
-      <Lottie 
-            lottieRef={lottieRef}
-            animationData={animationData}
-        loop={true}
-        autoplay={true}
-        style={{ 
-          width: 'calc(100% + 8px)',
-          height: 'calc(100% + 8px)',
-          position: 'absolute',
-          top: '-4px',
-          left: '-4px'
-        }}
-      />
-        </Suspense>
-    </div>
-    )
-  },
-
-  Wind: ({ isExpanded }: { isExpanded: boolean }) => {
-    const lottieRef = useRef<any>(null)
-    const { animationData, isLoading } = useAnimation('wind')
-    
-    useEffect(() => {
-      if (lottieRef.current && animationData) {
-        lottieRef.current.setSpeed(0.4)
-      }
-    }, [animationData])
-
-    if (isLoading || !animationData) {
-      return (
-        <div className="absolute -inset-1 bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-      )
-    }
-
-    return (
-    <div className="absolute -inset-1 mix-blend-overlay">
-        <Suspense fallback={<div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />}>
-      <Lottie 
-            lottieRef={lottieRef}
-            animationData={animationData}
-        loop={true}
-        autoplay={true}
-        style={{ 
-          width: 'calc(100% + 8px)',
-          height: 'calc(100% + 8px)',
-          position: 'absolute',
-          top: '-4px',
-          left: '-4px'
-        }}
-      />
-        </Suspense>
-    </div>
-    )
-  },
-
-  Storm: ({ isExpanded }: { isExpanded: boolean }) => {
-    const lottieRef = useRef<any>(null)
-    const { animationData, isLoading } = useAnimation('storm')
-    
-    useEffect(() => {
-      if (lottieRef.current && animationData) {
-        lottieRef.current.setSpeed(0.6)
-      }
-    }, [animationData])
-
-    if (isLoading || !animationData) {
-      return (
-        <div className="absolute -inset-1 bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />
-      )
-    }
-
-    return (
-    <div className="absolute -inset-1 mix-blend-overlay">
-        <Suspense fallback={<div className="w-full h-full bg-gradient-to-b from-[#2C2C2C] to-[#1C1C1C] rounded-lg animate-pulse" />}>
-      <Lottie 
-            lottieRef={lottieRef}
-            animationData={animationData}
-        loop={true}
-        autoplay={true}
-        style={{ 
-          width: 'calc(100% + 8px)',
-          height: 'calc(100% + 8px)',
-          position: 'absolute',
-          top: '-4px',
-          left: '-4px'
-        }}
-      />
-        </Suspense>
-    </div>
-  )
-  }
-}
-
 function getTimeSlot(hour: number): string {
   if (hour >= 6 && hour < 12) return 'morning'
   if (hour >= 12 && hour < 18) return 'day'
@@ -287,9 +54,13 @@ function TimeSlotCard({
   location: string;
   isExpanded: boolean;
 }) {
-  const WeatherIcon = useMemo(() => 
-    WeatherIcons[slot.condition as keyof typeof WeatherIcons] || WeatherIcons.Clear
-  , [slot.condition])
+  const { data: weather } = useQuery<WeatherData>({
+    queryKey: ['weather', location],
+    queryFn: () => fetch(`/api/weather?location=${encodeURIComponent(location)}`).then(res => res.json()),
+    enabled: !!location,
+  });
+  const { main: condition } = weather || { main: 'Clear' }
+  const IconComponent = null;
 
   // Smoother transition settings
   const smoothTransition = useMemo(() => ({
@@ -318,36 +89,40 @@ function TimeSlotCard({
     >
       <div className="relative h-full w-full p-0">
         {/* Weather animation - always visible */}
-        <WeatherIcon isExpanded={isExpanded} timeSlot={slot.id} />
+        {IconComponent && <IconComponent isExpanded={isExpanded} timeSlot={slot.id} />}
         
         <div className="absolute top-[24px] left-[24px] flex flex-col gap-0.5 z-10">
-          <motion.div
-            initial={false}
-            animate={{
-              opacity: isExpanded ? 1 : 0,
-            }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="text-[#FF7A33] text-sm font-medium"
-          >
-            {location}
-          </motion.div>
+          <AnimatePresence>
+            <motion.div
+              key="location"
+              initial={false}
+              animate={{
+                opacity: isExpanded ? 1 : 0,
+              }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="text-[#FF7A33] text-sm font-medium"
+            >
+              {location}
+            </motion.div>
 
-          <motion.div
-            initial={false}
-            animate={{
-              rotate: isExpanded ? 0 : 90,
-              y: isExpanded ? 0 : -20,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 150,
-              damping: 20,
-              mass: 0.8
-            }}
-            className="text-[#8C8C8C] text-sm origin-bottom-left"
-          >
-            {slot.label}
-          </motion.div>
+            <motion.div
+              key="label"
+              initial={false}
+              animate={{
+                rotate: isExpanded ? 0 : 90,
+                y: isExpanded ? 0 : -20,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 150,
+                damping: 20,
+                mass: 0.8
+              }}
+              className="text-[#8C8C8C] text-sm origin-bottom-left"
+            >
+              {slot.label}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         <motion.div
@@ -358,7 +133,7 @@ function TimeSlotCard({
             x: isExpanded ? 12 : 0,
             y: isExpanded ? 48 : 0
           }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="absolute z-10"
         >
           <div className="flex items-baseline mt-4  ">
@@ -393,7 +168,7 @@ function TimeSlotCard({
             left: "50%",
             transform: "translateX(-50%)"
           }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="absolute font-tiny font-light italic text-white text-xl sm:text-2xl md:text-[30px] leading-none z-10"
         >
           {slot.temperature}
@@ -472,6 +247,7 @@ function WeatherTimeline({ weather, className }: { weather: WeatherData; classNa
           transition={containerTransition}
         >
           <TimeSlotCard
+            key={slot.id}
             slot={slot}
             high={weather.high}
             low={weather.low}
@@ -515,7 +291,7 @@ export function WeatherWidgetAlt({ className }: { className?: string }) {
     return (
       <Card className="dashCard min-h-[16rem] flex items-center justify-center">
         <EmptyState
-          icon={CloudOff}
+          renderIcon={() => <CloudOff className="h-6 w-6 text-gray-400" />}
           title="Weather unavailable"
           description="Unable to load weather data. Check your connection and try again."
           action={{

@@ -1,73 +1,105 @@
-/* Custom editor styles */
-[contenteditable]:empty:before {
-  content: attr(data-placeholder);
-  color: rgba(255, 255, 255, 0.4);
-  font-style: italic;
-  pointer-events: none;
-  position: absolute;
+/* BlockNote Editor Custom Styles */
+@import '@blocknote/core/fonts/inter.css';
+@import '@blocknote/mantine/style.css';
+
+/* Editor container */
+.bn-container {
+  background-color: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
 }
 
-[contenteditable]:focus {
-  outline: none;
+/* Editor content */
+.bn-container .bn-editor {
+  padding: 1rem;
 }
 
-.editor-content {
-  white-space: pre-wrap;
-  word-break: break-word;
+/* Block styling */
+.bn-container [data-node-type="blockContainer"] {
+  margin-bottom: 0.5rem;
+}
+
+/* Paragraph styling */
+.bn-container [data-node-type="paragraph"] {
+  font-size: 14px !important;
   line-height: 1.5;
-  font-family: system-ui, -apple-system, sans-serif;
-  caret-color: white;
 }
 
-/* Basic formatting styles */
-[contenteditable] h1 {
-  font-size: 1.8em;
-  font-weight: bold;
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+/* Heading styling */
+.bn-container [data-node-type="heading"] {
+  font-weight: 600;
+  color: #ffffff !important;
 }
 
-[contenteditable] h2 {
-  font-size: 1.5em;
-  font-weight: bold;
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+/* List styling */
+.bn-container [data-node-type="bulletListItem"],
+.bn-container [data-node-type="numberedListItem"] {
+  font-size: 14px !important;
 }
 
-[contenteditable] h3 {
-  font-size: 1.3em;
-  font-weight: bold;
-  margin-bottom: 0.5em;
-  margin-top: 0.5em;
+/* Toolbar styling */
+.bn-toolbar {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+  border-radius: 8px;
 }
 
-[contenteditable] p {
-  margin-bottom: 1em;
+.bn-toolbar button {
+  color: #ffffff !important;
 }
 
-[contenteditable] ul, 
-[contenteditable] ol {
-  margin-left: 1.5em;
-  margin-bottom: 1em;
+.bn-toolbar button:hover {
+  background-color: #333333 !important;
 }
 
-[contenteditable] ul li {
-  list-style-type: disc;
+/* Side menu styling - hide it completely */
+.bn-side-menu {
+  display: none !important;
 }
 
-[contenteditable] ol li {
-  list-style-type: decimal;
+/* Placeholder styling */
+.bn-container .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #666666;
+  float: left;
+  pointer-events: none;
+  height: 0;
 }
 
-[contenteditable] blockquote {
-  border-left: 3px solid rgba(255, 255, 255, 0.3);
-  padding-left: 1em;
-  margin-left: 0;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.8);
+/* Selection styling */
+.bn-container .ProseMirror ::selection {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-[contenteditable] a {
-  color: #6ea8fe;
-  text-decoration: underline;
+/* Custom action buttons */
+.customActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Container styles */
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.editorContent {
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 0.5rem;
 } 

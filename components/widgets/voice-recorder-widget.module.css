@@ -1,0 +1,7 @@
+.container {
+  @apply relative rounded-[22px] h-full w-full;
+  overflow: visible;
+  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
+  border: 1px solid #323235;
+  box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+} 

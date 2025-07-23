@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1750918438371,
-      "tag": "0000_crazy_hedge_knight",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1750919282269,
-      "tag": "0001_robust_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1751109359456,
-      "tag": "0002_married_kate_bishop",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1751109474692,
-      "tag": "0003_lush_impossible_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1751986888899,
-      "tag": "0004_glossy_wolf_cub",
+      "when": 1753275286125,
+      "tag": "0000_fresh_trish_tilby",
       "breakpoints": true
     }
   ]

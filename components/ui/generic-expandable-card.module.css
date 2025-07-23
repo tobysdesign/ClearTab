@@ -1,3 +1,5 @@
+
+
 .trigger{ @apply cursor-pointer; }
 .overlay{ @apply fixed inset-0 bg-black/30 h-full w-full z-10; }
 .wrapper{ @apply fixed inset-0 grid place-items-center z-50; }

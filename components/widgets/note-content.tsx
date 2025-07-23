@@ -4,16 +4,14 @@ import type { Note } from '@/shared/schema'
 import { Input } from '@/components/ui/input'
 import { useEffect, useState, useRef, type ReactNode } from 'react'
 import { Editor } from '@/components/ui/editor'
-
-// Define empty content constant for compatibility
-const EMPTY_CONTENT = ''
+import { YooptaContentValue, EMPTY_CONTENT } from '@/shared/schema' // Import YooptaContentValue and EMPTY_CONTENT from shared/schema
 
 interface NoteContentProps {
   note: Note | null
   children?: ReactNode
   isNewNote?: boolean
   onTitleChange?: (title: string) => void
-  onContentChange?: (content: any, options: any) => void
+  onContentChange?: (content: YooptaContentValue, options: any) => void // Type content as YooptaContentValue
 }
 
 export function NoteContent({
@@ -24,53 +22,17 @@ export function NoteContent({
   onContentChange,
 }: NoteContentProps) {
   const [currentTitle, setCurrentTitle] = useState(note?.title || '')
-  const [currentContent, setCurrentContent] = useState<string>(extractTextContent(note?.content) || EMPTY_CONTENT)
+  // Initialize content directly with YooptaContentValue
+  const [currentContent, setCurrentContent] = useState<YooptaContentValue>(note?.content || EMPTY_CONTENT)
   const titleInputRef = useRef<HTMLInputElement>(null)
 
-  // Extract text content from structured content
-  function extractTextContent(content: any): string {
-    if (!content) return '';
-    
-    try {
-      // If it's already a string, return it
-      if (typeof content === 'string') return content;
-      
-      // If it's an object, try to extract text
-      if (typeof content === 'object') {
-        // For Yoopta-style content objects
-        if (content['paragraph-1'] && content['paragraph-1'].value) {
-          let extractedText = '';
-          
-          Object.values(content).forEach((block: any) => {
-            if (block.value && Array.isArray(block.value)) {
-              block.value.forEach((element: any) => {
-                if (element.children) {
-                  element.children.forEach((child: any) => {
-                    extractedText += typeof child === 'string' ? child : (child.text || '');
-                  });
-                }
-              });
-              extractedText += '\n';
-            }
-          });
-          
-          return extractedText;
-        }
-      }
-      
-      // Fallback to string representation
-      return String(content);
-    } catch (error) {
-      console.error("Error extracting text content:", error);
-      return '';
-    }
-  }
+  // Removed: extractTextContent function
 
   // Update title and content when note changes
   useEffect(() => {
     if (note) {
       setCurrentTitle(note.title)
-      setCurrentContent(extractTextContent(note.content) || EMPTY_CONTENT)
+      setCurrentContent(note.content || EMPTY_CONTENT)
     }
   }, [note])
   
@@ -90,10 +52,11 @@ export function NoteContent({
     }
   }
 
-  // Handle content changes
-  const handleContentChange = (newContent: string) => {
+  // Handle content changes - pass YooptaContentValue directly
+  const handleContentChange = (newContent: YooptaContentValue) => {
     setCurrentContent(newContent)
     if (onContentChange) {
+      // YooptaOnChangeOptions might not be needed if not used internally by Editor
       onContentChange(newContent, {})
     }
   }

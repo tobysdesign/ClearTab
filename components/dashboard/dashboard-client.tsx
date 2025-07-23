@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState, Suspense, useCallback } from 'react'
 import { motion, PanInfo, useAnimationControls } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { GripVertical } from 'lucide-react'
+import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical'
 import { DockContent } from '../dashboard/dock-content'
 import { ResizableBentoGrid } from './resizable-bento-grid'
-import { SettingsModal } from '@/components/settings/settings-modal'
+import { SettingsDrawer } from '@/components/settings/settings-drawer'
 import { PieGuide } from './pie-guide'
 import { type ReactNode } from 'react'
 import Image from 'next/image'
@@ -30,7 +30,7 @@ function LoadingState() {
       <div className="relative w-[90px] h-[50px]">
         <Image
           src="/assets/loading.gif"
-          alt="Loading..."
+          alt="Loader..."
           fill
           className="object-contain"
           priority
@@ -51,14 +51,14 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   const [dragOrigin, setDragOrigin] = useState<{ x: number, y: number } | null>(null)
   
   const [position, setPosition] = useState<'top' | 'left' | 'right' | 'bottom'>('bottom')
-  const [dropZones, setDropZones] = useState<DropZone[]>([])
+  const [dropZones, setDropZones] = useState<DropZone[]>([]);
 
   const initialPosition = 'bottom' as DropZone['id']
   const initialHorizontalWidth = false ? 320 : 180
   const initialHorizontalHeight = 52
   const initialVerticalWidth = 52 
   const initialVerticalHeight = false ? 220 : 160
-  const EDGE_MARGIN = 20
+  const EDGE_MARGIN = 8
 
   // Calculate initial currentZoneState based on a default position
   const initialCurrentZoneState = typeof window !== 'undefined' ? {
@@ -92,7 +92,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
     const horizontalHeight = 52
     const verticalWidth = 52 
     const verticalHeight = showSearch ? 220 : 160
-    const EDGE_MARGIN = 20
+    const EDGE_MARGIN = 8
 
     const newZones: DropZone[] = [
       {
@@ -209,10 +209,10 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
       ref={containerRef}
       className="relative h-screen w-screen bg-background"
     >
-      <SettingsModal 
+      {/* <SettingsModal 
         open={showSettings} 
         onOpenChange={setShowSettings} 
-      />
+      /> */}
       <PieGuide 
         isDragging={isDragging} 
         hoveredSlice={nearestZoneId} 
@@ -242,7 +242,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
           <div
             key={zone.id}
             className={cn(
-              'absolute border-2 border-dashed rounded-lg transition-colors duration-200',
+              'absolute border-2 border-dashed rounded-lg transition-colors duration-200 ease-out',
               nearestZoneId === zone.id ? 'border-emerald-500 bg-emerald-500/20' : 'border-muted bg-transparent'
             )}
             style={{
@@ -262,7 +262,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         dragMomentum={false}
-        className="select-none touch-none absolute z-50 rounded-xl bg-black/40 border border-white/20 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-black/30"
+        className="select-none touch-none absolute z-50 rounded-xl bg-black/40 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-black/30"
         style={{
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)'
         }}
@@ -282,8 +282,10 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
               isVertical={isVertical}
             />
             
+            <SettingsDrawer />
+
             <div
-              className="rounded-lg p-2 hover:bg-white/20 cursor-grab active:cursor-grabbing transition-all duration-200 text-white/60 hover:text-white/80"
+              className="rounded-lg p-2 hover:bg-white/20 cursor-grab active:cursor-grabbing transition-all duration-200 ease-out text-white/60 hover:text-white/80"
               onPointerDown={(e) => {
                 const target = e.currentTarget as HTMLDivElement
                 target.setPointerCapture(e.pointerId)

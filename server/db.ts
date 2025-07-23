@@ -9,8 +9,13 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
-// Create postgres connection with edge compatibility
-const client = postgres(connectionString, { ssl: 'prefer' })
+// Create postgres connection with proper pooling and timeouts
+const client = postgres(connectionString, { 
+  max: 10,                // Connection pool size
+  idle_timeout: 20,       // Close idle connections after 20 seconds
+  connect_timeout: 10,    // 10 second connection timeout
+  ssl: process.env.NODE_ENV === 'production' // Only use SSL in production
+})
 
 // Create drizzle database instance with schema
 export const db = drizzle(client, { schema })

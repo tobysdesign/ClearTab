@@ -24,7 +24,7 @@ const StockCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow transition-all duration-200 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10",
+      "rounded-xl border bg-card text-card-foreground shadow transition-all duration-200 ease-out hover:border-primary/50 hover:shadow-md hover:shadow-primary/10",
       className
     )}
     {...props}

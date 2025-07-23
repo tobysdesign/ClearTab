@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import type { Task } from '@/shared/schema'
-import { useDebouncedCallback } from 'use-debounce'
+// Removed useDebouncedCallback as optimistic updates will trigger direct saves
 import { Input } from '@/components/ui/input'
 import dynamic from 'next/dynamic'
-import { YooptaContentValue, EMPTY_CONTENT } from '@/types/yoopta'
+import { Block } from '@blocknote/core'
+import { EMPTY_BLOCKNOTE_CONTENT, BlockNoteContentSchema } from '@/shared/schema'
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -15,20 +16,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { CalendarIcon } from 'lucide-react'
+// Removed CalendarIcon as it's not used directly in JSX
 import { format } from 'date-fns'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { motion } from 'framer-motion'
 import { Editor } from '@/components/ui/editor'
-import { useActionState } from 'react'
 import { updateTask, createTask } from '@/lib/actions/tasks'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { StatusDropdown } from '@/components/ui/status-dropdown'
-import type { ActionResponse } from '@/types/actions'
+// Removed StatusDropdown and Select/SelectItem as priority is now a boolean
+// import { StatusDropdown } from '@/components/ui/status-dropdown'
+// import { Select, SelectItem } from '@/components/ui/select'
 
 const EditorComponent = dynamic(
   () => import('@/components/ui/editor').then(mod => mod.Editor),
@@ -47,42 +48,13 @@ interface EditTaskFormProps {
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.any().optional(),
-  status: z.enum(['pending', 'completed', 'important']),
+  content: BlockNoteContentSchema.optional(), // Use BlockNoteContentSchema for content
+  isCompleted: z.boolean().default(false),
+  isHighPriority: z.boolean().default(false), // Use isHighPriority instead of priority
   dueDate: z.date().optional().nullable(),
 })
 
 type TaskFormValues = z.infer<typeof taskSchema>
-
-// Helper function to convert plain text to Yoopta format
-function textToYooptaContent(text: string): YooptaContentValue {
-  try {
-    // Try to parse if it's already in JSON format
-    const parsed = JSON.parse(text);
-    if (typeof parsed === 'object' && parsed !== null) {
-      return parsed;
-    }
-  } catch (e) {
-    // Not JSON, continue with text conversion
-  }
-
-  // Create a simple paragraph content structure
-  const content = {
-    'paragraph-1': {
-      id: 'paragraph-1',
-      type: 'paragraph',
-      value: [{
-        id: 'paragraph-1-element',
-        type: 'paragraph',
-        children: [{ text }],
-        props: { nodeType: 'block' },
-      }],
-      meta: { order: 0, depth: 0 },
-    },
-  };
-
-  return content;
-}
 
 export function EditTaskForm({
   task,
@@ -90,21 +62,21 @@ export function EditTaskForm({
   onSave,
   initialDescription = ''
 }: EditTaskFormProps) {
-  const [formState, formAction] = useActionState<ActionResponse<Task | null>, TaskFormValues & { id?: string }>(task ? updateTask : createTask, null)
+  const [isPending, startTransition] = useTransition();
+  const [lastSaveResult, setLastSaveResult] = useState<any>(null);
+
+  // Initialize content with either the task content or the selected text from editor
+  const initialContent = task?.content || 
+    (initialDescription ? [{ type: 'paragraph', content: [{ type: 'text', text: initialDescription }] }] as Block[] : EMPTY_BLOCKNOTE_CONTENT);
   
-  // Initialize description with either the task description or the selected text from editor
-  const initialDescriptionContent = task?.description || 
-    (initialDescription ? textToYooptaContent(initialDescription) : EMPTY_CONTENT);
-  
-  const [currentDescription, setCurrentDescription] = useState<YooptaContentValue>(
-    JSON.parse(JSON.stringify(initialDescriptionContent))
+  const [currentContent, setCurrentContent] = useState<Block[]>(
+    JSON.parse(JSON.stringify(initialContent))
   );
 
-  // Generate initial title from the first line of the description if available
+  // Generate initial title from the first line of the content if available
   const getInitialTitle = () => {
     if (task?.title) return task.title;
     if (initialDescription) {
-      // Extract first line or first 50 chars for title
       const firstLine = initialDescription.split('\n')[0];
       return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine;
     }
@@ -115,8 +87,9 @@ export function EditTaskForm({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: getInitialTitle(),
-      description: initialDescriptionContent,
-      status: task?.status || 'pending',
+      content: initialContent, // Use initialContent for default value
+      isCompleted: task?.isCompleted || false,
+      isHighPriority: task?.isHighPriority || false, // Default to false
       dueDate: task?.dueDate || null,
     },
   })
@@ -125,106 +98,148 @@ export function EditTaskForm({
     if (task) {
       form.reset({
         title: task.title,
-        description: task.description,
-        status: task.status,
+        content: task.content || EMPTY_BLOCKNOTE_CONTENT,
+        isCompleted: task.isCompleted,
+        isHighPriority: task.isHighPriority, // Set from task
         dueDate: task.dueDate || null,
       })
-      setCurrentDescription(JSON.parse(JSON.stringify(task.description || EMPTY_CONTENT)))
+      setCurrentContent(JSON.parse(JSON.stringify(task.content || EMPTY_BLOCKNOTE_CONTENT)))
     } else if (initialDescription) {
-      // For new tasks with initial description from editor selection
       form.reset({
         title: getInitialTitle(),
-        description: initialDescriptionContent,
-        status: 'pending',
+        content: initialContent,
+        isCompleted: false,
+        isHighPriority: false, // Default for new tasks
         dueDate: null,
       });
     }
-  }, [task, initialDescription, form, initialDescriptionContent])
+  }, [task, initialDescription, form, initialContent])
 
   useEffect(() => {
-    if (formState?.success) {
+    // Only call onSave for new task creation, not for updates
+    if (lastSaveResult?.data?.success && !task) {
       onSave?.()
-    } else if (formState?.error) {
-      console.error('Server error:', formState.error)
+    } else if (lastSaveResult?.data?.error) {
+      console.error('Server error:', lastSaveResult.data.error)
     }
-  }, [formState, onSave])
+  }, [lastSaveResult, onSave, task])
 
-  const onSubmit = (values: TaskFormValues) => {
+  // Submit form directly on change for optimistic updates
+  const handleFormChange = () => {
+    // Only submit if there are actual changes
+    if (form.formState.isDirty) {
+      onSubmit(form.getValues());
+    }
+  };
+
+  const onSubmit = async (values: TaskFormValues) => {
     const dataToSend = {
       ...values,
-      id: task?.id,
-      description: currentDescription,
+      content: currentContent, // Use currentContent for description
+      isCompleted: values.isCompleted || false,
+      isHighPriority: values.isHighPriority || false, // Ensure default
     }
-    formAction(dataToSend)
+
+    startTransition(async () => {
+      try {
+        let result;
+        if (task?.id) {
+          result = await updateTask({ id: task.id, ...dataToSend });
+        } else {
+          result = await createTask(dataToSend);
+        }
+        setLastSaveResult(result);
+      } catch (error) {
+        console.error('Failed to save task:', error);
+      }
+    });
   }
 
-  const handleDescriptionChange = (value: YooptaContentValue) => {
-    setCurrentDescription(value)
-  }
+  // Use onChange for editor, which also triggers form submission
+  const handleEditorChange = (content: Block[]) => {
+    setCurrentContent(content);
+    handleFormChange(); // Trigger form submission on editor change
+  };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="p-4">
-      <h2 className="text-xl font-bold mb-4">{task ? 'Edit Task' : 'Create Task'}</h2>
-      <div className="mb-4">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
+    <form className="p-6 space-y-6 bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl">
+      <div className="relative">
+        <Label htmlFor="title" className="absolute -top-2 left-3 bg-[#141414] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono">Title</Label>
         <Input
           id="title"
           {...form.register('title')}
-          className="mt-1 block w-full"
+          placeholder="New Task"
+          className="bg-transparent border-[#3d3d3d] h-11"
+          onBlur={handleFormChange}
         />
-        {form.formState.errors.title && (
-          <p className="text-red-500 text-xs mt-1">{form.formState.errors.title.message}</p>
-        )}
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+      <div className="flex items-center space-x-6">
+        <div className="relative">
+          <Label htmlFor="dueDate" className="absolute -top-2 left-3 bg-[#141414] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono">Due By</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-[130px] justify-start text-left font-normal bg-transparent border-[#3d3d3d] h-11',
+                  !form.watch('dueDate') && 'text-muted-foreground',
+                )}
+              >
+                {form.watch('dueDate') ? format(form.watch('dueDate') as Date, 'dd/MM/yy') : '22/07/25'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 bg-[#111111] border-[#3d3d3d]">
+              <Calendar
+                mode="single"
+                selected={form.watch('dueDate') || undefined}
+                onSelect={(date) => {
+                  form.setValue('dueDate', date || null, { shouldDirty: true });
+                  handleFormChange();
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="flex items-center space-x-2 pt-2">
+          <Switch
+            id="isHighPriority"
+            className="task-important-switch"
+            checked={!!form.watch('isHighPriority')}
+            onCheckedChange={(checked) => {
+              form.setValue('isHighPriority', checked, { shouldDirty: true });
+              handleFormChange();
+            }}
+          />
+          <Label htmlFor="isHighPriority" className="text-sm text-[#555454]">Toggle important</Label>
+        </div>
+      </div>
+
+      <div className="relative">
+        <Label htmlFor="content" className="absolute -top-2 left-3 bg-[#141414] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono">Description</Label>
         <Editor
-          value={currentDescription}
-          onChange={handleDescriptionChange}
-          className="mt-1 block w-full border rounded-md min-h-[150px]"
+          value={currentContent}
+          onChange={handleEditorChange}
+          placeholder="Describe the task..."
+          className="bg-transparent border-[#313131] min-h-[120px] p-3 task-editor-description"
         />
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-        <StatusDropdown
-          currentStatus={form.watch('status')}
-          onSelectStatus={(status: TaskFormValues['status']) => form.setValue('status', status)}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date</label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={
-                `w-[240px] justify-start text-left font-normal ${!form.watch('dueDate') && "text-muted-foreground"}`
-              }
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {form.watch('dueDate') ? format(form.watch('dueDate')!, "PPP") : "Pick a date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={form.watch('dueDate') || undefined}
-              onSelect={(date) => form.setValue('dueDate', date || null)}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {task ? 'Save Changes' : 'Create Task'}
-        </Button>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+           <Checkbox
+            id="isCompleted"
+            className="task-complete-checkbox"
+            checked={!!form.watch('isCompleted')}
+            onCheckedChange={(checked) => {
+              form.setValue('isCompleted', checked as boolean, { shouldDirty: true });
+              handleFormChange();
+            }}
+          />
+          <Label htmlFor="isCompleted" className="text-sm text-[#555454]">Mark complete</Label>
+        </div>
       </div>
     </form>
-  )
+  );
 } 

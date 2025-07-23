@@ -5,9 +5,9 @@ import { useChatContext } from '@/hooks/use-chat-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatPanel } from './chat-panel'
 import { ShinyAiButton } from '../ui/shiny-ai-button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { X, MoreHorizontal } from 'lucide-react'
+import X from 'lucide-react/dist/esm/icons/x'
+import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal'
 
 function ChatOverlay() {
   const {
@@ -47,24 +47,24 @@ function ChatOverlay() {
             }}
         onClick={(e) => e.stopPropagation()}
       >
-          <Card className="h-full flex flex-col bg-card/95 backdrop-blur-xl border-border/50 shadow-2xl">
-            <CardHeader className="flex-shrink-0 border-b border-border/50">
+          <motion.div className="h-full flex flex-col bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl border border-neutral-800 shadow-2xl">
+            <div className="flex-shrink-0 border-b border-neutral-800 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
               <ShinyAiButton layoutId="ai-chat-icon-transform" onClick={() => {}} />
-                  <CardTitle className="text-lg">Tasks</CardTitle>
+                  <h2 className="text-lg font-semibold">AI Chat</h2>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="icon" className="w-8 h-8">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={closeChat}>
+                  <Button variant="ghost" size="icon" onClick={closeChat} className="w-8 h-8">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
         </div>
-            </CardHeader>
-            <CardContent className="flex-1 p-0 min-h-0">
+            </div>
+            <div className="flex-1 p-0 min-h-0">
               <ChatPanel
                 messages={messages}
                 onUserInput={handleUserInput}
@@ -72,8 +72,8 @@ function ChatOverlay() {
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
           </motion.div>
         </motion.div>
       )}

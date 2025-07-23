@@ -1,6 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+:root {
   --color-background: 0 0% 100%;
   --color-foreground: 222.2 84% 4.9%;
   --color-card: 0 0% 100%;
@@ -26,6 +28,30 @@
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
   --radius-3xl: 3rem;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Custom utility classes for missing Tailwind utilities */
+.fade-in-0 {
+  animation: fade-in 0s ease-out;
+  opacity: 1;
+}
+
+.peer {
+  /* Peer utility base class */
+}
+
+.focus\:bg-accent:focus {
+  background-color: hsl(var(--color-accent));
 }
 
 .dark {
@@ -89,7 +115,7 @@
 .text-secondary { color: hsl(var(--color-secondary)); }
 .text-secondary-foreground { color: hsl(var(--color-secondary-foreground)); }
 .text-muted { color: hsl(var(--color-muted)); }
-.text-muted-foreground { color: hsl(var(--color-muted-foreground)); }
+.text-muted-foreground { color: #8D8D8D; }
 .text-accent { color: hsl(var(--color-accent)); }
 .text-accent-foreground { color: hsl(var(--color-accent-foreground)); }
 .text-destructive { color: hsl(var(--color-destructive)); }
@@ -125,7 +151,7 @@
 
 /* Weather widget styles */
 .weather-widget {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  background: linear-gradient(135deg, #1F1F1F 0%, #161515 100%);
 }
 
 .weather-icon {
@@ -136,6 +162,8 @@
 .task-card {
   transition: all 0.2s ease-in-out;
 }
+
+
 
 .task-card:hover {
   transform: translateY(-1px);
@@ -151,7 +179,7 @@
 
 /* Scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -159,8 +187,8 @@
   border-radius: 3px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--color-muted-foreground));
+::-webkit-scrollbar-thumb {
+  background: #C57B93 !important;
   border-radius: 3px;
 }
 
@@ -307,10 +335,10 @@
     --notes-bg-color: hsl(var(--background));
 
     /* Widget Common Variables */
-    --widget-padding: 1rem;
-    --widget-header-height: 3rem;
-    --widget-border-color: hsl(var(--border));
+    
+    --widget-header-height: 60px;
     --widget-list-spacing: 0.5rem;
+    --widget-padding: 1rem;
     --widget-sidebar-width: 250px;
     --widget-item-padding: 0.75rem;
   }
@@ -402,189 +430,15 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
   overflow: hidden;
 }
 
-/* YooptaEditor Dark Theme Styles */
-.yoopta-dark-theme {
-  /* Editor container */
-  --yoopta-editor-background: #151515;
-  --yoopta-editor-color: #c2c2c2;
-  
-  /* Block elements */
-  --yoopta-block-background: transparent;
-  --yoopta-block-color: #c2c2c2;
-  --yoopta-block-border: #27272a;
-  
-  /* Toolbar */
-  --yoopta-toolbar-background: #151515;
-  --yoopta-toolbar-border: #27272a;
-  --yoopta-toolbar-color: #c2c2c2;
-  
-  /* Buttons */
-  --yoopta-button-background: #27272a;
-  --yoopta-button-hover-background: #3f3f46;
-  --yoopta-button-color: #c2c2c2;
-  
-  /* Selection */
-  --yoopta-selection-background: transparent;
-  
-  /* Placeholder */
-  --yoopta-placeholder-color: #71717a;
-}
+.notestits {font-size: 16px; font-weight: 300; color: #BBBBBB;}
+.widgetHead {padding: 24px 24px 0;     background: linear-gradient(182deg, rgb(39 39 39) 0%, rgb(33 33 33 / 0%) 50%);
+  position: absolute;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+  width: 100%;
+  padding-bottom: 24px;}
 
-/* YooptaEditor Dark Theme Implementation */
-.yoopta-dark-theme .yoopta-editor,
-.yoopta-editor-dark {
-  background-color: transparent !important;
-  color: var(--yoopta-editor-color) !important;
-}
-
-/* Block styling */
-.yoopta-dark-theme [data-yoopta-block],
-.yoopta-editor-dark [data-yoopta-block] {
-  background-color: var(--yoopta-block-background) !important;
-  color: var(--yoopta-block-color) !important;
-  border-color: var(--yoopta-block-border) !important;
-}
-
-/* Paragraph styling */
-.yoopta-dark-theme [data-yoopta-block="Paragraph"] p,
-.yoopta-editor-dark [data-yoopta-block="Paragraph"] p {
-  color: #c2c2c2 !important;
-}
-
-/* Heading styling */
-.yoopta-dark-theme [data-yoopta-block^="Heading"] h1,
-.yoopta-dark-theme [data-yoopta-block^="Heading"] h2,
-.yoopta-dark-theme [data-yoopta-block^="Heading"] h3,
-.yoopta-editor-dark [data-yoopta-block^="Heading"] h1,
-.yoopta-editor-dark [data-yoopta-block^="Heading"] h2,
-.yoopta-editor-dark [data-yoopta-block^="Heading"] h3 {
-  color: #c2c2c2 !important;
-}
-
-/* Blockquote styling */
-.yoopta-dark-theme [data-yoopta-block="Blockquote"] blockquote,
-.yoopta-editor-dark [data-yoopta-block="Blockquote"] blockquote {
-  color: #a1a1aa !important;
-  border-left-color: #3f3f46 !important;
-  background-color: #151515 !important;
-}
-
-/* List styling */
-.yoopta-dark-theme [data-yoopta-block="BulletedList"] ul,
-.yoopta-dark-theme [data-yoopta-block="NumberedList"] ol,
-.yoopta-editor-dark [data-yoopta-block="BulletedList"] ul,
-.yoopta-editor-dark [data-yoopta-block="NumberedList"] ol {
-  color: #c2c2c2 !important;
-}
-
-.yoopta-dark-theme [data-yoopta-block="BulletedList"] li,
-.yoopta-dark-theme [data-yoopta-block="NumberedList"] li,
-.yoopta-editor-dark [data-yoopta-block="BulletedList"] li,
-.yoopta-editor-dark [data-yoopta-block="NumberedList"] li {
-  color: #c2c2c2 !important;
-}
-
-/* Toolbar styling */
-.yoopta-dark-theme [data-yoopta-toolbar],
-.yoopta-editor-dark [data-yoopta-toolbar] {
-  background-color: var(--yoopta-toolbar-background) !important;
-  border-color: var(--yoopta-toolbar-border) !important;
-  color: var(--yoopta-toolbar-color) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Toolbar buttons */
-.yoopta-dark-theme [data-yoopta-toolbar] button,
-.yoopta-editor-dark [data-yoopta-toolbar] button {
-  background-color: var(--yoopta-button-background) !important;
-  color: var(--yoopta-button-color) !important;
-  border-color: var(--yoopta-toolbar-border) !important;
-}
-
-.yoopta-dark-theme [data-yoopta-toolbar] button:hover,
-.yoopta-editor-dark [data-yoopta-toolbar] button:hover {
-  background-color: var(--yoopta-button-hover-background) !important;
-}
-
-/* Placeholder styling */
-.yoopta-dark-theme [data-yoopta-placeholder],
-.yoopta-editor-dark [data-yoopta-placeholder] {
-  color: var(--yoopta-placeholder-color) !important;
-}
-
-/* Selection styling */
-.yoopta-dark-theme ::selection,
-.yoopta-editor-dark ::selection {
-  background-color: var(--yoopta-selection-background) !important;
-}
-
-/* Mark styling (Bold, Italic, etc.) */
-.yoopta-dark-theme [data-yoopta-mark="bold"],
-.yoopta-dark-theme [data-yoopta-mark="italic"],
-.yoopta-dark-theme [data-yoopta-mark="underline"],
-.yoopta-dark-theme [data-yoopta-mark="strike"],
-.yoopta-editor-dark [data-yoopta-mark="bold"],
-.yoopta-editor-dark [data-yoopta-mark="italic"],
-.yoopta-editor-dark [data-yoopta-mark="underline"],
-.yoopta-editor-dark [data-yoopta-mark="strike"] {
-  color: #fafafa !important;
-}
-
-/* Code mark styling */
-.yoopta-dark-theme [data-yoopta-mark="code"],
-.yoopta-editor-dark [data-yoopta-mark="code"] {
-  background-color: #27272a !important;
-  color: #fbbf24 !important;
-  border-radius: 4px !important;
-  padding: 2px 4px !important;
-}
-
-/* Focus and active states */
-/* Keep subtle background highlight without blue outline */
-.yoopta-dark-theme [data-yoopta-block]:focus-within,
-.yoopta-editor-dark [data-yoopta-block]:focus-within {
-  background: #222 !important;
-  outline: none !important;
-  outline-offset: 0 !important;
-}
-
-/* Dropdown and menu styling */
-.yoopta-dark-theme [data-yoopta-dropdown],
-.yoopta-dark-theme [data-yoopta-menu],
-.yoopta-editor-dark [data-yoopta-dropdown],
-.yoopta-editor-dark [data-yoopta-menu] {
-  background-color: #18181b !important;
-  border-color: #27272a !important;
-  color: #fafafa !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Menu items */
-.yoopta-dark-theme [data-yoopta-menu-item],
-.yoopta-editor-dark [data-yoopta-menu-item] {
-  color: #fafafa !important;
-}
-
-.yoopta-dark-theme [data-yoopta-menu-item]:hover,
-.yoopta-editor-dark [data-yoopta-menu-item]:hover {
-  background-color: #27272a !important;
-}
-
-.yoopta-editor-dark [data-yoopta-menu-item] {
-  padding: 10px;
-}
-
-.yoopta-editor-dark [data-yoopta-menu-item]:hover {
-  background-color: #27272a !important;
-}
-
-/* Remove Yoopta-specific styles */
-.yoopta-block-action-buttons {background-color: #212121 !important; border-radius: 10px; color: #fff; border:1px solid #444 !important;}
-.yoopta-block-actions-drag, .yoopta-block-actions-plus {color:#efd8ec !important;}
-.yoopta-block-actions-drag:hover, .yoopta-block-actions-plus:hover {color: #fff !important;}
-.yoopta-action-menu-list-content {background: #212121 !important;border: 1px solid hsl(var(--border));}
-.aria-selected\:yoo-action-menu-bg-\[\#f0f0f0\][aria-selected=true] {background: #282828 !important;}
-
+.WidgeTit {font-size: 14px; font-weight: 300; color: #BBBBBB;}
 .glow-button {
   position: relative;
   background: #1a1a1a;
@@ -612,21 +466,6 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
 
 .glow-button:hover::before {
   opacity: 0.2;
-}
-
-.yoopta-toolbar-button {
-  background-color: transparent !important;
-  color: hsl(var(--foreground)) !important;
-  border-radius: var(--radius) !important;
-}
-
-.yoopta-toolbar-button:hover {
-  background-color: hsl(var(--accent)) !important;
-  color: hsl(var(--accent-foreground)) !important;
-}
-
-.yoopta-toolbar-button[data-state='active'] {
-  background-color: hsl(var(--muted)) !important;
 }
 
 /* Shiny CTA Button styles - from user request */
@@ -1054,7 +893,7 @@ body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
     --angle-1 500ms ease;
   box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
-
+.nolisty {padding: 52px 0 25px 24px; margin-right: 24px;}
 .glow-button-glassmorphic:hover::after {
   --angle-1: -125deg;
 }
@@ -1154,19 +993,6 @@ html[data-vaul-drawer-visible="true"] {
 
 .yoopta-dnd-layer {
     display: none !important;
-}
-
-.dashCard {
-  @apply flex flex-col bg-transparent border-[#2A2A2A]/30 rounded-2xl backdrop-blur-sm;
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.dashCard:hover {
-  @apply border-[#3C3C3C]/50;
-}
-
-.dashCard.finance {
-  @apply bg-transparent border-transparent;
 }
 
 .ybot {background: linear-gradient(to bottom, #1F1F1F, #171414) !important;}
@@ -1299,14 +1125,14 @@ motion.div.widget-list-item.notes.active,
   border-color: #555555 !important;
 }
 
-.dashCard > .p-4 > h2 {
-  @apply text-lg font-bold;
-  font-size: 14px !important;
+/* Global card title styling */
+.dashCard h2,
+.dashCard .card-title,
+[class*="card"] h2 {
+  font-size: 10px;
 }
 
-.listItem h3 {
-  font-size: 14px;
-} 
+ 
 
 @import '@blocknote/mantine/style.css';
 
@@ -1336,6 +1162,42 @@ motion.div.widget-list-item.notes.active,
   color: var(--foreground) !important;
 }
 
+/* Missing utility classes for Tailwind v4 compatibility */
+.fade-in-0 { 
+  animation: fade-in 0s ease-out; 
+  opacity: 1;
+}
+
+.peer { 
+  /* Peer is a base class - add pseudo-class variants as needed */
+}
+
+.focus\:bg-accent:focus {
+  background-color: hsl(var(--color-accent));
+}
+
+.prose {
+  color: hsl(var(--color-foreground));
+  max-width: 65ch;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: hsl(var(--color-foreground));
+  font-weight: 600;
+}
+
+.prose p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose a {
+  color: hsl(var(--color-primary));
+  text-decoration: underline;
+}
+
+/* Custom styles for BlockNote toolbar */
+
 .bn-toolbar button:hover {
   background-color: var(--accent) !important;
 } 
@@ -1348,3 +1210,129 @@ motion.div.widget-list-item.notes.active,
 .bn-container .bn-toolbar button[data-test-id="create-link"] {
   display: none !important;
 } 
+
+[data-panel] {
+  overflow: visible !important;
+}
+
+[data-panel-group] {
+  overflow: visible !important;
+}
+
+.panel-content {
+  overflow: visible !important;
+} 
+
+.inner-right-shadow {
+  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Panel resize handle styles */
+[data-panel-resize-handle-id] {
+  background-color: rgba(75, 75, 75, 0.5) !important;
+  transition: background-color 0.2s ease;
+}
+
+[data-panel-resize-handle-id]:hover {
+  background-color: #FF4F4F !important;
+}
+
+
+
+/* Custom styles for EditTaskForm */
+.task-editor-description .bn-placeholder {
+  font-style: italic;
+  font-weight: 200; /* Extra-Light */
+  color: #424242 !important;
+}
+
+.task-important-switch[data-state=unchecked] > span {
+  background-color: #4d4949;
+}
+
+.task-complete-checkbox {
+  border-radius: 9999px;
+  width: 18px;
+  height: 18px;
+  border-color: #555454;
+}
+
+.task-complete-checkbox > span { /* The indicator */
+  display: none;
+}
+
+.task-complete-checkbox[data-state=checked] {
+  background-color: #555454;
+  border-color: #555454;
+} 
+
+/* Notes editor placeholder style */
+.notes-editor-placeholder .bn-placeholder {
+  font-style: italic;
+  font-weight: 300;
+  color: #555454 !important;
+}
+
+/* Fix for any links or special text that might be blue */
+.bn-container a, 
+.bn-container [data-node-type="link"], 
+.bn-container .ProseMirror a {
+  color: #D2D2D2 !important;
+  text-decoration: underline;
+}
+
+/* Ensure all text in the editor is the right color */
+.bn-container .ProseMirror * {
+  color: #D2D2D2 !important;
+  background-color: #151515 !important;
+}
+
+/* Fix for any default browser styling that might be overriding our colors */
+.bn-container input,
+.bn-container textarea,
+.bn-container [contenteditable="true"] {
+  color: #D2D2D2 !important;
+  caret-color: #D2D2D2;
+  background-color: #151515 !important;
+}
+
+.header {font-size: 10px; font-weight: 500;color: #BBBBBB;}
+.subtitle {font-size: 10px; font-weight: 300; color: #8D8D8D;}
+
+/* Widget headings and font styles */
+.widget-heading {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #BBBBBB;
+}
+
+/* Task and note item headings */
+.task.header {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 500; /* Medium weight */
+  color: #D2D2D2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Task and note item subtitles */
+.item-subtitle {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 400; /* Regular weight */
+  color: #8D8D8D;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

@@ -31,8 +31,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [isThinking, setIsThinking] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const [agentName, setAgentName] = useState('')
-  const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding } = useSettings()
+  const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -103,21 +102,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
 
       // Get AI response
-      const response = await askAi(userMessage, hasSeenOnboarding, onboardingStep)
+      const response = await askAi(userMessage, hasSeenOnboarding, onboardingStep, userName, agentName)
 
       if (response.success && response.data) {
         // Handle onboarding steps
         if (!hasSeenOnboarding && response.data.onboardingStep) {
           setOnboardingStep(response.data.onboardingStep)
           
-          // Store agent name during onboarding
-          if (onboardingStep === 'agent-name') {
-            setAgentName(userMessage)
-        }
-        
           // Complete onboarding with both names
         if (response.data.setupComplete) {
-            completeOnboarding({ userName: userMessage, agentName })
+            completeOnboarding({ userName: userMessage, agentName: 'Toby' }) // Defaulting agent name for now
         }
         }
 
@@ -137,17 +131,35 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsThinking(false)
     }
-  }, [inputValue, hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, createTaskMutation, createNoteMutation, toast, agentName])
+  }, [inputValue, hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, createTaskMutation, createNoteMutation, toast, userName, agentName])
 
   const openChat = useCallback(() => {
     setIsChatOpen(true)
-    if (!hasSeenOnboarding) {
-      processMessage('')
+    if (messages.length === 0) {
+      if (hasSeenOnboarding) {
+        setMessages([{ role: 'assistant', content: 'Welcome back! What can I help you with?' }])
+      } else {
+        processMessage('')
+      }
     }
-  }, [hasSeenOnboarding, processMessage])
+  }, [hasSeenOnboarding, processMessage, messages])
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false)
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey && event.key === 'k') {
+        event.preventDefault()
+        setIsChatOpen(prev => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
   }, [])
 
   return (

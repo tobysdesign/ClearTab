@@ -1,0 +1,69 @@
+/* Styling for empty editor placeholder */
+.editor-with-placeholder [data-content]:empty::before {
+  content: "Try [ / ] or highlighting text for additional features";
+  color: #8D8D8D;
+  font-style: italic;
+  opacity: 0.8;
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Custom styling for the BlockNote editor */
+.editor-with-custom-placeholder {
+  --block-note-text-color: #D2D2D2;
+  --block-note-heading-text-color: #F5F5F5;
+  --block-note-background: transparent;
+  --block-note-block-background: #222222;
+  --block-note-highlight-color: #2F4156;
+}
+
+/* Make sure the editor fills the container */
+.editor-with-custom-placeholder > div {
+  min-height: 100%;
+}
+
+/* Style paragraphs and other text */
+.editor-with-custom-placeholder [data-content] {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Style headings */
+.editor-with-custom-placeholder h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.editor-with-custom-placeholder h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.editor-with-custom-placeholder h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+/* Style lists */
+.editor-with-custom-placeholder ul, 
+.editor-with-custom-placeholder ol {
+  padding-left: 24px;
+}
+
+/* Improve the appearance of the slash menu */
+.bn-slash-menu {
+  background-color: #222222 !important;
+  border: 1px solid #2A2A2A !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.bn-slash-menu .bn-menu-item.bn-active {
+  background-color: #2F4156 !important;
+} 

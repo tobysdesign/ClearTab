@@ -1,20 +1,26 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import './block-note-custom.css'
+import { useCreateBlockNote } from "@blocknote/react"
+import { BlockNoteView } from "@blocknote/mantine"
+import "@blocknote/mantine/style.css"
+import "@blocknote/core/fonts/inter.css"
+import "./block-note-custom.css"
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Type, Bot, CheckSquare } from 'lucide-react'
+import { Bot, CheckSquare } from 'lucide-react'
 import styles from './block-note-editor.module.css'
+import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
 
 interface BlockNoteEditorProps {
-  value?: any
-  onChange?: (value: any) => void
-  editable?: boolean
-  placeholder?: string
-  onSelectionChange?: (selectedText: string) => void
-  onBlur?: () => void
-  onAskAI?: (selectedText: string) => void
-  onCreateTask?: (selectedText: string) => void
+  value?: any;
+  onChange?: (value: any) => void;
+  editable?: boolean;
+  placeholder?: string;
+  onSelectionChange?: (selectedText: string) => void;
+  onBlur?: () => void;
+  onAskAI?: (selectedText: string) => void;
+  onCreateTask?: (selectedText: string) => void;
+  isNewNote?: boolean;
 }
 
 export function BlockNoteEditor({
@@ -25,322 +31,141 @@ export function BlockNoteEditor({
   onSelectionChange,
   onBlur,
   onAskAI,
-  onCreateTask
+  onCreateTask,
+  isNewNote = false
 }: BlockNoteEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null)
-  const toolbarRef = useRef<HTMLDivElement>(null)
-  const [internalContent, setInternalContent] = useState('')
-  const [showToolbar, setShowToolbar] = useState(false)
-  const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 })
-  const [selectedText, setSelectedText] = useState('')
-  const isContentChanging = useRef(false)
   
-  // Initialize content from value prop
-  useEffect(() => {
-    if (!isContentChanging.current) {
+  const safeInitialContent = useMemo(() => {
+    return value && value.length > 0 ? value : EMPTY_BLOCKNOTE_CONTENT;
+  }, [value]);
+
+  // Create editor with initialContent
+  const editor = useCreateBlockNote({
+    initialContent: safeInitialContent
+  }, []);
+  
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+  
+  const debouncedSave = useCallback((blocks: any) => {
+    if (!onChange) return
+    
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+    
+    debounceTimeoutRef.current = setTimeout(() => {
       try {
-        let textContent = '';
+        onChange(blocks);
+      } catch (error) {
+        console.error("Error in debouncedSave:", error);
+      }
+    }, 500);
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    if (!isNewNote && value !== undefined && Array.isArray(value)) {
+      try {
+        const currentContent = editor.document; 
         
-        if (value === null || value === undefined) {
-          textContent = '';
-        } else if (typeof value === 'string') {
-          textContent = value;
-        } else if (typeof value === 'object') {
-          // Try to extract text from content object
-          textContent = extractTextFromContent(value);
-        } else {
-          textContent = String(value);
+        if (!currentContent || !Array.isArray(currentContent)) {
+          return;
         }
-        
-        setInternalContent(textContent);
-        if (editorRef.current) {
-          editorRef.current.innerHTML = textContent;
+
+        if (JSON.stringify(currentContent) !== JSON.stringify(value)) {
+          editor.replaceBlocks(currentContent, value);
         }
       } catch (error) {
-        console.error("Error setting content:", error);
+        console.error("Error updating editor content:", error);
       }
     }
-    
-    // Reset the flag after content is updated
-    isContentChanging.current = false;
-  }, [value]);
-  
-  // Extract text from structured content
-  function extractTextFromContent(content: any): string {
-    try {
-      if (!content) return '';
-      
-      // If it's a string, return it directly
-      if (typeof content === 'string') return content;
-      
-      // If it's a Yoopta-style content object
-      if (typeof content === 'object') {
-        // Try to extract text from children
-        let extractedText = '';
-        
-        // Handle different content formats
-        if (content.children && Array.isArray(content.children)) {
-          // Simple array of children
-          extractedText = content.children
-            .map((child: any) => typeof child === 'string' ? child : (child.text || ''))
-            .join('');
-        } else if (content['paragraph-1'] && content['paragraph-1'].value) {
-          // Structured content with paragraph blocks
-          Object.values(content).forEach((block: any) => {
-            if (block.value && Array.isArray(block.value)) {
-              block.value.forEach((element: any) => {
-                if (element.children) {
-                  element.children.forEach((child: any) => {
-                    extractedText += typeof child === 'string' ? child : (child.text || '');
-                  });
-                }
-              });
-              extractedText += '\n';
-            }
-          });
-        } else if (content.text) {
-          // Simple text object
-          extractedText = content.text;
-        }
-        
-        return extractedText || '';
-      }
-      
-      // Fallback
-      return String(content);
-    } catch (error) {
-      console.error("Error extracting text:", error);
-      return '';
-    }
-  }
-  
-  // Handle selection changes
+  }, [value, editor, isNewNote]);
+
   useEffect(() => {
-    if (!onSelectionChange) return;
+    if (!editor) return;
     
-    const handleSelectionUpdate = () => {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) {
-        onSelectionChange('');
-        setSelectedText('');
-        setShowToolbar(false);
-        return;
-      }
-      
-      // Check if selection is within our editor
-      const editorElement = editorRef.current;
-      if (!editorElement) return;
-      
-      let node = selection.anchorNode;
-      let isInEditor = false;
-      
-      while (node) {
-        if (node === editorElement) {
-          isInEditor = true;
-          break;
-        }
-        node = node.parentNode;
-      }
-      
-      if (!isInEditor) {
-        onSelectionChange('');
-        setSelectedText('');
-        setShowToolbar(false);
-        return;
-      }
-      
-      // Get selected text
-      const selectedText = selection.toString();
-      
-      // Only show toolbar if there's actual text selected
-      if (selectedText.trim()) {
-        setSelectedText(selectedText);
-        onSelectionChange(selectedText);
-        
-        // Position the toolbar above the selection
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        
-        if (toolbarRef.current) {
-          const toolbarHeight = toolbarRef.current.offsetHeight;
-          const editorRect = editorElement.getBoundingClientRect();
-          
-          setToolbarPosition({
-            top: rect.top - editorRect.top - toolbarHeight - 10,
-            left: rect.left - editorRect.left + (rect.width / 2)
-          });
-          
-          setShowToolbar(true);
-        }
-      } else {
-        setShowToolbar(false);
+    const unsubscribe = editor.onEditorContentChange(() => {
+      const blocks = editor.document;
+      debouncedSave(blocks);
+    });
+
+    return unsubscribe;
+  }, [editor, debouncedSave]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
     };
-    
-    document.addEventListener('selectionchange', handleSelectionUpdate);
-    return () => document.removeEventListener('selectionchange', handleSelectionUpdate);
-  }, [onSelectionChange]);
-  
-  // Handle content changes
-  const handleInput = useCallback(() => {
-    if (!editorRef.current) return;
-    
-    const newContent = editorRef.current.innerText;
-    setInternalContent(newContent);
-    
-    if (onChange) {
-      // Set flag to prevent content overwrite during the next render
-      isContentChanging.current = true;
-      onChange(newContent);
-    }
-  }, [onChange]);
-  
-  // Handle blur event
-  const handleBlur = useCallback(() => {
-    if (onBlur) {
-      onBlur();
-    }
-  }, [onBlur]);
-  
-  // Formatting commands
-  const executeCommand = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    
-    // Update content after formatting
-    if (editorRef.current) {
-      const newContent = editorRef.current.innerText;
-      setInternalContent(newContent);
+  }, []);
+
+  const [selectedText, setSelectedText] = useState('')
+
+  // This function is not used in the current implementation, but can be kept for future use.
+  const handleSelectionChange = () => {
+    if (editor) {
+      const selectedText = editor.getSelectedText()
       
-      if (onChange) {
-        onChange(newContent);
+      if (selectedText && selectedText.trim()) {
+        setSelectedText(selectedText)
+        onSelectionChange?.(selectedText)
+      } else {
+        setSelectedText('')
+        onSelectionChange?.('')
       }
     }
-  }, [onChange]);
-  
-  // Handle Ask AI button
-  const handleAskAI = useCallback(() => {
+  }
+
+  const handleAskAI = () => {
     if (onAskAI && selectedText) {
-      onAskAI(selectedText);
-      setShowToolbar(false);
+      onAskAI(selectedText)
     }
-  }, [onAskAI, selectedText]);
-  
-  // Handle Create Task button
-  const handleCreateTask = useCallback(() => {
+  }
+
+  const handleCreateTask = () => {
     if (onCreateTask && selectedText) {
-      onCreateTask(selectedText);
-      setShowToolbar(false);
+      onCreateTask(selectedText)
     }
-  }, [onCreateTask, selectedText]);
-  
+  }
+
   return (
     <div className={styles.container}>
-      <div
-        ref={editorRef}
-        contentEditable={editable}
+      <BlockNoteView
+        editor={editor}
+        sideMenu={false}
+        theme="dark"
         className={styles.editorContent}
-        onInput={handleInput}
-        onBlur={handleBlur}
-        data-placeholder={placeholder}
-        style={{
-          position: 'relative',
-          whiteSpace: 'pre-wrap',
-        }}
       />
       
-      {/* Floating formatting toolbar */}
-      {showToolbar && (
-        <div 
-          ref={toolbarRef}
-          className={styles.toolbar}
-          style={{ 
-            top: Math.max(0, toolbarPosition.top),
-            left: toolbarPosition.left,
-            transform: 'translateX(-50%)'
-          }}
-        >
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('bold')}
-          >
-            <Bold className={styles.iconSmall} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('italic')}
-          >
-            <Italic className={styles.iconSmall} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('underline')}
-          >
-            <Underline className={styles.iconSmall} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('formatBlock', '<h1>')}
-          >
-            <Type className={styles.iconSmall} />
-          </Button>
-          <div className={styles.toolbarDivider} />
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('justifyLeft')}
-          >
-            <AlignLeft className={styles.iconSmall} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('justifyCenter')}
-          >
-            <AlignCenter className={styles.iconSmall} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={styles.toolButton} 
-            onClick={() => executeCommand('justifyRight')}
-          >
-            <AlignRight className={styles.iconSmall} />
-          </Button>
-          <div className={styles.toolbarDivider} />
+      {/* Custom toolbar for AI and task creation */}
+      {(onAskAI || onCreateTask) && selectedText && (
+        <div className={styles.customActions}>
           {onAskAI && (
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className={styles.askButton} 
+              className={styles.actionButton}
               onClick={handleAskAI}
             >
-              <Bot className={styles.iconTiny} />
-              <span>Ask AI</span>
+              <Bot className={styles.icon} />
+              Ask AI
             </Button>
           )}
           {onCreateTask && (
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className={styles.createButton} 
+              className={styles.actionButton}
               onClick={handleCreateTask}
             >
-              <CheckSquare className={styles.iconTiny} />
-              <span>Create Task</span>
+              <CheckSquare className={styles.icon} />
+              Create Task
             </Button>
           )}
         </div>
       )}
     </div>
-  );
+  )
 } 

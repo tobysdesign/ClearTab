@@ -120,6 +120,7 @@ export function CharcoalWave() {
       uniform vec3 u_circlesColor[6];
       uniform vec3 u_circlesPosRad[6];
       uniform vec2 u_mouse;
+      uniform float u_time;
 
       float random(vec2 st) {
         return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -139,7 +140,7 @@ export function CharcoalWave() {
           float radius = posRad.z;
 
           float dist = length(st - cPos);
-          float sigma = radius * 0.45;
+          float sigma = radius * 0.45 * (0.8 + 0.2 * sin(u_time * 0.5));
           float val = exp(- (dist * dist) / (2.0 * sigma * sigma)) * 1.4;
 
           fieldSum += val;
@@ -208,6 +209,7 @@ export function CharcoalWave() {
     const u_circlesPosRad = gl.getUniformLocation(program, 'u_circlesPosRad')
     const u_mouse = gl.getUniformLocation(program, 'u_mouse')
     const u_time = gl.getUniformLocation(program, 'u_time')
+    
 
     // --- Animation Loop ---
     const startTime = performance.now()

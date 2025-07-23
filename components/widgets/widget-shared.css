@@ -1,0 +1,155 @@
+/* Shared styles for widgets to ensure consistency */
+
+:root {
+  --widget-padding: 16px;
+  --widget-list-spacing: 8px;
+  --widget-border-radius: 22px;
+}
+
+/* Add this to the top of the file */
+/* Global fix for all widgets */
+.widgetContainer,
+.widgetContent,
+[class*="widget-"],
+[class*="Widget"],
+[id*="widget"],
+[id*="Widget"] {
+  overflow: hidden !important;
+  border-radius: var(--widget-border-radius);
+}
+
+/* Fix for nested elements */
+.widgetContainer *,
+.widgetContent *,
+[class*="widget-"] *,
+[class*="Widget"] *,
+[id*="widget"] *,
+[id*="Widget"] * {
+  overflow: visible;
+}
+
+/* Widget structure - fixed to prevent content from overflowing outside rounded corners */
+.widget-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  /* No shadow here - container is just for positioning */
+}
+
+.widget-content {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--widget-border-radius);
+  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
+  border: 1px solid rgba(50, 50, 53, 0.6);
+  /* Critical: both border-radius and overflow on the same container */
+  overflow: hidden !important; /* Force overflow hidden with !important */
+  /* Shadow on this container with border-radius */
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Inner scrollable content */
+.widget-scrollable {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Widget inner content container */
+.widget-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  /* Ensure no overflow at this level either */
+  overflow: hidden;
+}
+
+/* Apply to all widgets to ensure consistency */
+[class*="widget"], 
+[class*="Widget"],
+[class*="-widget"],
+[class*="-Widget"] {
+  overflow: hidden !important;
+}
+
+/* Special fix for weather widget */
+.weather-widget,
+.calendar-widget,
+.date-widget,
+.events-widget {
+  overflow: hidden !important;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background-color: #222222;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.listItem:hover {
+  background-color: #3D3D3D;
+  border-color: #252323;
+}
+
+.listItem.selected {
+  background-color: #292929;
+  border-color: #434343;
+}
+
+/* Task and note item headings */
+.task.header {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 500; /* Medium weight */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Widget headings */
+.widget-heading {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #BBBBBB;
+}
+
+/* Task and note item subtitles */
+.item-subtitle {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 17px;
+  font-weight: 400; /* Regular weight */
+  color: #8D8D8D;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Consistent styling for the pink dot indicator */
+.pinkDot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FF3B9A;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+} 

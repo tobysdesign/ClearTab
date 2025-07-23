@@ -36,7 +36,7 @@ export function CircularProgress({
           cy={size / 2}
         />
         <circle
-          className={cn("stroke-current transition-all duration-300 ease-in-out", progressClassName)}
+          className={cn("stroke-current transition-all duration-300 ease-out", progressClassName)}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           fill="transparent"

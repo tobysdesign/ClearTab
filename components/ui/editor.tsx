@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { createTaskFromText } from '@/components/widgets/tasks-widget'
+import { YooptaContentValue, EMPTY_CONTENT } from '@/shared/schema'
 
 // Import the editor dynamically to avoid SSR issues
 const BlockNoteEditor = dynamic(
@@ -28,49 +29,11 @@ function EditorSkeleton() {
   )
 }
 
-// Helper function to extract text content from structured content
-function extractTextFromContent(content: any): string {
-  try {
-    if (!content) return '';
-    
-    // If it's already a string, return it
-    if (typeof content === 'string') return content;
-    
-    // If it's a Yoopta-style content object
-    if (typeof content === 'object') {
-      // Try to extract text from children
-      let extractedText = '';
-      
-      // Handle different content formats
-      if (content['paragraph-1'] && content['paragraph-1'].value) {
-        Object.values(content).forEach((block: any) => {
-          if (block.value && Array.isArray(block.value)) {
-            block.value.forEach((element: any) => {
-              if (element.children) {
-                element.children.forEach((child: any) => {
-                  extractedText += typeof child === 'string' ? child : (child.text || '');
-                });
-              }
-            });
-            extractedText += '\n';
-          }
-        });
-        
-        return extractedText;
-      }
-    }
-    
-    // Fallback to string representation
-    return String(content);
-  } catch (error) {
-    console.error("Error extracting text:", error);
-    return '';
-  }
-}
+// Removed: extractTextFromContent function
 
 export interface EditorProps {
-  value?: any
-  onChange?: (value: any) => void
+  value?: YooptaContentValue // Type as YooptaContentValue
+  onChange?: (value: YooptaContentValue) => void // Type onChange to receive YooptaContentValue
   className?: string
   placeholder?: string
   editable?: boolean
@@ -96,8 +59,7 @@ export function Editor({
   const [hasSelection, setHasSelection] = useState(false)
   const [isCreatingTask, setIsCreatingTask] = useState(false)
   
-  // Extract text content from value for display
-  const textContent = typeof value === 'string' ? value : extractTextFromContent(value);
+  // value is now directly YooptaContentValue, no need for textContent derivation
 
   // Handle selection changes to enable/disable AI buttons
   const handleSelectionChange = useCallback((text: string) => {
@@ -139,10 +101,9 @@ export function Editor({
     }
   }, [selectedText, onCreateTask])
 
-  // Handle content change
-  const handleContentChange = useCallback((newContent: string) => {
+  // Handle content change - pass YooptaContentValue directly
+  const handleContentChange = useCallback((newContent: YooptaContentValue) => {
     if (onChange) {
-      // Pass the content directly without transforming
       onChange(newContent);
     }
   }, [onChange]);
@@ -159,7 +120,7 @@ export function Editor({
   return (
     <div className={cn("relative flex flex-col", className)}>
       <BlockNoteEditor
-        value={textContent}
+        value={value}
         onChange={handleContentChange}
         editable={editable && !readOnly}
         placeholder={placeholder}

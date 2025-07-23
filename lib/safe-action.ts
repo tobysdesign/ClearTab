@@ -21,13 +21,12 @@ const baseClient = createSafeActionClient({
 export const action = baseClient.use(async ({ next }) => {
   const session = await getServerSession(authOptions)
 
-  if (!session?.user) {
-    throw new ActionError('You must be logged in to perform this action')
-  }
+  // Pass userId as null if not authenticated. Individual actions will validate if userId is required.
+  const userId = session?.user?.id || null; 
 
   return next({
     ctx: {
-      userId: session.user.id,
+      userId: userId,
     },
   })
 }) 

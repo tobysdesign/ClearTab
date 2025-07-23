@@ -1,4 +1,7 @@
 {
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
   "deno.enablePaths": [
     "supabase/functions"
   ],
@@ -18,17 +21,14 @@
     "http",
     "net"
   ],
-  "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    "**/.retool_types/**": true,
     "**/*tsconfig.json": true,
+    "**/.DS_Store": true,
+    "**/.git": true,
+    "**/.hg": true,
+    "**/.retool_types/**": true,
+    "**/.svn": true,
+    "**/Thumbs.db": true,
     ".cache": true,
     "retool.config.json": true
   }

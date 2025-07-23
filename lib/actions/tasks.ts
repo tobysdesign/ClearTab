@@ -1,31 +1,37 @@
 'use server'
 
 import { db } from '@/server/db';
-import { tasks } from '@/shared/schema';
+import { tasks, BlockNoteContentSchema } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 import { action } from '@/lib/safe-action';
 import { z } from 'zod';
 import { ActionResponse } from '@/types/actions';
-import { YooptaContentValue } from '@/types/yoopta';
+import { Block } from '@blocknote/core';
 
 const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  content: z.any().optional(), // Use z.any() for now due to complex YooptaContentValue structure
+  content: BlockNoteContentSchema.optional(),
+  isCompleted: z.boolean().default(false),
+  isHighPriority: z.boolean().default(false), // Use isHighPriority
+  dueDate: z.date().nullable().optional(),
+  order: z.number().nullable().optional(),
 });
 
 const updateTaskSchema = z.object({
   id: z.string(),
   title: z.string().min(1, 'Title is required').optional(),
-  description: z.any().optional(), // Use z.any() for now due to complex YooptaContentValue structure
-  status: z.enum(['pending', 'completed', 'important']).optional(),
+  content: BlockNoteContentSchema.optional(),
+  isCompleted: z.boolean().optional(),
+  isHighPriority: z.boolean().optional(), // Use isHighPriority
   dueDate: z.date().nullable().optional(),
+  order: z.number().nullable().optional(),
 });
 
 export const createTask = action
   .schema(createTaskSchema)
   .action(async ({ parsedInput, ctx }) => {
     try {
-      const { title, description } = parsedInput; // Changed from content to description
+      const { title, content, isCompleted, isHighPriority, dueDate, order } = parsedInput; // Destructure all fields
       if (!ctx.userId) {
         return {
           success: false,
@@ -35,8 +41,11 @@ export const createTask = action
 
       const [newTask] = await db.insert(tasks).values({
         title,
-        description: description || {}, // Changed from content to description
-        status: 'pending',
+        content: content || [],
+        isCompleted: isCompleted ?? false,
+        isHighPriority: isHighPriority ?? false, // Use isHighPriority
+        dueDate,
+        order,
         userId: ctx.userId,
       }).returning();
 
@@ -55,12 +64,25 @@ export const createTask = action
 
 export const updateTask = action
   .schema(updateTaskSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     try {
       const { id, ...updateData } = parsedInput;
 
+      // Filter out undefined values to prevent Drizzle from trying to update with undefined
+      const filteredUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([, value]) => value !== undefined)
+      );
+
+      // Ensure userId is present in where clause if it's a restricted operation
+      if (!ctx.userId) {
+        return {
+          success: false,
+          error: 'User not authenticated.',
+        } as ActionResponse<null>;
+      }
+
       const [updatedTask] = await db.update(tasks)
-        .set(updateData)
+        .set(filteredUpdateData)
         .where(eq(tasks.id, id))
         .returning();
 

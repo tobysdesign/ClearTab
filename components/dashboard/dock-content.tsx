@@ -2,7 +2,10 @@
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Settings, X, MessageSquare } from 'lucide-react'
+import Search from 'lucide-react/dist/esm/icons/search'
+import Settings from 'lucide-react/dist/esm/icons/settings'
+import X from 'lucide-react/dist/esm/icons/x'
+import MessageSquare from 'lucide-react/dist/esm/icons/message-square'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -44,7 +47,7 @@ export function DockContent({
             <button
                 onClick={() => setShowSearch(!showSearch)}
                 className={cn(
-                    "rounded-lg p-2 transition-all duration-200 hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
+                    "rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
                     showSearch && "bg-white/20 text-white shadow-lg"
                 )}
             >
@@ -73,7 +76,7 @@ export function DockContent({
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery("")}
-                            className="rounded-lg p-2 transition-all duration-200 hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white"
+                            className="rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -81,15 +84,15 @@ export function DockContent({
                 </div>
             )}
 
-            <button
+            {/* <button
                 onClick={() => setShowSettings(!showSettings)}
                 className={cn(
-                    "rounded-lg p-2 transition-all duration-200 hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
+                    "rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
                     showSettings && "bg-white/20 text-white shadow-lg"
                 )}
             >
                 <Settings className="h-4 w-4" />
-            </button>
+            </button> */}
         </div>
     )
 } 

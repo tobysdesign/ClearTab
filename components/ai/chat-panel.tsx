@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
-import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ConversationStarters } from './conversation-starters'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -21,16 +23,16 @@ function ChatMessage({ message }: { message: Message }) {
     return (
         <div
             className={cn(
-                "mb-4 flex",
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+                "mb-4 flex max-w-[80%]",
+                message.role === 'user' ? 'self-end' : 'self-start'
             )}
         >
             <div
                 className={cn(
                     "rounded-lg px-4 py-2",
                     message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-200'
+                        ? 'bg-[#292929] border border-[#434343] text-neutral-200'
+                        : 'bg-[#222222] text-neutral-300'
                 )}
             >
                 {message.content}
@@ -63,6 +65,14 @@ export function ChatPanel({
         scrollToBottom()
     }, [messages]);
 
+    const handleStarterSelect = (starter: string) => {
+        onInputChange({ target: { value: starter } } as React.ChangeEvent<HTMLInputElement>);
+        // We need a slight delay to ensure the input value is updated before submitting
+        setTimeout(() => {
+            onUserInput();
+        }, 50);
+    }
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (inputValue.trim()) {
@@ -71,8 +81,8 @@ export function ChatPanel({
     }
 
   return (
-    <div className="flex flex-col h-full p-4">
-      <div className="flex-grow overflow-y-auto pr-4 -mr-4">
+    <div className="flex flex-col h-full p-6 bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl">
+      <div className="flex-grow overflow-y-auto pr-4 -mr-4 flex flex-col">
         {messages.map((msg, index) => (
           <ChatMessage key={index} message={msg} />
         ))}
@@ -81,13 +91,20 @@ export function ChatPanel({
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="mt-4">
-        <PlaceholdersAndVanishInput
-            placeholders={placeholders}
-            onChange={onInputChange}
-            onSubmit={handleSubmit}
+        {messages.length === 0 && !isPending && (
+            <ConversationStarters onSelect={handleStarterSelect} />
+        )}
+      <div className="mt-6 pt-6 border-t border-neutral-800">
+        <form onSubmit={handleSubmit} className="relative">
+          <Label htmlFor="chat-input" className="absolute -top-3 left-3 bg-[#121212] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono">Message</Label>
+          <Input
+            id="chat-input"
+            placeholder="Type your message..."
             value={inputValue}
-        />
+            onChange={onInputChange}
+            className="bg-transparent border-[#3d3d3d] h-11"
+          />
+        </form>
       </div>
     </div>
   )

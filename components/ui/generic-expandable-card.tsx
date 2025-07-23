@@ -4,6 +4,7 @@ import React, { useState, useRef, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useOutsideClick } from '@/hooks/use-outside-click'
 import styles from './generic-expandable-card.module.css'
+import { ClientOnly } from './safe-motion'
 
 interface GenericExpandableCardProps {
   trigger: ReactNode
@@ -30,51 +31,69 @@ export function GenericExpandableCard({
     }
   })
 
+  // Get layoutId from trigger if it exists
+  const getLayoutId = () => {
+    if (
+      React.isValidElement(trigger) && 
+      trigger.props && 
+      typeof trigger.props === 'object' && 
+      'layoutId' in trigger.props && 
+      typeof trigger.props.layoutId === 'string'
+    ) {
+      return trigger.props.layoutId;
+    }
+    return undefined;
+  };
+
+  const layoutId = getLayoutId();
+
   return (
     <>
       <div onClick={() => setIsOpen(true)} className={styles.trigger}>
         {trigger}
       </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={styles.overlay}
-            />
-            <div className={styles.wrapper}>
-              <motion.button
+      <ClientOnly>
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={styles.closeBtn}
-                onClick={() => setIsOpen(false)}
-              >
-                <CloseIcon />
-              </motion.button>
-              {React.isValidElement(trigger) && (
-              <motion.div
-                ref={ref}
-                  layoutId={trigger.props.layoutId}
-                className={styles.modal}
-              >
-                  <div className={styles.cardContent}>{content}</div>
-              </motion.div>
-              )}
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+                className={styles.overlay}
+              />
+              <div className={styles.wrapper}>
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className={styles.closeBtn}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <CloseIcon />
+                </motion.button>
+                {React.isValidElement(trigger) && (
+                <motion.div
+                  ref={ref}
+                  layoutId={layoutId}
+                  className={styles.modal}
+                >
+                    <div className={styles.cardContent}>{content}</div>
+                </motion.div>
+                )}
+              </div>
+            </>
+          )}
+        </AnimatePresence>
+      </ClientOnly>
     </>
   )
 }
 
 export const CloseIcon = () => {
   return (
-    <motion.svg
+    <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
@@ -88,7 +107,7 @@ export const CloseIcon = () => {
     >
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
-    </motion.svg>
+    </svg>
   )
 }
 

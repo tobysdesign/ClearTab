@@ -1,5 +1,7 @@
-.wrapperCenter{ @apply fixed inset-0 z-50 flex items-center justify-center p-4; }
-.wrapperBottom{ @apply fixed inset-0 z-50 flex items-end justify-center p-4 pb-24; }
+
+
+.wrapperCenter{ @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm; }
+.wrapperBottom{ @apply fixed inset-0 z-50 flex items-end justify-center p-4 pb-24 bg-black/50 backdrop-blur-sm; }
 .overlay{ @apply absolute inset-0 bg-black/30; }
 .modal{ @apply relative w-full h-full md:h-fit md:max-h-[90%] md:max-w-lg bg-[#141414] rounded-2xl overflow-hidden border border-[#252525]; }
 .closeContainer{ @apply absolute top-6 right-6 z-10; }

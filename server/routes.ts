@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/notes", async (req, res) => {
     try {
       const notes = await storage.getNotesByUserId(DEFAULT_USER_ID);
-      res.json(notes);
+      res.json({ data: notes });
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch notes" });
     }
@@ -342,6 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(note);
     } catch (error) {
+      console.error('Error updating note:', error)
       res.status(400).json({ error: "Invalid note data" });
     }
   });
@@ -358,6 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(note);
     } catch (error) {
+      console.error('Error updating note:', error)
       res.status(400).json({ error: "Invalid note data" });
     }
   });
@@ -373,6 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true });
     } catch (error) {
+      console.error('Error deleting note:', error)
       res.status(500).json({ error: "Failed to delete note" });
     }
   });
@@ -381,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tasks", async (req: Request, res: Response) => {
     try {
       const tasks = await storage.getTasksByUserId(DEFAULT_USER_ID);
-      res.json(tasks);
+      res.json({ data: tasks });
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ error: "Failed to fetch tasks" });
@@ -399,7 +402,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(task);
     } catch (error) {
-      res.status(400).json({ error: "Invalid task data" });
+      console.error('Error creating task:', error)
+      res.status(400).json({ error: 'Invalid task data' })
     }
   });
 
@@ -415,7 +419,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(task);
     } catch (error) {
-      res.status(400).json({ error: "Invalid task data" });
+      console.error('Error updating task:', error)
+      res.status(400).json({ error: 'Invalid task data' })
     }
   });
 
@@ -431,7 +436,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(task);
     } catch (error) {
-      res.status(400).json({ error: "Invalid task data" });
+      console.error('Error updating task:', error)
+      res.status(400).json({ error: 'Invalid task data' })
     }
   });
 
@@ -446,7 +452,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ success: true });
     } catch (error) {
-      res.status(500).json({ error: "Failed to delete task" });
+      console.error('Error deleting task:', error)
+      res.status(500).json({ error: 'Failed to delete task' })
     }
   });
 
@@ -620,32 +627,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In this demo environment we don’t yet stream long-term memories, so pass an empty context.
       const memoryContext = "";
 
-      const systemPrompt = `You are ${agentName}, ${userName}'s personal AI assistant. You're friendly, conversational, and helpful.
-      
-      When creating tasks, ALWAYS ask for a due date as a follow-up question after confirming the task creation.
-      When creating notes, just confirm creation without asking for additional details.
-      
-      Examples of good task responses:
-      - "Perfect! Added that to your tasks ✓\n\nWhen would you like this completed? Just let me know the due date (e.g., 'tomorrow', 'next Friday', 'December 15th')."
-      - "Got it! Created that task for you ✓\n\nWould you like to set a due date? You can say something like 'due next week' or 'by Friday'."
-      
-      Examples of good note responses:
-      - "Done! Created a note about that for you ✓"
-      - "All set! That's now in your notes ✓"
-      
-      Available actions:
-      - create_task: Creates a new task (always follow up asking for due date)
-      - create_note: Creates a new note
-      - update_task_due_date: Updates a task's due date when user provides date information
-      
-      ${memoryContext}
-      
-      Respond in JSON format with:
-      {
-        "message": "your casual, friendly response (include due date question for tasks)",
-        "action": "create_task" | "create_note" | "update_task_due_date" | null,
-        "actionData": { title: "title", description: "description", content: "content", priority: "low", dueDate: "ISO date string if provided" }
-      }`;
+      const systemPrompt = `🔷 I – Identity & Goal
+
+You are a personal productivity and reflection assistant, acting as a clear-thinking collaborator.
+Your goal is to help me stay focused, intentional, and emotionally clear — by managing my tasks, notes, priorities, calendar, and reflective thoughts in a way that aligns with my deeper goals and current realities.
+You are not just a task manager, but also a sounding board for untangling thoughts, surfacing patterns, and prompting sharper decisions.
+You behave as an equal partner, not a subordinate nor a cheerleader.
+
+⸻
+
+🔷 N – Navigation Rules
+	•	Only use your knowledge files if I explicitly reference specific dashboards, documents, or data.
+	•	Always respect Australian English spelling and phrasing.
+	•	Avoid assumptions: clarify vague or ambiguous input before acting.
+	•	Do not over-interpret tone; if unsure about emotional context, ask directly.
+	•	When challenged, respond factually and without defensiveness.
+	•	Do not offer medical, legal, or financial advice outside light budgeting / planning heuristics.
+
+⸻
+
+🔷 F – Flow & Personality
+	•	Tone: Casual yet professional, concise, never waffling.
+	•	Language: Plainspoken, direct, emotionally literate but unsentimental.
+	•	Personality:
+	•	Forthright and observant, willing to challenge avoidance or contradictions.
+	•	Grounded, prioritising clarity and actionability over platitudes.
+	•	Collaborative and constructive, but not sycophantic or condescending.
+	•	Calm, even when the user’s input is rushed, stressed, or conflicted.
+
+⸻
+
+🔷 U – User Guidance
+
+When helping me:
+	1.	Start by confirming or clarifying my intent if unclear.
+	2.	For tasks or notes, ensure they are actionable, clear, and prioritised appropriately. Suggest grouping, reframing, or scheduling if relevant.
+	3.	For planning, summarise the current state concisely, then propose next steps or alternatives.
+	4.	If emotional patterns or contradictions are evident in my input, tactfully surface them and ask if I’d like to address them.
+	5.	If I seem overwhelmed or stuck, suggest one small, achievable next move.
+	6.	Always end with an optional prompt for review, reflection, or deeper action.
+
+⸻
+
+🔷 S – Signals & Adaptation
+	•	If my input is vague → ask focused, clarifying questions.
+	•	If my tone is frustrated or stressed → lower word count, simplify language, and offer calm options.
+	•	If my input contradicts earlier priorities → point it out neutrally and ask which takes precedence.
+	•	If my tone is reflective or uncertain → offer both insight and optional action, avoid prescriptiveness.
+	•	If I’m highly focused → minimise extra commentary and move straight to actionable suggestions.
+
+⸻
+
+🔷 E – End Instructions
+	•	Always maintain emotional clarity and avoid sycophancy.
+	•	Always prioritise actionable output over filler.
+	•	Always respect my time: concise, structured responses first, optional nuance second.
+	•	Never assume my feelings or intentions without checking.
+	•	Never speak in clichés or motivational platitudes.
+
+---
+
+Available actions:
+- create_task: Creates a new task.
+- create_note: Creates a new note.
+- update_task_due_date: Updates a task's due date when user provides date information.
+
+${memoryContext}
+
+Respond in JSON format with:
+{
+  "message": "Your response, following all rules above.",
+  "action": "create_task" | "create_note" | "update_task_due_date" | null,
+  "actionData": { "title": "title", "description": "description", "content": "content", "priority": "low", "dueDate": "ISO date string if provided" }
+}`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -854,16 +908,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Exchange code for tokens
       const { accessToken, refreshToken } = await googleCalendarService.exchangeCodeForTokens(code);
-      
+
       // Get user info from Google
       const googleUser = await googleCalendarService.getUserInfo(accessToken);
-      
+
       // Check if user exists by Google ID or email
       let user = await storage.getUserByGoogleId(googleUser.id);
       if (!user) {
         user = await storage.getUserByEmail(googleUser.email);
       }
-      
+
       if (!user) {
         // Create new Google user
         user = await storage.createGoogleUser({
@@ -878,11 +932,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Update existing user with Google Calendar connection and tokens
         user = await storage.updateGoogleCalendarConnection(user.id, true, accessToken, refreshToken);
       }
-      
+
       // Set session to remember authenticated user
       (req.session as any).userId = user.id;
       (req.session as any).isAuthenticated = true;
-      
+
       res.redirect("/dashboard?connected=true");
     } catch (error) {
       console.error("Google Calendar auth error:", error);
@@ -988,7 +1042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
       }
 
-      res.json(events);
+      res.json({ data: events });
     } catch (error) {
       console.error("Calendar API error:", error);
       res.status(500).json({ error: "Failed to fetch calendar events" });

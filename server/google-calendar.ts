@@ -19,39 +19,37 @@ export class GoogleCalendarService {
   constructor(
     clientId: string,
     clientSecret: string,
-    redirectUri: string
   ) {
     this.oauth2Client = new google.auth.OAuth2(
       clientId,
-      clientSecret,
-      redirectUri
+      clientSecret
     );
   }
 
-  getAuthUrl(): string {
-    return this.oauth2Client.generateAuthUrl({
-      access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/calendar.readonly',
-        'https://www.googleapis.com/auth/calendar.events',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/userinfo.email'
-      ],
-      prompt: 'consent'
-    });
-  }
+  // getAuthUrl(): string {
+  //   return this.oauth2Client.generateAuthUrl({
+  //     access_type: 'offline',
+  //     scope: [
+  //       'https://www.googleapis.com/auth/calendar.readonly',
+  //       'https://www.googleapis.com/auth/calendar.events',
+  //       'https://www.googleapis.com/auth/userinfo.profile',
+  //       'https://www.googleapis.com/auth/userinfo.email'
+  //     ],
+  //     prompt: 'consent'
+  //   });
+  // }
 
-  async exchangeCodeForTokens(code: string): Promise<{ accessToken: string; refreshToken?: string }> {
-    const { tokens } = await this.oauth2Client.getToken(code);
-    if (!tokens.access_token) {
-      throw new Error('No access token received');
-    }
-    
-    return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token || undefined
-    };
-  }
+  // async exchangeCodeForTokens(code: string): Promise<{ accessToken: string; refreshToken?: string }> {
+  //   const { tokens } = await this.oauth2Client.getToken(code);
+  //   if (!tokens.access_token) {
+  //     throw new Error('No access token received');
+  //   }
+  //   
+  //   return {
+  //     accessToken: tokens.access_token,
+  //     refreshToken: tokens.refresh_token || undefined
+  //   };
+  // }
 
   async getUserInfo(accessToken: string): Promise<{ id: string; email: string; name: string; picture?: string }> {
     this.oauth2Client.setCredentials({ access_token: accessToken });
@@ -249,16 +247,15 @@ export class GoogleCalendarService {
       },
     });
 
-    const createdEvent = response.data;
     return {
-      id: createdEvent.id!,
-      title: createdEvent.summary || event.title,
-      description: createdEvent.description ?? event.description,
-      startTime: new Date(createdEvent.start?.dateTime || createdEvent.start?.date || event.startTime),
-      endTime: new Date(createdEvent.end?.dateTime || createdEvent.end?.date || event.endTime),
-      location: createdEvent.location ?? event.location,
-      attendees: createdEvent.attendees?.map(a => a.email!).filter(Boolean) || event.attendees,
-      htmlLink: createdEvent.htmlLink ?? undefined
+      id: response.data.id!,
+      title: response.data.summary!,
+      description: response.data.description ?? undefined,
+      startTime: new Date(response.data.start?.dateTime || response.data.start?.date!),
+      endTime: new Date(response.data.end?.dateTime || response.data.end?.date!),
+      location: response.data.location ?? undefined,
+      attendees: response.data.attendees?.map(attendee => attendee.email!) || [],
+      htmlLink: response.data.htmlLink ?? undefined,
     };
   }
 
@@ -269,8 +266,21 @@ export class GoogleCalendarService {
   }
 }
 
+export const getGoogleOAuth2Client = (accessToken: string, refreshToken?: string): OAuth2Client => {
+  const client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID!,
+    process.env.GOOGLE_CLIENT_SECRET!,
+  );
+  client.setCredentials({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  return client;
+};
+
 export const googleCalendarService = new GoogleCalendarService(
   process.env.GOOGLE_CLIENT_ID!,
   process.env.GOOGLE_CLIENT_SECRET!,
-  `${process.env.NODE_ENV === 'production' ? 'https://t0.by' : `http://${process.env.REPLIT_DEV_DOMAIN || 'localhost:3000'}`}/api/auth/google/callback`
+  // No redirectUri here, as NextAuth handles the primary OAuth flow.
+  // `${process.env.NODE_ENV === 'production' ? 'https://t0.by' : `http://${process.env.REPLIT_DEV_DOMAIN || 'localhost:3000'}`}/api/auth/google/callback`
 );

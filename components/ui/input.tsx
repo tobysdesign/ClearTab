@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
-import { useMotionTemplate, useMotionValue, motion } from 'motion/react'
+import { useMotionTemplate, useMotionValue, motion } from 'framer-motion'
 
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
@@ -25,7 +25,7 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
           background: useMotionTemplate`
         radial-gradient(
           ${visible ? radius + 'px' : '0px'} circle at ${mouseX}px ${mouseY}px,
-          var(--blue-500),
+          var(--dark-pink, #333333),
           transparent 80%
         )
       `,
@@ -33,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
-        className="p-[2px] rounded-lg transition duration-300 group/input"
+        className="p-[2px] rounded-lg transition duration-300 ease-out group/input"
       >
         <input
           type={type}

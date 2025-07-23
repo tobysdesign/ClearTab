@@ -46,7 +46,7 @@ export default function ColorsPage() {
         { name: "Destructive", css: "bg-destructive text-destructive-foreground", hex: "#dc2626", hsl: "0 62.8% 30.6%" },
         { name: "Success", css: "bg-green-600 text-white", hex: "#16a34a", hsl: "142 76% 36%" },
         { name: "Warning", css: "bg-yellow-600 text-white", hex: "#ca8a04", hsl: "45 93% 47%" },
-        { name: "Info", css: "bg-blue-600 text-white", hex: "#2563eb", hsl: "221 83% 53%" },
+        { name: "Info", css: "bg-neutral-700 text-white", hex: "#333333", hsl: "0 0% 20%" },
       ]
     }
   ]
@@ -164,7 +164,7 @@ export default function ColorsPage() {
               <div className="bg-destructive text-destructive-foreground px-3 py-1 rounded text-sm inline-block">
                 Error
               </div>
-              <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm inline-block">
+              <div className="bg-neutral-700 text-white px-3 py-1 rounded text-sm inline-block">
                 Info
               </div>
             </div>

@@ -12,7 +12,7 @@ interface PaddingValues {
 export function useDockPadding(dockPosition: DockPosition): PaddingValues {
   return useMemo(() => {
     const basePadding = 24 // 24px for sides without dock
-    const dockPadding = 72 // 72px for side with dock
+    const dockPadding = 80 // 80px for side with dock
 
     switch (dockPosition) {
       case 'top':

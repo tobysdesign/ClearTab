@@ -8,7 +8,7 @@ const nextConfig = {
   productionBrowserSourceMaps: process.env.NODE_ENV === 'development',
   serverExternalPackages: ['sharp'],
   experimental: {
-    optimizePackageImports: ['@tanstack/react-query', 'framer-motion', 'lottie-react'],
+    optimizePackageImports: ['@tanstack/react-query', 'framer-motion'],
   },
   // Disable StrictMode for BlockNote compatibility
   reactStrictMode: false,
