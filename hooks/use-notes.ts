@@ -47,22 +47,25 @@ async function createNote(newNote: Partial<Note> & { temporaryId?: string }): Pr
 async function updateNote(
   updatedNote: Partial<Note> & { id: string }
 ): Promise<Note> {
-  // console.log("Updating note:", updatedNote);
   const { id, ...data } = updatedNote
   const res = await fetch(`/api/notes/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
+
   if (!res.ok) {
-    throw new Error('Network response was not ok')
+    const errorText = await res.text()
+    console.error(`Failed to update note: ${res.status} ${res.statusText}`, errorText)
+    throw new Error(`Failed to update note: ${errorText}`)
   }
+
   const body: ActionResponse<Note> = await res.json()
   if (body.success && body.data) {
-    // console.log("Note updated successfully:", body.data);
     return body.data
   }
-  console.error("Failed to update note:", body.error);
+
+  console.error("Failed to update note:", body.error)
   throw new Error(body.error || 'Failed to update note')
 }
 
@@ -91,6 +94,8 @@ export function useNotes() {
   } = useQuery<Note[], Error>({
     queryKey: ['notes'],
     queryFn: getNotes,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    refetchOnWindowFocus: false, // Prevent refetch on focus to reduce unnecessary requests
   })
 
   useEffect(() => {
@@ -112,13 +117,16 @@ export function useNotes() {
       // Optimistically update: find and replace if temporaryId, otherwise append
       queryClient.setQueryData<Note[]>(['notes'], (old = []) => {
         if (newNote.temporaryId) {
+          // Replace the temporary note with the new note data
           return old.map(note => 
             note.id === newNote.temporaryId 
-              ? { ...note, ...newNote } as Note // Spread newNote directly to update all properties
+              ? { ...note, ...newNote, id: newNote.temporaryId } as Note // Keep the temporary ID for now
               : note
           );
         } else {
-          return [...old, newNote as Note];
+          // Only add if not already present (safety check)
+          const exists = old.some(note => note.id === (newNote as Note).id)
+          return exists ? old : [...old, newNote as Note];
         }
       });
       
@@ -142,7 +150,8 @@ export function useNotes() {
           newNote,
         ])
       }
-      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      // Removed queryClient.invalidateQueries to prevent infinite loops
+      // The manual cache update above is sufficient
     },
     onError: (error, variables, context) => {
       // console.error("createNoteMutation onError:", error);
@@ -183,12 +192,11 @@ export function useNotes() {
       if (context?.previousNotes) {
         queryClient.setQueryData(['notes'], context.previousNotes)
       }
-    },
-    onSettled: () => {
-      // console.log("updateNoteMutation onSettled");
-      // Refetch to ensure we have the latest data
+      // Only invalidate on error to get fresh data
       queryClient.invalidateQueries({ queryKey: ['notes'] })
     },
+    // Removed onSettled to prevent automatic invalidation on success
+    // Optimistic updates are sufficient for successful operations
   })
 
   const deleteNoteMutation = useMutation<{ id: string }, Error, string>({

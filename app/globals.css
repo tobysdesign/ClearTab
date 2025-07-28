@@ -40,7 +40,300 @@
   100% { opacity: 0; }
 }
 
+/* ===========================================
+   WIDGET STRUCTURE SYSTEM
+   =========================================== */
+
+/* Widget base background */
+.widget-background {
+  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
+  border: 1px solid #323235;
+  box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Widget header with gradient overlay */
+.widget-header {
+  min-height: 60px;
+  padding: 14px 24px;
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgb(29 28 28) 70%, rgb(0 0 0 / 0%) 100%);
+  border-radius: 22px 22px 0 0;
+}
+
+
+
+/* Widget content areas */
+.widget-list-content {
+  padding: 52px 24px 24px;
+}
+
+.widget-notes-content {
+  padding: 52px 0 25px 24px;
+  margin-right: 24px;
+}
+
+/* Positioning utility */
+.widget-relative {
+  position: relative;
+}
+
+/* ===========================================
+   SEMANTIC LAYOUT UTILITIES
+   =========================================== */
+
+/* Flex layouts - semantic replacements for Tailwind */
+.widget-flex {
+  display: flex;
+}
+
+.widget-flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.widget-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.widget-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.widget-flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Spacing utilities */
+.widget-gap-2 {
+  gap: 8px;
+}
+
+.widget-gap-3 {
+  gap: 12px;
+}
+
+.widget-gap-4 {
+  gap: 16px;
+}
+
+/* Sizing utilities */
+.widget-full {
+  width: 100%;
+  height: 100%;
+}
+
+.widget-full-width {
+  width: 100%;
+}
+
+.widget-full-height {
+  height: 100%;
+}
+
+.widget-flex-1 {
+  flex: 1;
+}
+
+.widget-min-w-0 {
+  min-width: 0;
+}
+
+/* Text utilities */
+.widget-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-text-center {
+  text-align: center;
+}
+
+/* Positioning utilities */
+.widget-absolute {
+  position: absolute;
+}
+
+.widget-relative {
+  position: relative;
+}
+
+/* Overflow utilities */
+.widget-overflow-hidden {
+  overflow: hidden;
+}
+
+.widget-overflow-auto {
+  overflow: auto;
+}
+
+/* ===========================================
+   LEGACY CLASSES (TO BE DEPRECATED)
+   =========================================== */
+
+/* ToBYS NEVER DELETE THIS - Legacy classes for transition */
+.nolisty {
+  padding: 52px 0 25px 24px;
+  margin-right: 24px;
+}
+
+.notestits {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 16px;
+  line-height: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #BBBBBB;
+}
+
+.widgetHead {
+  padding: 24px 24px 0;
+  background: linear-gradient(182deg, rgb(39 39 39) 0%, rgb(33 33 33 / 0%) 50%);
+  position: absolute;
+  z-index: 100;
+  backdrop-filter: blur(6px);
+  width: 100%;
+  padding-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.rely {
+  position: relative;
+}
+
+.WidgeTit {
+  font-family: 'Inter Display', sans-serif;
+  font-size: 14px;
+  line-height: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #BBBBBB;
+}
+
+.tskly {
+  padding: 52px 24px 24px;
+}
+
+
 /* Custom utility classes for missing Tailwind utilities */
+.gradient-blur {
+  position: fixed;
+  z-index: 5;
+  inset: auto 0 0 0;
+  height: 65%;
+  pointer-events: none;
+}
+.gradient-blur > div,
+.gradient-blur::before,
+.gradient-blur::after {
+  position: absolute;
+  inset: 0;
+}
+.gradient-blur::before {
+  content: "";
+  z-index: 1;
+  backdrop-filter: blur(0.5px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 0) 37.5%
+  );
+}
+.gradient-blur > div:nth-of-type(1) {
+  z-index: 2;
+  backdrop-filter: blur(1px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 12.5%,
+    rgba(0, 0, 0, 1) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 0) 50%
+  );
+}
+.gradient-blur > div:nth-of-type(2) {
+  z-index: 3;
+  backdrop-filter: blur(2px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 25%,
+    rgba(0, 0, 0, 1) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 62.5%
+  );
+}
+.gradient-blur > div:nth-of-type(3) {
+  z-index: 4;
+  backdrop-filter: blur(4px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 37.5%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 0) 75%
+  );
+}
+.gradient-blur > div:nth-of-type(4) {
+  z-index: 5;
+  backdrop-filter: blur(8px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 1) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 0) 87.5%
+  );
+}
+.gradient-blur > div:nth-of-type(5) {
+  z-index: 6;
+  backdrop-filter: blur(16px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 62.5%,
+    rgba(0, 0, 0, 1) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+.gradient-blur > div:nth-of-type(6) {
+  z-index: 7;
+  backdrop-filter: blur(32px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 75%,
+    rgba(0, 0, 0, 1) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+.gradient-blur::after {
+  content: "";
+  z-index: 8;
+  backdrop-filter: blur(64px);
+  mask: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 87.5%,
+    rgba(0, 0, 0, 1) 100%
+  );
+}
+
+
 .fade-in-0 {
   animation: fade-in 0s ease-out;
   opacity: 1;
@@ -430,15 +723,7 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
   overflow: hidden;
 }
 
-.notestits {font-size: 16px; font-weight: 300; color: #BBBBBB;}
-.widgetHead {padding: 24px 24px 0;     background: linear-gradient(182deg, rgb(39 39 39) 0%, rgb(33 33 33 / 0%) 50%);
-  position: absolute;
-  z-index: 100;
-  backdrop-filter: blur(6px);
-  width: 100%;
-  padding-bottom: 24px;}
 
-.WidgeTit {font-size: 14px; font-weight: 300; color: #BBBBBB;}
 .glow-button {
   position: relative;
   background: #1a1a1a;
@@ -648,7 +933,6 @@ input[type="textarea"]::-moz-selection,
   color: hsl(var(--foreground));
 }
 
-/* Removed custom text selection styles to avoid conflicts with Yoopta */
 
 /* Prevent text selection during drag operations, but allow it for inputs and textareas */
 body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
@@ -893,7 +1177,8 @@ body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
     --angle-1 500ms ease;
   box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
-.nolisty {padding: 52px 0 25px 24px; margin-right: 24px;}
+
+
 .glow-button-glassmorphic:hover::after {
   --angle-1: -125deg;
 }
@@ -966,34 +1251,6 @@ html[data-vaul-drawer-visible="true"] {
     background: none;
 }
 
-.yoopta-paragraph {
-    padding: 0 5px;
-    font-size: 14px !important;
-}
-
-/* Yoopta Editor Dark Mode Toolbar Styles */
-.dark .yoopta-toolbar-root {
-    background-color: hsl(var(--card));
-    border-color: hsl(var(--border));
-    color: hsl(var(--card-foreground));
-}
-
-.dark .yoopta-toolbar-button {
-    color: hsl(var(--card-foreground));
-}
-
-.dark .yoopta-toolbar-button:hover {
-    background-color: hsl(var(--accent));
-}
-
-.dark .yoopta-toolbar-button[data-state="active"] {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-}
-
-.yoopta-dnd-layer {
-    display: none !important;
-}
 
 .ybot {background: linear-gradient(to bottom, #1F1F1F, #171414) !important;}
 
@@ -1014,34 +1271,6 @@ html[data-vaul-drawer-visible="true"] {
     width: 100%;
 }
 
-/* Weather Widget Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-@keyframes rain {
-  0% { transform: translateY(-4px); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(4px); opacity: 0; }
-}
-
-@keyframes breeze {
-  0% { transform: translateX(-2px); }
-  50% { transform: translateX(2px); }
-  100% { transform: translateX(-2px); }
-}
-
-@keyframes flash {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-.animate-float { animation: float 3s ease-in-out infinite; }
-.animate-rain { animation: rain 1.5s linear infinite; }
-.animate-breeze { animation: breeze 2s ease-in-out infinite; }
-.animate-flash { animation: flash 2s ease-in-out infinite; }
-
 @keyframes sun-pulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(0.95); opacity: 0.9; }
@@ -1060,28 +1289,81 @@ html[data-vaul-drawer-visible="true"] {
   animation: spin-slow 8s linear infinite;
 }
 
+/* ===========================================
+   WIDGET LIST ITEM SYSTEM
+   =========================================== */
+
+/* Base list item - clean, semantic styling */
 .widget-list-item {
-  @apply px-3 py-2 flex items-center justify-between rounded-lg cursor-pointer border border-[#2A2A2A]/30 bg-transparent backdrop-blur-sm transition-all duration-200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #2A2A2A;
+  background-color: transparent;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .widget-list-item:hover {
-  @apply bg-[#313131]/20 border-[#3C3C3C]/40;
+  background-color: rgba(49, 49, 49, 0.2);
+  border-color: rgba(60, 60, 60, 0.4);
 }
 
-.widget-list-item.active {
-  @apply bg-[#313131]/30 border-[#3C3C3C]/50;
+.widget-list-item.active,
+.widget-list-item[data-state="active"],
+.widget-list-item[aria-selected="true"] {
+  background-color: rgba(49, 49, 49, 0.3);
+  border-color: rgba(60, 60, 60, 0.5);
 }
 
-/* Override the specific Tailwind class that's causing issues */
-.hover\:bg-accent\/50:hover {
-  background-color: transparent !important;
-}
-
-/* Simple list item class for notes */
-.listItem {
-  @apply flex items-center justify-between p-3 mb-1 rounded-lg border transition-colors cursor-pointer;
+/* Task-specific list items (darker default background) */
+.widget-list-item--tasks {
   background-color: #222222;
   border-color: #222222;
+}
+
+.widget-list-item--tasks:hover {
+  background-color: #3D3D3D;
+  border-color: #252323;
+}
+
+.widget-list-item--tasks.active {
+  background-color: #292929;
+  border-color: #434343;
+}
+
+/* Notes-specific list items (lighter background) */
+.widget-list-item--notes {
+  background-color: #313131;
+  border-color: #3C3C3C;
+}
+
+.widget-list-item--notes:hover {
+  background-color: #3C3C3C;
+  border-color: #4A4A4A;
+}
+
+.widget-list-item--notes.active {
+  background-color: #4A4A4A;
+  border-color: #555555;
+}
+
+/* Legacy class for backward compatibility */
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  border: 1px solid #222222;
+  background-color: #222222;
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .listItem:hover {
@@ -1096,34 +1378,6 @@ html[data-vaul-drawer-visible="true"] {
   border-color: #434343;
 }
 
-/* Notes use the lighter background as default (same as tasks' hover/active state) */
-/* Nuclear option - maximum specificity to override Tailwind */
-div[class*="widget-list-item"][class*="notes"],
-div.widget-list-item.notes,
-motion.div[class*="widget-list-item"][class*="notes"],
-motion.div.widget-list-item.notes,
-[class*="widget-list-item"][class*="notes"] {
-  background-color: #313131 !important;
-  border-color: #3C3C3C !important;
-}
-
-div[class*="widget-list-item"][class*="notes"]:hover,
-div.widget-list-item.notes:hover,
-motion.div[class*="widget-list-item"][class*="notes"]:hover,
-motion.div.widget-list-item.notes:hover,
-[class*="widget-list-item"][class*="notes"]:hover {
-  background-color: #3C3C3C !important;
-  border-color: #4A4A4A !important;
-}
-
-div[class*="widget-list-item"][class*="notes"][class*="active"],
-div.widget-list-item.notes.active,
-motion.div[class*="widget-list-item"][class*="notes"][class*="active"],
-motion.div.widget-list-item.notes.active,
-[class*="widget-list-item"][class*="notes"][class*="active"] {
-  background-color: #4A4A4A !important;
-  border-color: #555555 !important;
-}
 
 /* Global card title styling */
 .dashCard h2,
@@ -1156,6 +1410,7 @@ motion.div.widget-list-item.notes.active,
 .bn-toolbar {
   background-color: var(--card) !important;
   border-color: var(--border) !important;
+  height: 38px;
 }
 
 .bn-toolbar button {
@@ -1239,11 +1494,18 @@ motion.div.widget-list-item.notes.active,
 
 
 
+/* Global placeholder styles - darker and italic */
+input::placeholder,
+textarea::placeholder {
+  color: #3a3a3a !important;
+  font-style: italic;
+}
+
 /* Custom styles for EditTaskForm */
 .task-editor-description .bn-placeholder {
   font-style: italic;
   font-weight: 200; /* Extra-Light */
-  color: #424242 !important;
+  color: #3a3a3a !important;
 }
 
 .task-important-switch[data-state=unchecked] > span {
@@ -1270,7 +1532,7 @@ motion.div.widget-list-item.notes.active,
 .notes-editor-placeholder .bn-placeholder {
   font-style: italic;
   font-weight: 300;
-  color: #555454 !important;
+  color: #3a3a3a !important;
 }
 
 /* Fix for any links or special text that might be blue */
@@ -1296,38 +1558,44 @@ motion.div.widget-list-item.notes.active,
   background-color: #151515 !important;
 }
 
-.header {font-size: 10px; font-weight: 500;color: #BBBBBB;}
-.subtitle {font-size: 10px; font-weight: 300; color: #8D8D8D;}
+/* ===========================================
+   WIDGET TYPOGRAPHY SYSTEM
+   =========================================== */
 
-/* Widget headings and font styles */
-.widget-heading {
+/* Widget titles - used in headers */
+.widget-title {
   font-family: 'Inter Display', sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 12px;
   font-weight: 500;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #BBBBBB;
 }
-
-/* Task and note item headings */
-.task.header {
+.bigNumber {font-family: 'Inter Display', sans-serif;
+  font-size: 60px;
+  line-height: 40px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #D2D2D2;
+}
+/* List item primary text */
+.item-title {
   font-family: 'Inter Display', sans-serif;
   font-size: 14px;
   line-height: 17px;
-  font-weight: 500; /* Medium weight */
+  font-weight: 500;
   color: #D2D2D2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Task and note item subtitles */
+/* List item secondary text */
 .item-subtitle {
   font-family: 'Inter Display', sans-serif;
   font-size: 14px;
   line-height: 17px;
-  font-weight: 400; /* Regular weight */
+  font-weight: 400;
   color: #8D8D8D;
   margin-top: 4px;
   overflow: hidden;
@@ -1335,4 +1603,11 @@ motion.div.widget-list-item.notes.active,
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+
+/* Small metadata text */
+.widget-meta {
+  font-size: 10px;
+  font-weight: 300;
+  color: #8D8D8D;
 }

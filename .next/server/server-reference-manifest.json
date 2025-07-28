@@ -1,72 +1,57 @@
 {
   "node": {
-    "7c19cb562a6c94527687b1f93365519a6b700cb03e": {
+    "7c54baa93c3e56acf4743703d2d4cd7d880a740cce": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         },
         "app/_not-found/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        },
-        "app/test-countdown/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
         "app/page": "action-browser",
-        "app/_not-found/page": "action-browser",
-        "app/test-countdown/page": "action-browser"
+        "app/_not-found/page": "action-browser"
       }
     },
-    "7fdface17a05dba892e8a5c1461f2d22bf2afd2082": {
+    "7f9e86d306393e2de9645e23806b6dc9ff3c6b4b36": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         },
         "app/_not-found/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        },
-        "app/test-countdown/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
         "app/page": "action-browser",
-        "app/_not-found/page": "action-browser",
-        "app/test-countdown/page": "action-browser"
+        "app/_not-found/page": "action-browser"
       }
     },
-    "7fe1107a420f72e8aae54d223d4ca570b311ad39fe": {
+    "7ffb32e0532ae5086f6ae19506bfa97a8ba431c50e": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         },
         "app/_not-found/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
-          "async": false
-        },
-        "app/test-countdown/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
       "layer": {
         "app/page": "action-browser",
-        "app/_not-found/page": "action-browser",
-        "app/test-countdown/page": "action-browser"
+        "app/_not-found/page": "action-browser"
       }
     },
-    "7f09f75467e49f57bfb1432e0cc55324245a54a608": {
+    "7f2bf282879ba2bba562e1c3a965bb9a9da6d8057d": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
@@ -74,10 +59,10 @@
         "app/page": "action-browser"
       }
     },
-    "7f18a490b45f3272aff606bd2db597e1b515a4ef8c": {
+    "7fa17d0fb00a41314e79b2c7056d18469d78c3884e": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
@@ -85,10 +70,10 @@
         "app/page": "action-browser"
       }
     },
-    "7f206c1dca02dc5612da21187366f2b9ee2f98dd85": {
+    "7fca4971444afbb7bf41ac4da3c15e50ab01fdae29": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
@@ -96,10 +81,10 @@
         "app/page": "action-browser"
       }
     },
-    "7fdde845e2a15e7651831bddbaf3204c8781304d5c": {
+    "7ff2d6898d2def93953aa9dd5f3a9c3a04dd307084": {
       "workers": {
         "app/page": {
-          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c19cb562a6c94527687b1f93365519a6b700cb03e%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227fdface17a05dba892e8a5c1461f2d22bf2afd2082%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227fe1107a420f72e8aae54d223d4ca570b311ad39fe%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f09f75467e49f57bfb1432e0cc55324245a54a608%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%2C%7B%22id%22%3A%227f18a490b45f3272aff606bd2db597e1b515a4ef8c%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227f206c1dca02dc5612da21187366f2b9ee2f98dd85%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227fdde845e2a15e7651831bddbaf3204c8781304d5c%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fai.ts%22%2C%5B%7B%22id%22%3A%227c54baa93c3e56acf4743703d2d4cd7d880a740cce%22%2C%22exportedName%22%3A%22askAi%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Ftasks.ts%22%2C%5B%7B%22id%22%3A%227f9e86d306393e2de9645e23806b6dc9ff3c6b4b36%22%2C%22exportedName%22%3A%22createTask%22%7D%2C%7B%22id%22%3A%227ffb32e0532ae5086f6ae19506bfa97a8ba431c50e%22%2C%22exportedName%22%3A%22updateTask%22%7D%5D%5D%2C%5B%22%2FUsers%2Fybot%2Fbye%2Fbye%2Flib%2Factions%2Fsettings.ts%22%2C%5B%7B%22id%22%3A%227f2bf282879ba2bba562e1c3a965bb9a9da6d8057d%22%2C%22exportedName%22%3A%22savePaydaySettings%22%7D%2C%7B%22id%22%3A%227fa17d0fb00a41314e79b2c7056d18469d78c3884e%22%2C%22exportedName%22%3A%22saveApiKey%22%7D%2C%7B%22id%22%3A%227fca4971444afbb7bf41ac4da3c15e50ab01fdae29%22%2C%22exportedName%22%3A%22getApiKey%22%7D%2C%7B%22id%22%3A%227ff2d6898d2def93953aa9dd5f3a9c3a04dd307084%22%2C%22exportedName%22%3A%22getPaydaySettings%22%7D%5D%5D%5D&__client_imported__=true!",
           "async": false
         }
       },
@@ -109,5 +94,5 @@
     }
   },
   "edge": {},
-  "encryptionKey": "BdjyyE0SJTHy5uo6i8j4aDBL37gA/ggSHVEXV0KuC6M="
+  "encryptionKey": "L/ZCFeEElRSTk2EeOx4d737n6HKXqLC0offmwkPlusY="
 }

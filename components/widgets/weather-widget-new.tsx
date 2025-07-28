@@ -101,7 +101,7 @@ export function WeatherWidgetNew() {
               <div className={styles.cardCenter}>
                 {/* Lottie animation will go here */}
               </div>
-              
+
               <div className={styles.cardFooter}>
                 <div className={styles.mainTempCol}>
                   <div className={styles.temperature}>{day.temperature}°</div>

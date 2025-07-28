@@ -70,7 +70,7 @@ Bye can also be used as a Chrome extension that replaces your new tab page.
 ### Features
 
 - Replaces your new tab page with the Bye dashboard
-- Quick access to notes, tasks, and meetings from the extension popup
+- Quick access to notes, tasks, and meetings from the extension
 - Works offline with data sync when online
 - Seamless integration with the web version
 

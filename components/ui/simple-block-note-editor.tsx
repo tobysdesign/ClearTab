@@ -6,117 +6,91 @@ import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
 import "./block-note-custom.css"
 import { useEffect, useRef, memo } from 'react'
-import "./editor-placeholder.css" // Add custom CSS for placeholder styling
+import "./editor-placeholder.css"
+import type { BlockNoteEditor } from "@blocknote/core"
 
 interface SimpleBlockNoteEditorProps {
-  initialContent?: any;
-  onChange?: (content: any) => void;
-  editable?: boolean;
-  theme?: "light" | "dark";
-  className?: string;
+  initialContent?: any
+  onChange?: (content: any) => void
+  onEditorReady?: (editor: BlockNoteEditor) => void
+  editable?: boolean
+  theme?: "light" | "dark"
+  className?: string
 }
 
-// Use memo to prevent unnecessary re-renders
 export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
   initialContent,
   onChange,
+  onEditorReady,
   editable = true,
   theme = "dark",
   className
 }: SimpleBlockNoteEditorProps) {
-  
-  // Track previous content for comparison
-  const prevContentRef = useRef<string>(JSON.stringify(initialContent || []));
-  const editorChangeTimeout = useRef<NodeJS.Timeout | null>(null);
-  const editorRef = useRef<any>(null);
-  const editorKey = JSON.stringify(initialContent || []).substring(0, 20); // Use content as key
-  
-  // Creates a new editor instance with the initial content dependency
-  // This ensures a new editor is created when the initialContent changes
+  const changeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastContentRef = useRef<string>('')
+  const isInitializedRef = useRef(false)
+
+  // Create editor instance at the top level
   const editor = useCreateBlockNote({
     initialContent: initialContent || undefined,
     domAttributes: {
       editor: {
-        class: "editor-with-placeholder" // Add class for placeholder styling
+        class: "editor-with-placeholder"
       }
     }
-  }, [editorKey]); // Use editorKey to reinitialize when content changes
-  
-  // Store editor reference
-  editorRef.current = editor;
-  
-  // Log when editor is created/recreated
+  })
+
+  // Initialize content and call onEditorReady when editor is ready
   useEffect(() => {
-    console.log("Editor created/recreated with key:", editorKey);
-    
-    // On first load, set content
-    if (initialContent && editor) {
-      try {
-        // Reset content to ensure clean state
-        console.log("Setting initial content for editor");
-        // Only set if different from current content
-        const currentContent = JSON.stringify(editor.document || []);
-        const newContent = JSON.stringify(initialContent || []);
-        if (currentContent !== newContent) {
-          console.log("Content differs, updating editor");
-          editor.replaceBlocks(editor.document, initialContent);
-        }
-        prevContentRef.current = newContent;
-      } catch (e) {
-        console.error("Error setting initial content:", e);
-      }
+    if (!isInitializedRef.current) {
+      const initialContentStr = JSON.stringify(initialContent || [])
+      lastContentRef.current = initialContentStr
+      isInitializedRef.current = true
     }
     
-    return () => {
-      // Clear any pending timeouts when editor is recreated
-      if (editorChangeTimeout.current) {
-        clearTimeout(editorChangeTimeout.current);
-      }
-    };
-  }, [editor, initialContent, editorKey]);
-  
-  // Set up onChange handler with debounce
+    if (onEditorReady) {
+      onEditorReady(editor)
+    }
+  }, [editor, onEditorReady, initialContent])
+
+  // Set up change handler
   useEffect(() => {
-    if (!editor || !onChange) return;
-    
-    const handleEditorChange = () => {
-      // Capture current content
-      const currentEditor = editorRef.current;
-      if (!currentEditor) return;
-      
-      // Don't update during typing - use a longer timeout
-      if (editorChangeTimeout.current) {
-        clearTimeout(editorChangeTimeout.current);
+    if (!onChange) return
+
+    const handleChange = () => {
+      // Clear any existing timeout
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current)
       }
-      
-      // Set a significant delay to avoid interrupting typing
-      editorChangeTimeout.current = setTimeout(() => {
-        const contentStr = JSON.stringify(currentEditor.document || []);
+
+      // Debounce changes to prevent rapid firing
+      changeTimeoutRef.current = setTimeout(() => {
+        const contentStr = JSON.stringify(editor.document || [])
         
-        // Only trigger onChange if content has actually changed
-        if (contentStr !== prevContentRef.current) {
-          console.log("Editor content changed, updating");
-          prevContentRef.current = contentStr;
-          onChange(currentEditor.document);
+        // Only call onChange if content actually changed
+        if (contentStr !== lastContentRef.current) {
+          lastContentRef.current = contentStr
+          onChange(editor.document)
         }
-      }, 1000); // 1 second debounce
-    };
-    
-    // Register the event handler
-    const unsubscribe = editor.onEditorContentChange(handleEditorChange);
-    
-    // Cleanup function
+      }, 500) // Reduced from 1000ms to 500ms for better responsiveness
+    }
+
+    const unsubscribe = editor.onEditorContentChange(handleChange)
+
     return () => {
-      // BlockNote API doesn't return an unsubscribe function we can call
-      if (editorChangeTimeout.current) {
-        clearTimeout(editorChangeTimeout.current);
+      if (changeTimeoutRef.current) {
+        clearTimeout(changeTimeoutRef.current)
+        changeTimeoutRef.current = null
       }
-    };
-  }, [editor, onChange]);
-  
-  // Render the editor with a key to force remounting when content changes
+      // Clean up subscription
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
+  }, [editor, onChange])
+
   return (
-    <div className={`flex flex-col h-full w-full ${className || ''}`} key={editorKey}>
+    <div className={`flex flex-col h-full w-full ${className || ''}`}>
       <BlockNoteView
         editor={editor}
         editable={editable}
@@ -125,5 +99,5 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
         className="editor-with-custom-placeholder"
       />
     </div>
-  );
-}); 
+  )
+}) 

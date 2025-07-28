@@ -275,6 +275,17 @@ export const getGoogleOAuth2Client = (accessToken: string, refreshToken?: string
     access_token: accessToken,
     refresh_token: refreshToken,
   });
+
+  // Automatically refresh the token if it's about to expire
+  client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+      // store the refresh_token in my database!
+      console.log("new refresh token", tokens.refresh_token);
+    }
+    console.log("new access token", tokens.access_token);
+    client.setCredentials(tokens);
+  });
+
   return client;
 };
 

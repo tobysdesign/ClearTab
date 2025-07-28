@@ -1,10 +1,5 @@
 {
   "pages": {
-    "/api/notes/route": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/api/notes/route.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -32,21 +27,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/api/tasks/route.js"
     ],
-    "/api/notes/[id]/route": [
+    "/api/notes/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/notes/[id]/route.js"
+      "static/chunks/app/api/notes/route.js"
     ],
-    "/api/auth/[...nextauth]/route": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/auth/[...nextauth]/route.js"
-    ],
-    "/test-countdown/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/test-countdown/page.css",
-      "static/chunks/app/test-countdown/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

@@ -9,12 +9,6 @@ declare module '@storybook/nextjs-vite';
 declare module 'storybook/test';
 declare module '@storybook/addon-vitest/vitest-plugin';
 
-declare module '@yoopta/editor' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export type YooptaContentValue = any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export type YooptaOnChangeOptions = any;
-}
 
 declare module 'vitest/config';
 

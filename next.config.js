@@ -63,6 +63,12 @@ const nextConfig = {
     ];
   },
   webpack: (config, { dev, isServer }) => {
+    // Ensure Yjs is treated as a singleton to prevent the "already imported" warning
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'yjs': require.resolve('yjs')
+    }
+    
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,

@@ -12,11 +12,15 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { getPaydaySettings } from '@/lib/actions/settings'
 import { WidgetActions } from '@/components/dashboard/widget-actions'
-import { FinanceSettingsPopover } from '@/components/settings/finance-settings-popover'
+import { WidgetContainer, WidgetContent } from '@/components/ui/widget-container'
+import { WidgetHeader } from '@/components/ui/widget-header'
 import { WidgetLoader } from './widget-loader'
 import { useEffect, useState } from 'react'
 import styles from './widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import Settings from 'lucide-react/dist/esm/icons/settings'
 
 interface FinanceWidgetProps {
   variant?: 'vertical' | 'horizontal'
@@ -32,6 +36,7 @@ type PaydayFrequency = keyof typeof RECURRENCE_DAYS
 type RecurrenceDays = (typeof RECURRENCE_DAYS)[PaydayFrequency]
 
 export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
+  const router = useRouter()
   const [settings, setSettings] = useState<{
     nextPayday: Date,
     daysLeft: number,
@@ -84,7 +89,7 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
   const [firstDigit, secondDigit] = formattedDaysLeft.split('')
 
   if (isLoading) {
-    return <WidgetLoader className="finance" minHeight="h-[280px]" />
+    return <WidgetLoader className="Countdown" minHeight="h-[280px]" />
   }
 
   // Calculate dot size and spacing based on grid dimensions
@@ -93,20 +98,16 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
   const dotSpacingY = Math.min(24, Math.max(16, 60 / rows));
 
   return (
-    <div className={styles.widgetContainer}>
-      <div className={cn(styles.widgetContent, "relative flex flex-col h-full overflow-hidden p-6")}>
-        <WidgetActions>
-          <FinanceSettingsPopover />
-        </WidgetActions>
-        <div className="flex flex-col gap-1">
-          <h2 className="font-inter-display text-[14px] font-normal text-white">Countdown</h2>
-          <span className="font-inter-display text-[14px] font-normal text-[#8D8D8D]">Payday</span>
-        </div>
+    <WidgetContainer>
+      <WidgetHeader title="Countdown" className="h-[60px]">
+      </WidgetHeader>
+      <WidgetContent scrollable={false} className="widget-relative widget-flex-column p-6">
+       
 
-        <div className="flex-grow flex items-end justify-between">
+        <div className="widget-flex-1 widget-flex-between items-end">
             {/* Numbers block */}
-            <div className="flex flex-col items-start">
-              <div className="flex items-baseline">
+            <div className="widget-flex-column items-start">
+              <div className="widget-flex items-baseline">
                 <ClientOnly>
                   <AnimatePresence mode="popLayout">
                     <motion.span
@@ -140,12 +141,12 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
 
             {/* Dots visualization */}
             <ClientOnly>
-              <div className="relative w-[120px] h-[80px] mr-2">
-                <div className="absolute w-full h-full">
+              <div className="widget-relative w-[120px] h-[80px] mr-2">
+                <div className="widget-absolute widget-full-width widget-full-height">
                   {dots.map((dot, index) => (
                     <motion.div
                       key={index}
-                      className="absolute rounded-full"
+                      className="widget-absolute rounded-full"
                       style={{
                         width: `${dotSize}px`,
                         height: `${dotSize}px`,
@@ -167,7 +168,7 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
                     />
                   ))}
                   <motion.div
-                    className="absolute rounded-full bg-pink-500"
+                    className="widget-absolute rounded-full bg-pink-500"
                     style={{
                       width: `${dotSize * 1.5}px`,
                       height: `${dotSize * 1.5}px`,
@@ -179,7 +180,7 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
               </div>
             </ClientOnly>
         </div>
-      </div>
-    </div>
+      </WidgetContent>
+    </WidgetContainer>
   )
 } 

@@ -1,21 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Button } from './button'
 import { createTaskFromText } from '@/components/widgets/tasks-widget'
-import { YooptaContentValue, EMPTY_CONTENT } from '@/shared/schema'
-
-// Import the editor dynamically to avoid SSR issues
-const BlockNoteEditor = dynamic(
-  () => import('@/components/ui/block-note-editor').then(mod => mod.BlockNoteEditor),
-  { 
-    ssr: false,
-    loading: () => <EditorSkeleton /> 
-  }
-)
+import { Block } from '@blocknote/core'
+import { SimpleBlockNoteEditor } from './simple-block-note-editor'
+import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
 
 // Skeleton component to show while editor is loading
 function EditorSkeleton() {
@@ -29,11 +21,9 @@ function EditorSkeleton() {
   )
 }
 
-// Removed: extractTextFromContent function
-
 export interface EditorProps {
-  value?: YooptaContentValue // Type as YooptaContentValue
-  onChange?: (value: YooptaContentValue) => void // Type onChange to receive YooptaContentValue
+  value?: Block[]
+  onChange?: (value: Block[]) => void
   className?: string
   placeholder?: string
   editable?: boolean
@@ -58,8 +48,6 @@ export function Editor({
   const [selectedText, setSelectedText] = useState<string>('')
   const [hasSelection, setHasSelection] = useState(false)
   const [isCreatingTask, setIsCreatingTask] = useState(false)
-  
-  // value is now directly YooptaContentValue, no need for textContent derivation
 
   // Handle selection changes to enable/disable AI buttons
   const handleSelectionChange = useCallback((text: string) => {
@@ -101,8 +89,8 @@ export function Editor({
     }
   }, [selectedText, onCreateTask])
 
-  // Handle content change - pass YooptaContentValue directly
-  const handleContentChange = useCallback((newContent: YooptaContentValue) => {
+  // Handle content change
+  const handleContentChange = useCallback((newContent: Block[]) => {
     if (onChange) {
       onChange(newContent);
     }
@@ -119,15 +107,11 @@ export function Editor({
 
   return (
     <div className={cn("relative flex flex-col", className)}>
-      <BlockNoteEditor
-        value={value}
+      <SimpleBlockNoteEditor
+        initialContent={value || EMPTY_BLOCKNOTE_CONTENT as Block[]}
         onChange={handleContentChange}
         editable={editable && !readOnly}
-        placeholder={placeholder}
-        onSelectionChange={handleSelectionChange}
-        onBlur={onBlur}
-        onAskAI={onOpenAiChat}
-        onCreateTask={onCreateTask}
+        className="h-full"
       />
       
       {/* AI action buttons that appear when text is selected */}
@@ -156,4 +140,4 @@ export function Editor({
       )}
     </div>
   )
-} 
+}

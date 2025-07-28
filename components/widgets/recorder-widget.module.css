@@ -49,7 +49,7 @@
 }
 
 .body {
-  @apply flex-1 flex flex-col items-center justify-center gap-5 px-6 pb-6;
+  @apply flex-1 flex flex-col items-center justify-end gap-5 px-6 pb-6;
 }
 
 .buttonContainer {

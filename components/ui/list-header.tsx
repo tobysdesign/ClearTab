@@ -12,10 +12,10 @@ interface ListHeaderProps {
   titleClassName?: string;
 }
 
-export function ListHeader({ title, children, className }: ListHeaderProps) {
+export function ListHeader({ title, children, className, titleClassName }: ListHeaderProps) {
   return (
     <div className={cn("flex items-center justify-between h-12", className)}>
-      <h2 className="WidgeTit">{title}</h2>
+      <h2 className={cn("WidgeTit", titleClassName)}>{title}</h2>
       {children}
     </div>
   )

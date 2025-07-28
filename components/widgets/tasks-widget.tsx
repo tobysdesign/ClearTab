@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card } from '@/components/ui/card'
 import { AddButton } from '@/components/ui/add-button'
 import type { Task } from '@/shared/schema'
-import { ListHeader } from '@/components/ui/list-header'
+import { WidgetHeader } from '@/components/ui/widget-header'
+import { WidgetContainer, WidgetContent } from '@/components/ui/widget-container'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { EditTaskForm } from './edit-task-form'
@@ -302,84 +303,77 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
   }
 
   return (
-    <div className={styles.widgetContainer}>
-      <div className={styles.widgetContent}>
-        <div className="flex h-full flex-col">
-          <ListHeader
-            title="Tasks"
-            className="widgetHead"
-            titleClassName="widget-heading"
-          >
-            <AddButton onClick={handleAddTask} />
-          </ListHeader>
-          <ScrollShadows className="flex-1 custom-scrollbar">
-            <div className="taskEmpty">
-              {tasks.length === 0 ? (
-                <EmptyState
-                  renderIcon={() => <X className="h-6 w-6 text-gray-400" />}
-                  title="Not a care"
-                  description="Could your first task be to add a task?"
-                  action={{
-                    label: "Add Task",
-                    onClick: handleAddTask
+    <WidgetContainer>
+      <WidgetHeader title="Tasks">
+        <AddButton onClick={handleAddTask} />
+      </WidgetHeader>
+      <WidgetContent>
+        <ScrollShadows className="widget-full-height custom-scrollbar">
+          <div className="taskEmpty">
+            {tasks.length === 0 ? (
+              <EmptyState
+                renderIcon={() => <X className="h-6 w-6 text-gray-400" />}
+                title="Not a care"
+                description="Could your first task be to add a task?"
+                action={{
+                  label: "Add Task",
+                  onClick: handleAddTask
+                }}
+                className="widget-full-height"
+              />
+            ) : (
+              <ClientOnly>
+                <motion.div
+                  className="widget-list-content"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.1 },
+                    },
                   }}
-                  className="h-full"
-                />
-              ) : (
-                <ClientOnly>
-                  <motion.div
-                    className="space-y-[var(--widget-list-spacing)]"
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.1 },
-                      },
-                    }}
-                  >
-                    <AnimatePresence>
-                      {tasks.map((task) => (
-                        <motion.div
-                          key={task.id}
-                          layoutId={`card-${task.id}`}
-                          initial={{ y: 20, opacity: 0 }}
-                          animate={{ y: 0, opacity: 1 }}
-                          exit={{ x: -50, opacity: 0 }}
-                          onClick={() => setActiveTaskId(task.id)}
-                          className="group listItem"
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <Checkbox
-                              id={`task-${task.id}`}
-                              checked={task.isCompleted}
-                              onCheckedChange={(checked) =>
-                                handleTaskStatusChange(task.id, checked as boolean)
-                              }
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <h3
-                              className={`task header flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                                task.isCompleted
-                                  ? 'line-through text-muted-foreground'
-                                  : ''
-                              }`}
-                            >
-                              {task.title}
-                            </h3>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
-                </ClientOnly>
-              )}
-            </div>
-          </ScrollShadows>
-          {/* Removed ExpandingModal and EditTaskForm rendering from here as it's now in client-providers.tsx */}
-        </div>
-      </div>
-    </div>
+                >
+                  <AnimatePresence>
+                    {tasks.map((task) => (
+                      <motion.div
+                        key={task.id}
+                        layoutId={`card-${task.id}`}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ x: -50, opacity: 0 }}
+                        onClick={() => setActiveTaskId(task.id)}
+                        className="group widget-list-item widget-list-item--tasks"
+                      >
+                        <div className="widget-flex widget-gap-3 widget-flex-1 widget-min-w-0">
+                          <Checkbox
+                            id={`task-${task.id}`}
+                            checked={task.isCompleted}
+                            onCheckedChange={(checked) =>
+                              handleTaskStatusChange(task.id, checked as boolean)
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <h3
+                            className={`item-title widget-flex-1 ${
+                              task.isCompleted
+                                ? 'line-through text-muted-foreground'
+                                : ''
+                            }`}
+                          >
+                            {task.title}
+                          </h3>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </ClientOnly>
+            )}
+          </div>
+        </ScrollShadows>
+      </WidgetContent>
+    </WidgetContainer>
   )
 }

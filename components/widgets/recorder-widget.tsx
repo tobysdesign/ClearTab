@@ -11,6 +11,7 @@ import Check from 'lucide-react/dist/esm/icons/check'
 import { cn } from '@/lib/utils'
 import styles from './recorder-widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
+import { WidgetHeader } from '@/components/ui/widget-header'
 
 interface RecorderWidgetProps {
   className?: string
@@ -107,11 +108,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <div className={styles.header}>
-                  <p className={styles.headerText}>
-                    Recorder
-                  </p>
-                </div>
+                <WidgetHeader title="Recorder" />
 
                 {/* Body */}
                 <div className={styles.body}>
@@ -158,11 +155,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <div className={styles.header}>
-                  <p className={styles.headerText}>
-                    Recorder
-                  </p>
-                </div>
+                <WidgetHeader title="Recorder" />
 
                 {/* Body */}
                 <div className={styles.recordingBody}>

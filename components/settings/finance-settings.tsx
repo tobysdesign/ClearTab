@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { Label } from '@/components/ui/label'
 import {
@@ -9,13 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
-import { GlowButton } from '@/components/ui/glow-button'
 import { format, getDay } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -35,14 +29,13 @@ const weekDays = [
   'Saturday',
 ]
 
-export function FinanceSettingsPopover() {
+export function FinanceSettings() {
   const [frequency, setFrequency] = useState<'weekly' | 'fortnightly' | 'monthly'>('fortnightly')
   const [dayOfWeek, setDayOfWeek] = useState<number>()
   const [paydayDate, setPaydayDate] = useState<Date>()
+  const [showCalendar, setShowCalendar] = useState(false)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -126,6 +119,13 @@ export function FinanceSettingsPopover() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-medium mb-2">Payday Settings</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Configure your payday schedule to help manage your budget.
+        </p>
+      </div>
+
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="frequency">Payday recurrence</Label>
@@ -136,7 +136,7 @@ export function FinanceSettingsPopover() {
             <SelectTrigger id="frequency" className="border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black">
               <SelectValue placeholder="Select frequency" />
             </SelectTrigger>
-            <SelectContent className="z-[60]">
+            <SelectContent>
               <SelectItem value="weekly">Weekly</SelectItem>
               <SelectItem value="fortnightly">Fortnightly</SelectItem>
               <SelectItem value="monthly">Monthly</SelectItem>
@@ -147,31 +147,32 @@ export function FinanceSettingsPopover() {
         <div className="space-y-2">
           <Label>Next payday</Label>
           {frequency === 'monthly' ? (
-            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'justify-start text-left font-normal border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black hover:bg-[#7c7c7c]',
-                    !paydayDate && 'text-black/70'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {paydayDate ? format(paydayDate, 'do') : 'Pick a day'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={paydayDate}
-                  onSelect={date => {
-                    setPaydayDate(date)
-                    setIsCalendarOpen(false)
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCalendar(!showCalendar)}
+                className={cn(
+                  'justify-start text-left font-normal border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black hover:bg-[#7c7c7c] w-full',
+                  !paydayDate && 'text-black/70'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {paydayDate ? format(paydayDate, 'do') : 'Pick a day'}
+              </Button>
+              {showCalendar && (
+                <div className="rounded-md border bg-popover p-4">
+                  <Calendar
+                    mode="single"
+                    selected={paydayDate}
+                    onSelect={date => {
+                      setPaydayDate(date)
+                      setShowCalendar(false)
+                    }}
+                    initialFocus
+                  />
+                </div>
+              )}
+            </div>
           ) : (
             <Select
               value={dayOfWeek?.toString()}
@@ -180,7 +181,7 @@ export function FinanceSettingsPopover() {
               <SelectTrigger className="border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black">
                 <SelectValue placeholder="Pick a day" />
               </SelectTrigger>
-              <SelectContent className="z-[60]">
+              <SelectContent>
                 {weekDays.map((day, index) => (
                   <SelectItem key={day} value={index.toString()}>
                     {day}
@@ -191,9 +192,10 @@ export function FinanceSettingsPopover() {
           )}
         </div>
 
-        <GlowButton
+        <Button
           onClick={handleSavePaydaySettings}
           disabled={isSubmitting}
+          className="w-full"
         >
           {isSubmitting ? (
             <div className="relative w-[45px] h-[25px] mr-2">
@@ -207,8 +209,8 @@ export function FinanceSettingsPopover() {
               />
             </div>
           ) : null}
-          {isSubmitting ? 'Saving...' : 'Done'}
-        </GlowButton>
+          {isSubmitting ? 'Saving...' : 'Save Settings'}
+        </Button>
       </div>
     </div>
   )

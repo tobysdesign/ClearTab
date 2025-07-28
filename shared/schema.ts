@@ -17,7 +17,14 @@ import { sql } from 'drizzle-orm'
 import { z } from "zod"
 import type { AdapterAccount } from 'next-auth/adapters'
 import { authenticatedRole } from 'drizzle-orm/supabase'
-import crypto from 'crypto'
+// Simple UUID v4 generator for edge compatibility
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 import { Block } from '@blocknote/core'
 
 // BlockNote Content Schemas
@@ -50,75 +57,13 @@ export const EMPTY_BLOCKNOTE_CONTENT = [
   },
 ];
 
-// Remove Yoopta-related schemas and EMPTY_CONTENT
-/*
-const yooptaTextNodeSchema = z.object({
-  text: z.string(),
-  bold: z.boolean().optional(),
-  italic: z.boolean().optional(),
-  underline: z.boolean().optional(),
-  code: z.boolean().optional(),
-  strike: z.boolean().optional(),
-  highlight: z.any().optional(),
-});
-
-export const yooptaNodeSchema = z.lazy(() => z.union([
-  yooptaTextNodeSchema,
-  z.object({
-    id: z.string(),
-    type: z.string(),
-    children: z.array(z.lazy(() => yooptaNodeSchema)),
-    props: z.record(z.string(), z.any()).optional(),
-  }).passthrough(),
-]));
-
-const yooptaBlockBaseMetaSchema = z.object({
-  order: z.number(),
-  depth: z.number(),
-  align: z.union([z.literal('left'), z.literal('center'), z.literal('right')]).optional(),
-});
-
-export const yooptaBlockDataSchema = z.object({
-  id: z.string(),
-  value: z.array(yooptaNodeSchema),
-  type: z.string(),
-  meta: yooptaBlockBaseMetaSchema,
-});
-
-export type YooptaBlockData = z.infer<typeof yooptaBlockDataSchema>;
-
-// Corrected YooptaContentValue to be a Record of block IDs to block data
-export const yooptaContentSchema = z.record(z.string(), yooptaBlockDataSchema);
-
-// Standard empty content structure aligned with Yoopta Editor expectations
-export const EMPTY_CONTENT = {
-  'paragraph-1': {
-    id: 'paragraph-1',
-    type: 'paragraph',
-    value: [{
-      id: 'paragraph-1-element',
-      type: 'paragraph',
-      children: [{ text: '' }],
-      props: {
-        nodeType: 'block',
-      },
-    }],
-    meta: {
-      order: 0,
-      depth: 0,
-    },
-  },
-};
-
-export type YooptaContentValue = z.infer<typeof yooptaContentSchema>;
-*/
 
 export const user = pgTable(
   'user',
   {
     id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => generateUUID()),
     name: text('name'),
     email: text('email').notNull(),
     emailVerified: timestamp('emailVerified', { mode: 'date' }),
@@ -209,7 +154,7 @@ export const verificationTokens = pgTable(
 export const connectedAccounts = pgTable(
   'connected_accounts',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -230,7 +175,7 @@ export const connectedAccounts = pgTable(
 export const userCalendars = pgTable(
   'user_calendars',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -256,7 +201,7 @@ export const notes = pgTable(
   {
     id: uuid('id')
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -278,7 +223,7 @@ export const notes = pgTable(
 export const tasks = pgTable(
   'tasks',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -310,7 +255,7 @@ export type Task = Omit<typeof tasks.$inferSelect, 'content' | 'priority'> & {
 export const userPreferences = pgTable(
   'user_preferences',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' })
@@ -342,7 +287,7 @@ export const userPreferences = pgTable(
 export const chatMessages = pgTable(
   'chat_messages',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -366,7 +311,7 @@ export const chatMessages = pgTable(
 export const emotionalMetadata = pgTable(
   'emotional_metadata',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -395,7 +340,7 @@ export const emotionalMetadata = pgTable(
 export const memoryUsage = pgTable(
   'memory_usage',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -416,7 +361,7 @@ export const memoryUsage = pgTable(
 export const memories = pgTable(
   'memories',
   {
-    id: uuid('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+    id: uuid('id').primaryKey().$defaultFn(() => generateUUID()),
     userId: uuid('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -437,10 +382,15 @@ export const memories = pgTable(
 
 export type User = typeof user.$inferSelect;
 
-// Explicitly define Note type to ensure correct content typing
-export type Note = Omit<typeof notes.$inferSelect, 'content'> & {
-  content: Block[];
-};
+export interface Note {
+  id: string
+  title: string
+  content: Block[]
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  queued?: boolean // Add this for server-side debouncing responses
+}
 
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;

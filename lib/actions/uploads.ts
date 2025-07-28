@@ -30,7 +30,7 @@ export const uploadImage = action
 
     try {
       const result = await cloudinary.uploader.upload(fileUri, {
-        folder: 'yoopta-editor-uploads',
+        folder: 'editor-uploads',
       });
 
       return {

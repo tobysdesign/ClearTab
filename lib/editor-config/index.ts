@@ -1,1 +1,0 @@
-export { plugins, marks, TOOLS } from './editor-config.tsx' 

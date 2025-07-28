@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import {
   Popover,
   PopoverContent,
@@ -13,7 +14,7 @@ interface ActionsMenuProps {
   isNewNote?: boolean
 }
 
-export function ActionsMenu({ onDelete, isNewNote }: ActionsMenuProps) {
+export const ActionsMenu = React.memo(function ActionsMenu({ onDelete, isNewNote }: ActionsMenuProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -37,4 +38,4 @@ export function ActionsMenu({ onDelete, isNewNote }: ActionsMenuProps) {
       </PopoverContent>
     </Popover>
   )
-} 
+}) 

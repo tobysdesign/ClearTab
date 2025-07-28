@@ -3,29 +3,25 @@ import { Express, Request, Response } from 'express'
 import { createServer, Server } from 'http'
 import { z } from 'zod'
 import { storage } from './storage'
-import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema, type YooptaContentValue } from '@/shared/schema'
+import { insertNoteSchema, insertTaskSchema, insertUserPreferencesSchema, insertChatMessageSchema, EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
+import { Block } from '@blocknote/core'
 import OpenAI from 'openai'
 import { mem0Service } from './mem0-service'
 import { googleCalendarService } from './google-calendar'
 import type { CalendarSyncStatus } from '../shared/calendar-types'
 
-// Utility to convert string to YooptaContentValue
-function stringToYoopta(text: string): YooptaContentValue {
-  const blocks = text.split('\n').map((line, index) => ({
+// Utility to convert string to BlockNote content
+function stringToBlockNote(text: string): Block[] {
+  if (!text.trim()) {
+    return EMPTY_BLOCKNOTE_CONTENT as Block[]
+  }
+  
+  return text.split('\n').map((line, index) => ({
     id: `block-${index}`,
     type: 'paragraph',
-    children: [{ text: line }],
-    props: { nodeType: 'block' },
-  }))
-
-  return {
-    root: {
-      id: 'root',
-      type: 'paragraph',
-      value: blocks,
-      meta: { order: 0, depth: 0 },
-    },
-  }
+    props: {},
+    content: line.trim() ? [{ type: 'text', text: line, styles: {} }] : []
+  })) as Block[]
 }
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -588,7 +584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const noteContent = message.replace('#note', '').replace('#task', '').trim();
           const note = await storage.createNote({
             title: noteContent.substring(0, 50) || "Untitled Note",
-            content: stringToYoopta(noteContent), // Ensure content is YooptaContentValue
+            content: stringToBlockNote(noteContent),
             userId: DEFAULT_USER_ID
           });
           results.push({ type: 'note', data: note });
@@ -740,7 +736,7 @@ Respond in JSON format with:
         try {
           const note = await storage.createNote({
             title: responseData.actionData.title || "New Note",
-            content: stringToYoopta(responseData.actionData.content || ""), // Convert string to YooptaContentValue
+            content: stringToBlockNote(responseData.actionData.content || ""),
             userId: DEFAULT_USER_ID
           });
           responseData.note = note;
