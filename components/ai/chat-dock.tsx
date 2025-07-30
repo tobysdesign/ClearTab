@@ -3,7 +3,7 @@
 import { useChatContext } from "@/hooks/use-chat-context"
 import { Dock } from "@/components/ui/dock"
 import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import MessageCircle from "lucide-react/dist/esm/icons/message-circle"
 
 export function ChatDock() {
     const { openChat } = useChatContext()

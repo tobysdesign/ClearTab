@@ -1,0 +1,21 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+}
+
+.default {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.settings {
+  background: rgba(255, 255, 255, 0.20);
+}
+
+.notes {
+  background: rgba(20, 20, 20, 0.5);
+}
+
+.calendar {
+  background: rgba(30, 30, 30, 0.4);
+} 

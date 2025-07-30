@@ -231,6 +231,7 @@
 }
 
 
+
 /* Custom utility classes for missing Tailwind utilities */
 .gradient-blur {
   position: fixed;
@@ -380,19 +381,19 @@
 }
 
 /* Utility classes for Tailwind v4 compatibility with transparency */
-.bg-background { background-color: hsl(var(--color-background)); backdrop-filter: blur(8px); }
+.bg-background { background-color: hsl(var(--color-background)); }
 .bg-foreground { background-color: hsl(var(--color-foreground)); }
-.bg-card { background-color: hsl(var(--color-card)); backdrop-filter: blur(8px); }
+.bg-card { background-color: hsl(var(--color-card));}
 .bg-card-foreground { background-color: hsl(var(--color-card-foreground)); }
-.bg-popover { background-color: hsl(var(--color-popover)); backdrop-filter: blur(12px); }
+.bg-popover { background-color: hsl(var(--color-popover));  }
 .bg-popover-foreground { background-color: hsl(var(--color-popover-foreground)); }
 .bg-primary { background-color: hsl(var(--color-primary)); }
 .bg-primary-foreground { background-color: hsl(var(--color-primary-foreground)); }
-.bg-secondary { background-color: hsl(var(--color-secondary)); backdrop-filter: blur(6px); }
+.bg-secondary { background-color: hsl(var(--color-secondary)); }
 .bg-secondary-foreground { background-color: hsl(var(--color-secondary-foreground)); }
-.bg-muted { background-color: hsl(var(--color-muted)); backdrop-filter: blur(4px); }
+.bg-muted { background-color: hsl(var(--color-muted));  }
 .bg-muted-foreground { background-color: hsl(var(--color-muted-foreground)); }
-.bg-accent { background-color: hsl(var(--color-accent)); backdrop-filter: blur(6px); }
+.bg-accent { background-color: hsl(var(--color-accent)); }
 .bg-accent-foreground { background-color: hsl(var(--color-accent-foreground)); }
 .bg-destructive { background-color: hsl(var(--color-destructive)); }
 .bg-destructive-foreground { background-color: hsl(var(--color-destructive-foreground)); }

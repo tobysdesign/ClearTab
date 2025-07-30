@@ -81,11 +81,11 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
       return preview;
     }
     // Otherwise show placeholder
-    return "Start writing...";
+    return "Untitled note";
   }, [note.title, preview]);
 
   const shouldShowAsPlaceholder = useMemo(() => {
-    return displayText === "Start writing...";
+    return displayText === "Untitled note";
   }, [displayText]);
 
   // Memoized event handlers to prevent re-creation on every render
@@ -116,7 +116,7 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
   return (
     <ClientOnly>
       <motion.div layout initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className={cn("widget-list-item flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border", isSelected ? "widget-list-item--active bg-[#292929] border-[#434343]" : "bg-[#222222] border-[#222222] hover:bg-[#3D3D3D] hover:border-[#252323]", isRecentlyUpdated && "animate-highlight")}
+        className={cn("widget-list-item flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border", isSelected ? "widget-list-item--active bg-[#292929] border-[#434343]" : "bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545]", isRecentlyUpdated && "animate-highlight")}
         onClick={handleClick}
       >
         {/* Pink dot for active item */}
@@ -126,21 +126,19 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
         
         <div className="flex justify-between w-full items-start notelist">
           <div className={cn(
-            "font-inter-display font-medium text-[14px] leading-[17px] overflow-hidden truncate",
-            shouldShowAsPlaceholder ? "text-[#3a3a3a] italic" : "text-[#D2D2D2]"
+            "font-inter-display overflow-hidden truncate",
+            shouldShowAsPlaceholder 
+              ? "font-medium text-[14px] text-[#5c5c5c] italic" 
+              : note.title && note.title.trim() !== ""
+                ? "font-medium text-[14px] text-[#c4c4c4]" // Title styles
+                : "font-normal text-[12px] text-[#c4c4c4]" // Content as title styles
           )}>
             {displayText}
-          </div>
-          <div className="note subtitle flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild><Button variant="ghost" size="sm" className="h-6 w-6 p-0">...</Button></DropdownMenuTrigger>
-              <DropdownMenuContent align="end"><DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem></DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
         {/* Only show preview if we're showing a title (not content as title) */}
         {note.title && note.title.trim() !== "" && (
-          <div className="font-inter-display font-normal text-[14px] leading-[17px] text-[#8D8D8D] w-full overflow-hidden text-ellipsis [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
+          <div className="font-inter-display font-normal text-[12px] leading-[15px] text-[#8D8D8D] w-full overflow-hidden text-ellipsis [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box]">
             {preview}
           </div>
         )}

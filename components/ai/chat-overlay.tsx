@@ -15,9 +15,13 @@ function ChatOverlay() {
     closeChat,
     messages,
     processMessage,
+    processStreamingMessage,
     isThinking,
+    thinkingContent,
     inputValue,
     setInputValue,
+    isStreamingMode,
+    toggleStreamingMode,
   } = useChatContext()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -25,7 +29,11 @@ function ChatOverlay() {
   }
 
   const handleUserInput = async () => {
-    await processMessage()
+    if (isStreamingMode) {
+      await processStreamingMessage()
+    } else {
+      await processMessage()
+    }
   }
 
   return (
@@ -55,6 +63,14 @@ function ChatOverlay() {
                   <h2 className="text-lg font-semibold">AI Chat</h2>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={toggleStreamingMode}
+                    className="text-xs px-2 h-7"
+                  >
+                    {isStreamingMode ? 'Stream: ON' : 'Stream: OFF'}
+                  </Button>
                   <Button variant="ghost" size="icon" className="w-8 h-8">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -69,6 +85,8 @@ function ChatOverlay() {
                 messages={messages}
                 onUserInput={handleUserInput}
                 isPending={isThinking}
+                thinkingContent={thinkingContent}
+                isStreamingMode={isStreamingMode}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
               />

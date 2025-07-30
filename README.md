@@ -4,12 +4,21 @@ A modern, AI-powered personal dashboard and productivity app.
 
 ## Features
 
-- Personal dashboard with customizable widgets
+- Personal dashboard with customizable widgets designed to stop you new tab wanderings
 - Note-taking with rich text editor
 - Task management with due dates and priorities
-- Meeting recorder and transcriber
-- Weather and calendar integration
-- AI assistant for productivity
+- F2F (in person) Meeting recorder and transcriber
+- Weather and multiple gsuite calendar integration in one schedule
+- AI assistant for productivity, task completeion and analysis of notes+tasks+schedule wholistically.
+- Replaces your new tab page with the ClearTab.app dashboard
+- Quick access to features with keyboard shortcuts and LLM chatbotthat uses tInstuctional # tags like #note #task and generated them. 
+- Seamless integration with the web version with mobile optimised / native app. 
+
+## Roadmap 
+- Potentially create an MCP server that can help with more complex tasks 
+- Build In Widget generator 
+- Ability to toggle default widgets and re-arrange into personalised layout 
+- Routines "Summarise my week ahead and help me prepare" 
 
 ## Development
 
@@ -67,12 +76,9 @@ Bye can also be used as a Chrome extension that replaces your new tab page.
 2. Enable "Developer mode" in the top right
 3. Click "Load unpacked" and select the `dist/extension` directory
 
-### Features
 
-- Replaces your new tab page with the Bye dashboard
-- Quick access to notes, tasks, and meetings from the extension
-- Works offline with data sync when online
-- Seamless integration with the web version
+
+
 
 ## License
 

@@ -5,6 +5,9 @@ import { Drawer as DrawerPrimitive } from "vaul";
 import { DialogTitle } from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
+import styles from './drawer.module.css';
+
+type OverlayVariant = 'default' | 'settings' | 'notes' | 'calendar';
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -25,11 +28,17 @@ const DrawerClose = DrawerPrimitive.Close;
 
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay> & {
+    variant?: OverlayVariant
+  }
+>(({ className, variant = 'default', ...props }, ref) => (
   <DrawerPrimitive.Overlay
     ref={ref}
-    className={cn("fixed inset-0 z-50 bg-black/40", className)}
+    className={cn(
+      styles.overlay,
+      styles[variant],
+      className
+    )}
     {...props}
   />
 ));
@@ -37,14 +46,16 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    overlayVariant?: OverlayVariant
+  }
+>(({ className, children, overlayVariant = 'default', ...props }, ref) => (
   <DrawerPortal>
-    <DrawerOverlay />
+    <DrawerOverlay variant={overlayVariant} />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[85vh] flex-col rounded-t-[10px] border bg-[#111111]",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[70vh] flex-col rounded-t-[10px] border bg-[#111111]",
         className
       )}
       {...props}

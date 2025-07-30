@@ -113,6 +113,7 @@ export function NotesWidget() {
   const { toast } = useToast()
   const [activeNote, setActiveNote] = useState<Partial<Note> | null>(null)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const editorRef = useRef<BlockNoteEditor | null>(null)
   const isUpdatingEditor = useRef(false)
   const lastSavedContent = useRef<string>('')
@@ -234,12 +235,15 @@ export function NotesWidget() {
     const isDraft = noteToSave.id?.startsWith('draft-')
     const finalNote = { ...noteToSave, title: noteToSave.title?.trim() || 'Untitled Note' }
 
+    setIsSaving(true)
+
     if (isDraft) {
       createNote.mutate({ 
         ...finalNote, 
         temporaryId: finalNote.id // Pass the draft ID as temporaryId
       } as Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'userId'> & { temporaryId: string }, {
         onSuccess: (savedNote) => {
+          setIsSaving(false)
           // Prevent editor sync during note creation by setting updating flag
           isUpdatingEditor.current = true
           setActiveNote(savedNote)
@@ -260,6 +264,7 @@ export function NotesWidget() {
           }
         },
         onError: (error) => {
+          setIsSaving(false)
           toast({
             title: 'Failed to create note',
             description: error.message || 'Please try again.',
@@ -269,7 +274,11 @@ export function NotesWidget() {
       })
     } else {
       updateNote.mutate(finalNote as Note, {
+        onSuccess: () => {
+          setIsSaving(false)
+        },
         onError: (error) => {
+          setIsSaving(false)
           toast({
             title: 'Failed to save note',
             description: error.message || 'Please try again.',
@@ -334,10 +343,27 @@ export function NotesWidget() {
     }
   }, [debouncedSaveTitle]) // Removed activeNote dependency
 
-  const handleSelectNote = useCallback((note: Note) => {
+  const handleSelectNote = useCallback(async (note: Note) => {
     // Add debug tracking
     if (!trackUpdate('handleSelectNote')) return
     
+    // Save current note before switching
+    if (activeNote && editorRef.current) {
+      const currentContent = editorRef.current.document
+      const currentTitle = activeNote.title || ''
+      
+      // Force save the current note if it has changes
+      if (JSON.stringify(currentContent) !== lastSavedContent.current || 
+          currentTitle !== lastSavedTitle.current) {
+        await saveNote({ 
+          ...activeNote, 
+          content: currentContent, 
+          title: currentTitle 
+        }, false)
+      }
+    }
+    
+    // Flush any pending saves
     debouncedSaveContent.flush()
     debouncedSaveTitle.flush()
     
@@ -345,9 +371,43 @@ export function NotesWidget() {
     activeNoteIdRef.current = note.id
     lastSavedContent.current = JSON.stringify(note.content)
     lastSavedTitle.current = note.title || ''
-  }, [debouncedSaveContent, debouncedSaveTitle, trackUpdate])
+  }, [debouncedSaveContent, debouncedSaveTitle, trackUpdate, activeNote, saveNote])
+
+  // Save on blur/focus loss
+  const handleSaveOnBlur = useCallback(() => {
+    if (activeNote && editorRef.current) {
+      const currentContent = editorRef.current.document
+      const currentTitle = activeNote.title || ''
+      
+      // Force save if there are unsaved changes
+      if (JSON.stringify(currentContent) !== lastSavedContent.current || 
+          currentTitle !== lastSavedTitle.current) {
+        saveNote({ 
+          ...activeNote, 
+          content: currentContent, 
+          title: currentTitle 
+        }, false)
+      }
+    }
+  }, [activeNote, saveNote])
+
+  // Add event listeners for when user clicks outside notes widget
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const notesWidget = document.querySelector('[data-widget="notes"]')
+      if (notesWidget && !notesWidget.contains(event.target as Node)) {
+        handleSaveOnBlur()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [handleSaveOnBlur])
 
   const handleCreateNew = useCallback(() => {
+    // Save current note first
+    handleSaveOnBlur()
+    
     debouncedSaveContent.flush()
     debouncedSaveTitle.flush()
     
@@ -356,7 +416,7 @@ export function NotesWidget() {
     activeNoteIdRef.current = newNote.id
     lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT)
     lastSavedTitle.current = ''
-  }, [debouncedSaveContent, debouncedSaveTitle, generateDraftId])
+  }, [debouncedSaveContent, debouncedSaveTitle, generateDraftId, handleSaveOnBlur])
 
   const handleDeleteNote = useCallback((noteId: string) => {
     deleteNote.mutate(noteId, {
@@ -386,29 +446,52 @@ export function NotesWidget() {
   const selectedNoteId = useMemo(() => activeNote?.id, [activeNote?.id])
 
   return (
-    <WidgetContainer>
+    <WidgetContainer data-widget="notes">
       <div className="widget-flex-column widget-full-height">
         <ResizablePanels defaultWidth={300} collapsed={isCollapsed} onToggleCollapse={handleToggleCollapse}>
           {/* Notes List */}
           <div className="widget-flex-column widget-full-height widget-overflow-hidden widget-relative">
             <WidgetHeader title="Notes">
+              {isSaving && (
+                <div className="flex items-center mr-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse mr-1" />
+                  <span className="text-xs text-gray-400">Saving...</span>
+                </div>
+              )}
               <AddButton onClick={handleCreateNew} />
             </WidgetHeader>
             <div className="widget-flex-1 custom-scrollbar">
               {isLoadingNotes ? <WidgetLoader /> : (
-                notes.length > 0 ? (
+                (notes.length > 0 || activeNote) ? (
                   <div className="widget-list-content" >
                     <AnimatePresence>
-                      {notes.map((note) => (
+                      {/* Show active note first if it's a draft (not in notes array) */}
+                      {activeNote && !notes.find(n => n.id === activeNote.id) && (
                         <NoteListItem
-                          key={note.id}
-                          note={note}
-                          isSelected={selectedNoteId === note.id}
-                          onClick={() => handleSelectNote(note)}
-                          onDelete={() => handleDeleteNote(note.id as string)}
+                          key={activeNote.id}
+                          note={activeNote as Note}
+                          isSelected={true}
+                          onClick={() => {}} // Already selected
+                          onDelete={() => handleDeleteNote(activeNote.id as string)}
                           collapsed={isCollapsed}
                         />
-                      ))}
+                      )}
+                      {/* Then show saved notes, but use activeNote data if it's the selected one */}
+                      {notes.map((note) => {
+                        const isActive = selectedNoteId === note.id
+                        const displayNote = isActive && activeNote ? activeNote as Note : note
+                        
+                        return (
+                          <NoteListItem
+                            key={note.id}
+                            note={displayNote}
+                            isSelected={isActive}
+                            onClick={() => handleSelectNote(note)}
+                            onDelete={() => handleDeleteNote(note.id as string)}
+                            collapsed={isCollapsed}
+                          />
+                        )
+                      })}
                     </AnimatePresence>
                   </div>
                 ) : <EmptyState title="No Notes" description="Create your first note." />
@@ -420,20 +503,26 @@ export function NotesWidget() {
             {activeNote ? (
               <div className="widget-flex-column widget-full-height widget-overflow-auto custom-scrollbar bg-[#151515]">
                 <div className="widget-flex-column p-4">
-                  <div className="widget-flex-between sticky top-0 z-10 bg-[#151515]">
+                  {/* Header with Title and Actions */}
+                  <div className="sticky top-0 z-10 bg-[#151515] mb-4 flex items-center justify-between">
+                    {/* Title Input - Tab Index 1 */}
                     <Input
-                      className="font-['Inter_Display'] font-medium text-[18px] leading-[22px] text-[#D2D2D2] border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent widget-flex-1"
-                      placeholder="Untitled Note"
+                      tabIndex={1}
+                      className="font-['Inter_Display'] font-medium text-[18px] leading-[22px] text-[#D2D2D2] border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent flex-1 placeholder:text-[#5c5c5c] placeholder:italic placeholder:font-medium"
+                      placeholder="Untitled note"
                       value={activeNote.title || ''}
                       onChange={handleTitleChange}
                     />
-                    <div className="widget-flex widget-gap-2 ml-2">
+                    {/* Actions Menu - Tab Index 3 */}
+                    <div tabIndex={3}>
                       <ActionsMenu
                         onDelete={handleDeleteActiveNote}
                         isNewNote={isNewNote}
                       />
                     </div>
                   </div>
+                  
+                  {/* Content Editor - Tab Index 2 */}
                   <div className="widget-flex-1">
                     <SimpleBlockNoteEditor
                       key={activeNote.id}
@@ -458,6 +547,7 @@ export function NotesWidget() {
                       onEditorReady={handleEditorReady}
                       editable={true}
                       className="p-0 widget-flex-1"
+                      tabIndex={2}
                     />
                   </div>
                 </div>

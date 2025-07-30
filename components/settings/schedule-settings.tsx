@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import Calendar from 'lucide-react/dist/esm/icons/calendar'
 import { useQuery } from '@tanstack/react-query'
+import { signIn } from 'next-auth/react'
 
 export function ScheduleSettings() {
   const { data: isConnected } = useQuery({
@@ -25,7 +26,10 @@ export function ScheduleSettings() {
           description="See your schedule at a glance by connecting your Google Calendar."
           action={{
             label: "Connect Google Calendar",
-            onClick: () => window.location.href = '/api/auth/google'
+            onClick: () => signIn('google', { 
+              callbackUrl: '/',
+              scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+            })
           }}
         />
       </div>
@@ -41,7 +45,10 @@ export function ScheduleSettings() {
         </p>
         <Button
           variant="outline"
-          onClick={() => window.location.href = '/api/auth/google'}
+          onClick={() => signIn('google', { 
+            callbackUrl: '/',
+            scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+          })}
         >
           Refresh Calendar Connection
         </Button>

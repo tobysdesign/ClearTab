@@ -9,11 +9,14 @@ import { ConversationStarters } from './conversation-starters'
 export interface Message {
   role: 'user' | 'assistant'
   content: string
+  isStreaming?: boolean
 }
 
 interface ChatPanelProps {
   messages: Message[]
   isPending: boolean
+  thinkingContent: string
+  isStreamingMode?: boolean
   onUserInput: () => void
   inputValue: string
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
@@ -36,6 +39,26 @@ function ChatMessage({ message }: { message: Message }) {
                 )}
             >
                 {message.content}
+                {message.isStreaming && (
+                    <span className="inline-block w-2 h-4 bg-neutral-400 ml-1 animate-pulse" />
+                )}
+            </div>
+        </div>
+    );
+}
+
+function ThinkingMessage({ content }: { content: string }) {
+    return (
+        <div className="mb-4 flex max-w-[80%] self-start">
+            <div className="rounded-lg px-4 py-2 bg-[#1a1a1a] text-neutral-400 border border-[#333]">
+                <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" />
+                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.1s]" />
+                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    </div>
+                    <span className="text-sm italic">{content}</span>
+                </div>
             </div>
         </div>
     );
@@ -44,6 +67,8 @@ function ChatMessage({ message }: { message: Message }) {
 export function ChatPanel({
   messages,
   isPending,
+  thinkingContent,
+  isStreamingMode = true,
   onUserInput,
   inputValue,
   onInputChange,
@@ -86,8 +111,11 @@ export function ChatPanel({
         {messages.map((msg, index) => (
           <ChatMessage key={index} message={msg} />
         ))}
-        {isPending && (
+        {isPending && (!isStreamingMode || !thinkingContent) && (
             <ChatMessage message={{ role: 'assistant', content: '...'}} />
+        )}
+        {isStreamingMode && thinkingContent && (
+            <ThinkingMessage content={thinkingContent} />
         )}
         <div ref={messagesEndRef} />
       </div>

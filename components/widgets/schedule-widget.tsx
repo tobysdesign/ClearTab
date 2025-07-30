@@ -298,7 +298,7 @@ export function ScheduleWidget() {
     <WidgetContainer>
       <div className="flex h-full">
         {/* Left Sidebar */}
-        <div className="flex flex-col w-[12 0px] h-full justify-between flex-shrink-0 pb-[24px] border-r border-[#323235] pt-[14px]">
+        <div className="flex flex-col w-[120px] h-full justify-between flex-shrink-0 pb-[24px] border-r border-[#323235] pt-[14px]">
           {/* Header in first column */}
           <div className="mb-4">
             <h2 className="text-white font-medium widget-title text-center h-[60px] ">Schedule</h2>

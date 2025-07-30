@@ -136,7 +136,7 @@ export function FinanceWidget({ variant = 'vertical' }: FinanceWidgetProps) {
                 </ClientOnly>
                 <span className="font-inter-display text-[24px] font-light leading-none text-white ml-2">days</span>
               </div>
-              <span className="font-inter-display text-[14px] font-normal text-[#8D8D8D]">until payday</span>
+              <span className="font-inter-display text-[14px] font-normal text-[#8D8D8D]">until count</span>
             </div>
 
             {/* Dots visualization */}
