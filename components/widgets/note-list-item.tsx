@@ -28,20 +28,60 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
   // Memoized function to get a preview from Block[] content
   const preview = useMemo(() => {
     function getBlocksPreview(blocks: any): string {
-      if (!blocks || blocks.length === 0) return "Empty note";
+      console.log('DEBUG: Note content structure:', JSON.stringify(blocks, null, 2));
+      
+      if (!blocks || blocks.length === 0) {
+        console.log('DEBUG: No blocks or empty blocks array');
+        return "Empty note";
+      }
       
       // Concatenate text content from all blocks for a preview
       try {
         const previewText = blocks.map((block: any) => {
+          console.log('DEBUG: Processing block:', JSON.stringify(block, null, 2));
+          
+          // Handle BlockNote structure: block.content contains text nodes
           if (block.content && Array.isArray(block.content)) {
-            return block.content.map((item: any) => 
-              typeof item === 'object' && item.type === 'text' && item.text ? item.text : ''
-            ).join('');
+            const text = block.content.map((item: any) => {
+              console.log('DEBUG: Processing content item:', JSON.stringify(item, null, 2));
+              // BlockNote text nodes have a 'text' property
+              if (typeof item === 'object' && item.text) {
+                return item.text;
+              }
+              // Some structures might have type 'text' with text property
+              if (typeof item === 'object' && item.type === 'text' && item.text) {
+                return item.text;
+              }
+              // Handle plain string content
+              if (typeof item === 'string') {
+                return item;
+              }
+              return '';
+            }).join('');
+            console.log('DEBUG: Extracted text from block:', text);
+            return text;
           }
+          
+          // Handle blocks that might have text directly in props or other places
+          if (block.text) {
+            console.log('DEBUG: Found direct text in block:', block.text);
+            return block.text;
+          }
+          
+          // Handle empty paragraph blocks - they might just be structural
+          if (block.type === 'paragraph' && (!block.content || block.content.length === 0)) {
+            console.log('DEBUG: Empty paragraph block');
+            return '';
+          }
+          
+          console.log('DEBUG: Block has no valid content');
           return '';
         }).join(' ');
 
-        return previewText.trim() === '' ? "Empty note" : previewText.substring(0, 100) + (previewText.length > 100 ? '...' : '');
+        console.log('DEBUG: Final preview text before processing:', previewText);
+        const result = previewText.trim() === '' ? "Empty note" : previewText.substring(0, 100) + (previewText.length > 100 ? '...' : '');
+        console.log('DEBUG: Final preview result:', result);
+        return result;
       } catch (error) {
         console.error("Error generating preview:", error);
         return "Error generating preview";
