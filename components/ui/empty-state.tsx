@@ -16,11 +16,11 @@ import { Button } from './button';
 export function EmptyState({ renderIcon, icon, title, description, action, className = '' }: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center justify-center h-full text-center p-8 ${className}`}>
-      <div className="bg-gray-800 rounded-full p-3 mb-4">
+      <div className="bg-white/10 rounded-full p-3 mb-4">
         {renderIcon ? renderIcon() : icon}
       </div>
       <h3 className="font-semibold text-lg text-white">{title}</h3>
-      <p className="text-sm text-gray-500 mt-1">{description}</p>
+      <p className="text-sm text-white/40 mt-1">{description}</p>
       
       {action && (
         <Button 

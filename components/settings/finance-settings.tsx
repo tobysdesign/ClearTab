@@ -11,7 +11,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
 import { format, getDay } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
@@ -41,7 +41,7 @@ export function FinanceSettings() {
 
   useEffect(() => {
     async function fetchPaydaySettings() {
-      const result = await getPaydaySettings()
+      const result = await getPaydaySettings({} as any)
       if (result.data) {
         const { paydayDate: date, paydayFrequency: freq } = result.data
         if (freq) setFrequency(freq as 'weekly' | 'fortnightly' | 'monthly')

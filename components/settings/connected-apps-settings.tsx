@@ -1,21 +1,38 @@
 'use client'
 
 import * as React from 'react'
-import { useSession } from 'next-auth/react'
+// import { useSession } from 'next-auth/react' // Disabled - using Supabase
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ExternalLink, CheckCircle, AlertTriangle, Info } from 'lucide-react'
-import { signIn } from "next-auth/react"
+import ExternalLink from 'lucide-react/dist/esm/icons/external-link'
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle'
+import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle'
+import Info from 'lucide-react/dist/esm/icons/info'
+
+import { createClient } from '@/lib/supabase/client'
 
 export function ConnectedAppsSettings() {
-  const { data: session, update } = useSession()
+  const supabase = createClient()
+  const [session, setSession] = React.useState<any>(null)
 
-  const isGoogleConnected = session?.user?.accounts?.some(
-    (account: any) => account.provider === 'google'
-  );
+  React.useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
+    }
+    getSession()
+  }, [supabase.auth])
 
-  const handleConnectGoogle = () => {
-    signIn("google", { scope: "openid email profile https://www.googleapis.com/auth/calendar.readonly" });
+  const isGoogleConnected = session?.user?.app_metadata?.provider === 'google'
+
+  const handleConnectGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+      },
+    })
   };
 
   const handleDisconnectGoogle = async () => {

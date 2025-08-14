@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { notes, type Note } from '@/shared/schema'
-import { db } from '@/server/db'
-import { and, eq } from 'drizzle-orm'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
-import { shouldProcessUpdate, queueUpdate, getQueuedUpdate } from '@/server/debounced-updates'
+import { type Note } from '@/shared/schema'
+import { createClient } from '@/lib/supabase/server'
+// import { shouldProcessUpdate, queueUpdate, getQueuedUpdate } from '@/server/debounced-updates' // Temporarily disabled
 
 export const runtime = 'nodejs'
 
@@ -19,15 +16,20 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user.id;
+  const supabase = await createClient()
+  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json(
       { success: false, error: 'User not authenticated' },
       { status: 401 }
     );
   }
+
+  const userId = user.id;
 
   const params = await context.params
   const id = params.id
@@ -36,12 +38,19 @@ export async function GET(
   }
 
   try {
-    const note = await db.query.notes.findFirst({
-      where: and(eq(notes.id, id), eq(notes.userId, userId))
-    });
+    const { data: note, error } = await supabase
+      .from('notes')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
 
-    if (!note) {
-      return Response.json({ success: false, error: 'Note not found' }, { status: 404 });
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return Response.json({ success: false, error: 'Note not found' }, { status: 404 });
+      }
+      console.error('Supabase query error:', error);
+      return Response.json({ success: false, error: 'Internal server error' }, { status: 500 });
     }
 
     return Response.json({ success: true, data: note });
@@ -57,15 +66,20 @@ export async function PUT(
   context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions)
-    const userId = session?.user.id
+    const supabase = await createClient()
+    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'User not authenticated' },
         { status: 401 }
       )
     }
+
+    const userId = user.id;
 
     const params = await context.params
     const id = params.id
@@ -80,43 +94,48 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateSchema.parse(body)
 
-    // Check if we should process this update now
-    const shouldProcess = await shouldProcessUpdate(id, userId)
+    // Temporarily disabled debouncing - always process updates immediately
+    // const shouldProcess = await shouldProcessUpdate(id, userId)
+    // if (!shouldProcess) {
+    //   await queueUpdate(id, userId, validatedData)
+    //   return NextResponse.json({ 
+    //     success: true, 
+    //     data: { ...validatedData, id, queued: true },
+    //     message: 'Update queued'
+    //   })
+    // }
 
-    if (!shouldProcess) {
-      // Queue the update for later
-      await queueUpdate(id, userId, validatedData)
-      return NextResponse.json({ 
-        success: true, 
-        data: { ...validatedData, id, queued: true },
-        message: 'Update queued'
-      })
-    }
-
-    // Get any queued updates and merge them with the current update
-    const queuedUpdate = await getQueuedUpdate(id, userId)
+    // const queuedUpdate = await getQueuedUpdate(id, userId)
     const finalData = {
-      ...(queuedUpdate?.data || {}),
       ...validatedData,
-      updatedAt: new Date(),
+      updated_at: new Date().toISOString(),
     }
     
-    const result = await db
-      .update(notes)
-      .set(finalData)
-      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
-      .returning()
+    const { data: result, error } = await supabase
+      .from('notes')
+      .update(finalData)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single()
 
-    if (!result.length) {
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { success: false, error: 'Note not found' },
+          { status: 404 }
+        )
+      }
+      console.error('Supabase update error:', error)
       return NextResponse.json(
-        { success: false, error: 'Note not found' },
-        { status: 404 }
+        { success: false, error: 'Failed to update note' },
+        { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      data: { ...result[0], queued: false }
+      data: result
     })
   } catch (error) {
     console.error('Error updating note:', error)
@@ -143,15 +162,20 @@ export async function DELETE(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await getServerSession(authOptions);
-  const userId = session?.user.id;
+  const supabase = await createClient()
+  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json(
       { success: false, error: 'User not authenticated' },
       { status: 401 }
     );
   }
+
+  const userId = user.id;
   
   const params = await context.params
   const id = params.id
@@ -160,18 +184,25 @@ export async function DELETE(
   }
 
   try {
-    const result = await db
-      .delete(notes)
-      .where(and(eq(notes.id, id), eq(notes.userId, userId)))
-      .returning();
+    const { data: result, error } = await supabase
+      .from('notes')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select();
 
-    if (!result.length) {
-      return Response.json({ error: 'Note not found' }, { status: 404 });
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return Response.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    }
+
+    if (!result || result.length === 0) {
+      return Response.json({ success: false, error: 'Note not found' }, { status: 404 });
     }
 
     return Response.json({ success: true });
   } catch (error) {
     console.error('Error deleting note:', error);
-    return Response.json({ error: 'Internal server error' }, { status: 500 });
+    return Response.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 } 

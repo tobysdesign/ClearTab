@@ -1,6 +1,17 @@
 {
+  "components/settings/account-settings.tsx -> @/lib/supabase/client": {
+    "id": "components/settings/account-settings.tsx -> @/lib/supabase/client",
+    "files": []
+  },
   "components/widgets/edit-task-form.tsx -> @/components/ui/editor": {
     "id": "components/widgets/edit-task-form.tsx -> @/components/ui/editor",
+    "files": [
+      "static/css/_app-pages-browser_components_ui_editor_tsx.css",
+      "static/chunks/_app-pages-browser_components_ui_editor_tsx.js"
+    ]
+  },
+  "components/widgets/schedule-widget.tsx -> @/lib/supabase/client": {
+    "id": "components/widgets/schedule-widget.tsx -> @/lib/supabase/client",
     "files": []
   },
   "node_modules/@blocknote/core/dist/blocknote.js -> @emoji-mart/data": {
@@ -87,16 +98,20 @@
       "static/chunks/_app-pages-browser_node_modules_emoji-mart_dist_module_js.js"
     ]
   },
-  "node_modules/@tanstack/query-devtools/build/dev.js -> ./DevtoolsComponent/HH7B3BHX.js": {
-    "id": "node_modules/@tanstack/query-devtools/build/dev.js -> ./DevtoolsComponent/HH7B3BHX.js",
-    "files": [
-      "static/chunks/_app-pages-browser_node_modules_tanstack_query-devtools_build_DevtoolsComponent_HH7B3BHX_js.js"
-    ]
+  "node_modules/@supabase/auth-js/dist/module/lib/helpers.js -> @supabase/node-fetch": {
+    "id": "node_modules/@supabase/auth-js/dist/module/lib/helpers.js -> @supabase/node-fetch",
+    "files": []
   },
-  "node_modules/@tanstack/query-devtools/build/dev.js -> ./DevtoolsPanelComponent/JZI2RDCT.js": {
-    "id": "node_modules/@tanstack/query-devtools/build/dev.js -> ./DevtoolsPanelComponent/JZI2RDCT.js",
-    "files": [
-      "static/chunks/_app-pages-browser_node_modules_tanstack_query-devtools_build_DevtoolsPanelComponent_JZI2RDCT_js.js"
-    ]
+  "node_modules/@supabase/functions-js/dist/module/helper.js -> @supabase/node-fetch": {
+    "id": "node_modules/@supabase/functions-js/dist/module/helper.js -> @supabase/node-fetch",
+    "files": []
+  },
+  "node_modules/@supabase/realtime-js/dist/module/RealtimeClient.js -> @supabase/node-fetch": {
+    "id": "node_modules/@supabase/realtime-js/dist/module/RealtimeClient.js -> @supabase/node-fetch",
+    "files": []
+  },
+  "node_modules/@supabase/storage-js/dist/module/lib/helpers.js -> @supabase/node-fetch": {
+    "id": "node_modules/@supabase/storage-js/dist/module/lib/helpers.js -> @supabase/node-fetch",
+    "files": []
   }
 }

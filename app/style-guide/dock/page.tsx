@@ -2,8 +2,13 @@
 
 import { Dock } from '@/components/ui/dock'
 import { DockIcon } from '@/components/ui/dock-icon'
-import { MessageCircle, Terminal, Trash } from 'lucide-react'
-import { CalendarIcon, HomeIcon, MailIcon, PencilIcon } from "lucide-react";
+import MessageCircle from 'lucide-react/dist/esm/icons/message-circle'
+import Terminal from 'lucide-react/dist/esm/icons/terminal'
+import Trash from 'lucide-react/dist/esm/icons/trash'
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar'
+import HomeIcon from 'lucide-react/dist/esm/icons/home'
+import MailIcon from 'lucide-react/dist/esm/icons/mail'
+import PencilIcon from 'lucide-react/dist/esm/icons/pencil'
 import Link from "next/link";
 import React from "react";
 
@@ -93,11 +98,11 @@ const DATA = {
   },
 };
 
-export function DockDemo() {
+export default function DockDemo() {
   return (
     <>
       <div className="flex flex-col items-center justify-center">
-        <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
+        <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-white/80 bg-clip-text text-center text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
           Dock
         </span>
         <TooltipProvider>

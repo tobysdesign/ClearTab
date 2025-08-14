@@ -61,7 +61,7 @@ export const panelConstraints: Record<WidgetId, PanelConstraints> = {
     defaultSize: 33,
     minSize: 25
   },
-  finance: {
+  countdown: {
     minWidth: '280px',
     minHeight: '280px',
     defaultSize: 33,

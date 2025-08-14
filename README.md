@@ -1,85 +1,116 @@
-# Bye - Personal Dashboard
+## ClearTab.app (Bye) – Personal Dashboard
 
-A modern, AI-powered personal dashboard and productivity app.
+Modern, AI-powered personal dashboard and productivity app with notes, tasks, calendars, and widgets. Ships as a web app and a Chrome new-tab extension.
 
-## Features
+### Features
+- Customizable dashboard (bento/widget layout) with internal scroll for long content
+- Notes with rich text editor (BlockNote)
+- Tasks with due dates, priorities, and quick actions
+- AI assistant for context-aware actions (notes, tasks, calendar)
+- Weather and multi-calendar timeline
+- Chrome extension that replaces the new tab page
 
-- Personal dashboard with customizable widgets designed to stop you new tab wanderings
-- Note-taking with rich text editor
-- Task management with due dates and priorities
-- F2F (in person) Meeting recorder and transcriber
-- Weather and multiple gsuite calendar integration in one schedule
-- AI assistant for productivity, task completeion and analysis of notes+tasks+schedule wholistically.
-- Replaces your new tab page with the ClearTab.app dashboard
-- Quick access to features with keyboard shortcuts and LLM chatbotthat uses tInstuctional # tags like #note #task and generated them. 
-- Seamless integration with the web version with mobile optimised / native app. 
+### Tech Stack
+- Framework: Next.js 15 (App Router), React 18
+- Database: PostgreSQL + Drizzle ORM
+- Styling: Tailwind CSS + CSS Modules + CSS custom properties
+- Auth/Session: Supabase SSR
+- State: Zustand (client), TanStack Query (server state)
+- Editor: BlockNote
 
-## Roadmap 
-- Potentially create an MCP server that can help with more complex tasks 
-- Build In Widget generator 
-- Ability to toggle default widgets and re-arrange into personalised layout 
-- Routines "Summarise my week ahead and help me prepare" 
+---
 
-## Development
+## Getting Started
 
 ### Prerequisites
-
 - Node.js 18+
-- npm or yarn
-- PostgreSQL database
+- npm
+- PostgreSQL database (local or hosted)
 
-### Installation
-
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/bye.git
-cd bye
-```
-
-2. Install dependencies
+### Install
 ```bash
 npm install
 ```
 
-3. Set up environment variables
+### Environment Variables
+Create `.env.local` with at least:
 ```bash
-cp .env.example .env
-# Edit .env with your database and API credentials
+DATABASE_URL=postgres://user:password@host:5432/db
+OPENAI_API_KEY=sk-...
+
+# Supabase (for SSR auth client)
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+
+# Optional integrations
+MEM0_API_KEY=...
+TOMORROW_IO_API_KEY=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 ```
 
-4. Run database migrations
+### Database (Drizzle)
+- Generate migration files (based on `shared/schema.ts`):
 ```bash
-npm run migrate
+npx drizzle-kit generate
 ```
+- Apply migrations:
+```bash
+node scripts/migrate.js
+```
+Notes:
+- Migrations are emitted to `migrations/` per `drizzle.config.ts`.
+- Ensure `DATABASE_URL` is set for both generation and running migrations.
 
-5. Start the development server
+### Development
 ```bash
 npm run dev
 ```
 
-## Chrome Extension
-
-Bye can also be used as a Chrome extension that replaces your new tab page.
-
-### Building the Extension
-
-1. Build the extension
+### Production Build
 ```bash
-./scripts/build-extension.sh
+npm run build
+npm run start
 ```
 
-2. The extension will be built to `dist/extension` and a zip file will be created at `dist/bye-extension.zip`
+---
 
-### Installing the Extension
+## Chrome Extension (New Tab)
+Build the extension assets and package a zip for the Chrome Web Store:
+```bash
+npm run build-extension
+npm run package-extension
+```
+Then:
+1. Open `chrome://extensions`
+2. Enable Developer Mode
+3. Click “Load unpacked” and select `dist/extension`
 
-1. Open Chrome and navigate to `chrome://extensions`
-2. Enable "Developer mode" in the top right
-3. Click "Load unpacked" and select the `dist/extension` directory
+---
 
+## Style Guide and Components
+- Refer to `app/style-guide` pages for canonical UI components and patterns
+- New components should follow established patterns and be added to the style guide
+- Viewport is not exceeded; widget content should scroll internally (overflow-y)
 
+---
 
+## Testing
+End-to-end tests use Playwright. Run directly via:
+```bash
+npx playwright test
+```
 
+---
+
+## Project Structure (high level)
+- `app/` Next.js App Router pages and API routes
+- `components/` Reusable UI, dashboard, widgets, AI, settings
+- `server/` Backend services (LLM, calendar, storage) and db helpers
+- `shared/` Database schema and shared types
+- `scripts/` Build and tooling scripts (extension, migrations, etc.)
+
+---
 
 ## License
-
-[MIT](LICENSE) 
+[MIT](LICENSE)

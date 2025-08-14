@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -15,6 +14,7 @@ import {
 import type { ConnectedAccountWithEmail } from '@/app/api/settings/accounts/route'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
 
 interface Calendar {
   id: string
@@ -29,6 +29,17 @@ export function CalendarSettings() {
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loadingCalendars, setLoadingCalendars] = useState(true)
   const queryClient = useQueryClient()
+
+  const supabase = createClient()
+
+  const handleGoogleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
+    })
+  }
 
   useEffect(() => {
     async function fetchAccounts() {
@@ -121,8 +132,8 @@ export function CalendarSettings() {
           <p className="text-muted-foreground">
             Connect and manage your Google Calendars.
           </p>
-          <Button onClick={() => signIn('google')}>
-            Connect new Google account
+          <Button onClick={handleGoogleSignIn}>
+            Connect Google Calendar
           </Button>
         </div>
 

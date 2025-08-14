@@ -123,7 +123,7 @@ export function MiniAiChat({
                 case 'content':
                   if (messageIndex === -1) {
                     setMessages(prev => {
-                      const newMessages = [...prev, { role: 'assistant', content: data.content, isStreaming: true }]
+                      const newMessages = [...prev, { role: 'assistant' as const, content: data.content, isStreaming: true }]
                       messageIndex = newMessages.length - 1
                       return newMessages
                     })

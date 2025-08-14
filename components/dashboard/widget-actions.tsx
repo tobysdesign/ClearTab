@@ -1,6 +1,6 @@
 "use client"
 
-import { MoreVertical } from 'lucide-react'
+import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical'
 import { Button } from '@/components/ui/button'
 import {
   Popover,

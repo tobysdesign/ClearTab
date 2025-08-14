@@ -26,7 +26,7 @@ const Select = React.forwardRef<
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
         <svg
-          className="h-4 w-4 text-gray-400"
+          className="h-4 w-4 text-white/40"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

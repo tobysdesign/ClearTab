@@ -71,15 +71,16 @@ export function ExpandingModal({
                   exit={{ opacity: 0 }}
                   className={styles.closeContainer}
                 >
-                  <GlowButton
+                  <button
                     onClick={() => {
                       onClose?.(); // Call onClose when close button is clicked
                       setIsOpen(false)
                     }}
-                    className={styles.closeBtn}
+                    className="md3-icon-button"
+                    aria-label="Close dialog"
                   >
-                    <X className={styles.closeIcon} />
-                  </GlowButton>
+                    <X size={20} />
+                  </button>
                 </motion.div>
                 {children}
               </motion.div>

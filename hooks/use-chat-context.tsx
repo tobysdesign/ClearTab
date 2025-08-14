@@ -27,6 +27,8 @@ interface ChatContextType {
   processStreamingMessage: (initialMessage?: string) => Promise<void>
   isStreamingMode: boolean
   toggleStreamingMode: () => void
+  cancelMessage: () => void
+  canCancel: boolean
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -38,6 +40,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [thinkingContent, setThinkingContent] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [isStreamingMode, setIsStreamingMode] = useState(true)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -45,10 +48,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (content: string) => {
+      // Validate task content
+      const trimmedContent = content.trim()
+      if (!trimmedContent || trimmedContent.length < 5) {
+        throw new Error('Task content must be at least 5 characters')
+      }
+      
+      // Additional validation - don't allow single words
+      if (!/\s/.test(trimmedContent) && trimmedContent.length < 10) {
+        throw new Error('Task content appears to be too short or a single word')
+      }
+      
+      console.log('Creating task with content:', content)
+      console.trace('Task creation stack trace:')
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content: content.trim() }),
       })
       if (!response.ok) throw new Error('Failed to create task')
       return response.json()
@@ -58,6 +74,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       toast({
         title: 'Task created',
         description: 'Your task has been created successfully.',
+      })
+    },
+    onError: (error) => {
+      console.error('Failed to create task:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to create task. Please try again.',
+        variant: 'destructive',
       })
     },
   })
@@ -95,17 +119,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Process hashtags before sending to AI
-      if (hasSeenOnboarding) {
+      // Process hashtags before sending to AI - only for user messages
+      if (hasSeenOnboarding && userMessage.trim()) {
         const taskMatch = userMessage.match(/#task\s+(.+)/)
         const noteMatch = userMessage.match(/#note\s+(.+)/)
 
         if (taskMatch) {
+          console.log('Creating task from user message:', taskMatch[1])
           await createTaskMutation.mutateAsync(taskMatch[1])
+          return // Don't send hashtag commands to AI at all
         }
         if (noteMatch) {
+          console.log('Creating note from user message:', noteMatch[1])
           await createNoteMutation.mutateAsync(noteMatch[1])
-      }
+          return // Don't send hashtag commands to AI at all
+        }
       }
 
       // Get AI response
@@ -154,18 +182,30 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Process hashtags before sending to AI
-      if (hasSeenOnboarding) {
+      // Process hashtags before sending to AI - only for user messages
+      if (hasSeenOnboarding && userMessage.trim()) {
+        console.log('STREAMING: Checking message for hashtags:', userMessage)
         const taskMatch = userMessage.match(/#task\s+(.+)/)
         const noteMatch = userMessage.match(/#note\s+(.+)/)
+        
+        console.log('STREAMING: Task match result:', taskMatch)
+        console.log('STREAMING: Note match result:', noteMatch)
 
         if (taskMatch) {
+          console.log('STREAMING: Creating task from user message:', taskMatch[1])
           await createTaskMutation.mutateAsync(taskMatch[1])
+          return // Don't send hashtag commands to AI at all
         }
         if (noteMatch) {
+          console.log('STREAMING: Creating note from user message:', noteMatch[1])
           await createNoteMutation.mutateAsync(noteMatch[1])
+          return // Don't send hashtag commands to AI at all
         }
       }
+
+      // Create abort controller for cancellation
+      const controller = new AbortController()
+      abortControllerRef.current = controller
 
       // Start streaming response
       const response = await fetch('/api/ai/stream', {
@@ -176,7 +216,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           hasSeenOnboarding,
           userName,
           agentName
-        })
+        }),
+        signal: controller.signal
       })
 
       if (!response.ok) throw new Error('Failed to get streaming response')
@@ -208,7 +249,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                   if (messageIndex === -1) {
                     // Add initial assistant message
                     setMessages(prev => {
-                      const newMessages = [...prev, { role: 'assistant', content: data.content, isStreaming: true }]
+                      const newMessages = [...prev, { role: 'assistant' as const, content: data.content, isStreaming: true }]
                       messageIndex = newMessages.length - 1
                       return newMessages
                     })
@@ -249,22 +290,39 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       }
 
-    } catch (error) {
-      console.error('Error processing streaming message:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to process your message. Please try again.',
-        variant: 'destructive',
-      })
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Message cancelled by user')
+        toast({
+          title: 'Message cancelled',
+          description: 'The message was cancelled.'
+        })
+      } else {
+        console.error('Error processing streaming message:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to process your message. Please try again.',
+          variant: 'destructive',
+        })
+      }
     } finally {
       setIsThinking(false)
       setThinkingContent('')
+      abortControllerRef.current = null
     }
   }, [inputValue, hasSeenOnboarding, userName, agentName, createTaskMutation, createNoteMutation, toast])
 
   const toggleStreamingMode = useCallback(() => {
     setIsStreamingMode(prev => !prev)
   }, [])
+
+  const cancelMessage = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+  }, [])
+
+  const canCancel = Boolean(abortControllerRef.current && isThinking)
 
   const openChat = useCallback(() => {
     setIsChatOpen(true)
@@ -312,6 +370,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         processStreamingMessage,
         isStreamingMode,
         toggleStreamingMode,
+        cancelMessage,
+        canCancel,
       }}
     >
       {children}

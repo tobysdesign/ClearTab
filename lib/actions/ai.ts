@@ -45,7 +45,7 @@ export async function askAi(
       const onboardingResponse = await getChatCompletion({
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: `You are ${agentName || 'a helpful assistant'}. You are talking to ${userName || 'a user'}.` },
+          { role: 'system', content: `You are ${agentName || 'a helpful assistant'}. You are talking to ${userName || 'a user'}. IMPORTANT: Never use hashtags (#) in your responses as they will be interpreted as commands.` },
           { role: 'user', content: validatedInput.prompt },
         ],
         stream: false,

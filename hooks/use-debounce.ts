@@ -11,9 +11,9 @@ export function useDebounce<T>(
   delay: number,
   options: { leading?: boolean } = {}
 ): DebouncedFunction<T> {
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const callbackRef = useRef(callback)
-  const valueRef = useRef<T>()
+  const valueRef = useRef<T | undefined>(undefined)
   const optionsRef = useRef(options)
 
   // Update refs when values change

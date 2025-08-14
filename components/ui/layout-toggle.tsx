@@ -3,7 +3,8 @@
 import { useLayout } from '@/hooks/use-layout'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Grid3x3, LayoutGrid } from 'lucide-react'
+import Grid3x3 from 'lucide-react/dist/esm/icons/grid-3x3'
+import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid'
 
 interface LayoutToggleProps {
   variant?: 'dock' | 'settings'

@@ -7,7 +7,8 @@ import "@blocknote/core/fonts/inter.css"
 import "./block-note-custom.css"
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Bot, CheckSquare } from 'lucide-react'
+import Bot from 'lucide-react/dist/esm/icons/bot'
+import CheckSquare from 'lucide-react/dist/esm/icons/check-square'
 import styles from './block-note-editor.module.css'
 import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
 
@@ -44,7 +45,7 @@ export function BlockNoteEditor({
     initialContent: safeInitialContent
   }, []);
   
-  const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const debouncedSave = useCallback((blocks: any) => {
     if (!onChange) return

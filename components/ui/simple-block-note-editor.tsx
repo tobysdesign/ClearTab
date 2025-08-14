@@ -18,6 +18,17 @@ import { MiniAiChat } from './mini-ai-chat'
 import { useChatContext } from '@/hooks/use-chat-context'
 import BotIcon from 'lucide-react/dist/esm/icons/bot'
 
+// Magic UI Animated Gradient Text Component
+function AnimatedGradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span
+      className={`bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent animate-gradient ${className}`}
+    >
+      {children}
+    </span>
+  )
+}
+
 interface SimpleBlockNoteEditorProps {
   initialContent?: any
   onChange?: (content: any) => void
@@ -40,12 +51,25 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
   const isInitializedRef = useRef(false)
   const editorRef = useRef<BlockNoteEditor | null>(null)
   const [editorReady, setEditorReady] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const dropdownButtonRef = useRef<HTMLButtonElement>(null)
   
   // Mini AI Chat state
   const [selectedText, setSelectedText] = useState('')
   const [selectionPosition, setSelectionPosition] = useState<{ x: number; y: number } | null>(null)
   const [isMiniChatOpen, setIsMiniChatOpen] = useState(false)
-  const { setMessages: setMainChatMessages, openChat } = useChatContext()
+  const [isFormattingDropdownOpen, setIsFormattingDropdownOpen] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 })
+  
+  // Safely use chat context - will return null if not wrapped in ChatProvider
+  let chatContext
+  try {
+    chatContext = useChatContext()
+  } catch (error) {
+    // Not wrapped in ChatProvider, that's okay
+    chatContext = null
+  }
+  const { setMessages: setMainChatMessages, openChat } = chatContext || { setMessages: () => {}, openChat: () => {} }
 
   // Create editor instance at the top level
   const editor = useCreateBlockNote({
@@ -83,21 +107,14 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
     if (!onChange) return
 
     const handleChange = () => {
-      // Clear any existing timeout
-      if (changeTimeoutRef.current) {
-        clearTimeout(changeTimeoutRef.current)
+      // Call onChange immediately to let parent handle debouncing
+      const contentStr = JSON.stringify(editor.document || [])
+      
+      // Only call onChange if content actually changed
+      if (contentStr !== lastContentRef.current) {
+        lastContentRef.current = contentStr
+        onChange(editor.document)
       }
-
-      // Debounce changes to prevent rapid firing
-      changeTimeoutRef.current = setTimeout(() => {
-        const contentStr = JSON.stringify(editor.document || [])
-        
-        // Only call onChange if content actually changed
-        if (contentStr !== lastContentRef.current) {
-          lastContentRef.current = contentStr
-          onChange(editor.document)
-        }
-      }, 500) // Reduced from 1000ms to 500ms for better responsiveness
     }
 
     let unsubscribe: (() => void) | undefined
@@ -130,6 +147,7 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
       
       try {
         const selection = editor.getSelectedText()
+        console.log('Text selection changed:', selection) // Debug log
         if (selection && selection.trim().length > 0) {
           setSelectedText(selection.trim())
           
@@ -147,6 +165,7 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
           setSelectedText('')
           setSelectionPosition(null)
         }
+        // Don't automatically open mini chat - only when button is clicked
       } catch (error) {
         console.warn('Selection tracking error:', error)
       }
@@ -166,9 +185,30 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
     }
   }, [editor])
 
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isFormattingDropdownOpen && 
+          dropdownRef.current && 
+          !dropdownRef.current.contains(event.target as Node) &&
+          dropdownButtonRef.current &&
+          !dropdownButtonRef.current.contains(event.target as Node)) {
+        setIsFormattingDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isFormattingDropdownOpen])
+
   // Custom formatting toolbar component
   const CustomFormattingToolbar = () => {
-    if (!editorReady || !editorRef.current) return null
+    if (!editorReady || !editorRef.current) {
+      console.log('Formatting toolbar not ready') // Debug log
+      return null
+    }
     
     const editor = editorRef.current
     
@@ -176,11 +216,50 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
       const currentBlock = editor.getTextCursorPosition()?.block
       const activeStyles = editor.getActiveStyles()
       
-      if (!currentBlock) return null
+      if (!currentBlock) {
+        console.log('No current block for formatting toolbar') // Debug log
+        return null
+      }
+      
+      console.log('Rendering formatting toolbar') // Debug log
+      
+      // Get current alignment for cycling
+      const currentAlignment = (currentBlock.props as any)?.textAlignment || "left"
+      const alignmentOrder = ["left", "center", "right"]
+      const currentAlignmentIndex = alignmentOrder.indexOf(currentAlignment)
+      const nextAlignment = alignmentOrder[(currentAlignmentIndex + 1) % alignmentOrder.length]
       
       return (
         <div className="bn-formatting-toolbar">
-          {/* Block Type Selector */}
+          {/* Ask Ybot Button - Left side */}
+          <button
+            onClick={() => {
+              try {
+                const selection = editor.getSelectedText()
+                console.log('Ask Ybot clicked, selection:', selection) // Debug log
+                if (selection && selection.trim()) {
+                  setSelectedText(selection.trim())
+                  setIsMiniChatOpen(true)
+                }
+              } catch (error) {
+                console.warn("Ask Ybot failed:", error)
+              }
+            }}
+            title="Ask Ybot about selected text"
+            disabled={!selectedText}
+            className="ask-ybot-btn"
+          >
+            <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 9" width="18" height="12">
+              <path d="M10.538 3.914c.128 0 .232.104.232.232v.81a.23.23 0 0 1-.232.232h-.81a.23.23 0 0 1-.232-.232v-.81c0-.128.104-.232.232-.232zm-6.485 0c.128 0 .232.104.232.232v.81a.23.23 0 0 1-.232.232h-.81a.23.23 0 0 1-.232-.232v-.81c0-.128.104-.232.232-.232z" fill="#fff"/>
+              <path d="M7.76 3.725q0-1.287.65-1.997c.433-.473.862-.71 1.636-.71q1.16 0 1.81.71t.651 1.997V5.2q0 1.324-.65 2.015c-.434.46-.863.69-1.636.69q-1.161 0-1.811-.69T7.76 5.2zm2.46 3.462c.54 0 .77-.176 1.037-.53q.41-.539.41-1.513V3.78q0-.453-.1-.823a1.7 1.7 0 0 0-.31-.643 1.36 1.36 0 0 0-.51-.426q-.3-.15-.701-.151c-.273 0-.336.05-.536.151q-.3.152-.51.426a1.8 1.8 0 0 0-.3.643q-.1.369-.1.823v1.363q0 .975.4 1.513.41.53 1.22.53M1.274 3.655q0-1.308.65-2.03c.434-.481.863-.722 1.637-.722q1.16 0 1.81.722t.65 2.03v1.502q0 1.347-.65 2.05c-.433.468-.862.702-1.636.702q-1.16 0-1.81-.702-.651-.703-.651-2.05zm2.461 3.523c.54 0 .77-.18 1.036-.54q.41-.547.41-1.539V3.713a3.3 3.3 0 0 0-.1-.837 1.8 1.8 0 0 0-.31-.654 1.4 1.4 0 0 0-.51-.434 1.5 1.5 0 0 0-.7-.154c-.274 0-.336.052-.536.154q-.3.154-.51.434-.201.27-.3.654-.1.376-.1.837V5.1q0 .99.4 1.54.41.54 1.22.539m2.75-3.049a.434.434 0 0 1 .869 0v3.533a.434.434 0 0 1-.869 0zm-5.732.182s-.29.23-.29.434.29.434.29.434c0 .872-.753.064-.753-.434s.753-1.306.753-.434m12.183.868s.29-.23.29-.434-.29-.435-.29-.435c0-.871.753-.063.753.435 0 .497-.753 1.306-.753.434" fill="#fff"/>
+            </svg>
+            <AnimatedGradientText>Ask Ybot</AnimatedGradientText>
+          </button>
+          
+          {/* Divider */}
+          <div className="toolbar-divider"></div>
+          
+          {/* Paragraph/Heading Dropdown - Removed list options */}
           <select
             value={currentBlock.type || "paragraph"}
             onChange={(e) => {
@@ -193,16 +272,63 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
               }
             }}
             className="bn-dropdown"
+            style={{ width: '60px' }}
           >
-            <option value="paragraph">Paragraph</option>
-            <option value="heading">Heading 1</option>
-            <option value="heading">Heading 2</option>
-            <option value="heading">Heading 3</option>
-            <option value="bulletListItem">Bullet List</option>
-            <option value="numberedListItem">1,2,3 List</option>
+            <option value="paragraph">P</option>
+            <option value="heading">H1</option>
+            <option value="heading">H2</option>
+            <option value="heading">H3</option>
           </select>
           
-          {/* Text Formatting */}
+          {/* Single Alignment Button that cycles - Fixed positioning */}
+          <button
+            onClick={() => {
+              try {
+                editor.updateBlock(currentBlock, {
+                  props: { textAlignment: nextAlignment } as any
+                })
+              } catch (error) {
+                console.warn("Alignment toggle failed:", error)
+              }
+            }}
+            title={`Align ${nextAlignment}`}
+            className="alignment-btn"
+            style={{ position: 'relative' }}
+          >
+            {currentAlignment === "left" && (
+              <svg width="12" height="9" viewBox="0 0 12 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g clipPath="url(#clip0_475_1264)">
+                  <path d="M9.31982 2H1.06982" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5.65316 4.5H1.06982" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7.48649 7H1.06982" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                </g>
+                <defs>
+                  <clipPath id="clip0_475_1264">
+                    <rect width="11" height="9" fill="white" transform="translate(0.0698242)"/>
+                  </clipPath>
+                </defs>
+              </svg>
+            )}
+            {currentAlignment === "center" && (
+              <svg width="11" height="9" viewBox="0 0 11 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.625 2H1.375" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7.79183 4.5H3.2085" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M8.70817 7H2.2915" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+            {currentAlignment === "right" && (
+              <svg width="11" height="9" viewBox="0 0 11 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 2H0.75" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M8.99984 4.5H4.4165" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.00016 7H2.5835" stroke="#E6E6E6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </button>
+          
+  
+  
+          
+          {/* Text Formatting Buttons */}
           <button
             onClick={() => {
               try {
@@ -245,115 +371,88 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
             <u>U</u>
           </button>
           
-          <button
-            onClick={() => {
-              try {
-                editor.toggleStyles({ strike: true })
-              } catch (error) {
-                console.warn("Strike toggle failed:", error)
-              }
-            }}
-            data-active={activeStyles?.strike || false}
-            title="Strikethrough"
-          >
-            <s>S</s>
-          </button>
-          
-          {/* Alignment Toggle Group */}
-          <div className="alignment-toggle-group">
+          {/* Formatting Dropdown with more options */}
+          <div className="formatting-dropdown">
             <button
+              ref={dropdownButtonRef}
               onClick={() => {
-                try {
-                  editor.updateBlock(currentBlock, {
-                    props: { textAlignment: "left" } as any
+                setIsFormattingDropdownOpen(!isFormattingDropdownOpen)
+                // Calculate position for dropdown
+                if (dropdownButtonRef.current) {
+                  const rect = dropdownButtonRef.current.getBoundingClientRect()
+                  setDropdownPosition({
+                    x: rect.left,
+                    y: rect.bottom + 5
                   })
-                } catch (error) {
-                  console.warn("Left align failed:", error)
                 }
               }}
-              data-active={(currentBlock.props as any)?.textAlignment === "left"}
-              title="Align Left"
+              title="More formatting options"
+              className="formatting-dropdown-btn"
             >
-              ⬅
-            </button>
-            <button
-              onClick={() => {
-                try {
-                  editor.updateBlock(currentBlock, {
-                    props: { textAlignment: "center" } as any
-                  })
-                } catch (error) {
-                  console.warn("Center align failed:", error)
-                }
-              }}
-              data-active={(currentBlock.props as any)?.textAlignment === "center"}
-              title="Align Center"
-            >
-              ⬌
-            </button>
-            <button
-              onClick={() => {
-                try {
-                  editor.updateBlock(currentBlock, {
-                    props: { textAlignment: "right" } as any
-                  })
-                } catch (error) {
-                  console.warn("Right align failed:", error)
-                }
-              }}
-              data-active={(currentBlock.props as any)?.textAlignment === "right"}
-              title="Align Right"
-            >
-              ➡
+              ⋯
             </button>
           </div>
           
-          {/* Text Color */}
-          <button
-            onClick={() => {
-              try {
-                editor.toggleStyles({ textColor: "red" })
-              } catch (error) {
-                console.warn("Text color failed:", error)
-              }
-            }}
-            title="Text Color"
-          >
-            A
-          </button>
+          {/* Divider */}
+          <div className="toolbar-divider"></div>
           
-          {/* Custom Actions */}
-          <button
-            onClick={() => {
-              try {
-                const selection = editor.getSelectedText()
-                if (selection && selection.trim()) {
-                  setSelectedText(selection.trim())
-                  setIsMiniChatOpen(true)
-                }
-              } catch (error) {
-                console.warn("Ask AI failed:", error)
-              }
-            }}
-            title="Ask AI about selected text"
-            disabled={!selectedText}
-          >
-            <BotIcon size={14} />
-          </button>
-          
+          {/* Create Task Button - Right side */}
           <button
             onClick={() => {
               try {
                 const selectedText = editor.getSelectedText()
-                console.log("Add to Tasks:", selectedText)
-                // TODO: Implement Add to Tasks functionality
+                console.log("Create task clicked:", selectedText) // Debug log
+                if (selectedText && selectedText.trim()) {
+                  // Create a task from the selected text
+                  const taskData = {
+                    title: selectedText.trim(),
+                    description: `Task created from note selection: "${selectedText.trim()}"`,
+                    status: 'pending' as const,
+                    priority: 'medium' as const,
+                    dueDate: null,
+                    tags: ['from-notes']
+                  }
+                  
+                  // Call the API to create the task
+                  fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(taskData),
+                  })
+                  .then(response => {
+                    if (response.ok) {
+                      console.log('Task created successfully from selected text')
+                      // You could add a toast notification here
+                    } else {
+                      console.error('Failed to create task')
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error creating task:', error)
+                  })
+                }
               } catch (error) {
-                console.warn("Add to Tasks failed:", error)
+                console.warn("Create task failed:", error)
               }
             }}
-            title="Add to Tasks"
+            title="Create task"
+            disabled={!selectedText}
+            className="create-task-btn"
           >
-            ✓
+            <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 13" width="14" height="13">
+              <g clipPath="url(#a)" stroke="#E6E6E6" strokeWidth=".7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.7 5.8A3.7 3.7 0 1 1 9 3.3"/>
+                <path d="m6 6.1 1 1.2 3.8-3.8"/>
+              </g>
+              <defs>
+                <clipPath id="a">
+                  <path fill="#fff" d="M2.6 2h9v9h-9z"/>
+                </clipPath>
+              </defs>
+            </svg>
+            Create task
           </button>
         </div>
       )
@@ -389,6 +488,112 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
 
   return (
     <div className={`flex flex-col h-full w-full ${className || ''}`}>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .formatting-dropdown {
+            position: relative;
+            display: inline-block;
+          }
+          
+          .formatting-dropdown-btn {
+            background: none;
+            border: none;
+            color: #d2d2d2;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 2px;
+          }
+          
+          .formatting-dropdown-btn:hover {
+            background-color: #3a3a3a;
+          }
+          
+          .formatting-options {
+            position: fixed;
+            background-color: #2a2a2a;
+            min-width: 120px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 10000;
+            border-radius: 4px;
+            padding: 4px;
+            display: none;
+          }
+          
+          .formatting-options.show {
+            display: block;
+          }
+          
+          .formatting-options button {
+            width: 100%;
+            padding: 8px 12px;
+            text-align: left;
+            background: none;
+            border: none;
+            color: #d2d2d2;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 14px;
+          }
+          
+          .formatting-options button:hover {
+            background-color: #3a3a3a;
+          }
+          
+          /* Toolbar Dividers */
+          .toolbar-divider {
+            width: 1px;
+            height: 20px;
+            background-color: #333;
+            margin: 0 8px;
+            border-radius: 1px;
+          }
+          
+          /* Magic UI Animated Gradient Text */
+          .bg-gradient-to-r {
+            background-image: linear-gradient(to right, var(--tw-gradient-stops));
+          }
+          
+          .from-violet-600 {
+            --tw-gradient-from: #7c3aed;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(124, 58, 237, 0));
+          }
+          
+          .via-indigo-600 {
+            --tw-gradient-stops: var(--tw-gradient-from), #4f46e5, var(--tw-gradient-to, rgba(79, 70, 229, 0));
+          }
+          
+          .to-purple-600 {
+            --tw-gradient-to: #9333ea;
+          }
+          
+          .bg-clip-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+          }
+          
+          .text-transparent {
+            color: transparent;
+          }
+          
+          .animate-gradient {
+            background-size: 200% 200%;
+            animation: gradient 3s ease infinite;
+          }
+          
+          @keyframes gradient {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+        `
+      }} />
+      
       <BlockNoteView
         editor={editor}
         editable={editable}
@@ -401,6 +606,91 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
           formattingToolbar={CustomFormattingToolbar}
         />
       </BlockNoteView>
+      
+      {/* Formatting Dropdown - Outside the editor */}
+      {isFormattingDropdownOpen && (
+        <div 
+          ref={dropdownRef}
+          className="formatting-options show"
+          style={{
+            left: dropdownPosition.x,
+            top: dropdownPosition.y
+          }}
+        >
+          <button
+            onClick={() => {
+              try {
+                if (editorRef.current) {
+                  editorRef.current.toggleStyles({ strike: true })
+                }
+              } catch (error) {
+                console.warn("Strike toggle failed:", error)
+              }
+              setIsFormattingDropdownOpen(false)
+            }}
+            title="Strikethrough"
+          >
+            <s>S</s> Strikethrough
+          </button>
+          <button
+            onClick={() => {
+              try {
+                if (editorRef.current) {
+                  // Add link functionality here
+                  console.log("Link button clicked")
+                }
+              } catch (error) {
+                console.warn("Link toggle failed:", error)
+              }
+              setIsFormattingDropdownOpen(false)
+            }}
+            title="Link"
+          >
+            <svg width="12" height="11" viewBox="0 0 12 11" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '4px' }}>
+              <g clipPath="url(#clip0_479_2074)">
+                <path d="M3.94077 8.21509H2.85474C2.13465 8.21509 1.44406 7.92903 0.934879 7.41986C0.425702 6.91068 0.139648 6.22009 0.139648 5.5C0.139648 4.77991 0.425702 4.08932 0.934879 3.58014C1.44406 3.07097 2.13465 2.78491 2.85474 2.78491H3.94077M7.19888 2.78491H8.28491C9.005 2.78491 9.69559 3.07097 10.2048 3.58014C10.7139 4.08932 11 4.77991 11 5.5C11 6.22009 10.7139 6.91068 10.2048 7.41986C9.69559 7.92903 9.005 8.21509 8.28491 8.21509H7.19888M3.39775 5.5H7.74189" stroke="#C4C4C4" strokeWidth="1.08604" strokeLinecap="round" strokeLinejoin="round"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_479_2074">
+                  <rect width="11" height="9.43018" fill="white" transform="translate(0.0698242 0.784912)"/>
+                </clipPath>
+              </defs>
+            </svg>
+            Link
+          </button>
+          <button
+            onClick={() => {
+              try {
+                if (editorRef.current) {
+                  const currentBlock = editorRef.current.getTextCursorPosition()?.block
+                  if (currentBlock) {
+                    editorRef.current.updateBlock(currentBlock, {
+                      type: "codeBlock" as any
+                    })
+                  }
+                }
+              } catch (error) {
+                console.warn("Code block failed:", error)
+              }
+              setIsFormattingDropdownOpen(false)
+            }}
+            title="Code Block"
+          >
+            <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline', marginRight: '4px' }}>
+              <g clipPath="url(#clip0_479_2079)">
+                <path d="M8.82793 8.67197L11 6.4999L8.82793 4.32783M2.31172 4.32783L0.139648 6.4999L2.31172 8.67197M6.92737 2.15576L4.21228 10.844" stroke="#C4C4C4" strokeWidth="1.08604" strokeLinecap="round" strokeLinejoin="round"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_479_2079">
+                  <rect width="11" height="12.6883" fill="white" transform="translate(0.0698242 0.155762)"/>
+                </clipPath>
+              </defs>
+            </svg>
+            Code Block
+          </button>
+          {/* Add more formatting options here */}
+        </div>
+      )}
       
       {/* Mini AI Chat */}
       <MiniAiChat

@@ -10,7 +10,7 @@ import {
   useTransform,
 } from "framer-motion";
 import React, { PropsWithChildren, useContext, useRef } from "react";
-import { GripVertical } from "lucide-react";
+import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
 import { cn } from "@/lib/utils";
 
 export interface DockProps extends VariantProps<typeof dockVariants> {

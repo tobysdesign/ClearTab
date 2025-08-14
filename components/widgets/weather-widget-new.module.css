@@ -7,15 +7,15 @@
 }
 
 .card {
-  width: calc(85% - 20px);
-  height: calc(85% - 20px);
+  width: calc(100% - 20px);
+  height: calc(100% - 0px);
   background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
   border: 1px solid #323235;
   border-radius: 22px;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   font-family: 'Inter Display', -apple-system, BlinkMacSystemFont, sans-serif;
   box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
 }
@@ -24,8 +24,7 @@
 
 /* Row 1 - Header aligned right */
 .cardHeader {
-  text-align: leftthe;
-  
+  text-align: left;
 }
 
 .date {
@@ -51,7 +50,6 @@
   align-items: center;
   justify-content: center;
   flex: 1;
-  margin-bottom: 20px;
 }
 
 .weatherIcon {
@@ -123,4 +121,16 @@
   font-size: max(10px, 2.8cqw);
   font-weight: 300;
   line-height: 1;
-} 
+}
+
+.cardBack:hover {
+  transform: rotate(5deg);
+  transform-origin: bottom right;
+  transition: transform 0.3s spring;
+}
+
+.cardMiddle:hover {
+  transform: rotate(-5deg);
+  transform-origin: bottom left;
+  transition: transform 0.3s spring;
+}

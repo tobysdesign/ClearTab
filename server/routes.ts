@@ -572,9 +572,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check for hashtag shortcuts anywhere in the message
-      const hasNote = message.includes('#note');
-      const hasTask = message.includes('#task');
+      // DISABLED: Check for hashtag shortcuts anywhere in the message
+      // This is now handled client-side to avoid duplicate processing
+      const hasNote = false; // message.includes('#note');
+      const hasTask = false; // message.includes('#task');
       
       if (hasNote || hasTask) {
         const results = [];

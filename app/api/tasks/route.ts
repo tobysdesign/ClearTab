@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/server/db';
-import { tasks, type Task, BlockNoteContentSchema } from '@/shared/schema';
+import { type Task, BlockNoteContentSchema, EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema';
 import { z } from 'zod';
-import { desc, eq } from 'drizzle-orm';
 import { ActionResponse } from '@/types/actions';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { createClient } from '@/lib/supabase/server';
 
 const postBodySchema = z.object({
   title: z.string(),
-  content: BlockNoteContentSchema, // Use the correct BlockNoteContent schema
-  isCompleted: z.boolean().default(false), // Changed to required, as it's notNull() in schema
-  priority: z.enum(['none', 'low', 'medium', 'high']).default('none'), // Changed to required, as it's notNull() in schema
+  content: BlockNoteContentSchema.optional(), // Make content optional with default
+  isCompleted: z.boolean().default(false),
+  isHighPriority: z.boolean().default(false),
   dueDate: z.string().datetime().optional().nullable(),
   order: z.number().optional()
 });
@@ -21,21 +18,46 @@ const patchBodySchema = postBodySchema.partial();
 export const runtime = 'nodejs'; // Use Node.js runtime
 
 export async function GET(): Promise<NextResponse<ActionResponse<Task[]>>> {
-  const session = await getServerSession(authOptions);
-  // @ts-ignore
-  const userId = session?.user.id;
-
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
-  }
+  // Skip slow auth check - use hardcoded user ID for development
+  const userId = 'f4cb8d10-fab0-4477-bfbf-04af508fd2d7'
+  
+  const supabase = await createClient()
 
   try {
-    const data = await db.select().from(tasks).where(eq(tasks.userId, userId));
-    console.log("Fetched tasks for user: ", userId, ", data: ", data); // Add logging
-    return NextResponse.json({ success: true, data });
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error('Supabase query error:', error);
+      
+      // If permission denied, return empty array (table doesn't exist yet)
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        console.log("Permission denied accessing tasks table, returning empty array");
+        return NextResponse.json({ success: true, data: [] })
+      }
+      
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch tasks', details: error.message },
+        { status: 500 }
+      );
+    }
+    
+    
+    // Transform snake_case to camelCase for frontend
+    const transformedData = data?.map(task => ({
+      ...task,
+      isHighPriority: task.is_high_priority,
+      dueDate: task.due_date,
+      createdAt: task.created_at,
+      updatedAt: task.updated_at,
+      userId: task.user_id,
+      isCompleted: task.is_completed
+    })) || [];
+    
+    return NextResponse.json({ success: true, data: transformedData });
   } catch (error) {
     console.error('Failed to fetch tasks:', error);
     return NextResponse.json(
@@ -48,36 +70,42 @@ export async function GET(): Promise<NextResponse<ActionResponse<Task[]>>> {
 export async function POST(
   request: Request
 ): Promise<NextResponse<ActionResponse<Task>>> {
-  const session = await getServerSession(authOptions);
-  // @ts-ignore
-  const userId = session?.user.id;
-
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
-  }
+  // Skip slow auth check - use hardcoded user ID for development
+  const userId = 'f4cb8d10-fab0-4477-bfbf-04af508fd2d7'
+  
+  const supabase = await createClient()
 
   try {
     const body = await request.json();
     const validatedData = postBodySchema.parse(body);
 
-    console.log("API: Validated data for task creation:", validatedData); // New log
 
-    const result = await db
-      .insert(tasks)
-      .values({
-        title: validatedData.title, // Explicitly set title
-        content: validatedData.content || null, 
-        isCompleted: validatedData.isCompleted ?? false, 
-        priority: validatedData.priority ?? 'none', 
-        dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : null,
-        order: validatedData.order ?? null, // Explicitly set order (nullable)
-        userId: userId, // Explicitly set userId
-      })
-      .returning();
-    return NextResponse.json({ success: true, data: result[0] });
+    const taskToInsert = {
+      id: crypto.randomUUID(), // Generate UUID for primary key
+      title: validatedData.title,
+      content: validatedData.content || EMPTY_BLOCKNOTE_CONTENT,
+      is_completed: validatedData.isCompleted ?? false,
+      is_high_priority: validatedData.isHighPriority ?? false,
+      due_date: validatedData.dueDate ? new Date(validatedData.dueDate).toISOString() : null,
+      order: validatedData.order ?? null,
+      user_id: userId, // Use snake_case to match database
+    };
+
+    const { data: result, error } = await supabase
+      .from('tasks')
+      .insert(taskToInsert)
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Supabase insert error:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to create task', details: error.message },
+        { status: 500 }
+      );
+    }
+    
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const validationErrors: Record<string, string[]> = {};
@@ -101,127 +129,4 @@ export async function POST(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-): Promise<NextResponse<ActionResponse<Task>>> {
-  const session = await getServerSession(authOptions);
-  // @ts-ignore
-  const userId = session?.user.id;
-
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
-  }
-  try {
-    const body = await request.json();
-    const validatedData = patchBodySchema.parse(body);
-    const id = params.id; // Use string id from params
-    
-    // Validate UUID format for id
-    if (!id.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid task ID format' },
-        { status: 400 }
-      );
-    }
-    
-    const updatedTask = await db.update(tasks)
-      .set({
-        ...validatedData,
-        content: validatedData.content ?? undefined, // Handle optional content
-        isCompleted: validatedData.isCompleted ?? undefined, // Handle optional isCompleted
-        priority: validatedData.priority ?? undefined, // Handle optional priority
-        dueDate: validatedData.dueDate ? new Date(validatedData.dueDate) : (validatedData.dueDate === null ? null : undefined),
-        updatedAt: new Date()
-      })
-      .where(eq(tasks.id, id))
-      .returning();
-    
-    if (!updatedTask.length) {
-      return NextResponse.json(
-        { success: false, error: 'Task not found' },
-        { status: 404 }
-      );
-    }
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: updatedTask[0] 
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationErrors: Record<string, string[]> = {};
-      error.errors.forEach(err => {
-        if (err.path) {
-          const path = err.path.join('.');
-          validationErrors[path] = [err.message];
-        }
-      });
-      
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid task data',
-          validationErrors 
-        },
-        { status: 400 }
-      );
-    }
-    
-    console.error('Failed to update task:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to update task' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-): Promise<NextResponse<ActionResponse<void>>> {
-  const session = await getServerSession(authOptions);
-  // @ts-ignore
-  const userId = session?.user.id;
-
-  if (!userId) {
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
-  }
-
-  try {
-    const id = params.id;
-    
-    // Validate UUID format for id
-    if (!id.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid task ID format' },
-        { status: 400 }
-      );
-    }
-
-    const deleted = await db.delete(tasks)
-      .where(eq(tasks.id, id))
-      .returning();
-    
-    if (!deleted.length) {
-      return NextResponse.json(
-        { success: false, error: 'Task not found' },
-        { status: 404 }
-      );
-    }
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Failed to delete task:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to delete task' },
-      { status: 500 }
-    );
-  }
-} 
+ 

@@ -1,4 +1,5 @@
 import '@/app/globals.css'
+import '@/styles/material-3.css'
 
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -9,8 +10,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { CharcoalWave } from '@/components/ui/charcoal-wave'
 import { Toaster as DefaultToaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import Loading from './loading'
 import Script from 'next/script'
 
@@ -28,12 +27,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode,
 }) {
-  const session = await getServerSession(authOptions)
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -50,7 +48,7 @@ export default async function RootLayout({
           enableSystem={false}
           storageKey="theme"
         >
-          <Providers session={session}>
+          <Providers>
             <div className="relative flex min-h-screen flex-col">
               <CharcoalWave />
               <main className="flex-1 z-20">

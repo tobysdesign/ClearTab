@@ -47,7 +47,7 @@ export const createTask = action
         dueDate,
         order,
         userId: ctx.userId,
-      }).returning();
+      } as typeof tasks.$inferInsert).returning();
 
       return {
         success: true,

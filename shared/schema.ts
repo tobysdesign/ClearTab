@@ -15,7 +15,6 @@ import {
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 import { z } from "zod"
-import type { AdapterAccount } from 'next-auth/adapters'
 import { authenticatedRole } from 'drizzle-orm/supabase'
 // Simple UUID v4 generator for edge compatibility
 function generateUUID(): string {
@@ -94,9 +93,6 @@ export const account = pgTable(
     userId: uuid("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    type: text("type").
-      $type<AdapterAccount["type"]>()
-      .notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),

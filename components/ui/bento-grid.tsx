@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
-import { ArrowRight } from "lucide-react";
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import styles from './bento-grid.module.css'
 
 import { Button } from "@/components/ui/button";

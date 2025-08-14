@@ -84,15 +84,7 @@ export function DockContent({
                 </div>
             )}
 
-            {/* <button
-                onClick={() => setShowSettings(!showSettings)}
-                className={cn(
-                    "rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
-                    showSettings && "bg-white/20 text-white shadow-lg"
-                )}
-            >
-                <Settings className="h-4 w-4" />
-            </button> */}
+            {/* Settings button is handled by SettingsDrawer component */}
         </div>
     )
 } 

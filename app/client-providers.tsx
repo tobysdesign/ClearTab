@@ -1,17 +1,15 @@
 "use client"
 
-import { SessionProvider } from "next-auth/react"
-import type { Session } from "next-auth"
 import React, { useState, useMemo, createContext, useContext } from 'react'
-import { ExpandingModal } from '@/components/ui/expanding-modal'
+import { Drawer, DrawerContent, DrawerClose } from '@/components/ui/drawer'
 import { EditTaskForm } from '@/components/widgets/edit-task-form'
 import type { Task } from '@/shared/schema'
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
+import X from 'lucide-react/dist/esm/icons/x'
 
 interface ClientProvidersProps {
   children: React.ReactNode
-  session?: (Session & { expires: string }) | null // Add expires property to Session
 }
 
 interface TaskModalContextValue {
@@ -30,7 +28,7 @@ export function useTaskModal() {
   return context
 }
 
-export default function ClientProviders({ children, session }: ClientProvidersProps) {
+export default function ClientProviders({ children }: ClientProvidersProps) {
   const queryClient = useQueryClient();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const [newTaskText, setNewTaskText] = useState<string | null>(null)
@@ -62,32 +60,39 @@ export default function ClientProviders({ children, session }: ClientProvidersPr
   }), [setActiveTaskId, setNewTaskText, activeTask]);
 
   return (
-    <SessionProvider session={session}>
-      <TaskModalContext.Provider value={contextValue}>
-        {children}
-        <AnimatePresence>
-          {(activeTaskId || newTaskText) && (
-            <ExpandingModal
-              key="task-modal"
-              layoutId={activeTaskId ? `card-${activeTaskId}` : "new-task-modal"}
-              isOpen={!!(activeTaskId || newTaskText)}
-              setIsOpen={(open) => {
-                if (!open) {
-                  handleModalClose();
-                }
-              }}
-              onClose={handleModalClose}
-            >
-              <EditTaskForm 
-                task={activeTask}
-                onClose={handleModalClose}
-                onSave={handleModalSave}
-                initialDescription={newTaskText || undefined}
-              />
-            </ExpandingModal>
-          )}
-        </AnimatePresence>
-      </TaskModalContext.Provider>
-    </SessionProvider>
+    <TaskModalContext.Provider value={contextValue}>
+      {children}
+      <Drawer 
+        open={!!(activeTaskId || newTaskText)} 
+        onOpenChange={(open) => {
+          if (!open) {
+            handleModalClose();
+          }
+        }}
+        direction="right"
+      >
+        <DrawerContent direction="right" className="overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="text-lg font-semibold">
+              {activeTask?.id ? 'Edit Task' : 'Create Task'}
+            </h2>
+            <DrawerClose asChild>
+              <button 
+                className="md3-icon-button"
+                aria-label="Close dialog"
+              >
+                <X size={20} />
+              </button>
+            </DrawerClose>
+          </div>
+          <EditTaskForm 
+            task={activeTask}
+            onClose={handleModalClose}
+            onSave={handleModalSave}
+            initialDescription={newTaskText || undefined}
+          />
+        </DrawerContent>
+      </Drawer>
+    </TaskModalContext.Provider>
   )
 } 

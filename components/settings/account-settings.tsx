@@ -2,35 +2,26 @@
 
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
-import { signOut, useSession, signIn } from 'next-auth/react'
-import { LogOut, Calendar, Plus, X, User } from 'lucide-react'
+import { useAuth } from '@/components/auth/supabase-auth-provider'
+import LogOut from 'lucide-react/dist/esm/icons/log-out'
+import Calendar from 'lucide-react/dist/esm/icons/calendar'
+import Plus from 'lucide-react/dist/esm/icons/plus'
+import X from 'lucide-react/dist/esm/icons/x'
+import User from 'lucide-react/dist/esm/icons/user'
 import { useQuery } from '@tanstack/react-query'
 
-// Mock data structure for demonstration - replace with actual data fetching
-const mockSecondaryAccounts = [
-  {
-    id: '2',
-    email: 'work@company.com',
-    name: 'Work Account',
-    image: null,
-    isCalendarConnected: true
-  },
-  {
-    id: '3', 
-    email: 'personal2@gmail.com',
-    name: 'Personal 2',
-    image: null,
-    isCalendarConnected: false
-  }
-]
+// For now, no secondary accounts (real functionality to be implemented later)
+const mockSecondaryAccounts: any[] = []
 
 export function AccountSettings() {
-  const { data: session } = useSession()
+  const { user, signOut: supabaseSignOut } = useAuth()
   
   const { data: isCalendarConnected } = useQuery({
     queryKey: ['googleCalendarConnected'],
     queryFn: async () => {
-      const res = await fetch('/api/calendar/status')
+      const res = await fetch('/api/calendar/status', {
+        credentials: 'include'
+      })
       if (!res.ok) return false
       const data = await res.json()
       return data.connected
@@ -38,22 +29,55 @@ export function AccountSettings() {
   })
 
   function handleLogout() {
-    signOut({ callbackUrl: '/' })
+    console.log('Logout button clicked - redirecting to logout page')
+    // Simply navigate to the logout page
+    window.location.href = '/logout'
   }
 
-  function handleConnectCalendar() {
-    signIn('google', { 
-      callbackUrl: '/',
-      scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
-    })
+  async function handleConnectCalendar() {
+    try {
+      console.log('Connect calendar button clicked')
+      
+      // First try the manual connection endpoint
+      const response = await fetch('/api/auth/connect-calendar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      })
+      
+      const data = await response.json()
+      console.log('Connect calendar response:', data)
+      
+      if (data.success) {
+        // Refresh the page to show updated status
+        window.location.reload()
+      } else {
+        // Fall back to OAuth re-authentication
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        
+        await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error connecting calendar:', error)
+    }
   }
 
   function handleAddAccount() {
-    signIn('google', {
-      callbackUrl: '/',
-      prompt: 'select_account',
-      scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
-    })
+    // TODO: Implement multiple account support with Supabase
+    console.log('Add account - to be implemented with Supabase')
   }
 
   function handleRemoveAccount(accountId: string) {
@@ -73,19 +97,19 @@ export function AccountSettings() {
         <h2 className="text-lg font-medium text-white mb-3">Primary Account</h2>
         <div className="flex items-center justify-between p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-              {session?.user?.image ? (
-                <img src={session.user.image} alt="Profile" className="w-10 h-10 rounded-full" />
+            <div className="w-10 h-10 rounded-full bg-white/40 flex items-center justify-center">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-10 h-10 rounded-full" />
               ) : (
-                <User className="h-5 w-5 text-gray-300" />
+                <User className="h-5 w-5 text-white" />
               )}
             </div>
             <div>
               <div className="font-medium text-white">
-                {session?.user?.name || 'Primary Account'}
+                {user?.user_metadata?.full_name || 'Primary Account'}
               </div>
-              <div className="text-sm text-gray-400">
-                {session?.user?.email || 'Not signed in'}
+              <div className="text-sm text-white">
+                {user?.email || 'Not signed in'}
               </div>
             </div>
           </div>
@@ -120,16 +144,16 @@ export function AccountSettings() {
             mockSecondaryAccounts.map((account) => (
               <div key={account.id} className="flex items-center justify-between p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
                     {account.image ? (
                       <img src={account.image} alt="Profile" className="w-10 h-10 rounded-full" />
                     ) : (
-                      <User className="h-5 w-5 text-gray-300" />
+                      <User className="h-5 w-5 text-white" />
                     )}
                   </div>
                   <div>
                     <div className="font-medium text-white">{account.name}</div>
-                    <div className="text-sm text-gray-400">{account.email}</div>
+                    <div className="text-sm text-white">{account.email}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -160,7 +184,7 @@ export function AccountSettings() {
               </div>
             ))
           ) : (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 text-white">
               <User className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No additional accounts connected</p>
               <p className="text-xs mt-1">Add a secondary Google account to access multiple calendars</p>
@@ -172,7 +196,7 @@ export function AccountSettings() {
       {/* Calendar Display Settings */}
       <div>
         <h2 className="text-lg font-medium text-white mb-3">Calendar Display</h2>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-white mb-4">
           Customize how your calendar events are displayed in the schedule widget.
         </p>
         <div className="text-sm text-gray-400">
@@ -183,10 +207,15 @@ export function AccountSettings() {
       {/* Account Actions */}
       <div>
         <h2 className="text-lg font-medium text-white mb-3">Account Actions</h2>
-        <Button variant="destructive" onClick={handleLogout} className="flex items-center gap-2">
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
+        <div className="space-y-2">
+          <Button variant="destructive" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+          <div className="text-sm text-gray-400">
+            If the button above doesn't work, <a href="/api/auth/logout-redirect" className="text-blue-400 hover:underline">click here to logout</a>
+          </div>
+        </div>
       </div>
     </div>
   )

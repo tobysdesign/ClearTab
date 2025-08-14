@@ -4,9 +4,21 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import Calendar from 'lucide-react/dist/esm/icons/calendar'
 import { useQuery } from '@tanstack/react-query'
-import { signIn } from 'next-auth/react'
+
+import { createClient } from '@/lib/supabase/client'
 
 export function ScheduleSettings() {
+  const supabase = createClient()
+
+  const handleGoogleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+      },
+    })
+  }
   const { data: isConnected } = useQuery({
     queryKey: ['googleCalendarConnected'],
     queryFn: async () => {
@@ -21,15 +33,12 @@ export function ScheduleSettings() {
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <EmptyState
-          renderIcon={() => <Calendar className="h-6 w-6 text-gray-400" />}
+          renderIcon={() => <Calendar className="h-6 w-6 text-white/40" />}
           title="Connect your calendar"
           description="See your schedule at a glance by connecting your Google Calendar."
           action={{
             label: "Connect Google Calendar",
-            onClick: () => signIn('google', { 
-              callbackUrl: '/',
-              scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
-            })
+            onClick: handleGoogleSignIn
           }}
         />
       </div>
@@ -45,10 +54,7 @@ export function ScheduleSettings() {
         </p>
         <Button
           variant="outline"
-          onClick={() => signIn('google', { 
-            callbackUrl: '/',
-            scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
-          })}
+          onClick={handleGoogleSignIn}
         >
           Refresh Calendar Connection
         </Button>

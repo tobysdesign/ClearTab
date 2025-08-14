@@ -1,44 +1,66 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { notes, type Note, BlockNoteContentSchema, EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
-import { db } from '@/server/db'
-import { desc, eq } from 'drizzle-orm'
+import { type Note, BlockNoteContentSchema, EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
 import { ActionResponse } from '@/types/actions'
-import { getServerSession, type Session } from 'next-auth'
-import { authOptions } from '../auth/[...nextauth]/route'
+import { createClient } from '@/lib/supabase/server'
+import { getStoredSession, getSessionId } from '@/lib/session-store'
 
 const postBodySchema = z.object({
   title: z.string().default('Untitled Note'),
   content: BlockNoteContentSchema.optional().default(EMPTY_BLOCKNOTE_CONTENT),
-  userId: z.string(), // Add userId to the schema
 })
 
-export async function GET(): Promise<NextResponse<ActionResponse<Note[]>>> {
-  console.time('notes-api-total');
-  console.log("Notes API: Starting GET request");
+export async function GET(request: Request): Promise<NextResponse<ActionResponse<Note[]>>> {
+  const supabase = await createClient()
   
-  console.time('notes-session');
-  const session = await getServerSession(authOptions);
-  console.timeEnd('notes-session');
+  // Try session-based auth first
+  const sessionId = getSessionId(request)
+  let userId: string
   
-  if (!session?.user?.id) { // Check for session and user ID
-    console.log("GET /api/notes: User not authenticated");
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
+  if (sessionId) {
+    // Get stored session (fast path)
+    const storedAuth = getStoredSession(sessionId)
+    
+    if (storedAuth) {
+      userId = storedAuth.user.id
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Session not found or expired' },
+        { status: 401 }
+      );
+    }
+  } else {
+    // Fallback to Supabase auth (slower, but works during transition)
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'User not authenticated' },
+        { status: 401 }
+      );
+    }
+    
+    userId = user.id
   }
 
-  const userId = session.user.id;
-  console.log("Notes API: Got user ID:", userId);
-
   try {
-    console.time('notes-db-query');
-    const data = await db.select().from(notes).where(eq(notes.userId, userId)).orderBy(desc(notes.updatedAt))
-    console.timeEnd('notes-db-query');
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
     
-    console.log("GET /api/notes: Fetched notes data for userId", userId, data);
-    console.timeEnd('notes-api-total');
+    if (error) {
+      // If permission denied, return empty array (table doesn't exist yet)
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        return NextResponse.json({ success: true, data: [] })
+      }
+      
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch notes', details: error.message },
+        { status: 500 }
+      )
+    }
     
     return NextResponse.json({ success: true, data })
   } catch (error) {
@@ -59,35 +81,61 @@ export async function GET(): Promise<NextResponse<ActionResponse<Note[]>>> {
 export async function POST(
   request: Request
 ): Promise<NextResponse<ActionResponse<Note>>> {
-  const session = await getServerSession(authOptions);
+  const supabase = await createClient()
   
-  if (!session?.user?.id) { // Check for session and user ID
-    return NextResponse.json(
-      { success: false, error: 'User not authenticated' },
-      { status: 401 }
-    );
+  // Use the same hybrid auth as GET
+  const sessionId = getSessionId(request)
+  let userId: string
+  
+  if (sessionId) {
+    const storedAuth = getStoredSession(sessionId)
+    if (storedAuth) {
+      userId = storedAuth.user.id
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Session not found or expired' },
+        { status: 401 }
+      );
+    }
+  } else {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'User not authenticated' },
+        { status: 401 }
+      );
+    }
+    userId = user.id
   }
-  
-  const userId = session.user.id;
 
   try {
     const body = await request.json()
-    console.log("POST /api/notes: Received body", JSON.stringify(body, null, 2));
-
-    const validatedData = postBodySchema.parse({ ...body, userId }); // Pass userId to the schema
-    console.log("POST /api/notes: Validated data", JSON.stringify(validatedData, null, 2));
+    const validatedData = postBodySchema.parse(body);
 
     // Explicitly construct the object for insertion to ensure correct types
     const noteToInsert = {
+      id: crypto.randomUUID(), // Generate UUID for primary key
       title: validatedData.title,
       content: validatedData.content || EMPTY_BLOCKNOTE_CONTENT,
-      userId: validatedData.userId,
+      user_id: userId, // Use snake_case to match database
     };
 
-    const result = await db.insert(notes).values(noteToInsert).returning()
-    console.log("POST /api/notes: Inserted result", JSON.stringify(result, null, 2));
+    const { data: result, error } = await supabase
+      .from('notes')
+      .insert(noteToInsert)
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Supabase insert error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to create note', details: error.message },
+        { status: 500 }
+      )
+    }
+    
 
-    return NextResponse.json({ success: true, data: result[0] })
+    return NextResponse.json({ success: true, data: result })
   } catch (error) {
     if (error instanceof z.ZodError) {
       const validationErrors: Record<string, string[]> = {}
@@ -113,6 +161,78 @@ export async function POST(
     console.error('Failed to create note:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to create note' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(
+  request: Request
+): Promise<NextResponse<ActionResponse<Note>>> {
+  const supabase = await createClient()
+  
+  // Use the same hybrid auth as GET
+  const sessionId = getSessionId(request)
+  let userId: string
+  
+  if (sessionId) {
+    const storedAuth = getStoredSession(sessionId)
+    if (storedAuth) {
+      userId = storedAuth.user.id
+    } else {
+      return NextResponse.json(
+        { success: false, error: 'Session not found or expired' },
+        { status: 401 }
+      );
+    }
+  } else {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'User not authenticated' },
+        { status: 401 }
+      );
+    }
+    userId = user.id
+  }
+
+  try {
+    const body = await request.json()
+    const { noteId, ...updateData } = body
+    
+    if (!noteId) {
+      return NextResponse.json(
+        { success: false, error: 'Note ID required for update' },
+        { status: 400 }
+      )
+    }
+
+    // Direct update - client-side debouncing handles rate limiting
+    const { data: updatedNote, error } = await supabase
+      .from('notes')
+      .update({
+        title: updateData.title,
+        content: updateData.content,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase update error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to update note', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true, data: updatedNote })
+  } catch (error) {
+    console.error('Failed to update note:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to update note' },
       { status: 500 }
     )
   }

@@ -24,12 +24,12 @@ export const saveApiKey = action
         .values({
           userId: ctx.userId,
           openaiApiKey: parsedInput.apiKey,
-        })
+        } as typeof userPreferences.$inferInsert)
         .onConflictDoUpdate({
           target: userPreferences.userId,
           set: {
             openaiApiKey: parsedInput.apiKey,
-          },
+          } as Partial<typeof userPreferences.$inferInsert>,
         })
 
       return { success: true }
@@ -50,13 +50,13 @@ export const savePaydaySettings = action
           userId: ctx.userId,
           paydayDate: parsedInput.paydayDate,
           paydayFrequency: parsedInput.paydayFrequency,
-        })
+        } as typeof userPreferences.$inferInsert)
         .onConflictDoUpdate({
           target: userPreferences.userId,
           set: {
             paydayDate: parsedInput.paydayDate,
             paydayFrequency: parsedInput.paydayFrequency,
-          },
+          } as Partial<typeof userPreferences.$inferInsert>,
         })
 
       return { success: true }

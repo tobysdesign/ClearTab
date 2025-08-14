@@ -11,13 +11,11 @@ import { Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { NotesWidget } from '@/components/widgets/notes-widget'
 import { TasksWidget } from '@/components/widgets/tasks-widget'
-import { WeatherWidgetAlt } from '@/components/widgets/weather-widget-alt'
 import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { ScheduleWidget } from '@/components/widgets/schedule-widget'
-import { FinanceWidget } from '@/components/widgets/finance-widget'
+import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
-import { Globe } from '@/components/ui/globe'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useLayout } from '@/hooks/use-layout'
 import Image from 'next/image'
@@ -63,13 +61,13 @@ export function ResizableBentoGrid({
       {/* Top Row */}
       <Panel defaultSize={50} minSize={30}>
         <PanelGroup direction="horizontal" className="h-full w-full">
-          <Panel defaultSize={50} minSize={25}>
+          <Panel defaultSize={50} minSize={8}>
             <motion.div {...motionProps(0.25)} className="h-full">
               {notes}
             </motion.div>
           </Panel>
           <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
-          <Panel defaultSize={50} minSize={25}>
+          <Panel defaultSize={50} minSize={8}>
             <motion.div {...motionProps(0.5)} className="h-full">
               {tasks}
             </motion.div>
@@ -96,7 +94,7 @@ export function ResizableBentoGrid({
           <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
           <Panel defaultSize={25}>
             <motion.div {...motionProps(1)} className="h-full">
-              <FinanceWidget />
+              <CountdownWidget />
             </motion.div>
           </Panel>
           <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
@@ -130,7 +128,7 @@ export function ResizableBentoGrid({
               <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
               <Panel defaultSize={33}>
                 <motion.div {...motionProps(0.85)} className="h-full">
-                  <FinanceWidget />
+                  <CountdownWidget />
                 </motion.div>
               </Panel>
               <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
@@ -144,9 +142,9 @@ export function ResizableBentoGrid({
         </PanelGroup>
       </Panel>
       <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
-      <Panel defaultSize={33} minSize={20}>
+      <Panel defaultSize={33} minSize={8}>
         <PanelGroup direction="vertical" className="h-full w-full">
-          <Panel defaultSize={50} minSize={25}>
+          <Panel defaultSize={50} minSize={8}>
             <motion.div {...motionProps(0.5)} className="h-full">
               {tasks}
             </motion.div>

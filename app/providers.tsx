@@ -6,30 +6,29 @@ import React from 'react'
 import ChatOverlay from '@/components/ai/chat-overlay'
 import QueryProvider from '@/app/query-provider'
 import ClientProviders from './client-providers'
-import type { Session } from 'next-auth'
+import { SupabaseAuthProvider } from '@/components/auth/supabase-auth-provider'
 import { usePathname } from 'next/navigation'
-import Loading from './loading'
 
 export default function Providers({ 
-    children,
-    session 
+    children 
 }: { 
-    children: React.ReactNode,
-    session: Session | null
+    children: React.ReactNode
 }) {
   const pathname = usePathname()
   const isAuthPage = pathname === '/login'
 
   return (
     <QueryProvider>
-        <ClientProviders session={session}>
-            <TooltipProvider>
-                <ChatProvider>
-                    {children}
-            {!isAuthPage && <ChatOverlay />}
-                </ChatProvider>
-            </TooltipProvider>
+      <SupabaseAuthProvider>
+        <ClientProviders>
+          <TooltipProvider>
+            <ChatProvider>
+              {children}
+              {!isAuthPage && <ChatOverlay />}
+            </ChatProvider>
+          </TooltipProvider>
         </ClientProviders>
+      </SupabaseAuthProvider>
     </QueryProvider>
   )
 }

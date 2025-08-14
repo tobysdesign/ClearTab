@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { saveApiKey } from '@/lib/actions/settings'
 import { useToast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
-import { Check, Star } from 'lucide-react'
+import Check from 'lucide-react/dist/esm/icons/check'
+import Star from 'lucide-react/dist/esm/icons/star'
 import type { ReactNode } from 'react'
 
 export function APISettings(): ReactNode {

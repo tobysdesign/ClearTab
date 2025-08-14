@@ -120,7 +120,7 @@
 }
 
 .widget-gap-3 {
-  gap: 12px;
+  gap: 8px;
 }
 
 .widget-gap-4 {
@@ -211,7 +211,7 @@
   justify-content: space-between;
   height: 60px;
 }
-
+.font-light {font-weight: 50 !important; color: #C4C4C4;}
 .rely {
   position: relative;
 }
@@ -810,7 +810,7 @@ body[data-vaul-drawer-visible='true'][data-popover-open='true'] {
   width: 100%;
   height: 100%;
   padding: 0;
-  border-radius: 9999px;
+  border-radius: 10px;
 }
 
 .shiny-cta::before,
@@ -1299,9 +1299,9 @@ html[data-vaul-drawer-visible="true"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  border-radius: 6px;
   border: 1px solid #2A2A2A;
   background-color: transparent;
   backdrop-filter: blur(4px);
@@ -1323,18 +1323,19 @@ html[data-vaul-drawer-visible="true"] {
 
 /* Task-specific list items (darker default background) */
 .widget-list-item--tasks {
-  background-color: #222222;
-  border-color: #222222;
+  background-color: rgba(34, 34, 34, 0.5);
+  border-color: transparent;
+  backdrop-filter: blur(8px);
 }
 
 .widget-list-item--tasks:hover {
-  background-color: #3D3D3D;
-  border-color: #252323;
+  background-color: rgba(61, 61, 61, 0.5);
+  border-color: rgba(37, 35, 35, 0.3);
 }
 
 .widget-list-item--tasks.active {
-  background-color: #292929;
-  border-color: #434343;
+  background-color: rgba(41, 41, 41, 0.6);
+  border-color: rgba(67, 67, 67, 0.5);
 }
 
 /* Notes-specific list items (lighter background) */
@@ -1581,14 +1582,13 @@ textarea::placeholder {
 }
 /* List item primary text */
 .item-title {
-  font-family: 'Inter Display', sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 14px;
-  line-height: 17px;
-  font-weight: 500;
-  color: #D2D2D2;
+  line-height: 20px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.87);
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* List item secondary text */

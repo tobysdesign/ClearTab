@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Button } from './button'
-import { MoreVertical } from 'lucide-react'
+import MoreVertical from 'lucide-react/dist/esm/icons/more-vertical'
 
 interface ActionsMenuProps {
   onDelete: () => void

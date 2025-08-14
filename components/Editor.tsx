@@ -6,7 +6,10 @@ import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import { useState, useCallback } from "react";
 import styles from './Editor.module.css';
-import { Bot, Sparkles, Wand2, ListTodo } from "lucide-react";
+import Bot from 'lucide-react/dist/esm/icons/bot'
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles'
+import Wand2 from 'lucide-react/dist/esm/icons/wand-2'
+import ListTodo from 'lucide-react/dist/esm/icons/list-todo';
 import { getAiResponse, aiCommands } from "@/components/ai-editor-integration";
 
 // Editor props to handle content changes

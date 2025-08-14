@@ -207,7 +207,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   return (
     <div
       ref={containerRef}
-      className="relative h-screen w-screen bg-background"
+      className="relative h-screen w-screen"
     >
       {/* <SettingsModal 
         open={showSettings} 

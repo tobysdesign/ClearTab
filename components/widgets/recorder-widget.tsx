@@ -8,42 +8,129 @@ import Square from 'lucide-react/dist/esm/icons/square'
 import Pause from 'lucide-react/dist/esm/icons/pause'
 import Play from 'lucide-react/dist/esm/icons/play'
 import Check from 'lucide-react/dist/esm/icons/check'
+import Download from 'lucide-react/dist/esm/icons/download'
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2'
+import MicOff from 'lucide-react/dist/esm/icons/mic-off'
 import { cn } from '@/lib/utils'
 import styles from './recorder-widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
 import { WidgetHeader } from '@/components/ui/widget-header'
+import { useAudioRecorder } from '@/hooks/use-audio-recorder'
+import { useToast } from '@/components/ui/use-toast'
+import { useAuth } from '@/components/auth/supabase-auth-provider'
+import { createClient } from '@/lib/supabase/client'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface RecorderWidgetProps {
   className?: string
 }
 
-type RecordingState = 'idle' | 'recording' | 'paused'
-
 export function RecorderWidget({ className }: RecorderWidgetProps) {
-  const [state, setState] = useState<RecordingState>('idle')
-  const [duration, setDuration] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [showSuccess, setShowSuccess] = useState(false)
+  const { toast } = useToast()
+  const { user } = useAuth()
+  const supabase = createClient()
+  
+  const {
+    state,
+    duration,
+    audioBlob,
+    isMuted,
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+    stopRecording,
+    toggleMute,
+    transcribeAudio,
+    saveAudioLocally,
+    reset
+  } = useAudioRecorder({
+    onTranscriptionComplete: async (text: string) => {
+      console.log('Transcription complete:', text)
+      try {
+        if (!user) {
+          toast({
+            title: "Error",
+            description: "You must be logged in to save voice notes",
+            variant: "destructive"
+          })
+          return
+        }
 
-  // Timer effect
+        console.log('Saving note for user:', user.id)
+        // Save note to Supabase
+        const { data, error } = await supabase
+          .from('notes')
+          .insert({
+            title: `Voice Note - ${new Date().toLocaleDateString()}`,
+            content: [{
+              id: 'voice-note-block',
+              type: 'paragraph',
+              props: { textColor: 'default', backgroundColor: 'default', textAlignment: 'left' },
+              content: [{ type: 'text', text, styles: {} }],
+              children: []
+            }],
+            user_id: user.id
+          })
+          .select()
+        
+        if (error) {
+          console.error('Error saving note:', error)
+          toast({
+            title: "Error",
+            description: "Failed to save voice note",
+            variant: "destructive"
+          })
+          return
+        }
+        
+        console.log('Note saved successfully:', data)
+
+        toast({
+          title: "Success",
+          description: "Voice note saved successfully!"
+        })
+        
+        console.log('Setting showSuccess to true')
+        setShowSuccess(true)
+        setTimeout(() => {
+          console.log('Hiding success and resetting')
+          setShowSuccess(false)
+          setIsFlipped(false)
+          reset()
+        }, 2000)
+        
+      } catch (error: any) {
+        console.error('Error processing transcription:', error)
+        console.error('Error details:', error.message || error)
+        toast({
+          title: "Error", 
+          description: error.message || "Failed to process transcription",
+          variant: "destructive"
+        })
+        // Reset state on error
+        reset()
+      }
+    },
+    onError: (error: string) => {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive"
+      })
+    }
+  })
+
+
+  // Watch for when audio blob is ready and automatically transcribe
   useEffect(() => {
-    if (state === 'recording') {
-      intervalRef.current = setInterval(() => {
-        setDuration(prev => prev + 1)
-      }, 1000)
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+    if (state === 'processing' && audioBlob && !showSuccess) {
+      console.log('Audio blob ready, starting transcription...')
+      transcribeAudio()
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
-    }
-  }, [state])
+  }, [state, audioBlob, showSuccess]) // Remove transcribeAudio from dependencies
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -51,31 +138,38 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const handleStartRecording = () => {
+  const handleStartRecording = async () => {
     setIsFlipped(true)
-    setTimeout(() => {
-      setState('recording')
-      setDuration(0)
-    }, 400) // Half of flip animation duration
+    setTimeout(async () => {
+      await startRecording()
+    }, 400)
   }
 
-  const handleStopRecording = () => {
-    setIsFlipped(true)
-    setTimeout(() => {
-      setState('idle')
-      setDuration(0)
-      setTimeout(() => {
-        setIsFlipped(false)
-      }, 100)
-    }, 400) // Half of flip animation duration
+  const handleStopRecording = async () => {
+    console.log('Stop recording clicked')
+    stopRecording()
   }
 
-  const handlePauseRecording = () => {
-    setState('paused')
+  const handleDownloadAudio = async () => {
+    try {
+      await saveAudioLocally()
+      toast({
+        title: "Success",
+        description: "Audio saved!"
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save audio",
+        variant: "destructive"
+      })
+    }
   }
 
-  const handleResumeRecording = () => {
-    setState('recording')
+  const handleReset = () => {
+    reset()
+    setIsFlipped(false)
+    setShowSuccess(false)
   }
 
   // Generate waveform visualization
@@ -100,8 +194,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   };
 
   return (
-    <ClientOnly>
-      <div className={cn(styles.flipContainer, { [styles.flipped]: isFlipped }, className)}>
+    <TooltipProvider delayDuration={0}>
+      <ClientOnly>
+        <div className={cn(styles.flipContainer, { [styles.flipped]: isFlipped }, className)}>
         <div className={styles.flipper}>
           {/* Front Side (Idle) */}
           <div className={styles.front}>
@@ -159,70 +254,171 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                 {/* Body */}
                 <div className={styles.recordingBody}>
-                  {/* Waveform visualization */}
-                  <div className={styles.waveformContainer}>
-                    {generateWaveform()}
-                  </div>
-                  
-                  {/* Timer */}
-                  <div className={styles.timerContainer}>
-                    <p className={styles.timer}>{formatTime(duration)}</p>
-                  </div>
-                  
-                  {/* Controls */}
-                  <div className={styles.recordingControls}>
-                    {state === 'recording' && (
-                      <>
-                        <button 
-                          onClick={handlePauseRecording}
-                          className={styles.controlButton}
-                        >
-                          <div className={styles.controlButtonInner}>
-                            <Pause className={styles.controlIcon} />
+                  {state === 'processing' && !showSuccess ? (
+                    <div className={styles.transcribingWrapper}>
+                      <div className={styles.transcribingContent}>
+                        <div className={styles.gifPlaceholder}>
+                          {/* GIF placeholder - will be replaced with actual GIF */}
+                          <div className={styles.animatedDotsContainer}>
+                            <div className={styles.animatedDot}></div>
+                            <div className={styles.animatedDot}></div>
+                            <div className={styles.animatedDot}></div>
+                            <div className={styles.animatedDot}></div>
                           </div>
-                        </button>
+                        </div>
+                        <h2 className={styles.transcribingTitle}>Transcribing note...</h2>
+                        <p className={styles.transcribingSubtitle}>
+                          Transcriptions are saved as a<br />
+                          note once complete.
+                        </p>
+                      </div>
+                      <button 
+                        onClick={handleReset}
+                        className={styles.okButton}
+                      >
+                        OK
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Waveform visualization */}
+                      <div className={styles.waveformContainer}>
+                        {generateWaveform()}
+                      </div>
+                      
+                      {/* Timer */}
+                      <div className={styles.timerContainer}>
+                        <p className={styles.timer}>{formatTime(duration)}</p>
+                      </div>
+                      
+                      {/* Controls */}
+                      <div className={styles.recordingControls}>
+                        {state === 'requesting-permission' && (
+                          <div className={styles.permissionMessage}>
+                            <p>Requesting microphone permission...</p>
+                          </div>
+                        )}
                         
-                        <button 
-                          onClick={handleStopRecording}
-                          className={cn(styles.controlButton, styles.doneButton)}
-                        >
-                          <div className={styles.controlButtonInner}>
-                            <Check className={styles.controlIcon} />
-                          </div>
-                          <span className={styles.doneText}>Done</span>
-                        </button>
+                        {state === 'recording' && (
+                      <>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={toggleMute}
+                              className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
+                            >
+                              <div className={cn(styles.controlButtonInner, { [styles.muteButtonInnerActive]: isMuted })}>
+                                {isMuted ? <MicOff className={styles.controlIcon} /> : <Mic className={styles.controlIcon} />}
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>{isMuted ? 'Unmute' : 'Mute'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={pauseRecording}
+                              className={styles.controlButton}
+                            >
+                              <div className={styles.controlButtonInner}>
+                                <Pause className={styles.controlIcon} />
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>Pause</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={handleStopRecording}
+                              className={cn(styles.controlButton, styles.doneButton)}
+                            >
+                              <div className={styles.controlButtonInner}>
+                                <Check className={styles.controlIcon} />
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>Done</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </>
                     )}
                     
                     {state === 'paused' && (
                       <>
-                        <button 
-                          onClick={handleResumeRecording}
-                          className={styles.controlButton}
-                        >
-                          <div className={styles.controlButtonInner}>
-                            <Play className={styles.controlIcon} />
-                          </div>
-                        </button>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={toggleMute}
+                              className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
+                            >
+                              <div className={cn(styles.controlButtonInner, { [styles.muteButtonInnerActive]: isMuted })}>
+                                {isMuted ? <MicOff className={styles.controlIcon} /> : <Mic className={styles.controlIcon} />}
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>{isMuted ? 'Unmute' : 'Mute'}</p>
+                          </TooltipContent>
+                        </Tooltip>
                         
-                        <button 
-                          onClick={handleStopRecording}
-                          className={cn(styles.controlButton, styles.doneButton)}
-                        >
-                          <div className={styles.controlButtonInner}>
-                            <Check className={styles.controlIcon} />
-                          </div>
-                          <span className={styles.doneText}>Done</span>
-                        </button>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={resumeRecording}
+                              className={styles.controlButton}
+                            >
+                              <div className={styles.controlButtonInner}>
+                                <Play className={styles.controlIcon} />
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>Resume</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button 
+                              onClick={handleStopRecording}
+                              className={cn(styles.controlButton, styles.doneButton)}
+                            >
+                              <div className={styles.controlButtonInner}>
+                                <Check className={styles.controlIcon} />
+                              </div>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            <p>Done</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </>
                     )}
-                  </div>
+                    
+                        {showSuccess && (
+                          <div className={styles.successContainer}>
+                            <Check className={styles.controlIcon} />
+                            <span className={styles.doneText}>Note saved!</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </ClientOnly>
+        </div>
+      </ClientOnly>
+    </TooltipProvider>
   )
 } 

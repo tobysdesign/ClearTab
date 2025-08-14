@@ -1,105 +1,100 @@
 "use client"
 
-import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Image from "next/image"
+import { useAuth } from "@/components/auth/supabase-auth-provider"
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import { CharcoalWave } from "@/components/ui/charcoal-wave"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const { signIn } = useAuth()
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError("")
     
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: true,
-        callbackUrl: "/"
-      })
-      
-      if (!result?.ok) {
-        setError("Invalid email or password")
-      }
+      await signIn('google')
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError("Failed to sign in with Google. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-card">
-      <Card className="w-full max-w-md shadow-lg border border-border">
-        <CardHeader>
-          <div className="flex flex-col items-center gap-4">
-            <Image src="/dibs.svg" alt="Logo" width={60} height={60} />
-            <CardTitle className="text-2xl font-bold">AI Productivity Dashboard</CardTitle>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background shader */}
+      <CharcoalWave />
+      
+      {/* Dummy widgets overlay */}
+      <motion.div 
+        className="absolute inset-0 z-10"
+        initial={{ y: 0 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <div className="relative w-full h-full flex items-center justify-center">
+          <img
+            src="/assets/dummy%20content.png"
+            alt="Dashboard Preview"
+            className="max-w-[90vw] max-h-[80vh] object-contain"
+          />
+        </div>
+      </motion.div>
+
+      {/* Login drawer overlay */}
+      <Drawer 
+        open={true} 
+        onOpenChange={() => {}}
+        modal={false}
+      >
+        <DrawerContent className="h-auto bg-[#212121] border-t z-50 max-w-md mx-auto">
+          <div className="w-full">
+            <DrawerHeader className="text-left pb-2 px-6">
+              <DrawerTitle className="text-2xl font-normal text-white">
+                Just a tab away.
+              </DrawerTitle>
+            </DrawerHeader>
+            
+            <div className="px-6 pb-6 space-y-6">
+              {/* Description */}
+              <div className="space-y-4 text-left">
+                <p className="text-base text-gray-300 leading-relaxed">
+                  Capture thoughts, take notes, set tasks, see your schedules combined for clarity. ClearTab+ boosts your productivity with automation, insights and contextual synthesis with Ybot your AI assistant.
+                </p>
+              </div>
+
+              {/* Google Sign In Button */}
+              <div className="pt-4">
+                <Button 
+                  className="w-auto px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-full font-normal text-sm shadow-sm transition-all duration-200"
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  variant="outline"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" className="mr-2">
+                    <g fill="none" fillRule="evenodd">
+                      <path fill="#4285F4" d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" />
+                      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" />
+                      <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" />
+                      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
+                    </g>
+                  </svg>
+                  Sign in with Google
+                </Button>
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive mt-4">{error}</p>
+              )}
+            </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@email.com" 
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••" 
-                required
-              />
-            </div>
-            {error && <p className="text-destructive text-sm">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in with Email"}
-            </Button>
-          </form>
-          
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or</span>
-            </div>
-          </div>
-          
-          <Button 
-            className="w-full" 
-            variant="outline"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
-          >
-            <svg width="18" height="18" viewBox="0 0 256 262" className="mr-2">
-              <path fill="#4285F4" d="M255.72 133.5c0-12.3-1.1-24.1-3.2-35.6H130v67.4h71.5c-3.1 16.8-12.5 31-26.6 40.5v33h43c25.1-23.1 39.6-57.1 39.6-98.3z" />
-              <path fill="#34A853" d="M130 261.6c35.7 0 65.6-11.8 87.4-31.9l-43-33c-12 8.1-27.4 13-44.4 13-34.2 0-63.3-23.1-73.6-54.3H13.7v34.1C35.2 232 79.7 261.6 130 261.6z" />
-              <path fill="#FBBC05" d="M56.4 155.4c-4.6-13.8-4.6-28.7 0-42.5V78.8H13.7c-18.6 36.9-18.6 78.9 0 115.8l42.7-39.2z" />
-              <path fill="#EA4335" d="M130 52.5c18.9 0 35.8 6.5 49.1 19.4l36.7-36.7C195.4 11.8 165.7 0 130 0 79.7 0 35.2 29.6 13.7 78.8l42.7 34.1C66.7 75.6 95.8 52.5 130 52.5z" />
-            </svg>
-            Continue with Google
-          </Button>
-        </CardContent>
-      </Card>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
-} 
+}

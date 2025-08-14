@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
             messages: [
               { 
                 role: 'system', 
-                content: `You are ${agentName || 'a helpful assistant'}. You are talking to ${userName || 'a user'}. Think step by step about your response.` 
+                content: `You are ${agentName || 'a helpful assistant'}. You are talking to ${userName || 'a user'}. 
+
+IMPORTANT: Never use hashtags (#) in your responses. The user has a separate command system that uses hashtags like #task and #note, but you should NEVER include these in your responses as they will be interpreted as commands.
+
+Think step by step about your response and provide helpful, clear answers without using hashtags.` 
               },
               { role: 'user', content: prompt }
             ],

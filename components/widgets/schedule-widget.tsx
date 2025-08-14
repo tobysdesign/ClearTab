@@ -5,11 +5,13 @@ import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, isPast, isToday, isAfter, isBefore } from 'date-fns'
 
 import Calendar from 'lucide-react/dist/esm/icons/calendar'
+import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import { WidgetLoader } from './widget-loader'
 import { WidgetContainer } from '@/components/ui/widget-container'
 import { WidgetHeader } from '@/components/ui/widget-header'
+import { useAuth } from '@/components/auth/supabase-auth-provider'
 
 // Interfaces
 interface CalendarEvent {
@@ -40,7 +42,7 @@ function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: bool
       'bg-[#3a2a3a]': isCurrent
     })}>
       <div className="text-white font-medium mb-1">{event.title}</div>
-      <div className="text-gray-400 text-sm">
+      <div className="text-white/40 text-sm">
         {format(startTime, 'p')} – {format(endTime, 'p')}
       </div>
     </div>
@@ -112,7 +114,7 @@ function DaySection({
       )}
       
       {/* Inline day header matching Figma design */}
-      <div className="text-sm font-medium text-gray-300 mb-4 px-1">
+      <div className="text-sm font-medium text-white/40 mb-4 px-1">
         {format(parseISO(dayKey), 'EEEE do \'of\' MMMM')}
       </div>
       
@@ -130,20 +132,33 @@ function DaySection({
 
 
 export function ScheduleWidget() {
+  const { user, session, loading } = useAuth()
+  
+  
+  // Check if we have session cookies as a workaround for auth loading issues
+  const hasSessionCookies = typeof document !== 'undefined' && document.cookie.includes('sb-qclvzjiyglvxtctauyhb-auth-token')
+  
   const {
     data: events = [],
     isLoading,
     error,
   } = useQuery<CalendarEvent[]>({
     queryKey: ['schedule'],
+    enabled: !loading || hasSessionCookies, // Enable query if not loading OR if we have session cookies
     queryFn: async () => {
       try {
-        const res = await fetch('/api/calendar')
+        const res = await api.get('/api/calendar')
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.error || 'Failed to fetch schedule');
         }
         const json = await res.json()
+        
+        // Check if calendar needs reconnection
+        if (json.success && json.data && json.data.length === 0 && json.message && json.message.includes('Try reconnecting')) {
+          throw new Error('Google Calendar not connected');
+        }
+        
         const eventsFromServer = json.data || []
         if (!Array.isArray(eventsFromServer)) return []
         return eventsFromServer.map((event: any) => ({
@@ -161,7 +176,7 @@ export function ScheduleWidget() {
         }))
       } catch (error) {
         console.error('Error fetching schedule:', error)
-        return []
+        throw error // Re-throw to let React Query handle the error
       }
     },
     retry: false,
@@ -175,6 +190,7 @@ export function ScheduleWidget() {
     const timer = setInterval(() => setNow(new Date()), 60000) // update 'now' every minute
     return () => clearInterval(timer)
   }, [])
+
 
   // Get all events grouped by day and sort them
   const groupedEvents = useMemo(() => {
@@ -261,7 +277,7 @@ export function ScheduleWidget() {
     }
   }
 
-  if (isLoading) {
+  if ((loading && !hasSessionCookies) || isLoading) {
     return <WidgetLoader className="schedule" />
   }
 
@@ -273,12 +289,54 @@ export function ScheduleWidget() {
         <div className="flex flex-col items-center justify-center p-6 text-center">
           {isAuthError ? (
              <EmptyState
-              renderIcon={() => <Calendar className="h-6 w-6 text-gray-400" />}
+              renderIcon={() => <Calendar className="h-6 w-6 text-white/40" />}
               title="Connect your calendar"
               description="See your schedule at a glance by connecting your Google Calendar."
               action={{
-                label: "Go to Settings",
-                onClick: () => window.location.href = '/settings'
+                label: "Connect Calendar",
+                onClick: async () => {
+                  try {
+                    console.log('Connecting calendar - starting OAuth flow...');
+                    
+                    const { createClient } = await import('@/lib/supabase/client');
+                    const supabase = createClient();
+                    
+                    const { data, error } = await supabase.auth.signInWithOAuth({
+                      provider: 'google',
+                      options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
+                        queryParams: {
+                          access_type: 'offline',
+                          prompt: 'consent'
+                        }
+                      },
+                    });
+                    
+                    console.log('OAuth response:', { data, error });
+                    
+                    if (error) {
+                      console.error('Error connecting calendar:', error);
+                      // Try alternative approach if Supabase fails
+                      console.log('Trying direct Google OAuth...');
+                      const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+                        `client_id=${encodeURIComponent('301293553612-42c89kj4s39tckdevgv5o6dttsfulnml.apps.googleusercontent.com')}&` +
+                        `redirect_uri=${encodeURIComponent(window.location.origin + '/auth/callback')}&` +
+                        `response_type=code&` +
+                        `scope=${encodeURIComponent('openid email profile https://www.googleapis.com/auth/calendar.readonly')}&` +
+                        `access_type=offline&` +
+                        `prompt=consent`;
+                      
+                      console.log('Redirecting to:', redirectUrl);
+                      window.location.href = redirectUrl;
+                    } else {
+                      console.log('OAuth initiated successfully');
+                    }
+                    
+                  } catch (error) {
+                    console.error('Failed to connect calendar:', error);
+                  }
+                }
               }}
             />
           ) : (
@@ -305,14 +363,14 @@ export function ScheduleWidget() {
           </div>
           
           <div className="flex flex-col items-center justify-center flex-1">
-            <div className="flex items-center text-xs font-medium text-gray-400 uppercase mb-1">
+            <div className="flex items-center text-xs font-medium text-white/40 uppercase mb-1">
               {isToday(visibleDate) && <div className="w-2 h-2 rounded-full bg-rose-400 mr-2" />}
               {format(visibleDate, 'EEE')}
             </div>
             <div className="bigNumber">
               {format(visibleDate, 'dd')}
             </div>
-            <div className="text-xs font-medium text-gray-400 uppercase">
+            <div className="text-xs font-medium text-white/40 uppercase">
               {format(visibleDate, 'MMM')}
             </div>
           </div>
@@ -329,7 +387,7 @@ export function ScheduleWidget() {
           <div className="h-full overflow-y-auto p-3">
             {sortedDays.length === 0 ? (
               <EmptyState
-                renderIcon={() => <Calendar className="h-6 w-6 text-gray-400" />}
+                renderIcon={() => <Calendar className="h-6 w-6 text-white/40" />}
                 title="No events scheduled"
                 description="Your calendar is clear. Connect your Google Calendar to see upcoming events."
                 className="pt-20"

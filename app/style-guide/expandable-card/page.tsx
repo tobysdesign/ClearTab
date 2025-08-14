@@ -1,3 +1,5 @@
+'use client'
+
 import { ExpandableCardContainer } from '@/components/ui/expandable-card-container'
 import { Card as CardType } from '@/components/ui/expandable-card-context'
 

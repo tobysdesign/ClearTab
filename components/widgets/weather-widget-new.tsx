@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './weather-widget-new.module.css'
 
@@ -33,7 +33,7 @@ const weatherData = [
 
 export function WeatherWidgetNew() {
   const [cards, setCards] = useState(weatherData)
-  const [isHovered, setIsHovered] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
   
   // A piece of state to hold the card we're removing, to add it back later
   const [exitingCard, setExitingCard] = useState<typeof weatherData[0] | null>(null);
@@ -42,23 +42,26 @@ export function WeatherWidgetNew() {
     // Prevent new animations while one is already in progress
     if (exitingCard) return;
 
-    const topCard = cards[0];
+    const topCard = cards[cards.length - 1]; // Get the last card (blue/top card)
     setExitingCard(topCard); // Store the card that is leaving
-    setCards(prev => prev.slice(1)); // Remove it from the main array
+    setCards(prev => prev.slice(0, -1)); // Remove the last card from array
   }
 
   const handleExitComplete = () => {
     if (!exitingCard) return;
-    // Add the card that just finished its exit animation to the back of the array
-    setCards(prev => [...prev, exitingCard]);
+    // Add the card that just finished its exit animation to the front of the array
+    setCards(prev => [exitingCard, ...prev]);
     setExitingCard(null); // Clear the exiting card state
   }
 
+
   return (
-    <div 
+    <motion.div 
+      ref={containerRef}
       className={styles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      whileHover="hover"
+      initial="rest"
+      animate="rest"
     >
       <AnimatePresence onExitComplete={handleExitComplete}>
         {cards.map((day, index) => {
@@ -66,40 +69,74 @@ export function WeatherWidgetNew() {
           if (index > 2) return null;
 
           return (
-            <motion.div 
-              key={day.date} // A stable key from the data itself
-              className={styles.card}
+            <motion.div
+              key={day.date}
+              layout
               style={{
                 position: 'absolute',
                 left: '50%',
-                bottom: 0,
-                cursor: index === 0 ? 'pointer' : 'default',
-                transformOrigin: 'center bottom',
+                width: 'calc(100% - 20px)',
+                height: 'calc(100% - 40px)',
+                transform: 'translateX(-50%)',
+                zIndex: index === 0 ? 1 : index === 1 ? 2 : 3,
               }}
               animate={{
-                x: index === 0 ? '-50%' : 'calc(-50% + 0px)',
-                y: index === 0 ? 0 : index === 1 ? -40 : -80,
-                scale: index === 0 ? 1 : index === 1 ? 0.89 : 0.78,
-                rotate: isHovered && index !== 0 ? (index === 1 ? -15 : 15) : 0,
-                opacity: index === 0 ? 1 : index === 1 ? 0.7 : 0.4,
-                zIndex: 3 - index, // Higher index in array = lower z-index
+                top: index === 0 ? 10 : index === 1 ? 20 : 40,
               }}
-              exit={{ y: 100, opacity: 0, scale: 0.9 }}
               transition={{
                 type: "spring",
                 stiffness: 120,
                 damping: 20,
               }}
-              whileTap={index === 0 ? { scale: 0.98 } : {}}
-              onClick={index === 0 ? handleCardClick : undefined}
             >
+              <motion.div
+                layout
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transformOrigin: index === 0 ? 'bottom right' : index === 1 ? 'bottom left' : 'center',
+                }}
+                variants={{
+                  rest: { rotate: 0 },
+                  hover: { 
+                    rotate: index === 0 ? 8 : index === 1 ? -12 : 0
+                  }
+                }}
+                transition={{
+                  layout: { type: "spring", stiffness: 200, damping: 30, mass: 1.2 },
+                  rotate: { type: "spring", stiffness: 200, damping: 30, mass: 1.2 },
+                  default: { type: "spring", stiffness: 200, damping: 30, mass: 1.2 }
+                }}
+              >
+                <motion.div 
+                  className={styles.card}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  transformOrigin: 'top center',
+                  cursor: 'pointer',
+                }}
+                animate={{
+                  scale: index === 0 ? 0.64 : index === 1 ? 0.8 : 1,
+                  opacity: index === 2 ? 1 : index === 1 ? 0.7 : 0.5,
+                  rotate: 0,
+                }}
+                exit={{ y: 100, opacity: 0, scale: 0.9 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 120,
+                  damping: 20,
+                }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCardClick}
+              >
               <div className={styles.cardHeader}>
                 <div className={styles.date}>{day.date}</div>
                 <div className={styles.location}>{day.location}</div>
               </div>
               
               <div className={styles.cardCenter}>
-                {/* Lottie animation will go here */}
+                {/* Weather icon placeholder */}
               </div>
 
               <div className={styles.cardFooter}>
@@ -118,10 +155,12 @@ export function WeatherWidgetNew() {
                   </div>
                 </div>
               </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
           )
         })}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 } 

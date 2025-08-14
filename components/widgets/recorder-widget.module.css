@@ -151,7 +151,7 @@
 
 /* Recording state (back side) */
 .recordingBody {
-  @apply flex-1 flex flex-col items-center justify-between p-6;
+  @apply flex-1 flex flex-col items-center justify-center p-6;
 }
 
 /* Waveform visualization */
@@ -189,7 +189,7 @@
 
 /* Controls */
 .recordingControls {
-  @apply flex items-center justify-center gap-4 mt-auto;
+  @apply flex items-center justify-center gap-3 mt-auto;
 }
 
 .controlButton {
@@ -237,6 +237,161 @@
 
 .doneText {
   @apply text-xs text-white/70 mt-1;
+}
+
+/* Permission message */
+.permissionMessage {
+  @apply flex flex-col items-center justify-center text-center;
+}
+
+.permissionMessage p {
+  @apply text-sm text-white/70;
+}
+
+/* Processing state */
+.processingContainer {
+  @apply flex flex-col items-center justify-center gap-2;
+}
+
+.processingContainer .controlIcon {
+  @apply text-blue-400;
+  width: 24px;
+  height: 24px;
+}
+
+.processingContainer .doneText {
+  @apply text-blue-400;
+}
+
+/* Transcribing Screen */
+.transcribingWrapper {
+  @apply flex flex-col items-center justify-between w-full h-full;
+  padding: 40px 24px;
+}
+
+.transcribingContent {
+  @apply flex flex-col items-center text-center;
+}
+
+.gifPlaceholder {
+  @apply flex items-center justify-center rounded-lg;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  margin-bottom: 32px;
+}
+
+.animatedDotsContainer {
+  @apply flex gap-2;
+}
+
+.animatedDot {
+  @apply bg-white/80 rounded-full;
+  width: 16px;
+  height: 16px;
+  opacity: 0.2;
+  animation: dotPulse 1.4s infinite ease-in-out both;
+}
+
+.animatedDot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.animatedDot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.animatedDot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+.animatedDot:nth-child(4) {
+  animation-delay: 0.16s;
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.2;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.transcribingTitle {
+  @apply text-xl font-normal text-white mb-2;
+  letter-spacing: -0.02em;
+}
+
+.transcribingSubtitle {
+  @apply text-sm font-light leading-relaxed;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  margin-bottom: auto;
+}
+
+.okButton {
+  @apply text-white text-base font-medium cursor-pointer transition-all duration-200;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 48px;
+  border-radius: 32px;
+}
+
+.okButton:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.okButton:active {
+  transform: translateY(0);
+}
+
+/* Success state */
+.successContainer {
+  @apply flex flex-col items-center justify-center gap-2;
+}
+
+.successContainer .controlIcon {
+  @apply text-green-400;
+  width: 24px;
+  height: 24px;
+}
+
+.successContainer .doneText {
+  @apply text-green-400;
+}
+
+/* Mute button states */
+.muteButtonActive .controlButtonInner {
+  background: linear-gradient(180deg, #4A1A1A 0%, #2A1010 100%) !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+  box-shadow: 
+    0px 2px 4px rgba(248, 113, 113, 0.2),
+    inset 0px 1px 1px rgba(248, 113, 113, 0.1) !important;
+}
+
+.muteButtonInnerActive {
+  background: linear-gradient(180deg, #4A1A1A 0%, #2A1010 100%) !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+.muteButtonActive:hover .controlButtonInner {
+  background: linear-gradient(180deg, #5A2020 0%, #3A1515 100%) !important;
+  box-shadow: 
+    0px 3px 6px rgba(248, 113, 113, 0.25),
+    inset 0px 1px 1px rgba(248, 113, 113, 0.15) !important;
+}
+
+.muteButtonActive .controlIcon {
+  @apply text-red-400 !important;
+}
+
+.muteTextActive {
+  @apply text-red-400 !important;
 }
 
 /* Utility class for backface visibility */

@@ -23,7 +23,6 @@ const sections = [
       { name: 'Drawer', path: '/style-guide/drawer' },
       { name: 'Editor', path: '/style-guide/editor' },
       { name: 'Expandable Card', path: '/style-guide/expandable-card' },
-      { name: 'Globe', path: '/style-guide/globe' },
       { name: 'Input', path: '/style-guide/input' },
       { name: 'Label', path: '/style-guide/label' },
       { name: 'List', path: '/style-guide/list' },

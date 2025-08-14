@@ -2,9 +2,14 @@
 
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { SimpleBlockNoteEditor } from '@/components/ui/simple-block-note-editor'
 import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
 import { Block } from '@blocknote/core'
+import dynamic from 'next/dynamic'
+
+const SimpleBlockNoteEditor = dynamic(
+  () => import('@/components/ui/simple-block-note-editor').then(mod => ({ default: mod.SimpleBlockNoteEditor })),
+  { ssr: false }
+)
 
 export default function EditorStyleGuidePage() {
   const [value, setValue] = useState<Block[]>(EMPTY_BLOCKNOTE_CONTENT as Block[])

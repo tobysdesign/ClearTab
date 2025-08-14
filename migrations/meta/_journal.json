@@ -8,6 +8,13 @@
       "when": 1753275286125,
       "tag": "0000_fresh_trish_tilby",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754098242522,
+      "tag": "0001_fresh_fallen_one",
+      "breakpoints": true
     }
   ]
 }

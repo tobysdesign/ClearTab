@@ -11,7 +11,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
 import { format, getDay } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
@@ -41,7 +41,7 @@ export function CountSettings() {
 
   useEffect(() => {
     async function fetchCountSettings() {
-      const result = await getPaydaySettings()
+      const result = await getPaydaySettings({} as any)
       if (result.data) {
         const { paydayDate: date, paydayFrequency: freq } = result.data
         if (freq) setFrequency(freq as 'weekly' | 'fortnightly' | 'monthly')
@@ -122,7 +122,7 @@ export function CountSettings() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-medium text-white mb-3">Count Settings</h2>
-        <p className="text-sm text-gray-400 mb-4">
+        <p className="text-sm text-white mb-4">
           Configure your counter.
         </p>
       </div>
@@ -156,7 +156,7 @@ export function CountSettings() {
                 onClick={() => setShowCalendar(!showCalendar)}
                 className={cn(
                   'justify-start text-left font-normal bg-[#111111] border border-[#2A2A2A] text-white hover:bg-[#1A1A1A] w-full',
-                  !countDate && 'text-gray-400'
+                  !countDate && 'text-400/40'
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -199,7 +199,7 @@ export function CountSettings() {
         <Button
           onClick={handleSaveCountSettings}
           disabled={isSubmitting}
-          className="w-full bg-white text-black hover:bg-gray-100 rounded-full py-3"
+          className="w-full bg-white text-black hover:bg-white/40 rounded-full py-3"
         >
           {isSubmitting ? (
             <div className="relative w-[45px] h-[25px] mr-2">

@@ -285,7 +285,7 @@ export function CharcoalWave() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full z-[-1] bg-[#1a1a1a]"
+      className="fixed top-0 left-0 w-full h-full -z-10 bg-[#1a1a1a]"
     />
   )
 }

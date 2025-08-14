@@ -116,7 +116,7 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
   return (
     <ClientOnly>
       <motion.div layout initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className={cn("widget-list-item flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border", isSelected ? "widget-list-item--active bg-[#292929] border-[#434343]" : "bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545]", isRecentlyUpdated && "animate-highlight")}
+        className={cn("widget-list-item flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border", isSelected ? "widget-list-item--active bg-[#5c5c5c] border-[#5c5c5c]" : "bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545]", isRecentlyUpdated && "animate-highlight")}
         onClick={handleClick}
       >
         {/* Pink dot for active item */}

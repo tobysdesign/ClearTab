@@ -45,16 +45,48 @@ const settingsNav: NavItem[] = [
   },
 ]
 
-export function SettingsDrawer() {
+interface SettingsDrawerProps {
+  initialTab?: string
+}
+
+export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawerProps) {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState<string>('Display options')
+  const [activeTab, setActiveTab] = React.useState<string>(initialTab)
+
+  // Update activeTab when initialTab changes and drawer opens
+  React.useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab)
+    }
+  }, [isOpen, initialTab])
+
+  // Listen for global settings open events
+  React.useEffect(() => {
+    const handleOpenSettings = (event: CustomEvent) => {
+      console.log('SettingsDrawer: Received openSettings event', event.detail)
+      const { tab } = event.detail
+      if (tab) {
+        console.log(`SettingsDrawer: Setting active tab to "${tab}"`)
+        setActiveTab(tab)
+      }
+      setIsOpen(true)
+    }
+
+    window.addEventListener('openSettings' as any, handleOpenSettings)
+    return () => window.removeEventListener('openSettings' as any, handleOpenSettings)
+  }, [])
 
   const ActiveComponent = settingsNav.find(item => item.name === activeTab)?.component || (() => <div>Select a setting</div>)
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80 group">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80 group"
+          data-testid="settings-drawer-trigger"
+        >
           <Settings className="h-4 w-4 group-hover:rotate-45 transition-transform duration-300" />
           <span className="sr-only">Open Settings</span>
         </Button>

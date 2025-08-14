@@ -1,6 +1,5 @@
 import { createSafeActionClient } from 'next-safe-action'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { createClient } from '@/lib/supabase/server'
 
 class ActionError extends Error {
   constructor(message: string) {
@@ -19,10 +18,13 @@ const baseClient = createSafeActionClient({
 })
 
 export const action = baseClient.use(async ({ next }) => {
-  const session = await getServerSession(authOptions)
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   // Pass userId as null if not authenticated. Individual actions will validate if userId is required.
-  const userId = session?.user?.id || null; 
+  const userId = user?.id || null; 
 
   return next({
     ctx: {

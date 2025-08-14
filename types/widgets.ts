@@ -1,4 +1,4 @@
-export type WidgetId = 'notes' | 'schedule' | 'weather' | 'finance' | 'tasks' | 'recorder'
+export type WidgetId = 'notes' | 'schedule' | 'weather' | 'countdown' | 'tasks' | 'recorder'
 
 export interface WidgetState {
   id: WidgetId
