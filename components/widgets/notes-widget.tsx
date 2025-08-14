@@ -140,6 +140,16 @@ export function NotesWidget() {
   useEffect(() => {
     if (isLoadingNotes) return
 
+    // Temporary debugging: log the actual notes structure
+    if (notes && notes.length > 0) {
+      console.log('DEBUG: All notes structure:', notes.map(note => ({
+        id: note.id,
+        title: note.title,
+        content: note.content,
+        contentString: JSON.stringify(note.content, null, 2)
+      })))
+    }
+
     // Initialize only once when notes are loaded
     if (!isInitializedRef.current) {
       isInitializedRef.current = true
