@@ -1,33 +1,38 @@
-'use client'
+"use client";
 
-import { Button } from '@/components/ui/button'
-import { EmptyState } from '@/components/ui/empty-state'
-import Calendar from 'lucide-react/dist/esm/icons/calendar'
-import { useQuery } from '@tanstack/react-query'
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import Calendar from "lucide-react/dist/esm/icons/calendar";
+import { useQuery } from "@tanstack/react-query";
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from "@/lib/supabase/client";
 
 export function ScheduleSettings() {
-  const supabase = createClient()
+  const supabase = createClient();
 
   const handleGoogleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo: `${location.origin}/auth/callback`,
-        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+        scopes:
+          "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
-    })
-  }
+    });
+  };
   const { data: isConnected } = useQuery({
-    queryKey: ['googleCalendarConnected'],
+    queryKey: ["googleCalendarConnected"],
     queryFn: async () => {
-      const res = await fetch('/api/calendar/status')
-      if (!res.ok) return false
-      const data = await res.json()
-      return data.connected
-    }
-  })
+      const res = await fetch("/api/calendar/status");
+      if (!res.ok) return false;
+      const data = await res.json();
+      return data.connected;
+    },
+  });
 
   if (!isConnected) {
     return (
@@ -38,11 +43,11 @@ export function ScheduleSettings() {
           description="See your schedule at a glance by connecting your Google Calendar."
           action={{
             label: "Connect Google Calendar",
-            onClick: handleGoogleSignIn
+            onClick: handleGoogleSignIn,
           }}
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -52,10 +57,7 @@ export function ScheduleSettings() {
         <p className="text-sm text-muted-foreground mb-4">
           Manage your connected Google Calendars and customize how they appear.
         </p>
-        <Button
-          variant="outline"
-          onClick={handleGoogleSignIn}
-        >
+        <Button variant="outline" onClick={handleGoogleSignIn}>
           Refresh Calendar Connection
         </Button>
       </div>
@@ -63,9 +65,10 @@ export function ScheduleSettings() {
       <div>
         <h2 className="text-lg font-medium mb-2">Display Settings</h2>
         <p className="text-sm text-muted-foreground">
-          Customize how your calendar events are displayed in the schedule widget.
+          Customize how your calendar events are displayed in the schedule
+          widget.
         </p>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -1,55 +1,107 @@
-'use client'
+"use client";
 
-import { cn } from '@/lib/utils'
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from 'framer-motion'
+import { cn } from "@/lib/utils";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  animate,
+  AnimatePresence,
+} from "framer-motion";
 import {
   addDays,
   differenceInDays,
   isBefore,
   startOfDay,
   addMonths,
-} from 'date-fns'
-import { useQuery } from '@tanstack/react-query'
-import { getPaydaySettings } from '@/lib/actions/settings'
-import { WidgetActions } from '@/components/dashboard/widget-actions'
-import { WidgetContainer, WidgetContent } from '@/components/ui/widget-container'
-import { WidgetHeader } from '@/components/ui/widget-header'
-import { WidgetLoader } from './widget-loader'
-import { useEffect, useState } from 'react'
-import styles from './widget.module.css'
-import { ClientOnly } from '@/components/ui/safe-motion'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import Settings from 'lucide-react/dist/esm/icons/settings'
+} from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { getPaydaySettings } from "@/lib/actions/settings";
+import { WidgetActions } from "@/components/dashboard/widget-actions";
+import {
+  WidgetContainer,
+  WidgetContent,
+} from "@/components/ui/widget-container";
+import { WidgetHeader } from "@/components/ui/widget-header";
+import { WidgetLoader } from "./widget-loader";
+import { useEffect, useState } from "react";
+import styles from "./widget.module.css";
+import { ClientOnly } from "@/components/ui/safe-motion";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Settings from "lucide-react/dist/esm/icons/settings";
 
 interface CountdownWidgetProps {
-  variant?: 'vertical' | 'horizontal'
+  variant?: "vertical" | "horizontal";
 }
 
 const RECURRENCE_DAYS = {
-  'weekly': 7,
-  'fortnightly': 14,
-  'monthly': 30
-} as const
+  weekly: 7,
+  fortnightly: 14,
+  monthly: 30,
+} as const;
 
-type PaydayFrequency = keyof typeof RECURRENCE_DAYS
-type RecurrenceDays = (typeof RECURRENCE_DAYS)[PaydayFrequency]
+type PaydayFrequency = keyof typeof RECURRENCE_DAYS;
+type RecurrenceDays = (typeof RECURRENCE_DAYS)[PaydayFrequency];
 
-export function CountdownWidget({ variant = 'vertical' }: CountdownWidgetProps) {
-  const router = useRouter()
+export function CountdownWidget({
+  variant = "vertical",
+}: CountdownWidgetProps) {
+  const router = useRouter();
   const [settings, setSettings] = useState<{
-    nextPayday: Date,
-    daysLeft: number,
-    recurrenceInDays: RecurrenceDays
+    nextPayday: Date;
+    daysLeft: number;
+    recurrenceInDays: RecurrenceDays;
   }>({
     nextPayday: new Date(),
-    daysLeft: RECURRENCE_DAYS['fortnightly'],
-    recurrenceInDays: RECURRENCE_DAYS['fortnightly']
-  })
-  const [isLoading, setIsLoading] = useState(false)
+    daysLeft: RECURRENCE_DAYS["fortnightly"],
+    recurrenceInDays: RECURRENCE_DAYS["fortnightly"],
+  });
 
-  const { daysLeft, recurrenceInDays } = settings
-  
+  // Fetch payday settings from database
+  const { data: paydayData, isLoading } = useQuery({
+    queryKey: ["payday-settings"],
+    queryFn: async () => {
+      const result = await getPaydaySettings({} as any);
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+      return result.data;
+    },
+  });
+
+  // Calculate next payday and days remaining
+  useEffect(() => {
+    if (paydayData?.paydayDate && paydayData?.paydayFrequency) {
+      const today = startOfDay(new Date());
+      const lastPayday = startOfDay(new Date(paydayData.paydayDate));
+      const recurrenceInDays = RECURRENCE_DAYS[paydayData.paydayFrequency];
+
+      // Calculate next payday
+      let nextPayday = new Date(lastPayday);
+      while (
+        isBefore(nextPayday, today) ||
+        nextPayday.getTime() === today.getTime()
+      ) {
+        if (paydayData.paydayFrequency === "monthly") {
+          nextPayday = addMonths(nextPayday, 1);
+        } else {
+          nextPayday = addDays(nextPayday, recurrenceInDays);
+        }
+      }
+
+      const daysLeft = differenceInDays(nextPayday, today);
+
+      setSettings({
+        nextPayday,
+        daysLeft,
+        recurrenceInDays,
+      });
+    }
+  }, [paydayData]);
+
+  const { daysLeft, recurrenceInDays } = settings;
+
   // Make rows and columns responsive based on the recurrence period
   const getGridDimensions = () => {
     if (recurrenceInDays <= 7) {
@@ -60,36 +112,36 @@ export function CountdownWidget({ variant = 'vertical' }: CountdownWidgetProps) 
       return { rows: 5, cols: 6 }; // For monthly
     }
   };
-  
+
   const { rows, cols } = getGridDimensions();
 
-  const safeRecurrence = recurrenceInDays > 1 ? recurrenceInDays : 2
+  const safeRecurrence = recurrenceInDays > 1 ? recurrenceInDays : 2;
   // Linear interpolation: maps daysLeft range [1, N] to translateX range [36, -50]
-  const translateX = 36 - 86 * (((daysLeft ?? 1) - 1) / (safeRecurrence - 1))
+  const translateX = 36 - 86 * (((daysLeft ?? 1) - 1) / (safeRecurrence - 1));
 
   const dotVariants = {
     hidden: { scale: 0, opacity: 0 },
     visible: { scale: 1, opacity: 1 },
-  }
+  };
 
   // Create array of dots in correct order (left to right, top to bottom in each column)
   const dots = Array.from({ length: recurrenceInDays }, (_, i) => {
-    const col = Math.floor(i / rows)
-    const row = i % rows
-    return { index: i, position: row * cols + col }
-  }).sort((a, b) => a.position - b.position)
+    const col = Math.floor(i / rows);
+    const row = i % rows;
+    return { index: i, position: row * cols + col };
+  }).sort((a, b) => a.position - b.position);
 
   // Add counter animation
-  const count = useMotionValue(daysLeft ?? 0)
-  const rounded = useTransform(count, (latest) => Math.round(latest))
-  const [displayNumber, setDisplayNumber] = useState(daysLeft ?? 0)
+  const count = useMotionValue(daysLeft ?? 0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const [displayNumber, setDisplayNumber] = useState(daysLeft ?? 0);
 
   // Format the days left for display with animation
-  const formattedDaysLeft = displayNumber.toString().padStart(2, '0')
-  const [firstDigit, secondDigit] = formattedDaysLeft.split('')
+  const formattedDaysLeft = displayNumber.toString().padStart(2, "0");
+  const [firstDigit, secondDigit] = formattedDaysLeft.split("");
 
   if (isLoading) {
-    return <WidgetLoader className="Countdown" minHeight="h-[280px]" />
+    return <WidgetLoader className="Countdown" minHeight="h-[280px]" />;
   }
 
   // Calculate dot size and spacing based on grid dimensions
@@ -99,35 +151,49 @@ export function CountdownWidget({ variant = 'vertical' }: CountdownWidgetProps) 
 
   return (
     <WidgetContainer>
-      <WidgetHeader title="Countdown" className="h-[60px]">
-      </WidgetHeader>
+      <WidgetHeader title="Countdown" className="h-[60px]"></WidgetHeader>
       <WidgetContent scrollable={false} className="widget-relative p-6">
         <div className="flex h-full">
-          {/* Left side - Text content */}
-          <div className="flex-1 flex flex-col justify-center">
-            {/* Title - shows "Pay" or configured countdown name */}
-            <div className="text-[#8D8D8D] text-[18px] font-normal mb-2">Pay</div>
-            
-            {/* Number */}
-            <ClientOnly>
-              <AnimatePresence mode="popLayout">
-                <motion.div
-                  key={displayNumber}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="text-[64px] font-light leading-none text-white"
-                >
-                  {formattedDaysLeft}
-                </motion.div>
-              </AnimatePresence>
-            </ClientOnly>
-            
-            {/* Days label */}
-            <div className="text-[18px] font-normal text-white/80">days</div>
+          {/* Left side - Text content with weather widget structure */}
+          <div className="flex-1 flex flex-col justify-between">
+            {/* Title at top */}
+            <div className="text-[#8D8D8D] text-[18px] font-normal">Pay</div>
+
+            {/* Spacer */}
+            <div></div>
+
+            {/* Bottom section - big number and post-text */}
+            <div className="flex flex-col items-start">
+              <ClientOnly>
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    key={displayNumber}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="text-[48px] font-light leading-none text-white mb-1"
+                  >
+                    {formattedDaysLeft}
+                  </motion.div>
+                </AnimatePresence>
+              </ClientOnly>
+
+              {/* Days label */}
+              <div
+                style={{
+                  color: "#555454",
+                  fontFamily: "Inter Display, sans-serif",
+                  fontSize: "12px",
+                  fontWeight: 400,
+                  lineHeight: 1.2,
+                }}
+              >
+                days
+              </div>
+            </div>
           </div>
-          
+
           {/* Right side - Dots grid */}
           <div className="flex items-center">
             <div className="grid grid-cols-5 gap-1.5">
@@ -144,7 +210,7 @@ export function CountdownWidget({ variant = 'vertical' }: CountdownWidgetProps) 
                     damping: 20,
                   }}
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: '#FF69B4' }}
+                  style={{ backgroundColor: "#FF69B4" }}
                 />
               ))}
             </div>
@@ -152,5 +218,5 @@ export function CountdownWidget({ variant = 'vertical' }: CountdownWidgetProps) 
         </div>
       </WidgetContent>
     </WidgetContainer>
-  )
-} 
+  );
+}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { WidgetHeader } from '@/components/ui/widget-header'
 import styles from './countdown-widget.module.css'
 
 interface CountdownWidgetProps {
@@ -12,7 +13,7 @@ interface CountdownWidgetProps {
   size?: 'small' | 'medium' | 'large'
 }
 
-export function CountdownWidget({ 
+export function CountdownWidget({
   title = 'Payday',
   totalDays,
   remainingDays,
@@ -20,30 +21,24 @@ export function CountdownWidget({
   size = 'medium'
 }: CountdownWidgetProps) {
   const [daysLeft, setDaysLeft] = useState<number>(remainingDays)
-  
+
   // Format the days left for display
   const formattedDaysLeft = daysLeft.toString().padStart(2, '0')
   const [firstDigit, secondDigit] = formattedDaysLeft.split('')
-  
+
   return (
     <div className={styles.container}>
-      <div className="relative flex flex-col h-full w-full p-6">
+      <div className="relative flex flex-col h-full w-full">
         {/* Header */}
-        <h2 className="text-[16px] font-normal text-white/90">Countdown</h2>
-        
-        {/* Content area */}
-        <div className="flex-1 flex flex-col items-center justify-center -mt-8">
-          {/* Title - countdown name */}
-          <div className="text-[#8D8D8D] text-[16px] font-normal mb-3">{title}</div>
-          
-          {/* Number and Days layout */}
-          <div className="flex items-baseline gap-2 mb-4">
-            <span className="text-[64px] font-extralight leading-none text-white">{formattedDaysLeft}</span>
-            <span className="text-[24px] font-light text-white/80">days</span>
-          </div>
-          
-          {/* Dots showing remaining days only */}
-          <div className="flex gap-2">
+        <WidgetHeader title="Countdown" className="!justify-start" />
+
+        {/* Content area matching weather widget structure */}
+        <div className="flex-1 flex flex-col justify-between p-6">
+          {/* Title - countdown name at top */}
+          <div className="text-[#8D8D8D] text-[16px] font-normal">{title}</div>
+
+          {/* Center area for dots */}
+          <div className="flex gap-2 justify-center">
             {[...Array(Math.min(daysLeft, 30))].map((_, i) => (
               <div
                 key={i}
@@ -52,8 +47,16 @@ export function CountdownWidget({
               />
             ))}
           </div>
+
+          {/* Footer matching weather widget cardFooter structure */}
+          <div className="flex justify-between items-end gap-4">
+            <div className="flex flex-col items-start flex-1">
+              <div className="bigNumber mb-1">{formattedDaysLeft}</div>
+              <div className={styles.postText}>days remaining</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
-} 
+}

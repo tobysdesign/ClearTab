@@ -47,11 +47,8 @@ export function CountSettings() {
         if (freq) setFrequency(freq as 'weekly' | 'fortnightly' | 'monthly')
         if (date) {
           const loadedDate = new Date(date)
-          if (freq === 'monthly') {
-            setCountDate(loadedDate)
-          } else {
-            setDayOfWeek(getDay(loadedDate))
-          }
+          setCountDate(loadedDate)
+          setDayOfWeek(getDay(loadedDate))
         }
       }
     }
@@ -59,19 +56,7 @@ export function CountSettings() {
   }, [])
 
   const handleSaveCountSettings = async () => {
-    let dateToSave: Date | undefined
-
-    if (frequency === 'monthly') {
-      dateToSave = countDate
-    } else if (dayOfWeek !== undefined) {
-      const today = new Date()
-      dateToSave = new Date()
-      const currentDay = today.getDay()
-      const daysUntilTarget = (dayOfWeek - currentDay + 7) % 7
-      dateToSave.setDate(today.getDate() + (daysUntilTarget === 0 ? 7 : daysUntilTarget))
-    }
-
-    if (!dateToSave) {
+    if (!countDate) {
       toast({
         title: 'Error',
         description: 'Please select a count date.',
@@ -83,7 +68,7 @@ export function CountSettings() {
     setIsSubmitting(true)
     try {
       const result = await savePaydaySettings({
-        paydayDate: dateToSave,
+        paydayDate: countDate,
         paydayFrequency: frequency,
       })
 
@@ -98,7 +83,7 @@ export function CountSettings() {
           title: 'Success',
           description: 'Count settings updated successfully',
         })
-        queryClient.invalidateQueries({ queryKey: ['paydaySettings'] })
+        queryClient.invalidateQueries({ queryKey: ['payday-settings'] })
       }
     } catch (error) {
       toast({
@@ -113,9 +98,7 @@ export function CountSettings() {
   
   const handleFrequencyChange = (value: 'weekly' | 'fortnightly' | 'monthly') => {
     setFrequency(value)
-    if (value !== 'monthly') {
-      setCountDate(undefined)
-    }
+    // Keep the selected date for all frequency types
   }
 
   return (
@@ -149,50 +132,32 @@ export function CountSettings() {
         {/* Start On Section */}
         <div>
           <h3 className="text-lg font-medium text-white mb-4">Start on</h3>
-          {frequency === 'monthly' ? (
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowCalendar(!showCalendar)}
-                className={cn(
-                  'justify-start text-left font-normal bg-[#111111] border border-[#2A2A2A] text-white hover:bg-[#1A1A1A] w-full',
-                  !countDate && 'text-400/40'
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {countDate ? format(countDate, 'do') : 'Pick a day'}
-              </Button>
-              {showCalendar && (
-                <div className="rounded-md border bg-popover p-4">
-                  <Calendar
-                    mode="single"
-                    selected={countDate}
-                    onSelect={date => {
-                      setCountDate(date)
-                      setShowCalendar(false)
-                    }}
-                    initialFocus
-                  />
-                </div>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCalendar(!showCalendar)}
+              className={cn(
+                'justify-start text-left font-normal bg-[#111111] border border-[#2A2A2A] text-white hover:bg-[#1A1A1A] w-full',
+                !countDate && 'text-400/40'
               )}
-            </div>
-          ) : (
-            <Select
-              value={dayOfWeek?.toString()}
-              onValueChange={value => setDayOfWeek(Number(value))}
             >
-              <SelectTrigger className="bg-[#111111] border border-[#2A2A2A] text-white">
-                <SelectValue placeholder="Pick a day" />
-              </SelectTrigger>
-              <SelectContent>
-                {weekDays.map((day, index) => (
-                  <SelectItem key={day} value={index.toString()}>
-                    {day}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {countDate ? format(countDate, frequency === 'monthly' ? 'do' : 'PPP') : 'Pick a date'}
+            </Button>
+            {showCalendar && (
+              <div className="rounded-md border bg-popover p-4">
+                <Calendar
+                  mode="single"
+                  selected={countDate}
+                  onSelect={date => {
+                    setCountDate(date)
+                    setShowCalendar(false)
+                  }}
+                  initialFocus
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Save Button */}

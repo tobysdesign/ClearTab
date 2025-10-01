@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import type { ConnectedAccountWithEmail } from '@/app/api/settings/accounts/route'
+import type { ConnectedAccountWithEmail } from '@/shared/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'

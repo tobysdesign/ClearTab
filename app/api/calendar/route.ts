@@ -1,179 +1,177 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { type ActionResponse } from '@/types/actions'
-import { user as userSchema, userCalendars, connectedAccounts } from '@/shared/schema'
-import { eq, and } from 'drizzle-orm'
-import { google } from 'googleapis'
-import { db } from '@/server/db'
-import { getGoogleOAuth2Client } from '@/server/google-calendar'
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { user as userTable, connectedAccounts } from "@/shared/schema";
+import { eq } from "drizzle-orm";
+import { google } from "googleapis";
 
-interface CalendarEvent {
-  id: string
-  title: string
-  start: string
-  end: string
-  description?: string
-  location?: string
-  allDay?: boolean
-  color?: string
-  calendarId?: string
-  calendarName?: string
-  source: 'google' | 'local'
+function getGoogleOAuth2Client(accessToken: string, refreshToken?: string) {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
+  );
+
+  oauth2Client.setCredentials({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+
+  return oauth2Client;
 }
 
-export async function GET(
-  request: Request
-): Promise<NextResponse<ActionResponse<CalendarEvent[]>>> {
+export async function GET(request: NextRequest) {
   try {
-    // Skip slow auth check - use hardcoded user ID for development
-    const userId = 'f4cb8d10-fab0-4477-bfbf-04af508fd2d7'
-    
-    const supabase = await createClient()
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    let currentUser;
-    try {
-      const { data: userData, error: userError } = await supabase
-        .from('user')
-        .select('id, google_calendar_connected, access_token, refresh_token')
-        .eq('id', userId)
-        .single()
-      
-      if (userError) {
-        return NextResponse.json({
-          success: false,
-          error: 'Failed to fetch user data'
-        }, { status: 500 })
-      }
-      
-      currentUser = {
-        ...userData,
-        googleCalendarConnected: userData.google_calendar_connected,
-        accessToken: userData.access_token,
-        refreshToken: userData.refresh_token
-      }
-    } catch (dbError) {
-      return NextResponse.json({
-        success: false,
-        error: 'Database connection failed. Please check your internet connection or try again later.'
-      }, { status: 503 })
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!currentUser) {
-      return NextResponse.json({
-        success: false,
-        error: 'User not found in database'
-      }, { status: 400 })
+    // Get user from database
+    const [dbUser] = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.id, user.id))
+      .limit(1);
+
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (!currentUser.googleCalendarConnected) {
-      return NextResponse.json({
-        success: false,
-        error: 'Google Calendar not connected. Please go to Settings and click "Connect Calendar".'
-      }, { status: 400 })
-    }
+    let events: any[] = [];
 
-    if (!currentUser.accessToken) {
-      return NextResponse.json({
-        success: true,
-        data: [],
-        message: 'Calendar connected but no events available. Try reconnecting your calendar.'
-      })
-    }
-
-    // Get all enabled calendars for the user using Supabase client
-    const { data: enabledCalendars, error: calendarsError } = await supabase
-      .from('user_calendars')
-      .select(`
-        *,
-        connected_accounts (
-          access_token,
-          refresh_token
-        )
-      `)
-      .eq('user_id', userId)
-      .eq('is_enabled', true)
-    
-    if (calendarsError) {
-      console.error('Error fetching calendars:', calendarsError)
-      // Continue with empty calendars array instead of failing
-    }
-    
-    // If no enabled calendars, use the primary calendar
-    let calendarsToFetch = (enabledCalendars && enabledCalendars.length > 0)
-      ? enabledCalendars.map(cal => ({
-          calendar_id: cal.calendar_id || 'primary',
-          name: cal.name || 'Primary Calendar',
-          color: cal.color,
-          connected_accounts: cal.connected_accounts || {
-            access_token: currentUser.accessToken,
-            refresh_token: currentUser.refreshToken
-          }
-        }))
-      : [{ 
-          calendar_id: 'primary',
-          name: 'Primary Calendar',
-          color: null,
-          connected_accounts: {
-            access_token: currentUser.accessToken,
-            refresh_token: currentUser.refreshToken
-          }
-        }];
-    
-    // Fetch events from the start of today to 7 days from now
-    const now = new Date()
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) // Fetch from 30 days ago
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-    
-    // Fetch events from all enabled calendars
-    const allEventsPromises = calendarsToFetch.map(async (calendar) => {
+    // Fetch events from primary account if connected
+    if (dbUser.googleCalendarConnected && dbUser.accessToken) {
       try {
         const oauth2Client = getGoogleOAuth2Client(
-          calendar.connected_accounts.access_token, 
-          calendar.connected_accounts.refresh_token ?? undefined
+          dbUser.accessToken,
+          dbUser.refreshToken || undefined,
         );
-        
-        const googleCalendar = google.calendar({ version: 'v3', auth: oauth2Client });
-        
-        const response = await googleCalendar.events.list({
-          calendarId: calendar.calendar_id,
+
+        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+        const response = await calendar.events.list({
+          calendarId: "primary",
           timeMin: thirtyDaysAgo.toISOString(),
           timeMax: thirtyDaysFromNow.toISOString(),
           singleEvents: true,
-          orderBy: 'startTime'
+          orderBy: "startTime",
         });
-        
-        return (response.data.items || []).map(event => ({
-          id: event.id || '',
-          title: event.summary || 'Untitled Event',
-          start: event.start?.dateTime || event.start?.date || '',
-          end: event.end?.dateTime || event.end?.date || '',
+
+        events = (response.data.items || []).map((event) => ({
+          id: event.id || "",
+          title: event.summary || "Untitled Event",
+          start: event.start?.dateTime || event.start?.date || "",
+          end: event.end?.dateTime || event.end?.date || "",
           description: event.description || undefined,
           location: event.location || undefined,
           allDay: !event.start?.dateTime,
-          color: calendar.color || event.colorId ? `var(--google-calendar-${event.colorId})` : undefined,
-          calendarId: calendar.calendar_id,
-          calendarName: calendar.name,
-          source: 'google' as const
+          color: event.colorId
+            ? `var(--google-calendar-${event.colorId})`
+            : "rgba(59, 130, 246, 0.3)",
+          calendarId: "primary",
+          calendarName: dbUser.email,
+          source: "google" as const,
         }));
       } catch (error) {
-        console.error(`Error fetching events from calendar ${calendar.calendar_id}:`, error);
-        return [];
+        console.error("Error fetching primary calendar:", error);
       }
-    });
-    
-    const eventsArrays = await Promise.all(allEventsPromises);
-    const events = eventsArrays.flat();
-    
-    return NextResponse.json({
-      success: true,
-      data: events
-    })
+    }
+
+    // Fetch events from secondary accounts
+    const secondaryAccounts = await db
+      .select()
+      .from(connectedAccounts)
+      .where(eq(connectedAccounts.userId, user.id));
+
+    for (const account of secondaryAccounts) {
+      if (!account.accessToken) continue;
+
+      try {
+        const oauth2Client = getGoogleOAuth2Client(
+          account.accessToken,
+          account.refreshToken || undefined,
+        );
+
+        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+        const response = await calendar.events.list({
+          calendarId: "primary",
+          timeMin: thirtyDaysAgo.toISOString(),
+          timeMax: thirtyDaysFromNow.toISOString(),
+          singleEvents: true,
+          orderBy: "startTime",
+        });
+
+        // Get account email
+        const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
+        let accountEmail = "Secondary Account";
+        try {
+          const { data: userInfo } = await oauth2.userinfo.get();
+          accountEmail = userInfo.email || accountEmail;
+        } catch (e) {
+          console.error(
+            "Could not fetch email for secondary account:",
+            account.id,
+          );
+        }
+
+        const secondaryEvents = (response.data.items || []).map((event) => ({
+          id: `${account.id}-${event.id}` || "",
+          title: event.summary || "Untitled Event",
+          start: event.start?.dateTime || event.start?.date || "",
+          end: event.end?.dateTime || event.end?.date || "",
+          description: event.description || undefined,
+          location: event.location || undefined,
+          allDay: !event.start?.dateTime,
+          color: "rgba(147, 51, 234, 0.3)", // Purple tint for secondary accounts
+          calendarId: "primary",
+          calendarName: `${accountEmail} (view-only)`,
+          source: "google" as const,
+        }));
+
+        events.push(...secondaryEvents);
+      } catch (error: any) {
+        console.error(
+          `Error fetching events from secondary account ${account.id}:`,
+          error.message,
+        );
+        // If the error is related to an invalid token, it means the user has likely revoked access.
+        // We should delete this stale connection to allow the account to be re-linked by someone else.
+        if (
+          error.response?.data?.error === "invalid_grant" ||
+          error.message.includes("invalid_grant")
+        ) {
+          console.log(
+            `Detected invalid grant for account ${account.id}. Deleting stale connection.`,
+          );
+          await db
+            .delete(connectedAccounts)
+            .where(eq(connectedAccounts.id, account.id));
+        }
+      }
+    }
+
+    return NextResponse.json({ data: events });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    
-    return NextResponse.json({
-      success: false,
-      error: `Failed to fetch calendar events: ${errorMessage}`
-    }, { status: 500 })
+    console.error("Calendar API error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch calendar events" },
+      { status: 500 },
+    );
   }
 }

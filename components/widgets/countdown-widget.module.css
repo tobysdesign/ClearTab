@@ -38,4 +38,12 @@
 
 .inactive {
   background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white for inactive dots/circles */
+}
+
+.postText {
+  color: #555454 !important;
+  font-family: 'Inter Display', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 1.2 !important;
 } 

@@ -1,11 +1,7 @@
 {
   // This is a comment to force a reload of the tsconfig.json by the editor's language server.
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -24,22 +20,17 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
     "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
+    "types/**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.d.ts",
     ".next/types/**/*.ts"
-
   ],
-  "exclude": [
-    "node_modules",
-    "stories/**"
-  ]
+  "exclude": ["node_modules", "stories/**"]
 }

@@ -1,24 +1,34 @@
-"use client"
-
-import { Card } from "@/components/ui/card"
-import Image from "next/image"
+"use client";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-card">
-      <Card className="w-full max-w-md p-6 shadow-lg border border-border flex flex-col items-center gap-4">
-        <div className="relative w-[90px] h-[50px]">
-          <Image
-            src="/assets/loading.gif"
-            alt="Loading..."
-            fill
-            className="object-contain"
-            sizes="90px"
-            priority
-            unoptimized
-          />
-        </div>
-      </Card>
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "#09090B",
+        zIndex: 9999,
+      }}
+    >
+      <div style={{ width: "150px", height: "82.8px" }}>
+        <img
+          src="/assets/loading.gif"
+          alt="Loading..."
+          width="500"
+          height="276"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain"
+          }}
+        />
+      </div>
     </div>
-  )
-} 
+  );
+}

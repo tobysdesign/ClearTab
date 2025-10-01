@@ -1,45 +1,56 @@
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 // import { useSession } from 'next-auth/react' // Disabled - using Supabase
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import ExternalLink from 'lucide-react/dist/esm/icons/external-link'
-import CheckCircle from 'lucide-react/dist/esm/icons/check-circle'
-import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle'
-import Info from 'lucide-react/dist/esm/icons/info'
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import ExternalLink from "lucide-react/dist/esm/icons/external-link";
+import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
+import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
+import Info from "lucide-react/dist/esm/icons/info";
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from "@/lib/supabase/client";
 
 export function ConnectedAppsSettings() {
-  const supabase = createClient()
-  const [session, setSession] = React.useState<any>(null)
+  const supabase = createClient();
+  const [session, setSession] = React.useState<any>(null);
 
   React.useEffect(() => {
     const getSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      setSession(data.session)
-    }
-    getSession()
-  }, [supabase.auth])
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+    };
+    getSession();
+  }, [supabase.auth]);
 
-  const isGoogleConnected = session?.user?.app_metadata?.provider === 'google'
+  const isGoogleConnected = session?.user?.app_metadata?.provider === "google";
 
   const handleConnectGoogle = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo: `${location.origin}/auth/callback`,
-        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly'
+        scopes:
+          "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
-    })
+    });
   };
 
   const handleDisconnectGoogle = async () => {
     // Implement disconnect logic here
     console.log("Disconnecting Google Calendar");
   };
-  
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Connected Apps</h3>
@@ -76,5 +87,5 @@ export function ConnectedAppsSettings() {
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

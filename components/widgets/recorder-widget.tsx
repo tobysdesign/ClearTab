@@ -32,7 +32,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const { toast } = useToast()
   const { user } = useAuth()
   const supabase = createClient()
-  
+
   const {
     state,
     duration,
@@ -75,7 +75,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             user_id: user.id
           })
           .select()
-        
+
         if (error) {
           console.error('Error saving note:', error)
           toast({
@@ -85,14 +85,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
           })
           return
         }
-        
+
         console.log('Note saved successfully:', data)
 
         toast({
           title: "Success",
           description: "Voice note saved successfully!"
         })
-        
+
         console.log('Setting showSuccess to true')
         setShowSuccess(true)
         setTimeout(() => {
@@ -101,12 +101,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
           setIsFlipped(false)
           reset()
         }, 2000)
-        
+
       } catch (error: any) {
         console.error('Error processing transcription:', error)
         console.error('Error details:', error.message || error)
         toast({
-          title: "Error", 
+          title: "Error",
           description: error.message || "Failed to process transcription",
           variant: "destructive"
         })
@@ -176,7 +176,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const generateWaveform = () => {
     const bars = [];
     const numBars = 20;
-    
+
     for (let i = 0; i < numBars; i++) {
       const animationDelay = `${i * 0.05}s`;
       bars.push(
@@ -189,7 +189,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         />
       );
     }
-    
+
     return bars;
   };
 
@@ -203,7 +203,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <WidgetHeader title="Recorder" />
+                <WidgetHeader title="Recorder" className="!justify-start" />
 
                 {/* Body */}
                 <div className={styles.body}>
@@ -218,16 +218,16 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                       <div className={styles.buttonOuter}>
                         {/* Main shading background */}
                         <div className={styles.buttonBackground} />
-                        
+
                         {/* Gradient border */}
                         <div className={styles.buttonBorder} />
-                        
+
                         {/* Top highlight for lighter upper half */}
                         <div className={styles.buttonTopHighlight} />
-                        
+
                         {/* Recording indicator dot (positioned top-right) */}
                         <div className={cn(styles.recordingDot, { [styles.recordingDotHover]: isHovered })} />
-                        
+
                         {/* Microphone icon */}
                         <div className={styles.microphoneIcon}>
                           <Mic className={styles.micIcon} />
@@ -250,7 +250,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <WidgetHeader title="Recorder" />
+                <WidgetHeader title="Recorder" className="!justify-start" />
 
                 {/* Body */}
                 <div className={styles.recordingBody}>
@@ -272,7 +272,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                           note once complete.
                         </p>
                       </div>
-                      <button 
+                      <button
                         onClick={handleReset}
                         className={styles.okButton}
                       >
@@ -285,12 +285,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                       <div className={styles.waveformContainer}>
                         {generateWaveform()}
                       </div>
-                      
+
                       {/* Timer */}
                       <div className={styles.timerContainer}>
                         <p className={styles.timer}>{formatTime(duration)}</p>
                       </div>
-                      
+
                       {/* Controls */}
                       <div className={styles.recordingControls}>
                         {state === 'requesting-permission' && (
@@ -298,12 +298,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             <p>Requesting microphone permission...</p>
                           </div>
                         )}
-                        
+
                         {state === 'recording' && (
                       <>
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={toggleMute}
                               className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
                             >
@@ -316,10 +316,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             <p>{isMuted ? 'Unmute' : 'Mute'}</p>
                           </TooltipContent>
                         </Tooltip>
-                        
+
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={pauseRecording}
                               className={styles.controlButton}
                             >
@@ -332,10 +332,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             <p>Pause</p>
                           </TooltipContent>
                         </Tooltip>
-                        
+
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={handleStopRecording}
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
@@ -350,12 +350,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         </Tooltip>
                       </>
                     )}
-                    
+
                     {state === 'paused' && (
                       <>
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={toggleMute}
                               className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
                             >
@@ -368,10 +368,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             <p>{isMuted ? 'Unmute' : 'Mute'}</p>
                           </TooltipContent>
                         </Tooltip>
-                        
+
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={resumeRecording}
                               className={styles.controlButton}
                             >
@@ -384,10 +384,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             <p>Resume</p>
                           </TooltipContent>
                         </Tooltip>
-                        
+
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
-                            <button 
+                            <button
                               onClick={handleStopRecording}
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
@@ -402,7 +402,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         </Tooltip>
                       </>
                     )}
-                    
+
                         {showSuccess && (
                           <div className={styles.successContainer}>
                             <Check className={styles.controlIcon} />
@@ -421,4 +421,4 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       </ClientOnly>
     </TooltipProvider>
   )
-} 
+}

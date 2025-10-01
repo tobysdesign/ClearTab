@@ -10,7 +10,7 @@ if (!connectionString) {
 }
 
 // Create postgres connection with proper pooling and timeouts
-const client = postgres(connectionString, { 
+const client = postgres(connectionString, {
   max: 10,                // Connection pool size
   idle_timeout: 20,       // Close idle connections after 20 seconds
   connect_timeout: 10,    // 10 second connection timeout

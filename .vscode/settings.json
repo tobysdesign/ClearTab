@@ -22,13 +22,13 @@
     "net"
   ],
   "files.exclude": {
-    "**/*tsconfig.json": true,
-    "**/.DS_Store": true,
     "**/.git": true,
-    "**/.hg": true,
-    "**/.retool_types/**": true,
     "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
     "**/Thumbs.db": true,
+    "**/*tsconfig.json": true,
+    "**/.retool_types/**": true,
     ".cache": true,
     "retool.config.json": true
   }

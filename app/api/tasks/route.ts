@@ -1,132 +1,173 @@
-import { NextResponse } from 'next/server';
-import { type Task, BlockNoteContentSchema, EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema';
-import { z } from 'zod';
-import { ActionResponse } from '@/types/actions';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
+import { tasks } from "@/shared/schema";
+import { eq, desc, and } from "drizzle-orm";
 
-const postBodySchema = z.object({
-  title: z.string(),
-  content: BlockNoteContentSchema.optional(), // Make content optional with default
-  isCompleted: z.boolean().default(false),
-  isHighPriority: z.boolean().default(false),
-  dueDate: z.string().datetime().optional().nullable(),
-  order: z.number().optional()
-});
-
-const patchBodySchema = postBodySchema.partial();
-
-export const runtime = 'nodejs'; // Use Node.js runtime
-
-export async function GET(): Promise<NextResponse<ActionResponse<Task[]>>> {
-  // Skip slow auth check - use hardcoded user ID for development
-  const userId = 'f4cb8d10-fab0-4477-bfbf-04af508fd2d7'
-  
-  const supabase = await createClient()
-
+export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-      
-    if (error) {
-      console.error('Supabase query error:', error);
-      
-      // If permission denied, return empty array (table doesn't exist yet)
-      if (error.code === '42501' || error.message.includes('permission denied')) {
-        console.log("Permission denied accessing tasks table, returning empty array");
-        return NextResponse.json({ success: true, data: [] })
-      }
-      
-      return NextResponse.json(
-        { success: false, error: 'Failed to fetch tasks', details: error.message },
-        { status: 500 }
-      );
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    
-    
-    // Transform snake_case to camelCase for frontend
-    const transformedData = data?.map(task => ({
-      ...task,
-      isHighPriority: task.is_high_priority,
-      dueDate: task.due_date,
-      createdAt: task.created_at,
-      updatedAt: task.updated_at,
-      userId: task.user_id,
-      isCompleted: task.is_completed
-    })) || [];
-    
-    return NextResponse.json({ success: true, data: transformedData });
+
+    const allTasks = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.userId, user.id))
+      .orderBy(desc(tasks.createdAt));
+
+    return NextResponse.json({ data: allTasks });
   } catch (error) {
-    console.error('Failed to fetch tasks:', error);
+    console.error("Tasks API error:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch tasks' },
-      { status: 500 }
+      { error: "Failed to fetch tasks" },
+      { status: 500 },
     );
   }
 }
 
-export async function POST(
-  request: Request
-): Promise<NextResponse<ActionResponse<Task>>> {
-  // Skip slow auth check - use hardcoded user ID for development
-  const userId = 'f4cb8d10-fab0-4477-bfbf-04af508fd2d7'
-  
-  const supabase = await createClient()
-
+export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
-    const validatedData = postBodySchema.parse(body);
+    const { title, description, dueDate, priority, isCompleted } = body;
 
+    const [newTask] = await db
+      .insert(tasks)
+      .values({
+        userId: user.id,
+        title: title || "Untitled Task",
+        content: description
+          ? [
+              {
+                type: "paragraph",
+                content: [{ type: "text", text: description }],
+              },
+            ]
+          : [],
+        dueDate: dueDate ? new Date(dueDate) : null,
+        isHighPriority: priority === "high",
+        isCompleted: isCompleted || false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
 
-    const taskToInsert = {
-      id: crypto.randomUUID(), // Generate UUID for primary key
-      title: validatedData.title,
-      content: validatedData.content || EMPTY_BLOCKNOTE_CONTENT,
-      is_completed: validatedData.isCompleted ?? false,
-      is_high_priority: validatedData.isHighPriority ?? false,
-      due_date: validatedData.dueDate ? new Date(validatedData.dueDate).toISOString() : null,
-      order: validatedData.order ?? null,
-      user_id: userId, // Use snake_case to match database
+    return NextResponse.json({ data: newTask });
+  } catch (error) {
+    console.error("Tasks API error:", error);
+    return NextResponse.json(
+      { error: "Failed to create task" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, title, description, dueDate, priority, isCompleted } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 },
+      );
+    }
+
+    const updateData: any = {
+      updatedAt: new Date(),
     };
 
-    const { data: result, error } = await supabase
-      .from('tasks')
-      .insert(taskToInsert)
-      .select()
-      .single();
-      
-    if (error) {
-      console.error('Supabase insert error:', error);
-      return NextResponse.json(
-        { success: false, error: 'Failed to create task', details: error.message },
-        { status: 500 }
-      );
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) {
+      updateData.content = description
+        ? [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: description }],
+            },
+          ]
+        : [];
     }
-    
-    return NextResponse.json({ success: true, data: result });
+    if (dueDate !== undefined)
+      updateData.dueDate = dueDate ? new Date(dueDate) : null;
+    if (priority !== undefined) updateData.isHighPriority = priority === "high";
+    if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
+
+    const [updatedTask] = await db
+      .update(tasks)
+      .set(updateData)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, user.id)))
+      .returning();
+
+    if (!updatedTask) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ data: updatedTask });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const validationErrors: Record<string, string[]> = {};
-      error.errors.forEach(err => {
-        const path = err.path.join('.');
-        if (!validationErrors[path]) {
-          validationErrors[path] = [];
-        }
-        validationErrors[path].push(err.message);
-      });
-      return NextResponse.json(
-        { success: false, error: 'Invalid task data', validationErrors },
-        { status: 400 }
-      );
-    }
-    console.error('Failed to create task:', error); // Log the full error object
+    console.error("Tasks API error:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create task' },
-      { status: 500 }
+      { error: "Failed to update task" },
+      { status: 500 },
     );
   }
 }
 
- 
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Task ID is required" },
+        { status: 400 },
+      );
+    }
+
+    await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.userId, user.id)));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Tasks API error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete task" },
+      { status: 500 },
+    );
+  }
+}

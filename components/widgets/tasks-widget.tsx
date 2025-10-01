@@ -16,7 +16,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useTaskModal } from '@/app/client-providers'
 import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema' // Corrected import path
 import styles from './widget.module.css'
-import { ScrollShadows } from '@/components/ui/scroll-shadows'
+
 import { ClientOnly } from '@/components/ui/safe-motion'
 import X from 'lucide-react/dist/esm/icons/x'
 import { format } from 'date-fns'
@@ -48,8 +48,8 @@ async function deleteTask(taskId: string): Promise<void> {
 }
 
 async function createTask(title: string, isCompleted: boolean, isHighPriority: boolean, content: any): Promise<Task> {
-  const res = await api.post('/api/tasks', { 
-    title, 
+  const res = await api.post('/api/tasks', {
+    title,
     isCompleted, // Use passed isCompleted
     isHighPriority, // Use passed high priority flag
     content, // Use passed content
@@ -66,30 +66,30 @@ async function createTask(title: string, isCompleted: boolean, isHighPriority: b
 export async function createTaskFromText(text: string): Promise<Task | null> {
   try {
     if (!text) return null;
-    
+
     // Extract title from first line or use truncated text
     const lines = text.split('\n');
-    const title = lines[0].length > 50 
-      ? lines[0].substring(0, 50) + '...' 
+    const title = lines[0].length > 50
+      ? lines[0].substring(0, 50) + '...'
       : lines[0];
-    
-    
+
+
     const res = await fetch('/api/tasks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        title, 
+      body: JSON.stringify({
+        title,
         isCompleted: false, // Default for new tasks from text
         priority: 'none', // Default for new tasks from text
         // We'll handle the description formatting in the edit form
       }),
     });
-    
+
     if (!res.ok) {
       const errorBody = await res.json();
       throw new Error(errorBody.error || 'Failed to create task');
     }
-    
+
     const response = await res.json();
     return response.data;
   } catch (error) {
@@ -119,15 +119,15 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     }
     loadTasks()
   }, [])
-  
+
 
   const updateTaskLocal = useCallback(async (updatedTask: Partial<Task> & { id: string }) => {
     try {
       // Optimistically update UI
-      setTasks(prev => prev.map(task => 
+      setTasks(prev => prev.map(task =>
         task.id === updatedTask.id ? { ...task, ...updatedTask } : task
       ))
-      
+
       // Update on server
       await updateTask(updatedTask)
     } catch (error) {
@@ -142,7 +142,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     try {
       // Optimistically update UI
       setTasks(prev => prev.filter(task => task.id !== taskId))
-      
+
       // Delete from server
       await deleteTask(taskId)
     } catch (error) {
@@ -157,13 +157,13 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     try {
       // Create task on server
       const newTask = await createTask(newTaskData.title, newTaskData.isCompleted, newTaskData.isHighPriority, newTaskData.content)
-      
+
       // Add to local state
       setTasks(prev => [newTask, ...prev])
-      
+
       // Open the new task in the modal
       setActiveTaskId(newTask.id)
-      
+
       return newTask
     } catch (error) {
       throw error
@@ -191,7 +191,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
       content: EMPTY_BLOCKNOTE_CONTENT, // Use BlockNote's empty content structure
     });
   }
-  
+
   // Function to handle creating a task from editor text
   function handleCreateTaskFromEditorText(text: string) {
     // We now just set the initial text, the modal open and form creation is handled by ClientProviders
@@ -240,11 +240,12 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
 
   return (
     <WidgetContainer>
-      <WidgetHeader title="Tasks">
+      <WidgetHeader title="Tasks" className="!justify-start">
         <AddButton onClick={handleAddTask} />
       </WidgetHeader>
       <WidgetContent>
-        <ScrollShadows className="widget-full-height custom-scrollbar">
+        <div className="widget-full-height overflow-y-auto custom-scrollbar">
+          <div className="widget-list-content">
           <div className="taskEmpty">
             {tasks.length === 0 ? (
               <EmptyState
@@ -260,7 +261,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
             ) : (
               <ClientOnly>
                 <motion.div
-                  className="widget-list-content"
+                  className="widget-tasks-content"
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -284,14 +285,14 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
                           onClick={() => setActiveTaskId(task.id)}
                           className={cn(
                             "group widget-list-item widget-list-item--tasks relative",
-                            isActive ? "bg-[#5c5c5c] border-[#5c5c5c]" : "bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545]"
+                            isActive ? "bg-[#5c5c5c] border-[#5c5c5c]" : "bg-[#222222] border-[#222222] hover:bg-[#2a2a2a] hover:border-[#2a2a2a]"
                           )}
                         >
                           {/* Pink dot for active item */}
                           {isActive && (
                             <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-400" />
                           )}
-                          
+
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <Checkbox
@@ -332,7 +333,8 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
               </ClientOnly>
             )}
           </div>
-        </ScrollShadows>
+          </div>
+        </div>
       </WidgetContent>
     </WidgetContainer>
   )
