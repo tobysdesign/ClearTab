@@ -1,4 +1,4 @@
-## ClearTab.app (Bye) – Personal Dashboard
+## ClearTab.app – Personal Productivity Dashboard
 
 Modern, AI-powered personal dashboard and productivity app with notes, tasks, calendars, and widgets. Ships as a web app and a Chrome new-tab extension.
 
