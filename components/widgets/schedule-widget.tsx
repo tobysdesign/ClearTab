@@ -49,8 +49,8 @@ function EventCard({
   return (
     <div
       className={cn(
-        scheduleStyles.eventCard,
-        isCurrent && scheduleStyles.eventCardCurrent
+        "widget-list-item widget-list-item--schedule",
+        isCurrent && "current",
       )}
     >
       <div className={scheduleStyles.eventTitle}>{event.title}</div>
@@ -124,7 +124,7 @@ function DaySection({
           className={scheduleStyles.currentTimeIndicator}
           style={{
             top: currentEvent ? "50%" : "20%",
-            transform: "translateY(-50%)"
+            transform: "translateY(-50%)",
           }}
         >
           <div className={scheduleStyles.currentTimeContainer}>
@@ -347,7 +347,9 @@ export function ScheduleWidget() {
         <div className={scheduleStyles.emptyStateContainer}>
           {isAuthError ? (
             <EmptyState
-              renderIcon={() => <Calendar className={scheduleStyles.emptyStateIcon} />}
+              renderIcon={() => (
+                <Calendar className={scheduleStyles.emptyStateIcon} />
+              )}
               title="Connect your calendar"
               description="See your schedule at a glance by connecting your Google Calendar."
               action={{
@@ -404,9 +406,7 @@ export function ScheduleWidget() {
             />
           ) : (
             <>
-              <p className={scheduleStyles.errorText}>
-                Error loading schedule
-              </p>
+              <p className={scheduleStyles.errorText}>Error loading schedule</p>
               <p className={scheduleStyles.errorMessage}>{error.message}</p>
             </>
           )}
@@ -481,7 +481,11 @@ export function ScheduleWidget() {
                     isCurrentDay = isToday(parseISO(dayKey));
                   }
                 } catch (e) {
-                  console.error("Error checking isToday for dayKey:", dayKey, e);
+                  console.error(
+                    "Error checking isToday for dayKey:",
+                    dayKey,
+                    e,
+                  );
                 }
 
                 return (

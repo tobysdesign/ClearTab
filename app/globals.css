@@ -10,9 +10,9 @@
     /* NEW CSS ARCHITECTURE VARIABLES */
     /* spacing scale */
     --space-1: 0.25rem; /* 3px */
-    --space-2: 0.5rem;  /* 6px */
+    --space-2: 0.5rem; /* 6px */
     --space-3: 0.75rem; /* 9px */
-    --space-4: 1rem;    /* 12px */
+    --space-4: 1rem; /* 12px */
     --radius-2: 8px;
 
     /* fluid type around 12px base */
@@ -54,7 +54,9 @@ html {
 
 /* Respect motion preferences */
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -66,176 +68,240 @@ html {
    =========================================== */
 
 /* Flex layouts - semantic replacements for Tailwind */
-.flex { display: flex; }
-.flex-col { display: flex; flex-direction: column; }
-.flex-row { display: flex; flex-direction: row; }
-.items-center { display: flex; align-items: center; }
-.justify-center { display: flex; justify-content: center; }
-.justify-between { display: flex; justify-content: space-between; }
-.flex-1 { flex: 1; }
+.flex {
+    display: flex;
+}
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+.items-center {
+    display: flex;
+    align-items: center;
+}
+.justify-center {
+    display: flex;
+    justify-content: center;
+}
+.justify-between {
+    display: flex;
+    justify-content: space-between;
+}
+.flex-1 {
+    flex: 1;
+}
 
 /* Sizing */
-.w-full { width: 100%; }
-.h-full { height: 100%; }
-.w-full.h-full { width: 100%; height: 100%; }
-.min-h-0 { min-height: 0; }
+.w-full {
+    width: 100%;
+}
+.h-full {
+    height: 100%;
+}
+.w-full.h-full {
+    width: 100%;
+    height: 100%;
+}
+.min-h-0 {
+    min-height: 0;
+}
 
 /* Spacing */
-.p-2 { padding: 0.5rem; }
-.p-4 { padding: 1rem; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
+.p-2 {
+    padding: 0.5rem;
+}
+.p-4 {
+    padding: 1rem;
+}
+.gap-2 {
+    gap: 0.5rem;
+}
+.gap-4 {
+    gap: 1rem;
+}
 
 /* Overflow */
-.overflow-hidden { overflow: hidden; }
-.overflow-auto { overflow: auto; }
-.overflow-y-auto { overflow-y: auto; }
+.overflow-hidden {
+    overflow: hidden;
+}
+.overflow-auto {
+    overflow: auto;
+}
+.overflow-y-auto {
+    overflow-y: auto;
+}
 
 /* Positioning */
-.relative { position: relative; }
-.absolute { position: absolute; }
-.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.relative {
+    position: relative;
+}
+.absolute {
+    position: absolute;
+}
+.inset-0 {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
 
 /* Text */
-.text-center { text-align: center; }
-.text-sm { font-size: 0.875rem; }
-.text-lg { font-size: 1.125rem; }
-.font-semibold { font-weight: 600; }
+.text-center {
+    text-align: center;
+}
+.text-sm {
+    font-size: 0.875rem;
+}
+.text-lg {
+    font-size: 1.125rem;
+}
+.font-semibold {
+    font-weight: 600;
+}
 
 /* Border radius */
-.rounded-lg { border-radius: 0.5rem; }
-.rounded-xl { border-radius: 0.75rem; }
+.rounded-lg {
+    border-radius: 0.5rem;
+}
+.rounded-xl {
+    border-radius: 0.75rem;
+}
 
 /* Dashboard components - removed Tailwind utilities */
 .dashboard-container {
-  position: relative;
-  height: 100vh;
-  width: 100vw;
+    position: relative;
+    height: 100vh;
+    width: 100vw;
 }
 
 .dashboard-content {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }
 
 .drop-zone {
-  /* layout */
-  position: fixed;
+    /* layout */
+    position: fixed;
 
-  /* box model */
-  width: 80px;
-  height: 80px;
-  border: 2px dashed;
-  border-radius: 8px;
+    /* box model */
+    width: 80px;
+    height: 80px;
+    border: 2px dashed;
+    border-radius: 8px;
 
-  /* visual */
-  transform: translate(-50%, -50%);
+    /* visual */
+    transform: translate(-50%, -50%);
 
-  /* state */
-  transition: all 200ms ease-out;
-  pointer-events: none;
+    /* state */
+    transition: all 200ms ease-out;
+    pointer-events: none;
 }
 
 .drop-zone-active {
-  /* visual */
-  border-color: #10b981;
-  background-color: rgba(16, 185, 129, 0.2);
+    /* visual */
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.2);
 }
 
 .drop-zone-inactive {
-  /* visual */
-  border-color: rgba(141, 141, 141, 0.3);
-  background-color: transparent;
+    /* visual */
+    border-color: rgba(141, 141, 141, 0.3);
+    background-color: transparent;
 }
 
 .dock-container {
-  /* layout */
-  position: absolute;
-  z-index: 50;
+    /* layout */
+    position: absolute;
+    z-index: 50;
 
-  /* box model */
-  width: fit-content;
-  height: fit-content;
-  border-radius: 12px;
+    /* box model */
+    width: fit-content;
+    height: fit-content;
+    border-radius: 12px;
 
-  /* visual */
-  background-color: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
-              0 0 0 1px rgba(255, 255, 255, 0.1),
-              0 0 20px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
+    /* visual */
+    background-color: rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
 
-  /* state */
-  user-select: none;
-  touch-action: none;
+    /* state */
+    user-select: none;
+    touch-action: none;
 }
 
 .dock-content {
-  display: flex;
-  padding: 0.5rem;
+    display: flex;
+    padding: 0.5rem;
 }
 
 .dock-content-vertical {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .dock-content-horizontal {
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .dock-handle {
-  /* box model */
-  padding: 0.5rem;
-  border-radius: 8px;
+    /* box model */
+    padding: 0.5rem;
+    border-radius: 8px;
 
-  /* typography */
-  color: rgba(255, 255, 255, 0.6);
+    /* typography */
+    color: rgba(255, 255, 255, 0.6);
 
-  /* state */
-  cursor: grab;
-  transition: all 200ms ease-out;
+    /* state */
+    cursor: grab;
+    transition: all 200ms ease-out;
 }
 
 .dock-handle:hover {
-  /* visual */
-  background-color: rgba(255, 255, 255, 0.2);
+    /* visual */
+    background-color: rgba(255, 255, 255, 0.2);
 
-  /* typography */
-  color: rgba(255, 255, 255, 0.8);
+    /* typography */
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .dock-handle:active {
-  /* state */
-  cursor: grabbing;
+    /* state */
+    cursor: grabbing;
 }
 
 .dock-handle-icon {
-  /* box model */
-  width: 1rem;
-  height: 1rem;
+    /* box model */
+    width: 1rem;
+    height: 1rem;
 }
 
 /* Bento grid components - removed Tailwind utilities */
 .panel-group {
-  height: 100%;
-  width: 100%;
+    height: 100%;
+    width: 100%;
 }
 
 .panel-motion {
-  height: 100%;
+    height: 100%;
 }
 
 .bento-container {
-  height: 100%;
-  width: 100%;
+    height: 100%;
+    width: 100%;
 }
 
 /* Modal structure */
@@ -299,11 +365,6 @@ html {
     align-items: center;
     justify-content: flex-start;
     gap: 0.5rem;
-    background: linear-gradient(
-        180deg,
-        rgb(29 28 28) 70%,
-        rgb(0 0 0 / 0%) 100%
-    );
     border-radius: 22px 22px 0 0;
 }
 
@@ -434,7 +495,7 @@ html {
 }
 
 .countdown-title {
-    color: #8D8D8D;
+    color: #8d8d8d;
     font-size: 16px;
     font-weight: 400;
 }
@@ -449,7 +510,7 @@ html {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #FF69B4;
+    background-color: #ff69b4;
 }
 
 .countdown-footer {
@@ -1938,6 +1999,30 @@ html[data-vaul-drawer-visible="true"] {
    WIDGET LIST ITEM SYSTEM
    =========================================== */
 
+/* List item entrance animation */
+@keyframes listItemFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* List item exit animation */
+@keyframes listItemFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+}
+
 /* Base list item - clean, semantic styling */
 .widget-list-item {
     display: flex;
@@ -1945,51 +2030,49 @@ html[data-vaul-drawer-visible="true"] {
     justify-content: space-between;
     padding: 8px 12px;
     margin-bottom: 4px;
-    border-radius: 6px;
-    border: 1px solid #2a2a2a;
-    background-color: transparent;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background-color: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(4px);
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     cursor: pointer;
+    animation: listItemFadeIn 0.2s ease-out;
 }
 
 .widget-list-item:hover {
-    background-color: rgba(49, 49, 49, 0.2);
-    border-color: rgba(60, 60, 60, 0.4);
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
 }
 
 .widget-list-item.active,
 .widget-list-item[data-state="active"],
 .widget-list-item[aria-selected="true"] {
-    background-color: rgba(49, 49, 49, 0.3);
-    border-color: rgba(60, 60, 60, 0.5);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Task-specific list items (darker default background) */
+/* Task-specific list items */
 .widget-list-item--tasks {
-    background-color: rgba(34, 34, 34, 0.5);
-    border-color: transparent;
-    backdrop-filter: blur(8px);
+    position: relative;
+    padding: 12px;
+    gap: 12px;
 }
 
 .widget-list-item--tasks:hover {
-    background-color: rgba(61, 61, 61, 0.5);
-    border-color: rgba(37, 35, 35, 0.3);
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .widget-list-item--tasks.active {
-    background-color: rgba(41, 41, 41, 0.6);
-    border-color: rgba(67, 67, 67, 0.5);
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Notes-specific list items (same as tasks) */
+/* Notes-specific list items */
 .widget-list-item--notes {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background-color: #222222;
-    border-color: #222222;
-    backdrop-filter: blur(8px);
+    padding: 12px;
+    gap: 6px;
 }
 
 /* Force flex display even with framer motion */
@@ -2000,8 +2083,30 @@ html[data-vaul-drawer-visible="true"] {
 }
 
 .widget-list-item--notes:hover {
-    background-color: #424242;
-    border-color: #424242;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.widget-list-item--notes.active {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Schedule-specific list items (event cards) */
+.widget-list-item--schedule {
+    padding: 12px;
+    margin-bottom: 4px;
+}
+
+.widget-list-item--schedule:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.widget-list-item--schedule.current {
+    background-color: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.widget-list-item--schedule.current:hover {
+    background-color: rgba(96, 165, 250, 0.2);
 }
 
 .widget-list-item--notes.active,
@@ -2170,7 +2275,7 @@ html[data-vaul-drawer-visible="true"] {
 
 /* Wider hitbox for hover detection */
 [data-panel-resize-handle-id]::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -8px;
     z-index: 1;
@@ -2255,7 +2360,6 @@ textarea::placeholder {
 
 /* Specifically target any elements with pink/rose colors */
 
-
 /* Hide any BlockNote UI elements that might be pink */
 .bn-container .bn-drag-handle,
 .bn-container .bn-side-menu,
@@ -2282,7 +2386,7 @@ textarea::placeholder {
 
 /* Wider hitbox for notes divider hover detection */
 .cursor-col-resize::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     bottom: 0;
@@ -2294,7 +2398,7 @@ textarea::placeholder {
 /* Override hover states for resize dividers */
 .bg-border.hover\:bg-primary:hover,
 .cursor-col-resize:hover {
-    background-color: #FF4F4F !important;
+    background-color: #ff4f4f !important;
 }
 
 /* Force override for that specific pink color */
