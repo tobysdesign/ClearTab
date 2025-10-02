@@ -10,6 +10,7 @@ import { SettingsDrawer } from "@/components/settings/settings-drawer";
 import { PieGuide } from "./pie-guide";
 import { type ReactNode } from "react";
 import Image from "next/image";
+import styles from "./dashboard-client.module.css";
 
 interface DashboardClientProps {
   notes: ReactNode;
@@ -26,7 +27,7 @@ interface DropZone {
 
 function LoadingState() {
   return (
-    <div className="flex items-center justify-center w-full h-full min-h-screen">
+    <div className={styles.loadingContainer}>
       <div className="relative w-[90px] h-[50px]">
         <Image
           src="/assets/loading.gif"
@@ -61,10 +62,6 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
 
   const initialPosition = "bottom" as DropZone["id"];
-  const initialHorizontalWidth = false ? 320 : 180;
-  const initialHorizontalHeight = 52;
-  const initialVerticalWidth = 52;
-  const initialVerticalHeight = false ? 220 : 160;
   const EDGE_MARGIN = 8;
 
   // Calculate initial currentZoneState based on a default position
@@ -72,10 +69,10 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
     typeof window !== "undefined"
       ? {
           id: initialPosition,
-          x: (window.innerWidth - initialHorizontalWidth) / 2,
-          y: window.innerHeight - initialHorizontalHeight - EDGE_MARGIN,
-          width: initialHorizontalWidth,
-          height: initialHorizontalHeight,
+          x: window.innerWidth / 2,
+          y: window.innerHeight - 60,
+          width: 0,
+          height: 0,
         }
       : null;
 
@@ -99,41 +96,36 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
 
   const calculateDropZones = useCallback(() => {
     const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-
-    const horizontalWidth = showSearch ? 320 : 180;
-    const horizontalHeight = 52;
-    const verticalWidth = 52;
-    const verticalHeight = showSearch ? 220 : 160;
     const EDGE_MARGIN = 8;
 
     const newZones: DropZone[] = [
       {
         id: "top",
-        x: (windowWidth - horizontalWidth) / 2,
-        y: EDGE_MARGIN,
-        width: horizontalWidth,
-        height: horizontalHeight,
+        x: windowWidth / 2,
+        y: 60,
+        width: 0,
+        height: 0,
       },
       {
         id: "bottom",
-        x: (windowWidth - horizontalWidth) / 2,
-        y: windowHeight - horizontalHeight - EDGE_MARGIN,
-        width: horizontalWidth,
-        height: horizontalHeight,
+        x: windowWidth / 2,
+        y: windowHeight - 60,
+        width: 0,
+        height: 0,
       },
       {
         id: "left",
-        x: EDGE_MARGIN,
-        y: (windowHeight - verticalHeight) / 2,
-        width: verticalWidth,
-        height: verticalHeight,
+        x: 60,
+        y: windowHeight / 2,
+        width: 0,
+        height: 0,
       },
       {
         id: "right",
-        x: windowWidth - verticalWidth - EDGE_MARGIN,
-        y: (windowHeight - verticalHeight) / 2,
-        width: verticalWidth,
-        height: verticalHeight,
+        x: windowWidth - 60,
+        y: windowHeight / 2,
+        width: 0,
+        height: 0,
       },
     ];
     setDropZones(newZones);
@@ -153,8 +145,6 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         {
           x: currentZone.x,
           y: currentZone.y,
-          width: currentZone.width,
-          height: currentZone.height,
         },
         { type: "spring", stiffness: 500, damping: 40 },
       );
@@ -229,7 +219,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   }
 
   return (
-    <div ref={containerRef} className="relative h-screen w-screen">
+    <div ref={containerRef} className="dashboard-container">
       {/* <SettingsModal
         open={showSettings}
         onOpenChange={setShowSettings}
@@ -241,7 +231,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         originPosition={position}
       />
 
-      <div className="absolute inset-0">
+      <div className="dashboard-content">
         <Suspense fallback={<LoadingState />}>
           <ResizableBentoGrid
             notes={notes}
@@ -269,16 +259,12 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
             <div
               key={zone.id}
               className={cn(
-                "absolute border-2 border-dashed rounded-lg transition-colors duration-200 ease-out",
-                nearestZoneId === zone.id
-                  ? "border-emerald-500 bg-emerald-500/20"
-                  : "border-muted bg-transparent",
+                "drop-zone",
+                nearestZoneId === zone.id ? "drop-zone-active" : "drop-zone-inactive",
               )}
               style={{
                 left: zone.x,
                 top: zone.y,
-                width: zone.width,
-                height: zone.height,
               }}
             />
           );
@@ -291,19 +277,13 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         dragMomentum={false}
-        className="select-none touch-none absolute z-50 rounded-xl bg-black/40 shadow-2xl backdrop-blur-xl supports-[backdrop-filter]:bg-black/30"
-        style={{
-          boxShadow:
-            "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.1)",
-        }}
+        className="dock-container"
         animate={controls}
       >
         <div
           className={cn(
-            "flex h-full w-full p-2",
-            isVertical
-              ? "flex-col items-center justify-center gap-2"
-              : "items-center gap-2",
+            "dock-content",
+            isVertical ? "dock-content-vertical" : "dock-content-horizontal",
           )}
         >
           <DockContent
@@ -319,13 +299,13 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
           <SettingsDrawer />
 
           <div
-            className="rounded-lg p-2 hover:bg-white/20 cursor-grab active:cursor-grabbing transition-all duration-200 ease-out text-white/60 hover:text-white/80"
+            className="dock-handle"
             onPointerDown={(e) => {
               const target = e.currentTarget as HTMLDivElement;
               target.setPointerCapture(e.pointerId);
             }}
           >
-            <GripVertical className="h-4 w-4" />
+            <GripVertical className="dock-handle-icon" />
           </div>
         </div>
       </motion.div>

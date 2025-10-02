@@ -1,0 +1,263 @@
+/* Schedule Widget: Event Card */
+.eventCard {
+  /* box model */
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.05);
+
+  /* state */
+  transition: background-color 150ms ease;
+}
+
+.eventCard:hover {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.eventCardCurrent {
+  /* visual */
+  background-color: rgba(96, 165, 250, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.eventCardCurrent:hover {
+  /* visual */
+  background-color: rgba(96, 165, 250, 0.2);
+}
+
+.eventTitle {
+  /* box model */
+  margin-bottom: 0.25rem;
+
+  /* typography */
+  color: white;
+  font-size: 0.875rem;
+}
+
+.eventTime {
+  /* typography */
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+/* Schedule Widget: Day Section */
+.daySection {
+  /* layout */
+  position: relative;
+
+  /* box model */
+  margin-bottom: 1.5rem;
+}
+
+/* Schedule Widget: Current Time Indicator */
+.currentTimeIndicator {
+  /* layout */
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 30;
+
+  /* state */
+  pointer-events: none;
+}
+
+.currentTimeContainer {
+  /* layout */
+  position: relative;
+}
+
+.currentTimeLine {
+  /* layout */
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  /* box model */
+  height: 2px;
+
+  /* visual */
+  background-color: #fb7185;
+}
+
+.currentTimeDot {
+  /* layout */
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  /* box model */
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+
+  /* visual */
+  background-color: #fb7185;
+}
+
+/* Schedule Widget: Day Header */
+.dayHeader {
+  /* box model */
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+
+  /* typography */
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Schedule Widget: Container */
+.scheduleContainer {
+  /* layout */
+  display: flex;
+
+  /* box model */
+  height: 100%;
+}
+
+/* Schedule Widget: Empty State */
+.emptyStateContainer {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* box model */
+  padding: 1.5rem;
+
+  /* typography */
+  text-align: center;
+}
+
+.emptyStateIcon {
+  /* box model */
+  width: 1.5rem;
+  height: 1.5rem;
+
+  /* typography */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Schedule Widget: Error State */
+.errorText {
+  /* typography */
+  font-weight: 700;
+  color: hsl(var(--destructive));
+}
+
+.errorMessage {
+  /* typography */
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.sidebar {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  
+  /* box model */
+  width: 120px;
+  height: 100%;
+  padding-bottom: 24px;
+  border-right: 1px solid #323235;
+}
+
+.sidebarHeader {
+  /* layout */
+  display: flex;
+  align-items: center;
+  
+  /* box model */
+  min-height: 60px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.sidebarContent {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  
+  /* box model */
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.sidebarFooter {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dayDateStack {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  
+  /* box model */
+  margin-bottom: 4px;
+}
+
+.dayLabel {
+  /* layout */
+  display: flex;
+  align-items: center;
+  
+  /* box model */
+  margin-bottom: 4px;
+  
+  /* typography */
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.todayDot {
+  /* box model */
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  
+  /* visual */
+  background-color: rgb(251, 113, 133);
+}
+
+.rightPanel {
+  /* layout */
+  overflow: hidden;
+  flex: 1;
+}
+
+.rightPanelContent {
+  /* layout */
+  overflow-y: auto;
+  
+  /* box model */
+  height: 100%;
+  padding: 16px;
+}
+
+.calendarIcon {
+  /* box model */
+  width: 24px;
+  height: 24px;
+  
+  /* typography */
+  color: rgba(255, 255, 255, 0.4);
+}

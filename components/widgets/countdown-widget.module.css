@@ -1,8 +1,19 @@
 .container {
-  @apply relative rounded-[22px] h-full w-full;
+  /* layout */
+  position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: visible;
-  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+  padding: 24px;
   border: 1px solid #323235;
+  border-radius: 22px;
+
+  /* visual */
+  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
   box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -40,10 +51,83 @@
   background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white for inactive dots/circles */
 }
 
+.countdownContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.countdownContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.countdownTitle {
+  /* typography */
+  color: #C4C4C4;
+  font-family: 'Inter Display', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+
+  /* box model */
+  margin-bottom: 2px;
+}
+
+.countdownDots {
+  /* layout */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 4px;
+
+  /* box model */
+  padding: 16px 0;
+}
+
+.countdownDot {
+  /* box model */
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  /* visual */
+  background-color: #FF69B4;
+}
+
+.countdownFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.countdownNumberSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bigNumber {
+  /* typography */
+  color: #C4C4C4;
+  font-family: 'Inter Display', sans-serif;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 0.9;
+
+  /* box model */
+  margin-bottom: 4px;
+}
+
 .postText {
-  color: #555454 !important;
-  font-family: 'Inter Display', sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
-  line-height: 1.2 !important;
-} 
+  /* typography */
+  color: #555454;
+  font-family: 'Inter Display', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+}

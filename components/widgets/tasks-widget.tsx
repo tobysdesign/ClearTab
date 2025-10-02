@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { useTaskModal } from '@/app/client-providers'
 import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema' // Corrected import path
 import styles from './widget.module.css'
+import tasksStyles from './tasks-widget.module.css'
 
 import { ClientOnly } from '@/components/ui/safe-motion'
 import X from 'lucide-react/dist/esm/icons/x'
@@ -230,38 +231,35 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
 
   if (isError) {
     return (
-      <Card className="rounded-lg border border-border bg-card text-card-foreground shadow-sm h-full">
-        <div className="flex items-center justify-center h-full text-destructive">
-          Failed to load tasks. Please try again later.
-        </div>
-      </Card>
+      <div className={tasksStyles.tasksError}>
+        Failed to load tasks. Please try again later.
+      </div>
     )
   }
 
   return (
     <WidgetContainer>
-      <WidgetHeader title="Tasks" className="!justify-start">
+      <WidgetHeader title="Tasks">
         <AddButton onClick={handleAddTask} />
       </WidgetHeader>
       <WidgetContent>
-        <div className="widget-full-height overflow-y-auto custom-scrollbar">
-          <div className="widget-list-content">
-          <div className="taskEmpty">
+        <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>
+          <div className={tasksStyles.tasksListContent}>
+          <div className={tasksStyles.tasksEmpty}>
             {tasks.length === 0 ? (
               <EmptyState
-                renderIcon={() => <X className="h-6 w-6 text-white/40" />}
+                renderIcon={() => <X className={tasksStyles.tasksEmptyIcon} />}
                 title="Not a care"
                 description="Could your first task be to add a task?"
                 action={{
                   label: "Add Task",
                   onClick: handleAddTask
                 }}
-                className="widget-full-height"
+                className={tasksStyles.tasksScrollArea}
               />
             ) : (
               <ClientOnly>
                 <motion.div
-                  className="widget-tasks-content"
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -284,17 +282,17 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
                           exit={{ x: -50, opacity: 0 }}
                           onClick={() => setActiveTaskId(task.id)}
                           className={cn(
-                            "group widget-list-item widget-list-item--tasks relative",
-                            isActive ? "bg-[#5c5c5c] border-[#5c5c5c]" : "bg-[#222222] border-[#222222] hover:bg-[#2a2a2a] hover:border-[#2a2a2a]"
+                            tasksStyles.taskItem,
+                            isActive && tasksStyles.taskItemActive
                           )}
                         >
                           {/* Pink dot for active item */}
                           {isActive && (
-                            <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-rose-400" />
+                            <div className={tasksStyles.taskActiveIndicator} />
                           )}
 
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={tasksStyles.tasksContent}>
+                            <div className={tasksStyles.tasksContentLeft}>
                               <Checkbox
                                 id={`task-${task.id}`}
                                 checked={task.isCompleted}
@@ -304,24 +302,22 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
                                 onClick={(e) => e.stopPropagation()}
                               />
                               <h3
-                                className={`text-sm font-normal truncate ${
-                                  task.isCompleted
-                                    ? 'line-through opacity-50'
-                                    : ''
-                                }`}
-                                style={{color: task.isCompleted ? '#5A5A5A' : '#E6E6E6'}}
+                                className={cn(
+                                  tasksStyles.taskTitle,
+                                  task.isCompleted ? tasksStyles.taskTitleCompleted : tasksStyles.taskTitleIncomplete
+                                )}
                               >
                                 {task.title}
                               </h3>
                             </div>
-                            <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className={tasksStyles.tasksContentRight}>
                               {task.dueDate && (
-                                <span className="text-xs" style={{color: '#5A5A5A'}}>
+                                <span className={tasksStyles.taskDueDate}>
                                   {format(new Date(task.dueDate), 'd MMM')}
                                 </span>
                               )}
                               {task.isHighPriority && (
-                                <span className="text-pink-500 text-base font-medium">!</span>
+                                <span className={tasksStyles.taskPriorityIndicator}>!</span>
                               )}
                             </div>
                           </div>

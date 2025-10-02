@@ -1,0 +1,108 @@
+/* Dock Content Layout */
+.container {
+  /* layout */
+  display: flex;
+  align-items: center;
+}
+
+.containerVertical {
+  /* layout */
+  flex-direction: column;
+
+  /* box model */
+  gap: 0.5rem;
+}
+
+.containerHorizontal {
+  /* box model */
+  gap: 0.5rem;
+}
+
+/* Icon Button */
+.iconButton {
+  /* box model */
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+
+  /* typography */
+  color: rgba(255, 255, 255, 0.8);
+
+  /* state */
+  transition: all 200ms ease-out;
+}
+
+.iconButton:hover {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* typography */
+  color: rgba(255, 255, 255, 1);
+}
+
+.iconButtonActive {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* typography */
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Search Container */
+.searchContainer {
+  /* layout */
+  display: flex;
+  align-items: center;
+}
+
+.searchContainerVertical {
+  /* layout */
+  flex-direction: column;
+
+  /* box model */
+  gap: 0.5rem;
+}
+
+.searchContainerHorizontal {
+  /* box model */
+  gap: 0.5rem;
+}
+
+/* Search Input */
+.searchInput {
+  /* box model */
+  height: 2rem;
+  width: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  /* typography */
+  color: white;
+
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.searchInput::placeholder {
+  /* typography */
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.searchInput:focus {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* AI Button Active State */
+.aiButtonActive {
+  /* visual */
+  background-color: hsl(var(--muted));
+}
+
+/* Icon sizing */
+.icon {
+  /* box model */
+  width: 1rem;
+  height: 1rem;
+}

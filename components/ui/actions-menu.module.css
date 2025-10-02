@@ -1,0 +1,61 @@
+.srOnly {
+  /* layout */
+  position: absolute;
+
+  /* box model */
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+
+  /* visual */
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.icon {
+  /* box model */
+  width: 1rem;
+  height: 1rem;
+}
+
+.popoverContent {
+  /* layout */
+  z-index: 50;
+
+  /* box model */
+  width: auto;
+  padding: 8px;
+  border: 0;
+  border-radius: 12px;
+
+  /* visual */
+  background-color: #a5a5a5;
+  box-shadow: none;
+  backdrop-filter: blur(0.75em);
+
+  /* typography */
+  color: black;
+}
+
+.deleteButton {
+  /* layout */
+  display: flex;
+  justify-content: flex-start;
+
+  /* box model */
+  width: 100%;
+
+  /* typography */
+  color: rgb(220, 38, 38);
+
+  /* state */
+  transition: colors 0.2s;
+}
+
+.deleteButton:hover {
+  background-color: #8c8c8c;
+  color: rgb(185, 28, 28);
+}

@@ -23,6 +23,7 @@ import { AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 import styles from "./widget.module.css";
+import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
 import { cn } from "@/lib/utils";
 import { ActionsMenu } from "@/components/ui/actions-menu";
@@ -96,21 +97,18 @@ function ResizablePanels({
   };
 
   return (
-    <div className="flex flex-row h-full w-full" ref={containerRef}>
+    <div className={notesStyles.resizablePanels} ref={containerRef}>
       <div
         style={{ width: collapsed ? 60 : currentWidth }}
-        className="flex-shrink-0"
+        className={notesStyles.resizableLeft}
       >
         {children[0]}
       </div>
       <div
-        className={cn(
-          "bg-border hover:bg-primary transition-colors cursor-col-resize flex-shrink-0",
-          collapsed ? "w-[1px]" : "w-[1px]",
-        )}
+        className={notesStyles.resizableHandle}
         onMouseDown={handleMouseDown}
       />
-      <div className="flex-grow overflow-hidden">{children[1]}</div>
+      <div className={notesStyles.resizableRight}>{children[1]}</div>
     </div>
   );
 }
@@ -710,7 +708,7 @@ export function NotesWidget() {
   }, [activeNote?.id]);
 
   return (
-    <WidgetContainer data-widget="notes" className="[&_.widget-background]:!rounded-[22px]">
+<WidgetContainer data-widget="notes">
       <div className="widget-flex-column widget-full-height overflow-hidden rounded-[22px]">
         <ResizablePanels
           defaultWidth={300}
@@ -718,15 +716,15 @@ export function NotesWidget() {
           onToggleCollapse={handleToggleCollapse}
         >
           {/* Notes List */}
-          <div className="flex flex-col h-full overflow-hidden relative notes-list-panel">
-            <WidgetHeader title="Notes" className="!rounded-tl-[22px] !rounded-tr-none !rounded-b-none !justify-start">
+<div className={notesStyles.notesListPanel}>
+<WidgetHeader title="Notes">
               <AddButton onClick={handleCreateNew} />
             </WidgetHeader>
-            <div className="flex-1 h-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
+<div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
               {isLoadingNotes ? (
                 <WidgetLoader />
               ) : notes.length > 0 || activeNote ? (
-                <div className="widget-list-content notes-list-fixed-padding">
+                <div className={notesStyles.notesListContent}>
                   <AnimatePresence>
                     {/* Show the active draft note (should be only one) */}
                     {activeNote && activeNote.id?.startsWith("draft-") && (
@@ -783,14 +781,14 @@ export function NotesWidget() {
             </div>
           </div>
           {/* Note Editor */}
-          <div className="widget-flex-column widget-full-height notes-editor-panel">
+          <div className={notesStyles.notesEditorPanel}>
             {activeNote ? (
-              <div className="widget-flex-column widget-full-height bg-[#151515] notes-content-panel relative">
+              <div className={notesStyles.notesContentPanel}>
                 {/* Header with Title and Actions - Fixed */}
-                <div className="flex-shrink-0 p-4 pb-0 bg-[#151515] z-10">
-                  <div className="flex items-start justify-between gap-1">
+                <div className={notesStyles.notesEditorHeader}>
+                  <div className={notesStyles.notesHeaderContent}>
                     {/* Title Input - Tab Index 1 */}
-                    <div className="flex-1 min-w-0">
+                    <div className={notesStyles.notesTitleContainer}>
                       <textarea
                         ref={(el) => {
                           if (el) {
@@ -800,7 +798,7 @@ export function NotesWidget() {
                           }
                         }}
                         tabIndex={1}
-                        className="font-['Inter_Display'] font-medium text-[18px] leading-[22px] text-[#D2D2D2] border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-[#5c5c5c] placeholder:italic placeholder:font-medium w-full resize-none outline-none break-words px-3 py-2"
+                        className={notesStyles.notesTitleInput}
                         placeholder="Untitled note"
                         rows={1}
                         value={displayTitle}
@@ -814,7 +812,7 @@ export function NotesWidget() {
                       />
                     </div>
                     {/* Actions Menu - Tab Index 3 */}
-                    <div tabIndex={3} className="flex-shrink-0">
+                    <div tabIndex={3} className={notesStyles.notesActions}>
                       <ActionsMenu
                         onDelete={handleDeleteActiveNote}
                         isNewNote={isNewNote}
@@ -823,29 +821,29 @@ export function NotesWidget() {
                   </div>
                 </div>
                 {/* Save Status Indicator - Fixed Bottom Right */}
-                <div className="fixed bottom-4 right-4 z-20">
+                <div className={notesStyles.saveStatus}>
                   {saveStatus === "saving" && (
-                    <div className="flex items-center gap-1 text-xs text-yellow-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <div className={cn(notesStyles.saveStatusContent, notesStyles.saveStatusSaving)}>
+                      <div className={cn(notesStyles.saveStatusIndicator, notesStyles.saveStatusIndicatorSaving)}></div>
                       Saving...
                     </div>
                   )}
                   {saveStatus === "saved" && (
-                    <div className="flex items-center gap-1 text-xs text-green-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <div className={cn(notesStyles.saveStatusContent, notesStyles.saveStatusSaved)}>
+                      <div className={cn(notesStyles.saveStatusIndicator, notesStyles.saveStatusIndicatorSaved)}></div>
                       Saved
                     </div>
                   )}
                   {saveStatus === "error" && (
-                    <div className="flex items-center gap-1 text-xs text-red-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                    <div className={cn(notesStyles.saveStatusContent, notesStyles.saveStatusError)}>
+                      <div className={cn(notesStyles.saveStatusIndicator, notesStyles.saveStatusIndicatorError)}></div>
                       Error
                     </div>
                   )}
                 </div>
 
                 {/* Content Editor - Scrollable - Tab Index 2 */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-4">
+                <div className={cn(notesStyles.notesEditorScroll, "custom-scrollbar")}>
                   <SimpleBlockNoteEditor
                       key="notes-editor" // Use completely stable key to prevent any re-mounts
                       initialContent={EMPTY_BLOCKNOTE_CONTENT} // Always use empty, sync via effects
@@ -1004,13 +1002,13 @@ export function NotesWidget() {
                       }}
                       onEditorReady={handleEditorReady}
                       editable={true}
-                      className="p-0 widget-flex-1"
+                      className={notesStyles.notesEditorContainer}
                     />
                 </div>
               </div>
             ) : (
-              <div className="widget-flex-center widget-full-height">
-                <p className="text-muted-foreground">
+              <div className={notesStyles.notesEmptyState}>
+                <p className={notesStyles.notesEmptyText}>
                   Select or create a note.
                 </p>
               </div>

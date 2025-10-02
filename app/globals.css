@@ -2,7 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================
+   NEW CSS ARCHITECTURE - KISS, Container Queries
+   =========================================== */
+
 :root {
+    /* NEW CSS ARCHITECTURE VARIABLES */
+    /* spacing scale */
+    --space-1: 0.25rem; /* 3px */
+    --space-2: 0.5rem;  /* 6px */
+    --space-3: 0.75rem; /* 9px */
+    --space-4: 1rem;    /* 12px */
+    --radius-2: 8px;
+
+    /* fluid type around 12px base */
+    --font-size-100: clamp(12px, 0.72rem + 0.2vw, 14px);
+    --font-size-200: clamp(13px, 0.78rem + 0.3vw, 16px);
+    --font-size-300: clamp(14px, 0.82rem + 0.4vw, 18px);
+
+    /* existing color variables */
     --color-background: 0 0% 100%;
     --color-foreground: 222.2 84% 4.9%;
     --color-card: 0 0% 100%;
@@ -28,6 +46,217 @@
     --radius-xl: 1.5rem;
     --radius-2xl: 2rem;
     --radius-3xl: 3rem;
+}
+
+html {
+    font-size: 12px;
+}
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===========================================
+   SEMANTIC UTILITY CLASSES (Code Cleanup)
+   =========================================== */
+
+/* Flex layouts - semantic replacements for Tailwind */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-row { display: flex; flex-direction: row; }
+.items-center { display: flex; align-items: center; }
+.justify-center { display: flex; justify-content: center; }
+.justify-between { display: flex; justify-content: space-between; }
+.flex-1 { flex: 1; }
+
+/* Sizing */
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.w-full.h-full { width: 100%; height: 100%; }
+.min-h-0 { min-height: 0; }
+
+/* Spacing */
+.p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+
+/* Overflow */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* Positioning */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+
+/* Text */
+.text-center { text-align: center; }
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.font-semibold { font-weight: 600; }
+
+/* Border radius */
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-xl { border-radius: 0.75rem; }
+
+/* Dashboard components - removed Tailwind utilities */
+.dashboard-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+}
+
+.dashboard-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.drop-zone {
+  /* layout */
+  position: fixed;
+
+  /* box model */
+  width: 80px;
+  height: 80px;
+  border: 2px dashed;
+  border-radius: 8px;
+
+  /* visual */
+  transform: translate(-50%, -50%);
+
+  /* state */
+  transition: all 200ms ease-out;
+  pointer-events: none;
+}
+
+.drop-zone-active {
+  /* visual */
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.drop-zone-inactive {
+  /* visual */
+  border-color: rgba(141, 141, 141, 0.3);
+  background-color: transparent;
+}
+
+.dock-container {
+  /* layout */
+  position: absolute;
+  z-index: 50;
+
+  /* box model */
+  width: fit-content;
+  height: fit-content;
+  border-radius: 12px;
+
+  /* visual */
+  background-color: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+              0 0 0 1px rgba(255, 255, 255, 0.1),
+              0 0 20px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+
+  /* state */
+  user-select: none;
+  touch-action: none;
+}
+
+.dock-content {
+  display: flex;
+  padding: 0.5rem;
+}
+
+.dock-content-vertical {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.dock-content-horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dock-handle {
+  /* box model */
+  padding: 0.5rem;
+  border-radius: 8px;
+
+  /* typography */
+  color: rgba(255, 255, 255, 0.6);
+
+  /* state */
+  cursor: grab;
+  transition: all 200ms ease-out;
+}
+
+.dock-handle:hover {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.2);
+
+  /* typography */
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dock-handle:active {
+  /* state */
+  cursor: grabbing;
+}
+
+.dock-handle-icon {
+  /* box model */
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Bento grid components - removed Tailwind utilities */
+.panel-group {
+  height: 100%;
+  width: 100%;
+}
+
+.panel-motion {
+  height: 100%;
+}
+
+.bento-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Modal structure */
+.modal {
+    /* Modal overlay styles */
+}
+
+.modal-header {
+    padding: var(--space-4);
+    border-bottom: 1px solid hsl(var(--color-border));
+}
+
+.modal-body {
+    padding: var(--space-4);
+    overflow-y: auto;
+    min-block-size: 0;
+}
+
+.modal-footer {
+    padding: var(--space-4);
+    border-top: 1px solid hsl(var(--color-border));
 }
 
 @keyframes fade-in {
@@ -65,8 +294,6 @@
 .widget-header {
     min-height: 60px;
     padding: 14px 24px;
-    position: absolute;
-    z-index: 100;
     width: 100%;
     display: flex;
     align-items: center;
@@ -108,9 +335,140 @@
     border-radius: 0 22px 22px 0;
 }
 
+/* Notes widget list panel container and scroll area */
+[data-widget="notes"] .notes-list-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+[data-widget="notes"] .notes-list-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Notes widget editor area */
+[data-widget="notes"] .notes-editor-header {
+    flex-shrink: 0;
+    padding: 1rem;
+    padding-bottom: 0;
+    background-color: #151515;
+    z-index: 10;
+}
+
+[data-widget="notes"] .notes-header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+
+[data-widget="notes"] .notes-title-container {
+    flex: 1;
+    min-width: 0;
+}
+
+[data-widget="notes"] .notes-actions {
+    flex-shrink: 0;
+}
+
+[data-widget="notes"] .notes-editor-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 1rem;
+}
+
+/* Tasks widget specific styles */
+.tasks-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.tasks-content-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.tasks-content-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.task-active-indicator {
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #fb7185;
+}
+
+/* Countdown widget styles */
+.countdown-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.countdown-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem;
+}
+
+.countdown-title {
+    color: #8D8D8D;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.countdown-dots {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.countdown-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #FF69B4;
+}
+
+.countdown-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.countdown-number-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+}
+
 /* Widget content areas */
 .widget-list-content {
-    padding: 52px 16px 24px 16px;
+    padding: 2px 16px 24px 16px;
     width: 100%;
     box-sizing: border-box;
 }

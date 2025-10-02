@@ -26,6 +26,7 @@ import { WidgetHeader } from "@/components/ui/widget-header";
 import { WidgetLoader } from "./widget-loader";
 import { useEffect, useState } from "react";
 import styles from "./widget.module.css";
+import countdownStyles from "./countdown-widget-main.module.css";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -151,19 +152,15 @@ export function CountdownWidget({
 
   return (
     <WidgetContainer>
-      <WidgetHeader title="Countdown" className="h-[60px]"></WidgetHeader>
-      <WidgetContent scrollable={false} className="widget-relative p-6">
-        <div className="flex h-full">
-          {/* Left side - Text content with weather widget structure */}
-          <div className="flex-1 flex flex-col justify-between">
-            {/* Title at top */}
-            <div className="text-[#8D8D8D] text-[18px] font-normal">Pay</div>
+      <WidgetHeader title="Countdown" className={countdownStyles.header}></WidgetHeader>
+      <WidgetContent scrollable={false} className={countdownStyles.content}>
+        <div className={countdownStyles.mainContainer}>
+          <div className={countdownStyles.leftColumn}>
+            <div className={countdownStyles.title}>Pay</div>
 
-            {/* Spacer */}
             <div></div>
 
-            {/* Bottom section - big number and post-text */}
-            <div className="flex flex-col items-start">
+            <div className={countdownStyles.bottomSection}>
               <ClientOnly>
                 <AnimatePresence mode="popLayout">
                   <motion.div
@@ -172,31 +169,21 @@ export function CountdownWidget({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="text-[48px] font-light leading-none text-white mb-1"
+                    className={countdownStyles.number}
                   >
                     {formattedDaysLeft}
                   </motion.div>
                 </AnimatePresence>
               </ClientOnly>
 
-              {/* Days label */}
-              <div
-                style={{
-                  color: "#555454",
-                  fontFamily: "Inter Display, sans-serif",
-                  fontSize: "12px",
-                  fontWeight: 400,
-                  lineHeight: 1.2,
-                }}
-              >
+              <div className={countdownStyles.daysLabel}>
                 days
               </div>
             </div>
           </div>
 
-          {/* Right side - Dots grid */}
-          <div className="flex items-center">
-            <div className="grid grid-cols-5 gap-1.5">
+          <div className={countdownStyles.rightColumn}>
+            <div className={countdownStyles.dotsGrid}>
               {[...Array(Math.min(daysLeft, 30))].map((_, i) => (
                 <motion.div
                   key={i}
@@ -209,8 +196,7 @@ export function CountdownWidget({
                     stiffness: 300,
                     damping: 20,
                   }}
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: "#FF69B4" }}
+                  className={countdownStyles.dot}
                 />
               ))}
             </div>

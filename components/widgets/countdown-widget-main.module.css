@@ -1,0 +1,84 @@
+.header {
+  height: 60px;
+}
+
+.content {
+  /* layout */
+  position: relative;
+
+  /* box model */
+  padding: 24px;
+}
+
+.mainContainer {
+  /* layout */
+  display: flex;
+
+  /* box model */
+  height: 100%;
+}
+
+.leftColumn {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.title {
+  /* typography */
+  color: #8D8D8D;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.bottomSection {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.number {
+  /* typography */
+  color: white;
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+
+  /* box model */
+  margin-bottom: 4px;
+}
+
+.daysLabel {
+  /* typography */
+  color: #555454;
+  font-family: 'Inter Display', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.rightColumn {
+  /* layout */
+  display: flex;
+  align-items: center;
+}
+
+.dotsGrid {
+  /* layout */
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dot {
+  /* box model */
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+
+  /* visual */
+  background-color: #FF69B4;
+}

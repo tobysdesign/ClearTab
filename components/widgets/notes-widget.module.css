@@ -1,0 +1,274 @@
+/* Notes Widget: Resizable Panels */
+.resizablePanels {
+  /* layout */
+  display: flex;
+  flex-direction: row;
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+}
+
+.resizableLeft {
+  /* layout */
+  flex-shrink: 0;
+}
+
+.resizableHandle {
+  /* layout */
+  position: relative;
+
+  /* box model */
+  width: 2px;
+
+  /* visual */
+  background-color: transparent;
+
+  /* state */
+  cursor: col-resize;
+  transition: background-color 200ms ease;
+}
+
+.resizableHandle:hover {
+  /* visual */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.resizableRight {
+  /* layout */
+  flex-grow: 1;
+
+  /* box model */
+  overflow: hidden;
+}
+
+/* Notes Widget: Main Container */
+.notesContainer {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+/* Notes Widget: List Panel */
+.notesListPanel {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+
+  /* box model */
+  height: 100%;
+  padding: 1rem 0;
+}
+
+.notesListScroll {
+  /* layout */
+  flex: 1;
+
+  /* box model */
+  overflow-y: auto;
+}
+
+.notesListContent {
+  /* box model */
+  padding: 0 0.75rem;
+}
+
+/* Notes Widget: Editor Panel */
+.notesEditorPanel {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+}
+
+.notesContentPanel {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+
+  /* visual */
+  background-color: #151515;
+}
+
+/* Notes Widget: Editor Header */
+.notesEditorHeader {
+  /* layout */
+  flex-shrink: 0;
+
+  /* box model */
+  padding: 1.5rem 1.5rem 0;
+}
+
+.notesHeaderContent {
+  /* layout */
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  /* box model */
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.notesTitleContainer {
+  /* layout */
+  flex: 1;
+}
+
+.notesTitleInput {
+  /* box model */
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  outline: none;
+  resize: none;
+
+  /* typography */
+  font-family: 'Inter Display', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 22px;
+  color: #D2D2D2;
+  word-break: break-words;
+
+  /* visual */
+  background-color: transparent;
+}
+
+.notesTitleInput::placeholder {
+  /* typography */
+  color: #5c5c5c;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.notesTitleInput:focus-visible {
+  /* state */
+  ring: 0;
+  ring-offset: 0;
+}
+
+.notesActions {
+  /* layout */
+  flex-shrink: 0;
+}
+
+/* Notes Widget: Save Status */
+.saveStatus {
+  /* layout */
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 20;
+
+  /* box model */
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+
+  /* visual */
+  background-color: #1a1a1a;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.saveStatusContent {
+  /* layout */
+  display: flex;
+  align-items: center;
+
+  /* box model */
+  gap: 0.25rem;
+
+  /* typography */
+  font-size: 0.75rem;
+}
+
+.saveStatusSaving {
+  /* typography */
+  color: #facc15;
+}
+
+.saveStatusSaved {
+  /* typography */
+  color: #4ade80;
+}
+
+.saveStatusError {
+  /* typography */
+  color: #f87171;
+}
+
+.saveStatusIndicator {
+  /* box model */
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+}
+
+.saveStatusIndicatorSaving {
+  /* visual */
+  background-color: #facc15;
+
+  /* state */
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.saveStatusIndicatorSaved {
+  /* visual */
+  background-color: #4ade80;
+}
+
+.saveStatusIndicatorError {
+  /* visual */
+  background-color: #f87171;
+}
+
+/* Notes Widget: Editor Scroll */
+.notesEditorScroll {
+  /* layout */
+  flex: 1;
+
+  /* box model */
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+/* Notes Widget: Editor Container */
+.notesEditorContainer {
+  /* layout */
+  flex: 1;
+
+  /* box model */
+  padding: 0 1.5rem;
+  overflow: visible;
+}
+
+/* Notes Widget: Empty State */
+.notesEmptyState {
+  /* layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* box model */
+  width: 100%;
+  height: 100%;
+}
+
+.notesEmptyText {
+  /* typography */
+  color: hsl(var(--muted-foreground));
+}

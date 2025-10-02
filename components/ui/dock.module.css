@@ -1,0 +1,32 @@
+/* Dock Container */
+.dock {
+  @apply mx-auto flex w-fit items-center justify-center gap-2 rounded-2xl border p-2;
+  @apply bg-neutral-950/10 backdrop-blur-md;
+  @apply dark:border-white/10 dark:bg-neutral-950/30;
+}
+
+.dock[data-direction="top"] {
+  @apply items-start;
+}
+
+.dock[data-direction="middle"] {
+  @apply items-center;
+}
+
+.dock[data-direction="bottom"] {
+  @apply items-end;
+}
+
+/* Dock Icon Container */
+.dockIcon {
+  @apply flex cursor-pointer items-center justify-center rounded-full;
+}
+
+.dockIconInner {
+  @apply flex items-center justify-center w-full h-full;
+}
+
+/* Dock Item Wrapper */
+.dockItemsWrapper {
+  @apply relative flex items-center gap-2;
+}

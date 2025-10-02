@@ -12,6 +12,7 @@ import { WidgetLoader } from "./widget-loader";
 import { WidgetContainer } from "@/components/ui/widget-container";
 import { WidgetHeader } from "@/components/ui/widget-header";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
+import scheduleStyles from "./schedule-widget.module.css";
 
 // Interfaces
 interface CalendarEvent {
@@ -48,16 +49,12 @@ function EventCard({
   return (
     <div
       className={cn(
-        "widget-list-item widget-list-item--schedule relative p-3 rounded-lg mb-3 border transition-colors",
-        {
-          "bg-[#5c5c5c] border-[#5c5c5c]": isCurrent,
-          "bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545]":
-            !isCurrent,
-        },
+        scheduleStyles.eventCard,
+        isCurrent && scheduleStyles.eventCardCurrent
       )}
     >
-      <div className="text-white text-sm mb-1">{event.title}</div>
-      <div className="text-white/40 text-xs">
+      <div className={scheduleStyles.eventTitle}>{event.title}</div>
+      <div className={scheduleStyles.eventTime}>
         {format(startTime, "p")} – {format(endTime, "p")}
       </div>
     </div>
@@ -120,25 +117,25 @@ function DaySection({
   }, [dayKey, todayRef]);
 
   return (
-    <div ref={todayRef || ref} className="mb-6 relative">
+    <div ref={todayRef || ref} className={scheduleStyles.daySection}>
       {/* Current time indicator - only on today's section */}
       {isCurrentDay && (
         <div
-          className="absolute left-0 right-0 z-30 pointer-events-none"
+          className={scheduleStyles.currentTimeIndicator}
           style={{
             top: currentEvent ? "50%" : "20%",
             transform: "translateY(-50%)"
           }}
         >
-          <div className="relative">
-            <div className="absolute left-0 right-0 h-0.5 bg-rose-400" />
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-rose-400 rounded-full" />
+          <div className={scheduleStyles.currentTimeContainer}>
+            <div className={scheduleStyles.currentTimeLine} />
+            <div className={scheduleStyles.currentTimeDot} />
           </div>
         </div>
       )}
 
       {/* Inline day header matching Figma design */}
-      <div className="text-sm font-medium text-white/40 mb-4 px-1">
+      <div className={scheduleStyles.dayHeader}>
         {dayKey && /^\d{4}-\d{2}-\d{2}$/.test(dayKey)
           ? format(parseISO(dayKey), "EEEE do 'of' MMMM")
           : "Invalid Date"}
@@ -347,10 +344,10 @@ export function ScheduleWidget() {
     return (
       <WidgetContainer>
         <WidgetHeader title="Schedule" />
-        <div className="flex flex-col items-center justify-center p-6 text-center">
+        <div className={scheduleStyles.emptyStateContainer}>
           {isAuthError ? (
             <EmptyState
-              renderIcon={() => <Calendar className="h-6 w-6 text-white/40" />}
+              renderIcon={() => <Calendar className={scheduleStyles.emptyStateIcon} />}
               title="Connect your calendar"
               description="See your schedule at a glance by connecting your Google Calendar."
               action={{
@@ -407,10 +404,10 @@ export function ScheduleWidget() {
             />
           ) : (
             <>
-              <p className="font-bold text-destructive">
+              <p className={scheduleStyles.errorText}>
                 Error loading schedule
               </p>
-              <p className="text-sm text-muted-foreground">{error.message}</p>
+              <p className={scheduleStyles.errorMessage}>{error.message}</p>
             </>
           )}
         </div>
@@ -422,28 +419,23 @@ export function ScheduleWidget() {
 
   return (
     <WidgetContainer data-widget="schedule">
-      <div className="flex h-full">
+      <div className={scheduleStyles.scheduleContainer}>
         {/* Left Sidebar */}
-        <div className="flex flex-col w-[120px] h-full justify-between flex-shrink-0 pb-[24px] border-r border-[#323235]">
-          {/* Header matching other widgets' positioning */}
-          <div className="min-h-[60px] flex items-center py-[14px] px-[24px]">
+        <div className={scheduleStyles.sidebar}>
+          <div className={scheduleStyles.sidebarHeader}>
             <h2 className="widget-title">Schedule</h2>
           </div>
 
-          <div className="flex flex-col justify-between flex-1 px-[24px]">
-            {/* Empty top spacer */}
+          <div className={scheduleStyles.sidebarContent}>
             <div></div>
 
-            {/* Center spacer */}
             <div></div>
 
-            {/* Footer with day/date stacked and month */}
-            <div className="flex flex-col items-start">
-              {/* Day and date stacked */}
-              <div className="flex flex-col items-start mb-1">
-                <div className="flex items-center text-xs font-medium text-white/40 uppercase mb-1">
+            <div className={scheduleStyles.sidebarFooter}>
+              <div className={scheduleStyles.dayDateStack}>
+                <div className={scheduleStyles.dayLabel}>
                   {isToday(visibleDate) && (
-                    <div className="w-2 h-2 rounded-full bg-rose-400 mr-2" />
+                    <div className={scheduleStyles.todayDot} />
                   )}
                   {format(visibleDate, "EEE")}
                 </div>
@@ -454,7 +446,6 @@ export function ScheduleWidget() {
                   {format(visibleDate, "dd")}
                 </div>
               </div>
-              {/* Month */}
               <div
                 style={{
                   color: "#555454",
@@ -470,13 +461,12 @@ export function ScheduleWidget() {
           </div>
         </div>
 
-        {/* Right Content */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto custom-scrollbar p-4">
+        <div className={scheduleStyles.rightPanel}>
+          <div className={scheduleStyles.rightPanelContent}>
             {sortedDays.length === 0 ? (
               <EmptyState
                 renderIcon={() => (
-                  <Calendar className="h-6 w-6 text-white/40" />
+                  <Calendar className={scheduleStyles.calendarIcon} />
                 )}
                 title="No events scheduled"
                 description="Your calendar is clear. Connect your Google Calendar to see upcoming events."

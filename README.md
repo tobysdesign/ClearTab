@@ -1,116 +1,146 @@
-## ClearTab.app (Bye) – Personal Dashboard
+# ClearTab App
 
-Modern, AI-powered personal dashboard and productivity app with notes, tasks, calendars, and widgets. Ships as a web app and a Chrome new-tab extension.
+A modern note-taking and task management application with AI integration and responsive dashboard.
 
-### Features
-- Customizable dashboard (bento/widget layout) with internal scroll for long content
-- Notes with rich text editor (BlockNote)
-- Tasks with due dates, priorities, and quick actions
-- AI assistant for context-aware actions (notes, tasks, calendar)
-- Weather and multi-calendar timeline
-- Chrome extension that replaces the new tab page
-
-### Tech Stack
-- Framework: Next.js 15 (App Router), React 18
-- Database: PostgreSQL + Drizzle ORM
-- Styling: Tailwind CSS + CSS Modules + CSS custom properties
-- Auth/Session: Supabase SSR
-- State: Zustand (client), TanStack Query (server state)
-- Editor: BlockNote
-
----
-
-## Getting Started
+## Local Setup
 
 ### Prerequisites
-- Node.js 18+
-- npm
-- PostgreSQL database (local or hosted)
+- Node.js 20+
+- pnpm (installed via corepack)
 
-### Install
+### Environment Setup
+1. Copy the environment template:
+   ```bash
+   cp env.example .env.local
+   ```
+
+2. Fill in your environment variables in `.env.local`:
+   - Supabase configuration
+   - Database URLs
+   - API keys for AI/weather services
+
+### Installation
 ```bash
-npm install
+# Install dependencies
+corepack enable && pnpm install
+
+# Run development server
+pnpm dev
 ```
 
-### Environment Variables
-Create `.env.local` with at least:
+### Development Scripts
+- `pnpm dev` - Start development server on port 3000
+- `pnpm dev:3001` - Start development server on port 3001 (for comparison)
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+
+## CSS Architecture Refactor
+
+This project has been refactored to use a KISS-based CSS architecture with:
+- Semantic, inspector-friendly class names
+- Container-query driven responsiveness
+- 12px base typography with fluid scaling
+- Native focus styles and motion preferences
+- Unified widget and modal structures
+
+### Compare Baseline vs Refactor
+
+To compare the original implementation with the CSS refactor:
+
+1. **Baseline Setup** (Original):
+   ```bash
+   # Create worktree for baseline
+   git worktree add ../cleartabAPP-baseline baseline-css
+   
+   # Install and run baseline
+   cd ../cleartabAPP-baseline
+   corepack enable && pnpm install
+   cp env.example .env.local
+   # Fill in your .env.local values
+   pnpm dev
+   ```
+
+2. **Refactor Setup** (Current):
+   ```bash
+   # In main project directory
+   pnpm dev:3001
+   ```
+
+3. **Compare**:
+   - Baseline: http://localhost:3000
+   - Refactor: http://localhost:3001
+   
+   Compare:
+   - Dashboard layout and responsiveness
+   - Widget behavior and scrolling
+   - Modal structures (settings, etc.)
+   - Typography and spacing
+   - Container query behavior (resize dashboard area)
+
+### Key Changes
+
+#### CSS Architecture
+- **Variables**: Semantic spacing and typography scale
+- **Layout**: Container queries for dashboard responsiveness
+- **Widgets**: Unified `.widget`, `.widget-header`, `.widget-content` structure
+- **Modals**: Standardized `.modal`, `.modal-header`, `.modal-body`, `.modal-footer`
+- **Scrolling**: Dashboard and widgets do NOT scroll - only internal content scrolls with `overflow-y: auto`
+
+#### Components Updated
+- `components/dashboard/` - Container query layout
+- `components/widgets/` - Unified widget shell
+- `components/ui/` - Semantic classes, removed Tailwind utilities
+- `app/globals.css` - New CSS architecture foundation
+
+#### Responsive Behavior
+- Dashboard adapts to container size, not viewport
+- Perfect for focusing on specific widgets
+- Independent of device size - context-driven breakpoints
+
+### Style Guide
+Visit `/style-guide/css-architecture` for complete documentation of the new CSS system.
+
+## Development Container
+
+The project includes a `.devcontainer` for consistent development environment:
+
 ```bash
-DATABASE_URL=postgres://user:password@host:5432/db
-OPENAI_API_KEY=sk-...
-
-# Supabase (for SSR auth client)
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-
-# Optional integrations
-MEM0_API_KEY=...
-TOMORROW_IO_API_KEY=...
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
+# Open in VS Code with Dev Containers extension
+code .
+# Select "Reopen in Container"
 ```
 
-### Database (Drizzle)
-- Generate migration files (based on `shared/schema.ts`):
-```bash
-npx drizzle-kit generate
+The container includes:
+- Node.js 20
+- pnpm
+- Pre-configured VS Code extensions
+- Automatic dependency installation
+
+## Project Structure
+
 ```
-- Apply migrations:
-```bash
-node scripts/migrate.js
-```
-Notes:
-- Migrations are emitted to `migrations/` per `drizzle.config.ts`.
-- Ensure `DATABASE_URL` is set for both generation and running migrations.
-
-### Development
-```bash
-npm run dev
-```
-
-### Production Build
-```bash
-npm run build
-npm run start
-```
-
----
-
-## Chrome Extension (New Tab)
-Build the extension assets and package a zip for the Chrome Web Store:
-```bash
-npm run build-extension
-npm run package-extension
-```
-Then:
-1. Open `chrome://extensions`
-2. Enable Developer Mode
-3. Click “Load unpacked” and select `dist/extension`
-
----
-
-## Style Guide and Components
-- Refer to `app/style-guide` pages for canonical UI components and patterns
-- New components should follow established patterns and be added to the style guide
-- Viewport is not exceeded; widget content should scroll internally (overflow-y)
-
----
-
-## Testing
-End-to-end tests use Playwright. Run directly via:
-```bash
-npx playwright test
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   ├── style-guide/       # Component documentation
+│   └── globals.css        # CSS architecture
+├── components/
+│   ├── dashboard/         # Dashboard layout components
+│   ├── widgets/           # Widget components
+│   ├── settings/          # Settings components
+│   └── ui/                # Reusable UI components
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utilities and configurations
+└── shared/                # Shared types and schemas
 ```
 
----
+## Contributing
 
-## Project Structure (high level)
-- `app/` Next.js App Router pages and API routes
-- `components/` Reusable UI, dashboard, widgets, AI, settings
-- `server/` Backend services (LLM, calendar, storage) and db helpers
-- `shared/` Database schema and shared types
-- `scripts/` Build and tooling scripts (extension, migrations, etc.)
-
----
+1. Follow the KISS principle for CSS
+2. Use semantic class names
+3. Prefer container queries over media queries for components
+4. Respect motion preferences and accessibility
+5. Document new components in the style guide
 
 ## License
-[MIT](LICENSE)
+
+Private project - All rights reserved.

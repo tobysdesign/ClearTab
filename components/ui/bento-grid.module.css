@@ -1,9 +1,168 @@
+.grid {
+  /* layout */
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-auto-rows: 22rem;
+  gap: 16px;
 
+  /* box model */
+  width: 100%;
+}
 
-.grid{ @apply grid w-full auto-rows-[22rem] grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4; }
-.card{ @apply group relative flex flex-col justify-between overflow-hidden rounded-xl [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)] dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]; }
-.cardContent{ @apply pointer-events-none z-10 flex transform-gpu flex-col gap-1 p-6 transition-all duration-300 group-hover:-translate-y-10; }
-.icon{ @apply h-12 w-12 origin-left transform-gpu text-neutral-700 transition-all duration-300 ease-in-out group-hover:scale-75; }
-.description{ @apply max-w-lg text-neutral-400; }
-.ctaContainer{ @apply pointer-events-none absolute bottom-0 flex w-full translate-y-10 transform-gpu flex-row items-center p-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100; }
-.hoverOverlay{ @apply pointer-events-none absolute inset-0 transform-gpu transition-all duration-300 group-hover:bg-black/[.03] group-hover:dark:bg-neutral-800/10; }
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  /* layout */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+
+  /* box model */
+  border-radius: 12px;
+
+  /* visual */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.05), 0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.card:global(.dark) {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -20px 80px -20px rgba(255, 255, 255, 0.12) inset;
+}
+
+.cardContent {
+  /* layout */
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  /* box model */
+  padding: 24px;
+
+  /* visual */
+  transform: translateZ(0);
+
+  /* state */
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.card:hover .cardContent {
+  transform: translateY(-40px);
+}
+
+.icon {
+  /* box model */
+  width: 48px;
+  height: 48px;
+
+  /* typography */
+  color: rgb(64, 64, 64);
+
+  /* visual */
+  transform: translateZ(0);
+  transform-origin: left;
+
+  /* state */
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover .icon {
+  transform: scale(0.75);
+}
+
+.heading {
+  /* typography */
+  color: rgb(64, 64, 64);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.heading:global(.dark) {
+  color: rgb(212, 212, 212);
+}
+
+.description {
+  /* box model */
+  max-width: 512px;
+
+  /* typography */
+  color: rgb(163, 163, 163);
+}
+
+.ctaContainer {
+  /* layout */
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  /* box model */
+  width: 100%;
+  padding: 16px;
+
+  /* visual */
+  transform: translateY(40px);
+  opacity: 0;
+
+  /* state */
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.card:hover .ctaContainer {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.hoverOverlay {
+  /* layout */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* visual */
+  transform: translateZ(0);
+
+  /* state */
+  pointer-events: none;
+  transition: all 0.3s;
+}
+
+.card:hover .hoverOverlay {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.card:hover .hoverOverlay:global(.dark) {
+  background-color: rgba(38, 38, 38, 0.1);
+}
+
+.ctaButton {
+  pointer-events: auto;
+}
+
+.ctaIcon {
+  /* box model */
+  width: 1rem;
+  height: 1rem;
+  margin-left: 8px;
+}
+
+.ctaIcon:global([dir="rtl"]) {
+  transform: rotate(180deg);
+}
