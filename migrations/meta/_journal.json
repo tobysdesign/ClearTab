@@ -15,6 +15,20 @@
       "when": 1754098242522,
       "tag": "0001_fresh_fallen_one",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1728707823000,
+      "tag": "0002_disable_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760237850522,
+      "tag": "0003_add_countdown_fields",
+      "breakpoints": true
     }
   ]
 }

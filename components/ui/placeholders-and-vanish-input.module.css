@@ -1,14 +1,172 @@
+/* Placeholders and Vanish Input Component Styles */
 
+.form {
+  width: 100%;
+  position: relative;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: white;
+  height: 3rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: 0px 2px 3px -1px rgba(0,0,0,0.1), 0px 1px 0px 0px rgba(25,28,33,0.02), 0px 0px 0px 1px rgba(25,28,33,0.08);
+  transition-duration: 200ms;
+}
 
-.form{ @apply w-full relative max-w-xl mx-auto bg-white dark:bg-zinc-800 h-12 rounded-full overflow-hidden shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),_0px_1px_0px_0px_rgba(25,28,33,0.02),_0px_0px_0px_1px_rgba(25,28,33,0.08)] transition duration-200; }
-.formActive{ @apply bg-white-50; }
-.canvas{ @apply absolute pointer-events-none text-base transform scale-50 top-[20%] left-2 sm:left-8 origin-top-left filter invert dark:invert-0 pr-20; }
-.canvasAnimating{ @apply opacity-100; }
-.canvasHidden{ @apply opacity-0; }
-.input{ @apply w-full relative text-sm sm:text-base z-50 border-none dark:text-white bg-transparent text-black h-full rounded-full focus:outline-none focus:ring-0 pl-4 sm:pl-10 pr-20; }
-.inputAnimating{ @apply text-transparent dark:text-transparent; }
-.submitBtn{ @apply absolute right-2 top-1/2 z-50 -translate-y-1/2 h-8 w-8 rounded-full disabled:bg-white/40 bg-black dark:bg-zinc-900 dark:disabled:bg-zinc-800 transition duration-200 flex items-center justify-center; }
-.placeholderText{ @apply dark:text-zinc-500 text-sm sm:text-base font-normal text-neutral-500 pl-4 sm:pl-12 text-left w-[calc(100%-2rem)] truncate; }
+@media (prefers-color-scheme: dark) {
+  .form {
+    background-color: rgb(39, 39, 42);
+  }
+}
+
+.formActive {
+  background-color: rgb(249, 250, 251);
+}
+
+.canvas {
+  position: absolute;
+  pointer-events: none;
+  font-size: 1rem;
+  transform: scale(0.5);
+  top: 20%;
+  left: 0.5rem;
+  transform-origin: top left;
+  filter: invert(1);
+  padding-right: 5rem;
+}
+
+@media (min-width: 640px) {
+  .canvas {
+    left: 2rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .canvas {
+    filter: invert(0);
+  }
+}
+
+.canvasAnimating {
+  opacity: 1;
+}
+
+.canvasHidden {
+  opacity: 0;
+}
+
+.input {
+  width: 100%;
+  position: relative;
+  font-size: 0.875rem;
+  z-index: 50;
+  border: none;
+  background-color: transparent;
+  color: black;
+  height: 100%;
+  border-radius: 9999px;
+  outline: none;
+  padding-left: 1rem;
+  padding-right: 5rem;
+}
+
+@media (min-width: 640px) {
+  .input {
+    font-size: 1rem;
+    padding-left: 2.5rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .input {
+    color: white;
+  }
+}
+
+.input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inputAnimating {
+  color: transparent;
+}
+
+.submitBtn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  z-index: 50;
+  transform: translateY(-50%);
+  height: 2rem;
+  width: 2rem;
+  border-radius: 9999px;
+  background-color: black;
+  transition-duration: 200ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  .submitBtn {
+    background-color: rgb(24, 24, 27);
+  }
+
+  .submitBtn:disabled {
+    background-color: rgb(39, 39, 42);
+  }
+}
+
+.submitIcon {
+  color: rgba(255, 255, 255, 0.4);
+  height: 1rem;
+  width: 1rem;
+}
+
+.placeholderContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.placeholderText {
+  color: rgb(115, 115, 115);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+  width: calc(100% - 2rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .placeholderText {
+    font-size: 1rem;
+    padding-left: 3rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .placeholderText {
+    color: rgb(113, 113, 122);
+  }
+}
 
 /* Arrow line animation */
 .arrowLine {

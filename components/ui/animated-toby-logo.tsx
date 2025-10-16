@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from "react"
-import styles from './animated-toby-logo.module.css'
-import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react";
+import styles from "./animated-toby-logo.module.css";
+import { cn } from "@/lib/utils";
 
 interface AnimatedTobyLogoProps {
-  color?: string
-  mode?: "binary" | "brand"
+  color?: string;
+  mode?: "binary" | "brand";
 }
 
-export function AnimatedTobyLogo({ 
-  color = "#ffffff", 
-  mode = "brand" 
+export function AnimatedTobyLogo({
+  color = "#ffffff",
+  mode = "brand",
 }: AnimatedTobyLogoProps) {
-  const [currentMode, setCurrentMode] = useState(mode)
+  const [currentMode, setCurrentMode] = useState(mode);
 
   useEffect(() => {
-    setCurrentMode(mode)
-  }, [mode])
+    setCurrentMode(mode);
+  }, [mode]);
 
   return (
     <svg
@@ -28,7 +28,7 @@ export function AnimatedTobyLogo({
     >
       {/* Left bar → 1 or T stem */}
       <rect
-        x={currentMode === "brand" ? 34 : 10}
+        x={10}
         y={1}
         width="15"
         height="126"
@@ -36,8 +36,8 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.tStem)}
         style={{
-          '--x-pos': currentMode === "brand" ? '34px' : '10px'
-        } as React.CSSProperties}
+          transform: `translateX(${currentMode === "brand" ? 24 : 0}px)`,
+        }}
       />
 
       {/* T crossbar only visible in brand mode */}
@@ -51,7 +51,7 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.tCrossbar, {
           [styles.visible]: currentMode === "brand",
-          [styles.hidden]: currentMode !== "brand"
+          [styles.hidden]: currentMode !== "brand",
         })}
       />
 
@@ -61,8 +61,8 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.zero)}
         style={{
-          '--x-pos': currentMode === "brand" ? '0px' : '-60px'
-        } as React.CSSProperties}
+          transform: `translateX(${currentMode === "brand" ? 0 : -60}px)`,
+        }}
       />
 
       {/* 0 dot morphs to . in brand mode */}
@@ -71,9 +71,8 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.dot)}
         style={{
-          '--scale': currentMode === "brand" ? '0.6' : '1',
-          '--x-pos': currentMode === "brand" ? '80px' : '0px'
-        } as React.CSSProperties}
+          transform: `translateX(${currentMode === "brand" ? 80 : 0}px) scale(${currentMode === "brand" ? 0.6 : 1})`,
+        }}
       />
 
       {/* b circle appears in brand mode */}
@@ -82,20 +81,21 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.bCircle, {
           [styles.visible]: currentMode === "brand",
-          [styles.hidden]: currentMode !== "brand"
+          [styles.hidden]: currentMode !== "brand",
         })}
       />
 
       {/* b stem slides in only in brand */}
       <rect
         x="235"
+        y="0"
         width="15"
         height="125"
         rx="7.5"
         fill={color}
         className={cn(styles.element, styles.bStem, {
           [styles.visible]: currentMode === "brand",
-          [styles.hidden]: currentMode !== "brand"
+          [styles.hidden]: currentMode !== "brand",
         })}
       />
 
@@ -110,7 +110,7 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.yArmRight, {
           [styles.visible]: currentMode === "brand",
-          [styles.hidden]: currentMode !== "brand"
+          [styles.hidden]: currentMode !== "brand",
         })}
       />
 
@@ -123,9 +123,9 @@ export function AnimatedTobyLogo({
         fill={color}
         className={cn(styles.element, styles.yArmLeft, {
           [styles.visible]: currentMode === "brand",
-          [styles.hidden]: currentMode !== "brand"
+          [styles.hidden]: currentMode !== "brand",
         })}
       />
     </svg>
-  )
-} 
+  );
+}

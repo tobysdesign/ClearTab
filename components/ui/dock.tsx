@@ -9,8 +9,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import React, { PropsWithChildren, useContext, useRef } from "react";
-import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
+import React, { useContext, useRef } from "react";
 import { cn } from "@/lib/utils";
 import styles from "./dock.module.css";
 

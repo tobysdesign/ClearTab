@@ -1,11 +1,11 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 import {
   motion,
   useMotionValue,
   useTransform,
-  animate,
+  // animate,
   AnimatePresence,
 } from "framer-motion";
 import {
@@ -17,20 +17,20 @@ import {
 } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { getPaydaySettings } from "@/lib/actions/settings";
-import { WidgetActions } from "@/components/dashboard/widget-actions";
+// import { WidgetActions } from "@/components/dashboard/widget-actions";
 import {
   WidgetContainer,
   WidgetContent,
 } from "@/components/ui/widget-container";
 import { WidgetHeader } from "@/components/ui/widget-header";
 import { WidgetLoader } from "./widget-loader";
-import { useEffect, useState } from "react";
-import styles from "./widget.module.css";
+import { useEffect, useState, useLayoutEffect, useRef } from "react";
+// import styles from "./widget.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import Settings from "lucide-react/dist/esm/icons/settings";
+// Icons replaced with ASCII placeholders
 
 interface CountdownWidgetProps {
   variant?: "vertical" | "horizontal";
@@ -40,6 +40,7 @@ const RECURRENCE_DAYS = {
   weekly: 7,
   fortnightly: 14,
   monthly: 30,
+  annual: 365,
 } as const;
 
 type PaydayFrequency = keyof typeof RECURRENCE_DAYS;
@@ -71,96 +72,187 @@ export function CountdownWidget({
     },
   });
 
-  // Calculate next payday and days remaining
+  // Calculate countdown based on mode
   useEffect(() => {
-    if (paydayData?.paydayDate && paydayData?.paydayFrequency) {
-      const today = startOfDay(new Date());
-      const lastPayday = startOfDay(new Date(paydayData.paydayDate));
-      const recurrenceInDays = RECURRENCE_DAYS[paydayData.paydayFrequency];
+    if (!paydayData) return;
 
-      // Calculate next payday
-      let nextPayday = new Date(lastPayday);
-      while (
-        isBefore(nextPayday, today) ||
-        nextPayday.getTime() === today.getTime()
-      ) {
-        if (paydayData.paydayFrequency === "monthly") {
-          nextPayday = addMonths(nextPayday, 1);
-        } else {
-          nextPayday = addDays(nextPayday, recurrenceInDays);
-        }
-      }
+    const { countdownMode, manualCount, endDate, startDate, paydayFrequency } =
+      paydayData;
 
-      const daysLeft = differenceInDays(nextPayday, today);
-
+    if (countdownMode === "manual-count") {
+      // Manual count mode - just use the manual count
       setSettings({
-        nextPayday,
-        daysLeft,
-        recurrenceInDays,
+        nextPayday: new Date(),
+        daysLeft: manualCount || 0,
+        recurrenceInDays: 14, // Default for dot display
       });
+    } else if (countdownMode === "date-range" || paydayData.paydayDate) {
+      // Date-based mode
+      const today = startOfDay(new Date());
+
+      if (paydayFrequency === "none") {
+        // One-time countdown to end date
+        const targetDate = endDate
+          ? new Date(endDate)
+          : new Date(paydayData.paydayDate);
+        const daysLeft = differenceInDays(startOfDay(targetDate), today);
+
+        setSettings({
+          nextPayday: targetDate,
+          daysLeft: Math.max(0, daysLeft),
+          recurrenceInDays: Math.max(14, Math.abs(daysLeft)), // Use days left or default
+        });
+      } else if (paydayFrequency && (endDate || paydayData.paydayDate)) {
+        // Recurring countdown
+        const lastPayday = startDate
+          ? new Date(startDate)
+          : new Date(paydayData.paydayDate);
+        const recurrenceInDays = RECURRENCE_DAYS[paydayFrequency];
+
+        // Calculate next occurrence
+        let nextPayday = new Date(lastPayday);
+        while (
+          isBefore(nextPayday, today) ||
+          nextPayday.getTime() === today.getTime()
+        ) {
+          if (paydayFrequency === "monthly") {
+            nextPayday = addMonths(nextPayday, 1);
+          } else if (paydayFrequency === "annual") {
+            nextPayday = new Date(
+              nextPayday.setFullYear(nextPayday.getFullYear() + 1),
+            );
+          } else {
+            nextPayday = addDays(nextPayday, recurrenceInDays);
+          }
+        }
+
+        const daysLeft = differenceInDays(nextPayday, today);
+
+        setSettings({
+          nextPayday,
+          daysLeft,
+          recurrenceInDays,
+        });
+      }
     }
   }, [paydayData]);
 
+  // Get the countdown title from settings
+  const countdownTitle = paydayData?.countdownTitle || "Swount";
+
   const { daysLeft, recurrenceInDays } = settings;
 
-  // Make rows and columns responsive based on the recurrence period
-  const getGridDimensions = () => {
-    if (recurrenceInDays <= 7) {
-      return { rows: 2, cols: 4 }; // For weekly
-    } else if (recurrenceInDays <= 14) {
-      return { rows: 3, cols: 5 }; // For fortnightly
-    } else {
-      return { rows: 5, cols: 6 }; // For monthly
-    }
-  };
+  // Calculate total days for dot display
+  const totalDays = Math.max(daysLeft, recurrenceInDays);
+  const elapsedDots = totalDays - daysLeft;
 
-  const { rows, cols } = getGridDimensions();
+  // DotGrid component using your cleaner approach
+  function DotGrid({ count, gap = 7 }: { count: number; gap?: number }) {
+    const ref = useRef<HTMLDivElement>(null);
 
-  const safeRecurrence = recurrenceInDays > 1 ? recurrenceInDays : 2;
-  // Linear interpolation: maps daysLeft range [1, N] to translateX range [36, -50]
-  const translateX = 36 - 86 * (((daysLeft ?? 1) - 1) / (safeRecurrence - 1));
+    useLayoutEffect(() => {
+      const el = ref.current!;
+      const makeDot = (index: number) => {
+        const d = document.createElement("div");
+        d.className = getDotClass(index);
+        return d;
+      };
 
-  const dotVariants = {
-    hidden: { scale: 0, opacity: 0 },
-    visible: { scale: 1, opacity: 1 },
-  };
+      const getDotClass = (index: number) => {
+        if (index < elapsedDots) {
+          return countdownStyles.pastDot;
+        } else if (index === totalDays - 1) {
+          return countdownStyles.activeDot;
+        } else if (isStartEndMode && index >= totalDays - eventDurationDays) {
+          return countdownStyles.activeDot;
+        } else {
+          return countdownStyles.dot;
+        }
+      };
 
-  // Create array of dots in correct order (left to right, top to bottom in each column)
-  const dots = Array.from({ length: recurrenceInDays }, (_, i) => {
-    const col = Math.floor(i / rows);
-    const row = i % rows;
-    return { index: i, position: row * cols + col };
-  }).sort((a, b) => a.position - b.position);
+      const ensureDotCount = (n: number) => {
+        const cur = el.children.length;
+        if (cur < n) {
+          for (let i = cur; i < n; i++) el.appendChild(makeDot(i));
+        } else {
+          while (el.children.length > n) el.lastChild?.remove();
+        }
+        // Update existing dot classes
+        for (let i = 0; i < el.children.length; i++) {
+          (el.children[i] as HTMLElement).className = getDotClass(i);
+        }
+      };
+
+      const bestGrid = (W: number, H: number, N: number, g: number) => {
+        let best = { rows: 1, cols: N, size: 0 };
+        for (let rows = 1; rows <= N; rows++) {
+          const cols = Math.ceil(N / rows);
+          const dotW = (W - g * (cols - 1)) / cols;
+          const dotH = (H - g * (rows - 1)) / rows;
+          const dot = Math.floor(Math.min(dotW, dotH));
+          if (dot > best.size) best = { rows, cols, size: dot };
+        }
+        return best;
+      };
+
+      const layout = () => {
+        const W = el.clientWidth;
+        const H = el.clientHeight;
+        if (!W || !H) return;
+        ensureDotCount(count);
+        const { cols, size } = bestGrid(W, H, count, gap);
+        el.style.gap = `${gap}px`;
+        el.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
+        el.style.setProperty("--dot-size", `${size}px`);
+      };
+
+      const ro = new ResizeObserver(layout);
+      ro.observe(el);
+      layout();
+      return () => ro.disconnect();
+    }, [count, gap, elapsedDots, totalDays, isStartEndMode, eventDurationDays]);
+
+    return (
+      <div
+        ref={ref}
+        className={countdownStyles.dotsGrid}
+        style={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}
+      />
+    );
+  }
 
   // Add counter animation
   const count = useMotionValue(daysLeft ?? 0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayNumber, setDisplayNumber] = useState(daysLeft ?? 0);
 
-  // Format the days left for display with animation
-  const formattedDaysLeft = displayNumber.toString().padStart(2, "0");
-  const [firstDigit, secondDigit] = formattedDaysLeft.split("");
+  // Format the days left for display
+  const formattedDaysLeft = displayNumber.toString();
 
   if (isLoading) {
     return <WidgetLoader className="Countdown" minHeight="h-[280px]" />;
   }
 
-  // Calculate dot size and spacing based on grid dimensions
-  const dotSize = Math.min(10, Math.max(6, 100 / (cols * 2))); // Responsive dot size
-  const dotSpacingX = Math.min(20, Math.max(10, 100 / cols));
-  const dotSpacingY = Math.min(24, Math.max(16, 60 / rows));
+  // For start/end mode, calculate event duration
+  const isStartEndMode = paydayData?.startDate && paydayData?.endDate;
+  const eventDurationDays = isStartEndMode
+    ? differenceInDays(
+        new Date(paydayData.endDate),
+        new Date(paydayData.startDate),
+      )
+    : 0;
 
   return (
     <WidgetContainer>
-      <WidgetHeader title="Countdown" className={countdownStyles.header}></WidgetHeader>
+      <WidgetHeader title="Countdown" />
       <WidgetContent scrollable={false} className={countdownStyles.content}>
         <div className={countdownStyles.mainContainer}>
-          <div className={countdownStyles.leftColumn}>
-            <div className={countdownStyles.title}>Pay</div>
+          {/* Row2: Dots Grid */}
+          <DotGrid count={totalDays} gap={7} />
 
-            <div></div>
-
-            <div className={countdownStyles.bottomSection}>
+          {/* Row3: Count and labels */}
+          <div className={countdownStyles.bottomSection}>
+            <div className={countdownStyles.numberSection}>
               <ClientOnly>
                 <AnimatePresence mode="popLayout">
                   <motion.div
@@ -169,36 +261,16 @@ export function CountdownWidget({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className={countdownStyles.number}
+                    className="countdown-number"
                   >
                     {formattedDaysLeft}
                   </motion.div>
                 </AnimatePresence>
               </ClientOnly>
-
-              <div className={countdownStyles.daysLabel}>
-                days
+              <div className={countdownStyles.labelRow}>
+                <span className={countdownStyles.daysLabel}>Days until</span>
+                <span className={countdownStyles.eventLabel}>{countdownTitle}</span>
               </div>
-            </div>
-          </div>
-
-          <div className={countdownStyles.rightColumn}>
-            <div className={countdownStyles.dotsGrid}>
-              {[...Array(Math.min(daysLeft, 30))].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    delay: i * 0.02,
-                    duration: 0.3,
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                  }}
-                  className={countdownStyles.dot}
-                />
-              ))}
             </div>
           </div>
         </div>

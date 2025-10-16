@@ -1,11 +1,7 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import Search from 'lucide-react/dist/esm/icons/search'
-import Settings from 'lucide-react/dist/esm/icons/settings'
-import X from 'lucide-react/dist/esm/icons/x'
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -25,8 +21,8 @@ export function DockContent({
     showSearch,
     searchQuery,
     setSearchQuery,
-    showSettings,
-    setShowSettings,
+    showSettings: _showSettings,
+    setShowSettings: _setShowSettings,
     setShowSearch,
     isVertical
 }: DockContentProps) {
@@ -52,7 +48,7 @@ export function DockContent({
                     showSearch && styles.iconButtonActive
                 )}
             >
-                <Search className={styles.icon} />
+                <span className={styles.icon}>🔍</span>
             </button>
 
             <ShinyAiButton
@@ -79,7 +75,7 @@ export function DockContent({
                             onClick={() => setSearchQuery("")}
                             className={styles.iconButton}
                         >
-                            <X className={styles.icon} />
+                            <span className={styles.icon}>×</span>
                         </button>
                     )}
                 </div>

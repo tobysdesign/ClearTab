@@ -129,85 +129,9 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
 
         console.log("SIGNED_IN event - Session stored with ID:", sessionId);
 
-        try {
-          // Check if user exists in database
-          const { data: existingUser } = await supabase
-            .from("user")
-            .select("id")
-            .eq("id", session.user.id)
-            .single();
-
-          // Check if this Google login includes calendar access
-          const provider_token = session.provider_token;
-          const provider_refresh_token = session.provider_refresh_token;
-          const hasCalendarAccess =
-            provider_token && session.user.app_metadata?.provider === "google";
-
-          console.log("Auth debug:", {
-            existingUser: !!existingUser,
-            hasCalendarAccess,
-            provider_token: provider_token ? "present" : "missing",
-            provider_refresh_token: provider_refresh_token
-              ? "present"
-              : "missing",
-          });
-
-          // If user doesn't exist, create them
-          if (!existingUser) {
-            console.log(
-              "Creating new user with calendar access:",
-              hasCalendarAccess,
-            );
-            const { error: insertError } = await supabase.from("user").insert({
-              id: session.user.id,
-              email: session.user.email!,
-              name:
-                session.user.user_metadata?.full_name ||
-                session.user.user_metadata?.name ||
-                "User",
-              google_id: session.user.user_metadata?.provider_id,
-              google_calendar_connected: hasCalendarAccess,
-              access_token: provider_token || null,
-              refresh_token: provider_refresh_token || null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            });
-
-            if (insertError) {
-              console.error("Error creating user record:", insertError);
-            } else {
-              console.log(
-                "User created successfully with calendar connected:",
-                hasCalendarAccess,
-              );
-            }
-          } else if (hasCalendarAccess) {
-            console.log("Updating existing user with calendar tokens");
-            // Update existing user with calendar tokens
-            const { error: updateError } = await supabase
-              .from("user")
-              .update({
-                google_calendar_connected: true,
-                access_token: provider_token,
-                refresh_token: provider_refresh_token,
-                updated_at: new Date().toISOString(),
-              })
-              .eq("id", session.user.id);
-
-            if (updateError) {
-              console.error(
-                "Error updating user with calendar access:",
-                updateError,
-              );
-            } else {
-              console.log("User updated successfully with calendar tokens");
-            }
-          } else {
-            console.log("No calendar access detected - not updating tokens");
-          }
-        } catch (error) {
-          console.error("Error handling user creation:", error);
-        }
+        // User creation/update is now handled by the auth callback API route
+        // This avoids direct database access from the client
+        console.log("User authentication complete, redirecting...");
 
         // Redirect to main page when user signs in
         if (window.location.pathname === "/login") {
@@ -221,7 +145,7 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Empty dependency array - run once on mount
+  }, [supabase]); // Include supabase in dependency array
 
   const signIn = async (provider: "google") => {
     const { error } = await supabase.auth.signInWithOAuth({

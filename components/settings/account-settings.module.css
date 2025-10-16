@@ -1,0 +1,171 @@
+.spaceY4 {
+  @apply space-y-4;
+}
+
+.card {
+  @apply p-4 bg-[#111111] rounded-lg border border-[#2A2A2A];
+}
+
+.textWhite60 {
+  @apply text-white/60 text-sm;
+}
+
+.flexItemsGap2 {
+  @apply flex items-center gap-2;
+}
+
+.textYellow400 {
+  @apply text-yellow-400;
+}
+
+.mb3 {
+  @apply mb-3;
+}
+
+.iconSmall {
+  @apply h-4 w-4;
+}
+
+.textSmMedium {
+  @apply text-sm font-medium;
+}
+
+.textXsWhite60 {
+  @apply text-xs text-white/60;
+}
+
+.flexJustifyBetween {
+  @apply flex items-center justify-between;
+}
+
+.flexJustifyBetweenMb3 {
+  @apply flex items-center justify-between mb-3;
+}
+
+.primaryAccountTitle {
+  @apply text-sm font-medium text-white/60;
+}
+
+.flexItemsGap3 {
+  @apply flex items-center gap-3;
+}
+
+.avatar {
+  @apply w-9 h-9 rounded-full bg-white/10 flex items-center justify-center overflow-hidden;
+}
+
+.avatarImage {
+  @apply w-full h-full object-cover;
+}
+
+.userIcon {
+  @apply h-4 w-4 text-white/60;
+}
+
+.userNameText {
+  @apply text-sm font-medium text-white;
+}
+
+.userEmailText {
+  @apply text-xs text-white/60;
+}
+
+.loadingPlaceholder {
+  @apply h-8 w-24 bg-[#1A1A1A] rounded animate-pulse;
+}
+
+.disconnectButton {
+  @apply h-8 text-xs;
+}
+
+.connectButton {
+  @apply h-8 text-xs;
+}
+
+.iconXs {
+  @apply h-3.5 w-3.5;
+}
+
+.iconXsMr {
+  @apply h-3.5 w-3.5 mr-1.5;
+}
+
+.iconXsMr1 {
+  @apply h-3.5 w-3.5 mr-1;
+}
+
+.additionalAccountsTitle {
+  @apply text-sm font-medium text-white/60 mb-1;
+}
+
+.additionalAccountsDescription {
+  @apply text-xs text-white/40;
+}
+
+.py3 {
+  @apply py-3;
+}
+
+.loadingLine {
+  @apply h-8 bg-[#1A1A1A] rounded animate-pulse;
+}
+
+.spaceY2 {
+  @apply space-y-2;
+}
+
+.accountItem {
+  @apply flex items-center justify-between p-2 rounded bg-[#0A0A0A] border border-[#1A1A1A];
+}
+
+.accountItemContent {
+  @apply flex items-center gap-2 min-w-0;
+}
+
+.userIconSmall {
+  @apply h-3.5 w-3.5 text-white/40 flex-shrink-0;
+}
+
+.accountDetails {
+  @apply min-w-0;
+}
+
+.accountEmail {
+  @apply text-xs text-white/90 truncate;
+}
+
+.removeButton {
+  @apply h-6 w-6 p-0 text-white/40 hover:text-red-400 hover:bg-red-400/10 flex-shrink-0;
+}
+
+.noAccountsRow {
+  @apply flex items-center justify-between py-2;
+}
+
+.noAccountsText {
+  @apply text-xs text-white/40;
+}
+
+.addAccountButton {
+  @apply h-7 text-xs hover:bg-white/5;
+}
+
+.signedInText {
+  @apply text-xs text-white/60;
+}
+
+.signedInEmail {
+  @apply text-white/80;
+}
+
+.signOutButton {
+  @apply h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10;
+}
+
+.signedInEmailSpan {
+  @apply text-white/80;
+}
+
+.signedInContainer {
+  @apply text-xs text-white/60;
+}

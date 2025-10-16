@@ -2,6 +2,7 @@
 import React from 'react'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { motion } from 'framer-motion'
+import styles from './shiny-ai-button.module.css'
 
 interface ShinyAiButtonProps {
   onClick: () => void
@@ -18,7 +19,7 @@ export function ShinyAiButton({
     <motion.div
       layoutId={layoutId}
       onClick={onClick}
-      className={`relative w-[40px] h-[40px] cursor-pointer ${className}`}
+      className={`${styles.container} ${className}`}
       transition={{
         type: "spring",
         damping: 30,
@@ -27,7 +28,7 @@ export function ShinyAiButton({
       }}
     >
       <button className="shiny-cta absolute inset-0" />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div className={styles.iconContainer}>
         <DotLottieReact
           src="https://lottie.host/5368e488-cb9d-4667-b407-8b42472d4c6e/0QAbp6DRx3.lottie"
           loop

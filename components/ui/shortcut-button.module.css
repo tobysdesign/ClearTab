@@ -1,0 +1,24 @@
+/* Shortcut Button Component Styles */
+
+.shortcut {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0.5rem;
+  pointer-events: none;
+  display: inline-flex;
+  height: 1.25rem;
+  user-select: none;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted));
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}

@@ -3,6 +3,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from './scroll-area'
+import styles from './scroll-shadows.module.css'
 
 interface ScrollShadowsProps {
   children: React.ReactNode
@@ -18,10 +19,10 @@ export function ScrollShadows({
   color = '#212121',
 }: ScrollShadowsProps) {
   return (
-    <div className={cn('relative h-full w-full', className)}>
+    <div className={cn(styles.container, className)}>
       <div
         style={{ height: size }}
-        className="absolute top-0 left-0 right-0 bg-gradient-to-b from-[var(--shadow-color)] to-transparent z-10 pointer-events-none"
+        className={styles.topShadow}
         data-shadow-color={color}
       />
       <ScrollArea 
@@ -46,7 +47,7 @@ export function ScrollShadows({
       </ScrollArea>
       <div
         style={{ height: size }}
-        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[var(--shadow-color)] to-transparent z-10 pointer-events-none"
+        className={styles.bottomShadow}
         data-shadow-color={color}
       />
     </div>

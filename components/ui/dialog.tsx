@@ -1,8 +1,8 @@
 "use client"
 
+// Icons replaced with ASCII placeholders
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import X from 'lucide-react/dist/esm/icons/x'
 import styles from './dialog.module.css'
 
 import { cn } from "@/lib/utils"
@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
     >
       {children}
       <DialogPrimitive.Close className={styles.closeBtn}>
-        <X className={styles.closeIcon} />
+        <span className={styles.closeIcon}>×</span>
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

@@ -1,8 +1,19 @@
 {
   "pages": {
+    "/api/settings/countdown/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/settings/countdown/route.js"
+    ],
+    "/api/settings/count/route": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/api/settings/count/route.js"
+    ],
     "/global-error": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
+      "static/css/app/global-error.css",
       "static/chunks/app/global-error.js"
     ],
     "/layout": [
@@ -14,6 +25,7 @@
     "/error": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
+      "static/css/app/error.css",
       "static/chunks/app/error.js"
     ],
     "/loading": [
@@ -24,6 +36,7 @@
     "/not-found": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
+      "static/css/app/not-found.css",
       "static/chunks/app/not-found.js"
     ],
     "/page": [
@@ -32,25 +45,20 @@
       "static/css/app/page.css",
       "static/chunks/app/page.js"
     ],
-    "/api/calendar/route": [
+    "/api/notes/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/calendar/route.js"
+      "static/chunks/app/api/notes/route.js"
     ],
     "/api/tasks/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/api/tasks/route.js"
     ],
-    "/api/notes/route": [
+    "/api/calendar/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/notes/route.js"
-    ],
-    "/_not-found/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/api/calendar/route.js"
     ]
   }
 }

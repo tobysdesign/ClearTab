@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ConversationStarters } from './conversation-starters'
+import styles from './chat-panel.module.css'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -26,21 +27,19 @@ function ChatMessage({ message }: { message: Message }) {
     return (
         <div
             className={cn(
-                "mb-4 flex max-w-[80%]",
-                message.role === 'user' ? 'self-end' : 'self-start'
+                styles.messageContainer,
+                message.role === 'user' ? styles.messageContainerUser : styles.messageContainerAssistant
             )}
         >
             <div
                 className={cn(
-                    "rounded-lg px-4 py-2",
-                    message.role === 'user'
-                        ? 'bg-[#292929] border border-[#434343] text-neutral-200'
-                        : 'bg-[#222222] text-neutral-300'
+                    styles.messageContent,
+                    message.role === 'user' ? styles.messageContentUser : styles.messageContentAssistant
                 )}
             >
                 {message.content}
                 {message.isStreaming && (
-                    <span className="inline-block w-2 h-4 bg-neutral-400 ml-1 animate-pulse" />
+                    <span className={styles.streamingCursor} />
                 )}
             </div>
         </div>
@@ -49,15 +48,15 @@ function ChatMessage({ message }: { message: Message }) {
 
 function ThinkingMessage({ content }: { content: string }) {
     return (
-        <div className="mb-4 flex max-w-[80%] self-start">
-            <div className="rounded-lg px-4 py-2 bg-[#1a1a1a] text-neutral-400 border border-[#333]">
-                <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" />
-                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.1s]" />
-                        <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+        <div className={styles.thinkingContainer}>
+            <div className={styles.thinkingContent}>
+                <div className={styles.thinkingIndicator}>
+                    <div className={styles.thinkingDots}>
+                        <div className={styles.thinkingDot} />
+                        <div className={cn(styles.thinkingDot, styles.thinkingDotDelay1)} />
+                        <div className={cn(styles.thinkingDot, styles.thinkingDotDelay2)} />
                     </div>
-                    <span className="text-sm italic">{content}</span>
+                    <span className={styles.thinkingText}>{content}</span>
                 </div>
             </div>
         </div>
@@ -73,7 +72,7 @@ export function ChatPanel({
   inputValue,
   onInputChange,
 }: ChatPanelProps) {
-    const placeholders = [
+    const _placeholders = [
         "Try adding #task at the anywhere in a message and I will create a task for you",
         "Did you know adding #note when you message the message will become a note!",
         "Cmd + K opens the chat window, don't do it now because it closes it too!",
@@ -106,8 +105,8 @@ export function ChatPanel({
     }
 
   return (
-    <div className="flex flex-col h-full p-6 bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl">
-      <div className="flex-grow overflow-y-auto pr-4 -mr-4 flex flex-col">
+    <div className={styles.chatContainer}>
+      <div className={styles.messagesContainer}>
         {messages.map((msg, index) => (
           <ChatMessage key={index} message={msg} />
         ))}
@@ -122,15 +121,15 @@ export function ChatPanel({
         {messages.length === 0 && !isPending && (
             <ConversationStarters onSelect={handleStarterSelect} />
         )}
-      <div className="mt-6 pt-6 border-t border-neutral-800">
-        <form onSubmit={handleSubmit} className="relative">
-          <Label htmlFor="chat-input" className="absolute -top-3 left-3 bg-[#121212] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono">Message</Label>
+      <div className={styles.inputSection}>
+        <form onSubmit={handleSubmit} className={styles.inputForm}>
+          <Label htmlFor="chat-input" className={styles.inputLabel}>Message</Label>
           <Input
             id="chat-input"
             placeholder="Type your message..."
             value={inputValue}
             onChange={onInputChange}
-            className="bg-transparent border-[#3d3d3d] h-11"
+            className={styles.input}
           />
         </form>
       </div>

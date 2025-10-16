@@ -17,7 +17,7 @@ export const ExpandableCardListItem: React.FC<Props> = ({ card }) => {
         className={styles.item}
         onClick={() => setActive(card)}
       >
-        <div className="flex gap-4 flex-col md:flex-row flex-1">
+        <div className={styles.content}>
           {card.src && (
             <motion.img
               layoutId={`image-${card.title}`}

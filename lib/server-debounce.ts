@@ -1,13 +1,13 @@
 // Server-side debouncing to prevent database spam while keeping UI responsive
 
-interface DebouncedOperation {
+interface DebouncedOperation<T> {
   timer: NodeJS.Timeout
-  latestData: any
-  resolve: (value: any) => void
-  reject: (error: any) => void
+  latestData: T | null
+  resolve: (value: T) => void
+  reject: (error: unknown) => void
 }
 
-const debouncedOperations = new Map<string, DebouncedOperation>()
+const debouncedOperations = new Map<string, DebouncedOperation<unknown>>()
 
 export function serverDebounce<T>(
   key: string,
@@ -16,11 +16,11 @@ export function serverDebounce<T>(
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     // Cancel existing operation
-    const existing = debouncedOperations.get(key)
+    const existing = debouncedOperations.get(key) as DebouncedOperation<T> | undefined
     if (existing) {
       clearTimeout(existing.timer)
       // Resolve the previous promise with the new data when it executes
-      existing.resolve = resolve
+      existing.resolve = resolve as (value: unknown) => void
       existing.reject = reject
     }
     
@@ -28,13 +28,13 @@ export function serverDebounce<T>(
     const timer = setTimeout(async () => {
       try {
         const result = await operation()
-        const op = debouncedOperations.get(key)
+        const op = debouncedOperations.get(key) as DebouncedOperation<T> | undefined
         if (op) {
           op.resolve(result)
           debouncedOperations.delete(key)
         }
       } catch (error) {
-        const op = debouncedOperations.get(key)
+        const op = debouncedOperations.get(key) as DebouncedOperation<T> | undefined
         if (op) {
           op.reject(error)
           debouncedOperations.delete(key)
@@ -45,8 +45,8 @@ export function serverDebounce<T>(
     debouncedOperations.set(key, {
       timer,
       latestData: null,
-      resolve,
+      resolve: resolve as (value: unknown) => void,
       reject
-    })
+    } as DebouncedOperation<unknown>)
   })
 }

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import styles from './conversation-starters.module.css'
 
 const allStarters = [
   "What's the single most important thing you want to move forward today?",
@@ -31,19 +32,19 @@ export function ConversationStarters({ onSelect }: ConversationStartersProps) {
   }, [])
 
   return (
-    <div className="mb-4">
-      <h3 className="text-sm font-medium text-neutral-400 mb-2">Conversation starters</h3>
-      <div className="flex flex-col space-y-2">
+    <div className={styles.container}>
+      <h3 className={styles.title}>Conversation starters</h3>
+      <div className={styles.startersContainer}>
         {starters.map((starter, index) => (
           <motion.button
             key={starter}
             onClick={() => onSelect(starter)}
-            className="group flex items-center justify-between w-full text-left p-2 rounded-lg bg-[#2C2C2C] hover:bg-[#363636] transition-colors"
+            className={styles.starterButton}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <span className="text-sm text-neutral-200">{starter}</span>
+            <span className={styles.starterText}>{starter}</span>
           </motion.button>
         ))}
       </div>

@@ -43,10 +43,10 @@ export function PlaceholdersAndVanishInput({
       }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [placeholders]);
+  }, [placeholders, handleVisibilityChange, startAnimation]);
  
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const newDataRef = useRef<any[]>([]);
+  const newDataRef = useRef<Array<{ x: number; y: number; r: number; color: string }>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const [animating, setAnimating] = useState(false);
  
@@ -69,12 +69,12 @@ export function PlaceholdersAndVanishInput({
  
     const imageData = ctx.getImageData(0, 0, 800, 800);
     const pixelData = imageData.data;
-    const newData: any[] = [];
+    const newData: Array<{ x: number; y: number; color: number[] }> = [];
  
     for (let t = 0; t < 800; t++) {
-      let i = 4 * t * 800;
+      const i = 4 * t * 800;
       for (let n = 0; n < 800; n++) {
-        let e = i + 4 * n;
+        const e = i + 4 * n;
         if (
           pixelData[e] !== 0 &&
           pixelData[e + 1] !== 0 &&
@@ -174,7 +174,7 @@ export function PlaceholdersAndVanishInput({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     vanishAndSubmit();
-    onSubmit && onSubmit(e);
+    onSubmit?.(e);
   };
   return (
     <form
@@ -188,7 +188,7 @@ export function PlaceholdersAndVanishInput({
       <input
         onChange={(e) => {
           if (!animating) {
-            onChange && onChange(e);
+            onChange?.(e);
           }
         }}
         onKeyDown={handleKeyDown}
@@ -213,7 +213,7 @@ export function PlaceholdersAndVanishInput({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-white/40 h-4 w-4"
+          className={styles.submitIcon}
         >
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path
@@ -225,7 +225,7 @@ export function PlaceholdersAndVanishInput({
         </svg>
       </button>
  
-      <div className="absolute inset-0 flex items-center rounded-full pointer-events-none">
+      <div className={styles.placeholderContainer}>
         <AnimatePresence mode="wait">
           {!value && (
             <motion.p

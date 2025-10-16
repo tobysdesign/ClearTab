@@ -6,34 +6,14 @@ import {
   PanelResizeHandle,
 } from 'react-resizable-panels'
 import { motion } from 'framer-motion'
-import { Card } from '@/components/ui/card'
-import { Suspense } from 'react'
 import type { ReactNode } from 'react'
-import { NotesWidget } from '@/components/widgets/notes-widget'
-import { TasksWidget } from '@/components/widgets/tasks-widget'
 import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { ScheduleWidget } from '@/components/widgets/schedule-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
-import { BentoCard, BentoGrid } from '@/components/ui/bento-grid'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useLayout } from '@/hooks/use-layout'
-import Image from 'next/image'
 import styles from './resizable-bento-grid.module.css'
-
-const WidgetSkeleton = () => (
-  <Card className={styles.skeletonCard}>
-    <div className={styles.loadingImageContainer}>
-      <Image
-        src="/assets/loading.gif"
-        alt="Loading..."
-        fill
-        className={styles.loadingImage}
-        priority
-      />
-    </div>
-  </Card>
-)
 
 interface ResizableBentoGridProps {
     notes: ReactNode
@@ -46,6 +26,7 @@ export function ResizableBentoGrid({
   notes,
   tasks,
   dockPosition,
+  searchQuery: _searchQuery,
 }: ResizableBentoGridProps) {
   const padding = useDockPadding(dockPosition)
   const { layout } = useLayout()
@@ -110,7 +91,7 @@ export function ResizableBentoGrid({
   )
 
   const renderSingleRowLayout = () => (
-    <PanelGroup direction="horizontal" className="h-full w-full">
+    <PanelGroup direction="horizontal" className={styles.singleRowPanelGroup}>
       <Panel defaultSize={67} minSize={30}>
         <PanelGroup direction="vertical" className="panel-group">
           <Panel defaultSize={60} minSize={25}>
@@ -142,7 +123,7 @@ export function ResizableBentoGrid({
           </Panel>
         </PanelGroup>
       </Panel>
-      <PanelResizeHandle className="mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F]" />
+      <PanelResizeHandle className={styles.resizeHandleInline} />
       <Panel defaultSize={33} minSize={8}>
         <PanelGroup direction="vertical" className="panel-group">
           <Panel defaultSize={50} minSize={8}>

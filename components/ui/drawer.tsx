@@ -68,7 +68,7 @@ const DrawerContent = React.forwardRef<
       }}
       {...props}
     >
-      {direction === 'bottom' && <div className="mx-auto mt-4 h-2 w-[100px] bg-muted" style={{ borderRadius: '50%' }} />}
+      {direction === 'bottom' && <div className={styles.handle} style={{ borderRadius: '50%' }} />}
       <VisuallyHidden.Root>
         <DrawerTitle>Drawer Content</DrawerTitle>
       </VisuallyHidden.Root>

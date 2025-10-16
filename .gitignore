@@ -10,7 +10,7 @@ storybook-static
 .next/
 .vercel/
 .turbo/
-
+.env.local
 # Cache
 .next/cache/
 node_modules/.cache/

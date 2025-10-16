@@ -6,6 +6,18 @@
    NEW CSS ARCHITECTURE - KISS, Container Queries
    =========================================== */
 
+/* Countdown Widget Styles */
+.countdown-number {
+    color: #d2d2d2;
+    font-family: "Inter Display", sans-serif;
+    font-size: 50px;
+    font-weight: 100;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-align: left;
+    text-shadow: 0px -1px 4px rgba(0, 0, 0, 0.34);
+}
+
 :root {
     /* NEW CSS ARCHITECTURE VARIABLES */
     /* spacing scale */
@@ -349,7 +361,11 @@ html {
 
 /* Widget base background */
 .widget-background {
-    background: linear-gradient(180deg, #1f1f1f 0%, #161515 100%);
+    background: linear-gradient(
+        180deg,
+        rgb(19, 19, 19) 4%,
+        rgb(23, 21, 21) 100%
+    );
     border: 1px solid #323235;
     box-shadow:
         0px 8px 12px 6px rgba(0, 0, 0, 0.15),
@@ -371,7 +387,6 @@ html {
 /* Notes widget - ensure proper border-radius on container */
 [data-widget="notes"] .widget-background {
     border-radius: 22px !important;
-    overflow: hidden !important;
 }
 
 /* Notes widget list panel header - only curve top left, square top right */
@@ -382,13 +397,11 @@ html {
 /* Notes widget list panel (left side) - square corners on right */
 [data-widget="notes"] .notes-list-panel {
     border-radius: 22px 0 0 22px !important;
-    overflow: hidden;
 }
 
 /* Notes widget editor panel (right side outer container) */
 [data-widget="notes"] .notes-editor-panel {
     border-radius: 0 22px 22px 0;
-    overflow: hidden;
 }
 
 /* Notes widget content panel (right side inner content) */
@@ -2345,14 +2358,15 @@ textarea::placeholder {
     border: none !important;
 }
 
-/* Remove any pink borders from widget containers and editor */
-[data-widget="notes"],
-[data-widget="notes"] *,
-.widget-flex-column.widget-full-height.widget-overflow-auto.custom-scrollbar,
+/* Remove any pink borders from editor elements only - NOT the widget container */
 .bn-container,
 .bn-container *,
-.notes-editor,
-.notes-editor * {
+.notes-editor *,
+[data-widget="notes"] .bn-container,
+[data-widget="notes"] .bn-container *,
+[data-widget="notes"] [contenteditable],
+[data-widget="notes"] .ProseMirror,
+[data-widget="notes"] .ProseMirror * {
     border-color: transparent !important;
     outline: none !important;
     box-shadow: none !important;

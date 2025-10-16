@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
 
 export default function LogoutPage() {
   const router = useRouter();
@@ -22,13 +23,13 @@ export default function LogoutPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Signing you out...</h1>
-        <p className="text-white">Please wait while we clear your session.</p>
-        <p className="text-sm text-white/60 mt-4">
-          If you're not redirected in a few seconds,{" "}
-          <a href="/login" className="underline">
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <h1 className={styles.title}>Signing you out...</h1>
+        <p className={styles.message}>Please wait while we clear your session.</p>
+        <p className={styles.footer}>
+          If you&apos;re not redirected in a few seconds,{" "}
+          <a href="/login" className={styles.link}>
             click here
           </a>
           .

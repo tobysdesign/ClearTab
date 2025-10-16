@@ -1,15 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { connectedAccounts, user as userTable } from "@/shared/schema";
-import { eq, and } from "drizzle-orm";
-import { google } from "googleapis";
+import { user as userTable } from "@/shared/schema";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
-  const addingAccount = searchParams.get("adding_account") === "true";
+  // Note: addingAccount functionality may be implemented in the future
+  // const addingAccount = searchParams.get("adding_account") === "true";
 
   if (!code) {
     console.error("Auth callback: No code provided.");

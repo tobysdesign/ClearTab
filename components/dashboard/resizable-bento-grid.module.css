@@ -59,3 +59,11 @@
 .resizeHandleVertical:hover {
   background-color: #FF4F4F;
 }
+
+.singleRowPanelGroup {
+  @apply h-full w-full;
+}
+
+.resizeHandleInline {
+  @apply mx-2 w-px bg-border transition-colors duration-300 ease-out hover:bg-[#FF4F4F];
+}

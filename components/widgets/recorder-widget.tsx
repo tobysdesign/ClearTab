@@ -1,16 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import Mic from 'lucide-react/dist/esm/icons/mic'
-import Square from 'lucide-react/dist/esm/icons/square'
-import Pause from 'lucide-react/dist/esm/icons/pause'
-import Play from 'lucide-react/dist/esm/icons/play'
-import Check from 'lucide-react/dist/esm/icons/check'
-import Download from 'lucide-react/dist/esm/icons/download'
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2'
-import MicOff from 'lucide-react/dist/esm/icons/mic-off'
+// Icons replaced with ASCII placeholders
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import styles from './recorder-widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
@@ -18,7 +9,7 @@ import { WidgetHeader } from '@/components/ui/widget-header'
 import { useAudioRecorder } from '@/hooks/use-audio-recorder'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/components/auth/supabase-auth-provider'
-import { createClient } from '@/lib/supabase/client'
+import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface RecorderWidgetProps {
@@ -29,9 +20,20 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isFlipped, setIsFlipped] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [supabase, setSupabase] = useState<any>(null)
   const { toast } = useToast()
+
+  // Use auth
   const { user } = useAuth()
-  const supabase = createClient()
+
+  // Initialize Supabase client based on environment
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await getSupabaseClient()
+      setSupabase(client)
+    }
+    initSupabase()
+  }, [])
 
   const {
     state,
@@ -60,6 +62,45 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         }
 
         console.log('Saving note for user:', user.id)
+
+        // Check if Supabase client is available (extension may be offline)
+        if (!supabase) {
+          console.warn('No Supabase client available, saving to local storage')
+
+          // Save to local storage as fallback for extension
+          const localNote = {
+            id: Date.now().toString(),
+            title: `Voice Note - ${new Date().toLocaleDateString()}`,
+            content: [{
+              id: 'voice-note-block',
+              type: 'paragraph',
+              props: { textColor: 'default', backgroundColor: 'default', textAlignment: 'left' },
+              content: [{ type: 'text', text, styles: {} }],
+              children: []
+            }],
+            user_id: user.id,
+            created_at: new Date().toISOString()
+          }
+
+          const existingNotes = JSON.parse(localStorage.getItem('voice_notes') || '[]')
+          existingNotes.push(localNote)
+          localStorage.setItem('voice_notes', JSON.stringify(existingNotes))
+
+          toast({
+            title: "Success",
+            description: "Voice note saved locally (extension mode)"
+          })
+
+          setShowSuccess(true)
+          setTimeout(() => {
+            setShowSuccess(false)
+            setIsFlipped(false)
+            reset()
+          }, 2000)
+
+          return
+        }
+
         // Save note to Supabase
         const { data, error } = await supabase
           .from('notes')
@@ -102,12 +143,13 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
           reset()
         }, 2000)
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error processing transcription:', error)
-        console.error('Error details:', error.message || error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        console.error('Error details:', errorMessage)
         toast({
           title: "Error",
-          description: error.message || "Failed to process transcription",
+          description: errorMessage || "Failed to process transcription",
           variant: "destructive"
         })
         // Reset state on error
@@ -130,7 +172,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       console.log('Audio blob ready, starting transcription...')
       transcribeAudio()
     }
-  }, [state, audioBlob, showSuccess]) // Remove transcribeAudio from dependencies
+  }, [state, audioBlob, showSuccess, transcribeAudio])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -150,14 +192,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     stopRecording()
   }
 
-  const handleDownloadAudio = async () => {
+  const _handleDownloadAudio = async () => {
     try {
       await saveAudioLocally()
       toast({
         title: "Success",
         description: "Audio saved!"
       })
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to save audio",
@@ -230,7 +272,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                         {/* Microphone icon */}
                         <div className={styles.microphoneIcon}>
-                          <Mic className={styles.micIcon} />
+                          <span className={styles.micIcon}>•</span>
                         </div>
                       </div>
                     </button>
@@ -308,7 +350,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
                             >
                               <div className={cn(styles.controlButtonInner, { [styles.muteButtonInnerActive]: isMuted })}>
-                                {isMuted ? <MicOff className={styles.controlIcon} /> : <Mic className={styles.controlIcon} />}
+                                {isMuted ? <span className={styles.controlIcon}>•</span> : <span className={styles.controlIcon}>•</span>}
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -324,7 +366,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={styles.controlButton}
                             >
                               <div className={styles.controlButtonInner}>
-                                <Pause className={styles.controlIcon} />
+                                <span className={styles.controlIcon}>•</span>
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -340,7 +382,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
                               <div className={styles.controlButtonInner}>
-                                <Check className={styles.controlIcon} />
+                                <span className={styles.controlIcon}>✓</span>
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -360,7 +402,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, { [styles.muteButtonActive]: isMuted })}
                             >
                               <div className={cn(styles.controlButtonInner, { [styles.muteButtonInnerActive]: isMuted })}>
-                                {isMuted ? <MicOff className={styles.controlIcon} /> : <Mic className={styles.controlIcon} />}
+                                {isMuted ? <span className={styles.controlIcon}>•</span> : <span className={styles.controlIcon}>•</span>}
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -376,7 +418,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={styles.controlButton}
                             >
                               <div className={styles.controlButtonInner}>
-                                <Play className={styles.controlIcon} />
+                                <span className={styles.controlIcon}>•</span>
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -392,7 +434,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
                               <div className={styles.controlButtonInner}>
-                                <Check className={styles.controlIcon} />
+                                <span className={styles.controlIcon}>✓</span>
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -405,7 +447,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                         {showSuccess && (
                           <div className={styles.successContainer}>
-                            <Check className={styles.controlIcon} />
+                            <span className={styles.controlIcon}>✓</span>
                             <span className={styles.doneText}>Note saved!</span>
                           </div>
                         )}

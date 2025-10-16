@@ -4,10 +4,13 @@ import React from "react";
 import dynamic from "next/dynamic";
 import styles from './dynamic-editor.module.css';
 
+// Define types for editor content
+type EditorContent = Record<string, unknown> | null;
+
 // Define the prop types for the Editor component
 interface EditorProps {
-  initialContent?: any;
-  onChange?: (content: any) => void;
+  initialContent?: EditorContent;
+  onChange?: (content: EditorContent) => void;
   readOnly?: boolean;
   onOpenAiChat?: (selectedText: string) => void;
   onCreateTask?: (selectedText: string) => void;

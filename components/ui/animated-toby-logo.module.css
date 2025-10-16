@@ -1,37 +1,53 @@
 .logo {
-  width: 100%;
-  height: auto;
+    width: 100%;
+    height: auto;
 }
 
 .element {
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-              opacity 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition:
+        transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform, opacity;
 }
 
 .tStem {
-  transform: translateX(var(--x-pos, 0));
+    transform-origin: center;
 }
 
 .tCrossbar {
-  transform-origin: center;
+    transform-origin: left center;
 }
 
 .visible {
-  opacity: 1;
+    opacity: 1;
+    transform: scale(1);
 }
 
 .hidden {
-  opacity: 0;
+    opacity: 0;
+    transform: scale(0.8);
 }
 
 .zero {
-  transform: translateX(var(--x-pos, 0));
+    transform-origin: center;
 }
 
 .dot {
-  transform: translateX(var(--x-pos, 0)) scale(var(--scale, 1));
+    transform-origin: center;
 }
 
-.bCircle, .bStem, .yArmRight, .yArmLeft {
-  transform-origin: center;
-} 
+.bCircle {
+    transform-origin: center;
+}
+
+.bStem {
+    transform-origin: center;
+}
+
+.yArmRight {
+    transform-origin: center;
+}
+
+.yArmLeft {
+    transform-origin: center;
+}

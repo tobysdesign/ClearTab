@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "browser-tools": {
+      "command": "npx",
+      "args": ["-y", "@agentdeskai/browser-tools-mcp@latest"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "figma": {
+      "command": "figma-mcp-pro",
+      "args": [],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "figd_eG8aIa4QUNYz6iS2l1DJT1jLuMAJNWPYhD0uXF3Z"
+      }
+    }
+  }
+}

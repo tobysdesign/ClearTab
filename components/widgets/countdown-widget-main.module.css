@@ -1,84 +1,163 @@
 .header {
-  height: 60px;
+    height: 60px;
 }
 
 .content {
-  /* layout */
-  position: relative;
+    /* layout */
+    position: relative;
+    overflow: hidden;
 
-  /* box model */
-  padding: 24px;
+    /* box model */
+    padding: 24px;
+    height: 100%;
 }
 
 .mainContainer {
-  /* layout */
-  display: flex;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 
-  /* box model */
-  height: 100%;
+    /* box model */
+    height: 100%;
+    padding: 0;
 }
 
 .leftColumn {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .title {
-  /* typography */
-  color: #8D8D8D;
-  font-size: 18px;
-  font-weight: 400;
+    /* typography */
+    color: #d2d2d2;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.21em;
+    text-align: left;
 }
 
 .bottomSection {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+    /* layout */
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    align-self: stretch;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.numberSection {
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.labelRow {
+    /* layout */
+    display: flex;
+    gap: 3px;
+    align-items: baseline;
+    line-height: 0;
+    white-space: nowrap;
 }
 
 .number {
-  /* typography */
-  color: white;
-  font-size: 48px;
-  font-weight: 300;
-  line-height: 1;
+    /* typography */
+    color: #d2d2d2;
+    font-family: "Inter Display", sans-serif;
+    font-size: 50px;
+    font-weight: 100;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-align: center;
 
-  /* box model */
-  margin-bottom: 4px;
+    /* visual */
+    text-shadow: 0px -1px 4px rgba(0, 0, 0, 0.34);
 }
 
 .daysLabel {
-  /* typography */
-  color: #555454;
-  font-family: 'Inter Display', sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.2;
+    /* typography */
+    color: #454545;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1em;
+    text-align: left;
+}
+
+.labelSection {
+    /* layout */
+    display: flex;
+    flex: 1;
+}
+
+.eventLabel {
+    /* typography */
+    color: #c4c4c4;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: left;
+
+    /* layout */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
 }
 
 .rightColumn {
-  /* layout */
-  display: flex;
-  align-items: center;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
 }
 
 .dotsGrid {
-  /* layout */
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
+    /* layout will be handled by JavaScript */
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
 }
 
 .dot {
-  /* box model */
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+    /* box model */
+    width: var(--dot-size, 9px);
+    height: var(--dot-size, 9px);
+    flex-shrink: 0;
+    border-radius: 50%;
 
-  /* visual */
-  background-color: #FF69B4;
+    /* visual */
+    background-color: #c57b93;
+}
+
+.pastDot {
+    /* box model */
+    width: var(--dot-size, 9px);
+    height: var(--dot-size, 9px);
+    flex-shrink: 0;
+    border-radius: 50%;
+
+    /* visual */
+    background-color: #484848;
+}
+
+.activeDot {
+    /* box model */
+    width: var(--dot-size, 9px);
+    height: var(--dot-size, 9px);
+    flex-shrink: 0;
+    border-radius: 50%;
+
+    /* visual */
+    background-color: #ff4f88;
 }

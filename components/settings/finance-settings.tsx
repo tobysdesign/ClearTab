@@ -1,5 +1,6 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -11,13 +12,18 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
 import { format, getDay } from 'date-fns'
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { getPaydaySettings, savePaydaySettings } from '@/lib/actions/settings'
 import { useQueryClient } from '@tanstack/react-query'
 import Image from 'next/image'
+import styles from './finance-settings.module.css'
+
+interface PaydaySettingsData {
+  paydayDate?: string | Date
+  paydayFrequency?: string
+}
 
 const weekDays = [
   'Sunday',
@@ -41,7 +47,7 @@ export function FinanceSettings() {
 
   useEffect(() => {
     async function fetchPaydaySettings() {
-      const result = await getPaydaySettings({} as any)
+      const result = await getPaydaySettings({} as PaydaySettingsData)
       if (result.data) {
         const { paydayDate: date, paydayFrequency: freq } = result.data
         if (freq) setFrequency(freq as 'weekly' | 'fortnightly' | 'monthly')
@@ -100,7 +106,7 @@ export function FinanceSettings() {
         })
         queryClient.invalidateQueries({ queryKey: ['paydaySettings'] })
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'An unexpected error occurred.',
@@ -118,22 +124,22 @@ export function FinanceSettings() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium mb-2">Payday Settings</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2 className={styles.heading}>Payday Settings</h2>
+        <p className={styles.description}>
           Configure your payday schedule to help manage your budget.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
+      <div className={styles.formContainer}>
+        <div className={styles.fieldContainer}>
           <Label htmlFor="frequency">Payday recurrence</Label>
           <Select
             value={frequency}
             onValueChange={handleFrequencyChange}
           >
-            <SelectTrigger id="frequency" className="border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black">
+            <SelectTrigger id="frequency" className={styles.frequencyTrigger}>
               <SelectValue placeholder="Select frequency" />
             </SelectTrigger>
             <SelectContent>
@@ -144,23 +150,23 @@ export function FinanceSettings() {
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className={styles.fieldContainer}>
           <Label>Next payday</Label>
           {frequency === 'monthly' ? (
-            <div className="space-y-2">
+            <div className={styles.dayPickerContainer}>
               <Button
                 variant="outline"
                 onClick={() => setShowCalendar(!showCalendar)}
                 className={cn(
-                  'justify-start text-left font-normal border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black hover:bg-[#7c7c7c] w-full',
-                  !paydayDate && 'text-black/70'
+                  styles.calendarButton,
+                  !paydayDate && styles.calendarButtonEmpty
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <span className={styles.calendarIcon}>◊</span>
                 {paydayDate ? format(paydayDate, 'do') : 'Pick a day'}
               </Button>
               {showCalendar && (
-                <div className="rounded-md border bg-popover p-4">
+                <div className={styles.calendarContainer}>
                   <Calendar
                     mode="single"
                     selected={paydayDate}
@@ -178,7 +184,7 @@ export function FinanceSettings() {
               value={dayOfWeek?.toString()}
               onValueChange={value => setDayOfWeek(Number(value))}
             >
-              <SelectTrigger className="border-0 focus:ring-0 focus:ring-offset-0 bg-[#8c8c8c] text-black">
+              <SelectTrigger className={styles.daySelectTrigger}>
                 <SelectValue placeholder="Pick a day" />
               </SelectTrigger>
               <SelectContent>
@@ -195,15 +201,15 @@ export function FinanceSettings() {
         <Button
           onClick={handleSavePaydaySettings}
           disabled={isSubmitting}
-          className="w-full"
+          className={styles.saveButton}
         >
           {isSubmitting ? (
-            <div className="relative w-[45px] h-[25px] mr-2">
+            <div className={styles.loadingContainer}>
               <Image
                 src="/assets/loading.gif"
                 alt="Loading..."
                 fill
-                className="object-contain"
+                className={styles.loadingImage}
                 sizes="100vw"
                 priority
               />

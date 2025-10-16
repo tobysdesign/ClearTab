@@ -1,0 +1,15 @@
+.trigger {
+  @apply absolute top-4 right-4;
+}
+
+.screenReaderOnly {
+  @apply sr-only;
+}
+
+.icon {
+  @apply h-5 w-5;
+}
+
+.content {
+  @apply w-40 border-0 bg-[#a5a5a5] text-black shadow-none backdrop-blur-[.75em] z-50 rounded-[12px];
+}

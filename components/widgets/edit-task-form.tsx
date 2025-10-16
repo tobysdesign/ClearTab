@@ -1,5 +1,6 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import { useEffect, useState, useTransition } from 'react'
 import type { Task } from '@/shared/schema'
 // Removed useDebouncedCallback as optimistic updates will trigger direct saves
@@ -26,8 +27,6 @@ import { TaskEditor } from '@/components/ui/task-editor'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import X from 'lucide-react/dist/esm/icons/x'
-
 // API functions for tasks
 async function updateTaskAPI(task: Partial<Task> & { id: string }): Promise<Task> {
   console.log('updateTaskAPI called with:', task);
@@ -299,7 +298,7 @@ export function EditTaskForm({
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/40 p-1"
               >
-                <X size={16} />
+                <span size={16}>×</span>
               </button>
             )}
             <label htmlFor="dueDate" className="md3-text-field__label">

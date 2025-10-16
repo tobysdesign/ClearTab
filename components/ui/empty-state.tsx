@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { Button } from './button';
+import { cn } from '@/lib/utils';
+import styles from './empty-state.module.css';
 
  interface EmptyStateProps {
   renderIcon?: () => ReactNode;
@@ -15,18 +17,18 @@ import { Button } from './button';
 
 export function EmptyState({ renderIcon, icon, title, description, action, className = '' }: EmptyStateProps) {
   return (
-    <div className={`flex flex-col items-center justify-center h-full text-center p-8 ${className}`}>
-      <div className="bg-white/10 rounded-full p-3 mb-4">
+    <div className={cn(styles.container, className)}>
+      <div className={styles.iconContainer}>
         {renderIcon ? renderIcon() : icon}
       </div>
-      <h3 className="font-semibold text-lg text-white">{title}</h3>
-      <p className="text-sm text-white/40 mt-1">{description}</p>
+      <h3 className={styles.title}>{title}</h3>
+      <p className={styles.description}>{description}</p>
       
       {action && (
         <Button 
           variant="outline" 
           onClick={action.onClick}
-          className="mt-4"
+          className={styles.actionButton}
         >
           {action.label}
         </Button>

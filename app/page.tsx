@@ -9,9 +9,9 @@ export default function Home() {
     <LayoutProvider>
       <SkipOnboardingHandler />
       <main>
-        <DashboardClient 
+        <DashboardClient
           notes={<NotesWidget />}
-          tasks={<TasksWidget searchQuery="" />} 
+          tasks={<TasksWidget searchQuery="" />}
         />
       </main>
     </LayoutProvider>

@@ -1,15 +1,12 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useChatContext } from '@/hooks/use-chat-context'
-import SendIcon from 'lucide-react/dist/esm/icons/send'
-import MessageSquarePlusIcon from 'lucide-react/dist/esm/icons/message-square-plus'
-import XIcon from 'lucide-react/dist/esm/icons/x'
-
+import styles from './mini-ai-chat.module.css'
 interface MiniMessage {
   role: 'user' | 'assistant'
   content: string
@@ -196,7 +193,7 @@ export function MiniAiChat({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-sm"
+        className={styles.overlay}
         onClick={onClose}
       >
         <motion.div
@@ -205,73 +202,73 @@ export function MiniAiChat({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           style={chatPosition}
-          className="w-96 h-96 bg-gradient-to-b from-[#1a1a1a] to-[#141414] rounded-2xl border border-neutral-700 shadow-2xl flex flex-col overflow-hidden"
+          className={styles.chatContainer}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-3 border-b border-neutral-700">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-              <h3 className="text-sm font-medium text-neutral-200">AI Assistant</h3>
+          <div className={styles.header}>
+            <div className={styles.headerLeft}>
+              <div className={styles.statusDot} />
+              <h3 className={styles.title}>AI Assistant</h3>
             </div>
-            <div className="flex items-center gap-1">
+            <div className={styles.headerRight}>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSendToMainChat}
-                className="h-6 px-2 text-xs hover:bg-neutral-600"
+                className={styles.sendButton}
                 disabled={messages.length <= 1}
               >
-                <MessageSquarePlusIcon className="w-3 h-3 mr-1" />
+                <span className={styles.sendIcon}>•</span>
                 Send to Main
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="h-6 w-6 hover:bg-neutral-600"
+                className={styles.closeButton}
               >
-                <XIcon className="w-3 h-3" />
+                <span className={styles.closeIcon}>×</span>
               </Button>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
+          <div className={styles.messagesContainer}>
             {messages.map((message, index) => (
               <div
                 key={index}
                 className={cn(
-                  "flex max-w-[85%]",
-                  message.role === 'user' ? 'self-end ml-auto' : 'self-start'
+                  styles.messageWrapper,
+                  message.role === 'user' ? styles.messageWrapperUser : styles.messageWrapperAssistant
                 )}
               >
                 <div
                   className={cn(
-                    "rounded-lg px-3 py-2 text-sm",
+                    styles.messageBubble,
                     message.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-neutral-700 text-neutral-200'
+                      ? styles.messageBubbleUser
+                      : styles.messageBubbleAssistant
                   )}
                 >
                   {message.content}
                   {message.isStreaming && (
-                    <span className="inline-block w-1 h-3 bg-neutral-300 ml-1 animate-pulse" />
+                    <span className={styles.streamingCursor} />
                   )}
                 </div>
               </div>
             ))}
             
             {thinkingContent && (
-              <div className="flex max-w-[85%] self-start">
-                <div className="rounded-lg px-3 py-2 bg-neutral-800 text-neutral-400 border border-neutral-600">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce" />
-                      <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.1s]" />
-                      <div className="w-1 h-1 bg-neutral-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+              <div className={styles.thinkingContainer}>
+                <div className={styles.thinkingBubble}>
+                  <div className={styles.thinkingContent}>
+                    <div className={styles.thinkingDots}>
+                      <div className={styles.thinkingDot1} />
+                      <div className={styles.thinkingDot2} />
+                      <div className={styles.thinkingDot3} />
                     </div>
-                    <span className="text-xs italic">{thinkingContent}</span>
+                    <span className={styles.thinkingText}>{thinkingContent}</span>
                   </div>
                 </div>
               </div>
@@ -281,23 +278,23 @@ export function MiniAiChat({
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-neutral-700">
-            <div className="flex gap-2">
+          <div className={styles.inputContainer}>
+            <div className={styles.inputWrapper}>
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask about this text..."
-                className="flex-1 h-8 text-sm bg-neutral-800 border-neutral-600 focus:border-blue-500"
+                className={styles.input}
                 disabled={isThinking}
               />
               <Button
                 onClick={handleSendMessage}
                 size="sm"
-                className="h-8 px-3"
+                className={styles.submitButton}
                 disabled={!inputValue.trim() || isThinking}
               >
-                <SendIcon className="w-3 h-3" />
+                <span className={styles.submitIcon}>•</span>
               </Button>
             </div>
           </div>

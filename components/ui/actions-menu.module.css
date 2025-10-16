@@ -1,61 +1,66 @@
 .srOnly {
-  /* layout */
-  position: absolute;
+    /* layout */
+    position: absolute;
 
-  /* box model */
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  border: 0;
+    /* box model */
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
 
-  /* visual */
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
+    /* visual */
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
 }
 
 .icon {
-  /* box model */
-  width: 1rem;
-  height: 1rem;
+    /* box model */
+    width: 1rem;
+    height: 1rem;
 }
 
 .popoverContent {
-  /* layout */
-  z-index: 50;
+    /* layout */
+    z-index: 50;
 
-  /* box model */
-  width: auto;
-  padding: 8px;
-  border: 0;
-  border-radius: 12px;
+    /* box model */
+    width: auto;
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
 
-  /* visual */
-  background-color: #a5a5a5;
-  box-shadow: none;
-  backdrop-filter: blur(0.75em);
+    /* visual */
+    background-color: rgba(35, 35, 35, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
 
-  /* typography */
-  color: black;
+    /* typography */
+    color: #d2d2d2;
 }
 
 .deleteButton {
-  /* layout */
-  display: flex;
-  justify-content: flex-start;
+    /* layout */
+    display: flex;
+    justify-content: flex-start;
 
-  /* box model */
-  width: 100%;
+    /* box model */
+    width: 100%;
 
-  /* typography */
-  color: rgb(220, 38, 38);
+    /* typography */
+    color: #ef4444;
 
-  /* state */
-  transition: colors 0.2s;
+    /* state */
+    transition: all 0.2s;
 }
 
 .deleteButton:hover {
-  background-color: #8c8c8c;
-  color: rgb(185, 28, 28);
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.deleteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

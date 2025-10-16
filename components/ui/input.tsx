@@ -2,6 +2,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import { useMotionTemplate, useMotionValue, motion } from 'framer-motion'
+import styles from './input.module.css'
 
 const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
@@ -33,7 +34,7 @@ const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLI
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
-        className="p-[2px] rounded-lg transition duration-300 ease-out group/input"
+        className={cn(styles.container, "group/input")}
       >
         <input
           type={type}

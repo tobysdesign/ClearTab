@@ -1,17 +1,13 @@
 "use client";
 
+// Icons replaced with ASCII placeholders
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
-import LogOut from "lucide-react/dist/esm/icons/log-out";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
-import Plus from "lucide-react/dist/esm/icons/plus";
-import X from "lucide-react/dist/esm/icons/x";
-import User from "lucide-react/dist/esm/icons/user";
-import CheckCircle2 from "lucide-react/dist/esm/icons/check-circle-2";
-import AlertCircle from "lucide-react/dist/esm/icons/alert-circle";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedAccountWithEmail } from "@/shared/types";
 import { useEffect } from "react";
+import Image from "next/image";
+import styles from "./account-settings.module.css";
 
 export function AccountSettings() {
   const { user, loading } = useAuth();
@@ -148,9 +144,9 @@ export function AccountSettings() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-          <div className="text-white/60 text-sm">
+      <div className={styles.spaceY4}>
+        <div className={styles.card}>
+          <div className={styles.textWhite60}>
             Loading account information...
           </div>
         </div>
@@ -160,13 +156,13 @@ export function AccountSettings() {
 
   if (!user) {
     return (
-      <div className="space-y-4">
-        <div className="p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-          <div className="flex items-center gap-2 text-yellow-400 mb-3">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">Not signed in</span>
+      <div className={styles.spaceY4}>
+        <div className={styles.card}>
+          <div className={`${styles.flexItemsGap2} ${styles.textYellow400} ${styles.mb3}`}>
+            <span className={styles.iconSmall}>•</span>
+            <span className={styles.textSmMedium}>Not signed in</span>
           </div>
-          <p className="text-xs text-white/60 mb-3">
+          <p className={`${styles.textXsWhite60} ${styles.mb3}`}>
             You need to sign in to manage your account settings.
           </p>
           <Button onClick={() => (window.location.href = "/login")} size="sm">
@@ -178,49 +174,50 @@ export function AccountSettings() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className={styles.spaceY4}>
       {/* Primary Account */}
-      <div className="p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-white/60">Primary Account</h3>
+      <div className={styles.card}>
+        <div className={styles.flexJustifyBetweenMb3}>
+          <h3 className={styles.primaryAccountTitle}>Primary Account</h3>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">
+        <div className={styles.flexJustifyBetween}>
+          <div className={styles.flexItemsGap3}>
+            <div className={styles.avatar}>
               {user.user_metadata?.avatar_url ? (
-                <img
+                <Image
                   src={user.user_metadata.avatar_url}
                   alt=""
-                  className="w-full h-full object-cover"
+                  fill
+                  className={styles.avatarImage}
                 />
               ) : (
-                <User className="h-4 w-4 text-white/60" />
+                <span className={styles.userIcon}>👤</span>
               )}
             </div>
             <div>
-              <div className="text-sm font-medium text-white">
+              <div className={styles.userNameText}>
                 {user.user_metadata?.full_name ||
                   user.email?.split("@")[0] ||
                   "User"}
               </div>
-              <div className="text-xs text-white/60">
+              <div className={styles.userEmailText}>
                 {user.email || "No email"}
               </div>
             </div>
           </div>
 
           {calendarLoading ? (
-            <div className="h-8 w-24 bg-[#1A1A1A] rounded animate-pulse" />
+            <div className={styles.loadingPlaceholder} />
           ) : isCalendarConnected ? (
             <Button
               variant="outline"
               size="sm"
               onClick={() => disconnectCalendarMutation.mutate()}
               disabled={disconnectCalendarMutation.isPending}
-              className="h-8 text-xs"
+              className={styles.disconnectButton}
             >
-              <X className="h-3.5 w-3.5 mr-1.5" />
+              <span className={styles.iconXsMr}>×</span>
               Disconnect
             </Button>
           ) : (
@@ -228,9 +225,9 @@ export function AccountSettings() {
               variant="outline"
               size="sm"
               onClick={handleConnectCalendar}
-              className="h-8 text-xs"
+              className={styles.disconnectButton}
             >
-              <Calendar className="h-3.5 w-3.5 mr-1.5" />
+              <span className={styles.iconXsMr}>◊</span>
               Connect
             </Button>
           )}
@@ -238,32 +235,32 @@ export function AccountSettings() {
       </div>
 
       {/* Additional Schedule Accounts */}
-      <div className="p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-        <div className="mb-3">
-          <h3 className="text-sm font-medium text-white/60 mb-1">
+      <div className={styles.card}>
+        <div className={styles.mb3}>
+          <h3 className={styles.additionalAccountsTitle}>
             Additional schedule accounts
           </h3>
-          <p className="text-xs text-white/40">
+          <p className={styles.additionalAccountsDescription}>
             Accounts listed below are view only for visibility in schedule
             widget
           </p>
         </div>
 
         {accountsLoading ? (
-          <div className="py-3">
-            <div className="h-8 bg-[#1A1A1A] rounded animate-pulse" />
+          <div className={styles.py3}>
+            <div className={styles.loadingLine} />
           </div>
         ) : connectedAccounts.length > 0 ? (
-          <div className="space-y-2">
+          <div className={styles.spaceY2}>
             {connectedAccounts.map((account) => (
               <div
                 key={account.id}
-                className="flex items-center justify-between p-2 rounded bg-[#0A0A0A] border border-[#1A1A1A]"
+                className={styles.accountItem}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <User className="h-3.5 w-3.5 text-white/40 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs text-white/90 truncate">
+                <div className={styles.accountItemContent}>
+                  <span className={styles.userIconSmall}>👤</span>
+                  <div className={styles.accountDetails}>
+                    <div className={styles.accountEmail}>
                       {account.email}
                     </div>
                   </div>
@@ -273,25 +270,25 @@ export function AccountSettings() {
                   size="sm"
                   onClick={() => removeAccountMutation.mutate(account.id)}
                   disabled={removeAccountMutation.isPending}
-                  className="h-6 w-6 p-0 text-white/40 hover:text-red-400 hover:bg-red-400/10 flex-shrink-0"
+                  className={styles.removeButton}
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <span className={styles.iconXs}>×</span>
                 </Button>
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-between py-2">
-            <p className="text-xs text-white/40">No additional accounts</p>
+          <div className={styles.noAccountsRow}>
+            <p className={styles.additionalAccountsDescription}>No additional accounts</p>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => addAccountMutation.mutate()}
               disabled={addAccountMutation.isPending}
-              className="h-7 text-xs hover:bg-white/5"
+              className={styles.addAccountButton}
               title="Note: Adding an account will switch your primary account"
             >
-              <Plus className="h-3.5 w-3.5 mr-1" />
+              <span className={styles.iconXsMr1}>+</span>
               Add
             </Button>
           </div>
@@ -299,18 +296,18 @@ export function AccountSettings() {
       </div>
 
       {/* Actions */}
-      <div className="p-4 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-white/60">
-            Signed in as <span className="text-white/80">{user.email}</span>
+      <div className={styles.card}>
+        <div className={styles.flexJustifyBetween}>
+          <div className={styles.signedInContainer}>
+            Signed in as <span className={styles.signedInEmailSpan}>{user.email}</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => (window.location.href = "/logout")}
-            className="h-8 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
+            className={styles.signOutButton}
           >
-            <LogOut className="h-3.5 w-3.5 mr-1.5" />
+            <span className={styles.iconXsMr}>•</span>
             Sign Out
           </Button>
         </div>

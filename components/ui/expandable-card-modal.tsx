@@ -43,7 +43,7 @@ export const ExpandableCardModal: React.FC<Props> = ({ card }) => {
                     className={styles.image}
                   />
                 )}
-                <div className="p-4">
+                <div className={styles.padding}>
                   <motion.h3 layoutId={`title-${card.title}`} className={styles.title}>
                     {card.title}
                   </motion.h3>

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getEnvironmentConfig, getExtensionId, isExtension } from '@/lib/chrome-extension-utils'
+import { getEnvironmentConfig } from '@/lib/chrome-extension-utils'
+import styles from './extension-info.module.css'
 
 interface ExtensionInfo {
   isExtension: boolean
@@ -26,7 +27,7 @@ export function ExtensionInfo() {
   if (!info) return null
 
   return (
-    <div className="text-xs text-white/40 p-2 bg-white/40 rounded">
+    <div className={styles.container}>
       <div>Environment: {info.isExtension ? 'Chrome Extension' : 'Web App'}</div>
       {info.extensionId && <div>Extension ID: {info.extensionId}</div>}
       <div>Storage: {info.storageType}</div>

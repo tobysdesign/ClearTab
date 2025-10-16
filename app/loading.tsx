@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function Loading() {
   return (
     <div
@@ -17,16 +19,17 @@ export default function Loading() {
       }}
     >
       <div style={{ width: "150px", height: "82.8px" }}>
-        <img
+        <Image
           src="/assets/loading.gif"
           alt="Loading..."
-          width="500"
-          height="276"
+          width={500}
+          height={276}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "contain"
           }}
+          unoptimized
         />
       </div>
     </div>

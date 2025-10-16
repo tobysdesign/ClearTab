@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { cn } from '@/lib/utils'
+import styles from './settings-layout.module.css'
 
 interface SettingsLayoutProps {
   nav: React.ReactNode
@@ -10,11 +10,11 @@ interface SettingsLayoutProps {
 
 export function SettingsLayout({ nav, children }: SettingsLayoutProps) {
   return (
-    <div className="flex h-full">
-      <div className="w-1/4 border-r border-white/40 dark:border-white/40 p-4">
+    <div className={styles.container}>
+      <div className={styles.nav}>
         {nav}
       </div>
-      <div className="w-3/4 p-6">
+      <div className={styles.content}>
         {children}
       </div>
     </div>

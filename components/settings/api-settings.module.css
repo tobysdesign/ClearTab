@@ -1,0 +1,39 @@
+.gridGap6 {
+  @apply grid gap-6;
+}
+
+.listDisc {
+  @apply list-disc pl-5 space-y-2;
+}
+
+.flexItemsGap2 {
+  @apply flex items-center gap-2;
+}
+
+.starIcon {
+  @apply h-5 w-5 text-yellow-500;
+}
+
+.listDiscMb6 {
+  @apply list-disc pl-5 space-y-2 mb-6;
+}
+
+.successText {
+  @apply flex items-center gap-2 text-green-500;
+}
+
+.checkIcon {
+  @apply h-5 w-5;
+}
+
+.spaceY4 {
+  @apply space-y-4;
+}
+
+.spaceY2 {
+  @apply space-y-2;
+}
+
+.flexGap2 {
+  @apply flex gap-2;
+}

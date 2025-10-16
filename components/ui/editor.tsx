@@ -8,15 +8,16 @@ import { createTaskFromText } from '@/components/widgets/tasks-widget'
 import { Block } from '@blocknote/core'
 import { SimpleBlockNoteEditor } from './simple-block-note-editor'
 import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
+import styles from './editor.module.css'
 
 // Skeleton component to show while editor is loading
 function EditorSkeleton() {
   return (
-    <div className="flex flex-col gap-2">
-      <Skeleton className="h-8 w-full" />
-      <Skeleton className="h-8 w-3/4" />
-      <Skeleton className="h-8 w-5/6" />
-      <Skeleton className="h-8 w-2/3" />
+    <div className={styles.skeletonContainer}>
+      <Skeleton className={styles.skeletonFirst} />
+      <Skeleton className={styles.skeletonSecond} />
+      <Skeleton className={styles.skeletonThird} />
+      <Skeleton className={styles.skeletonFourth} />
     </div>
   )
 }
@@ -37,11 +38,11 @@ export function Editor({
   value,
   onChange,
   className,
-  placeholder = "Start writing...",
+  placeholder: _placeholder = "Start writing...",
   editable = true,
   onOpenAiChat,
   onCreateTask,
-  onBlur,
+  onBlur: _onBlur,
   readOnly = false
 }: EditorProps) {
   const [isMounted, setIsMounted] = useState(false)
@@ -50,7 +51,7 @@ export function Editor({
   const [isCreatingTask, setIsCreatingTask] = useState(false)
 
   // Handle selection changes to enable/disable AI buttons
-  const handleSelectionChange = useCallback((text: string) => {
+  const _handleSelectionChange = useCallback((text: string) => {
     setSelectedText(text)
     setHasSelection(!!text.trim())
   }, [])
@@ -106,23 +107,23 @@ export function Editor({
   }
 
   return (
-    <div className={cn("relative flex flex-col", className)}>
+    <div className={cn(styles.editorContainer, className)}>
       <SimpleBlockNoteEditor
         initialContent={value || EMPTY_BLOCKNOTE_CONTENT as Block[]}
         onChange={handleContentChange}
         editable={editable && !readOnly}
-        className="h-full"
+        className={styles.editorContent}
       />
       
       {/* AI action buttons that appear when text is selected */}
       {hasSelection && !readOnly && (
-        <div className="absolute bottom-2 right-2 flex gap-2 z-10">
+        <div className={styles.actionButtons}>
           {onOpenAiChat && (
             <Button 
               variant="secondary" 
               size="sm" 
               onClick={handleAiChatClick}
-              className="shadow-md"
+              className={styles.actionButton}
             >
               Ask AI
             </Button>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Card } from "@/components/ui/card";
 import { AddButton } from "@/components/ui/add-button";
 import type { Task } from "@/shared/schema";
 import { WidgetHeader } from "@/components/ui/widget-header";
@@ -10,19 +9,15 @@ import {
   WidgetContent,
 } from "@/components/ui/widget-container";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { EditTaskForm } from "./edit-task-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { ActionsMenu } from "@/components/ui/actions-menu";
 import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "@/app/client-providers";
-import { EMPTY_BLOCKNOTE_CONTENT } from "@/shared/schema"; // Corrected import path
-import styles from "./widget.module.css";
+import { EMPTY_BLOCKNOTE_CONTENT, type BlockNoteContent } from "@/shared/schema"; // Corrected import path
 import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
-import X from "lucide-react/dist/esm/icons/x";
+// Icons replaced with ASCII placeholders
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
@@ -55,7 +50,7 @@ async function createTask(
   title: string,
   isCompleted: boolean,
   isHighPriority: boolean,
-  content: any,
+  content: BlockNoteContent,
 ): Promise<Task> {
   const res = await api.post("/api/tasks", {
     title,
@@ -99,12 +94,12 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
 
     const response = await res.json();
     return response.data;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-export function TasksWidget({ searchQuery }: TasksWidgetProps) {
+export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   const { setActiveTaskId, setNewTaskText, activeTask } = useTaskModal();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,7 +113,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
         const data = await fetchTasks();
         setTasks(data);
         setIsError(false);
-      } catch (error) {
+      } catch {
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -169,7 +164,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
       title: string;
       isCompleted: boolean;
       isHighPriority: boolean;
-      content: any;
+      content: BlockNoteContent;
     }) => {
       try {
         // Create task on server
@@ -201,13 +196,13 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
     [updateTaskLocal],
   );
 
-  function handleTaskSave(updatedTask: Partial<Task>) {
+  function _handleTaskSave(_updatedTask: Partial<Task>) {
     // Removed activeTask check and direct mutation - now handled by EditTaskForm's onSave
     // The EditTaskForm now directly calls updateTask server action
   }
 
-  function handleTaskDelete(taskId: string) {
-    deleteTaskLocal(taskId);
+  function _handleTaskDelete(_taskId: string) {
+    deleteTaskLocal(_taskId);
   }
 
   function handleAddTask() {
@@ -220,12 +215,12 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
   }
 
   // Function to handle creating a task from editor text
-  function handleCreateTaskFromEditorText(text: string) {
+  function _handleCreateTaskFromEditorText(_text: string) {
     // We now just set the initial text, the modal open and form creation is handled by ClientProviders
-    setNewTaskText(text);
+    setNewTaskText(_text);
     // Create a basic task to get an ID, then rely on the modal to open it with description
     createTaskLocal({
-      title: text.split("\n")[0] || "New Task",
+      title: _text.split("\n")[0] || "New Task",
       isCompleted: false,
       isHighPriority: false,
       content: {
@@ -277,7 +272,7 @@ export function TasksWidget({ searchQuery }: TasksWidgetProps) {
               {tasks.length === 0 ? (
                 <EmptyState
                   renderIcon={() => (
-                    <X className={tasksStyles.tasksEmptyIcon} />
+                    <span className={tasksStyles.tasksEmptyIcon}>×</span>
                   )}
                   title="Not a care"
                   description="Could your first task be to add a task?"

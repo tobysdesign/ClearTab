@@ -1,0 +1,7 @@
+.container {
+  @apply relative flex min-h-screen flex-col;
+}
+
+.mainContent {
+  @apply flex-1 z-20;
+}

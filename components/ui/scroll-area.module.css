@@ -1,0 +1,18 @@
+/* Scroll Area Component Styles */
+
+.root {
+  position: relative;
+  overflow: auto;
+}
+
+.thumb {
+  position: relative;
+  flex: 1;
+  border-radius: 9999px;
+  background-color: transparent;
+  transition: background-color 300ms;
+}
+
+.root:hover .thumb {
+  background-color: hsl(var(--border));
+}

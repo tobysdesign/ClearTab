@@ -6,7 +6,6 @@ import { eq } from 'drizzle-orm';
 import { action } from '@/lib/safe-action';
 import { z } from 'zod';
 import { ActionResponse } from '@/types/actions';
-import { Block } from '@blocknote/core';
 
 const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required'),

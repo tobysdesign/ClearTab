@@ -1,5 +1,6 @@
 "use client";
 
+// Icons replaced with ASCII placeholders
 import * as React from "react";
 // import { useSession } from 'next-auth/react' // Disabled - using Supabase
 import { Button } from "@/components/ui/button";
@@ -10,28 +11,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ExternalLink from "lucide-react/dist/esm/icons/external-link";
-import CheckCircle from "lucide-react/dist/esm/icons/check-circle";
-import AlertTriangle from "lucide-react/dist/esm/icons/alert-triangle";
-import Info from "lucide-react/dist/esm/icons/info";
 
-import { createClient } from "@/lib/supabase/client";
+import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
+import styles from "./connected-apps-settings.module.css";
 
 export function ConnectedAppsSettings() {
-  const supabase = createClient();
-  const [session, setSession] = React.useState<any>(null);
+  const [supabase, setSupabase] = React.useState<any>(null);
+  const [session, setSession] = React.useState<{ user: { email: string } } | null>(null);
+
+  // Initialize Supabase client based on environment
+  React.useEffect(() => {
+    const initSupabase = async () => {
+      const client = await getSupabaseClient()
+      setSupabase(client)
+    }
+    initSupabase()
+  }, [])
 
   React.useEffect(() => {
     const getSession = async () => {
+      if (!supabase) return
+
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
     };
     getSession();
-  }, [supabase.auth]);
+  }, [supabase]);
 
   const isGoogleConnected = session?.user?.app_metadata?.provider === "google";
 
   const handleConnectGoogle = async () => {
+    if (!supabase) {
+      console.warn('No Supabase client available for Google sign in (extension mode)')
+      return
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -52,8 +66,8 @@ export function ConnectedAppsSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-lg font-medium">Connected Apps</h3>
+    <div className={styles.spaceY6}>
+      <h3 className={styles.titleLarge}>Connected Apps</h3>
       <Card>
         <CardHeader>
           <CardTitle>Google Calendar</CardTitle>
@@ -63,24 +77,24 @@ export function ConnectedAppsSettings() {
         </CardHeader>
         <CardContent>
           {isGoogleConnected ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-green-500">
-                <CheckCircle className="h-5 w-5" />
-                <p className="font-medium">Connected</p>
+            <div className={styles.flexJustifyBetween}>
+              <div className={styles.flexItemsGap2Green}>
+                <span className={styles.iconMedium}>•</span>
+                <p className={styles.fontMedium}>Connected</p>
               </div>
               <Button variant="outline" onClick={handleDisconnectGoogle}>
                 Disconnect
               </Button>
             </div>
           ) : (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            <div className={styles.flexJustifyBetween}>
+              <div className={styles.flexItemsGap2Muted}>
+                <span className={styles.iconYellow}>•</span>
                 <p>Not connected</p>
               </div>
               <Button onClick={handleConnectGoogle}>
                 Connect
-                <ExternalLink className="ml-2 h-4 w-4" />
+                <span className={styles.iconSmall}>•</span>
               </Button>
             </div>
           )}

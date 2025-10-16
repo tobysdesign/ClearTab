@@ -9,7 +9,7 @@ export const VisuallyHidden = React.forwardRef<
   HTMLSpanElement,
   VisuallyHiddenProps
 >(({ children, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? React.Fragment : 'span'
+  const _Comp = asChild ? React.Fragment : 'span'
   
   if (asChild) {
     return <>{children}</>

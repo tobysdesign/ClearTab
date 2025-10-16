@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Loading from "@/app/loading";
-import { AlertCircle, CheckCircle } from "lucide-react";
+// Icons replaced with ASCII placeholders
 import { useMutation } from "@tanstack/react-query";
+import styles from "./page.module.css";
 
 export default function OpenSettingsAndRedirect() {
   const router = useRouter();
@@ -54,10 +55,10 @@ export default function OpenSettingsAndRedirect() {
           }
           const { authUrl } = await response.json();
           window.location.href = authUrl;
-        } catch (retryError: any) {
+        } catch (retryError: unknown) {
           setRevokeStatus({
             message:
-              retryError.message ||
+              (retryError as Error)?.message ||
               "Could not automatically retry. Please add the account again manually.",
             isError: true,
           });
@@ -73,7 +74,7 @@ export default function OpenSettingsAndRedirect() {
     return <Loading />;
   }
 
-  let errorDetails = {
+  const errorDetails = {
     message: errorParam,
     providerAccountId: null as string | null,
   };
@@ -81,25 +82,25 @@ export default function OpenSettingsAndRedirect() {
     const parsedError = JSON.parse(errorParam);
     errorDetails.message = parsedError.error_message || errorParam;
     errorDetails.providerAccountId = parsedError.providerAccountId || null;
-  } catch (e) {
+  } catch {
     // Error is not a JSON string
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-lg w-full p-6 bg-[#111111] rounded-lg border border-[#2A2A2A]">
-        <div className="flex items-center gap-2 text-red-400 mb-4">
-          <AlertCircle className="h-5 w-5" />
-          <h1 className="text-lg font-medium">Account Already Linked</h1>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <div className={styles.errorHeader}>
+          <span className={styles.iconLarge}>⚠</span>
+          <h1 className={styles.errorTitle}>Account Already Linked</h1>
         </div>
-        <div className="space-y-4 text-left">
-          <p className="text-sm text-white/70">{errorDetails.message}</p>
+        <div className={styles.contentSpace}>
+          <p className={styles.errorMessage}>{errorDetails.message}</p>
 
-          <div className="p-4 bg-black/20 rounded">
-            <p className="text-xs text-white/60 font-medium mb-2">
+          <div className={styles.infoSection}>
+            <p className={styles.infoSubtitle}>
               To resolve this, the owner of the Google account must:
             </p>
-            <ol className="list-decimal list-inside text-xs text-white/60 space-y-1">
+            <ol className={styles.instructionsList}>
               <li>
                 Go to their Google Account settings (
                 <a
@@ -117,8 +118,8 @@ export default function OpenSettingsAndRedirect() {
             </ol>
           </div>
 
-          <div className="p-4 bg-black/20 rounded">
-            <p className="text-xs text-white/60 font-medium mb-2">
+          <div className={styles.infoSection}>
+            <p className={styles.infoSubtitle}>
               After revoking permissions, click here:
             </p>
             <button
@@ -134,7 +135,7 @@ export default function OpenSettingsAndRedirect() {
                 }
               }}
               disabled={forceRevokeMutation.isPending}
-              className="w-full text-center p-2 text-sm rounded bg-white/5 hover:bg-white/10 disabled:opacity-50 transition-colors"
+              className={styles.checkButton}
             >
               {forceRevokeMutation.isPending
                 ? "Checking..."
@@ -142,12 +143,12 @@ export default function OpenSettingsAndRedirect() {
             </button>
             {revokeStatus && (
               <div
-                className={`mt-3 p-2 text-xs rounded flex items-center gap-2 ${revokeStatus.isError ? "bg-red-900/50 text-red-300" : "bg-green-900/50 text-green-300"}`}
+                className={`${styles.statusContainer} ${revokeStatus.isError ? styles.statusContainerError : styles.statusContainerSuccess}`}
               >
                 {revokeStatus.isError ? (
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className={styles.iconSmall}>⚠</span>
                 ) : (
-                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className={styles.iconSmall}>✓</span>
                 )}
                 <span>{revokeStatus.message}</span>
               </div>
@@ -156,7 +157,7 @@ export default function OpenSettingsAndRedirect() {
         </div>
         <button
           onClick={() => router.replace("/")}
-          className="mt-6 text-sm text-white/60 underline hover:text-white"
+          className={styles.returnButton}
         >
           Return to Dashboard
         </button>

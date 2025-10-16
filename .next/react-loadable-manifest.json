@@ -10,9 +10,15 @@
       "static/chunks/_app-pages-browser_components_ui_editor_tsx.js"
     ]
   },
-  "components/widgets/schedule-widget.tsx -> @/lib/supabase/client": {
-    "id": "components/widgets/schedule-widget.tsx -> @/lib/supabase/client",
+  "lib/extension-utils.ts -> @/lib/supabase/client": {
+    "id": "lib/extension-utils.ts -> @/lib/supabase/client",
     "files": []
+  },
+  "lib/extension-utils.ts -> @/lib/supabase/extension-client": {
+    "id": "lib/extension-utils.ts -> @/lib/supabase/extension-client",
+    "files": [
+      "static/chunks/_app-pages-browser_lib_supabase_extension-client_ts.js"
+    ]
   },
   "node_modules/@blocknote/core/dist/blocknote.js -> @emoji-mart/data": {
     "id": "node_modules/@blocknote/core/dist/blocknote.js -> @emoji-mart/data",

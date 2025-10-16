@@ -3,33 +3,71 @@
  * Safely handle Chrome extension APIs with fallbacks for web environment
  */
 
-export const isExtension = () => {
-  return typeof (globalThis as any).chrome !== 'undefined' && 
-         (globalThis as any).chrome.runtime && 
-         (globalThis as any).chrome.runtime.id;
-};
+// Chrome extension API types
+interface ChromeRuntime {
+  id: string;
+  getURL: (path: string) => string;
+  sendMessage: (message: unknown, callback: (response: unknown) => void) => void;
+  lastError?: { message: string };
+  openOptionsPage: () => void;
+}
 
-export const getExtensionId = (): string | null => {
-  if (isExtension()) {
-    return (globalThis as any).chrome.runtime.id;
+interface ChromeStorage {
+  local: {
+    get: (keys: string[], callback: (result: Record<string, unknown>) => void) => void;
+    set: (items: Record<string, unknown>, callback?: () => void) => void;
+  };
+  sync: {
+    get: (keys: string[], callback: (result: Record<string, unknown>) => void) => void;
+    set: (items: Record<string, unknown>, callback?: () => void) => void;
+  };
+}
+
+interface ChromeApi {
+  runtime: ChromeRuntime;
+  storage: ChromeStorage;
+}
+
+declare global {
+  interface Window {
+    chrome?: ChromeApi;
+  }
+}
+
+// Helper to safely access chrome API
+const getChromeApi = (): ChromeApi | null => {
+  if (typeof globalThis !== 'undefined' && 'chrome' in globalThis) {
+    return (globalThis as { chrome: ChromeApi }).chrome;
   }
   return null;
 };
 
+export const isExtension = () => {
+  const chrome = getChromeApi();
+  return chrome?.runtime?.id !== undefined;
+};
+
+export const getExtensionId = (): string | null => {
+  const chrome = getChromeApi();
+  return chrome?.runtime?.id || null;
+};
+
 export const getExtensionUrl = (path: string = ''): string => {
-  if (isExtension()) {
-    return (globalThis as any).chrome.runtime.getURL(path);
+  const chrome = getChromeApi();
+  if (chrome?.runtime?.getURL) {
+    return chrome.runtime.getURL(path);
   }
   // Fallback for web environment
   return path.startsWith('/') ? path : `/${path}`;
 };
 
-export const sendMessage = (message: any): Promise<any> => {
+export const sendMessage = (message: unknown): Promise<unknown> => {
   return new Promise((resolve, reject) => {
-    if (isExtension()) {
-      (globalThis as any).chrome.runtime.sendMessage(message, (response) => {
-        if ((globalThis as any).chrome.runtime.lastError) {
-          reject((globalThis as any).chrome.runtime.lastError);
+    const chrome = getChromeApi();
+    if (chrome?.runtime?.sendMessage) {
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
         } else {
           resolve(response);
         }
@@ -41,12 +79,13 @@ export const sendMessage = (message: any): Promise<any> => {
   });
 };
 
-export const getStorage = (key: string): Promise<any> => {
+export const getStorage = (key: string): Promise<unknown> => {
   return new Promise((resolve, reject) => {
-    if (isExtension()) {
-      (globalThis as any).chrome.storage.local.get([key], (result) => {
-        if ((globalThis as any).chrome.runtime.lastError) {
-          reject((globalThis as any).chrome.runtime.lastError);
+    const chrome = getChromeApi();
+    if (chrome?.storage?.local) {
+      chrome.storage.local.get([key], (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
         } else {
           resolve(result[key]);
         }
@@ -63,12 +102,13 @@ export const getStorage = (key: string): Promise<any> => {
   });
 };
 
-export const setStorage = (key: string, value: any): Promise<void> => {
+export const setStorage = (key: string, value: unknown): Promise<void> => {
   return new Promise((resolve, reject) => {
-    if (isExtension()) {
-      (globalThis as any).chrome.storage.local.set({ [key]: value }, () => {
-        if ((globalThis as any).chrome.runtime.lastError) {
-          reject((globalThis as any).chrome.runtime.lastError);
+    const chrome = getChromeApi();
+    if (chrome?.storage?.local) {
+      chrome.storage.local.set({ [key]: value }, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
         } else {
           resolve();
         }
@@ -86,8 +126,9 @@ export const setStorage = (key: string, value: any): Promise<void> => {
 };
 
 export const openOptionsPage = (): void => {
-  if (isExtension()) {
-    (globalThis as any).chrome.runtime.openOptionsPage();
+  const chrome = getChromeApi();
+  if (chrome?.runtime?.openOptionsPage) {
+    chrome.runtime.openOptionsPage();
   } else {
     // Fallback for web - could open settings page
     window.location.href = '/settings';

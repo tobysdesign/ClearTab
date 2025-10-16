@@ -1,0 +1,31 @@
+.spaceY6 {
+  @apply space-y-6;
+}
+
+.flexJustifyBetween {
+  @apply flex justify-between items-center;
+}
+
+.textMuted {
+  @apply text-muted-foreground;
+}
+
+.spaceY4 {
+  @apply space-y-4;
+}
+
+.skeletonFull {
+  @apply h-12 w-full;
+}
+
+.accordionFull {
+  @apply w-full;
+}
+
+.flexItemsJustifyBetween {
+  @apply flex items-center justify-between;
+}
+
+.textSmMuted {
+  @apply text-sm text-muted-foreground;
+}

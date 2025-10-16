@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { connectedAccounts } from "@/shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { google } from "googleapis";
 
 // This route is specifically for linking secondary accounts.
@@ -97,10 +97,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.redirect(`${origin}${next}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error linking secondary account:", error);
     const debugInfo = {
-      error_message: error.message || "Failed to link account",
+      error_message: error instanceof Error ? error.message : "Failed to link account",
       redirect_uri_used: redirectUri,
     };
     return NextResponse.redirect(

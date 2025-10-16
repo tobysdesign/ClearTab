@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, Suspense, useCallback } from "react";
 import { motion, PanInfo, useAnimationControls } from "framer-motion";
 import { cn } from "@/lib/utils";
-import GripVertical from "lucide-react/dist/esm/icons/grip-vertical";
+// Icons replaced with ASCII placeholders
 import { DockContent } from "../dashboard/dock-content";
 import { ResizableBentoGrid } from "./resizable-bento-grid";
 import { SettingsDrawer } from "@/components/settings/settings-drawer";
@@ -28,7 +28,7 @@ interface DropZone {
 function LoadingState() {
   return (
     <div className={styles.loadingContainer}>
-      <div className="relative w-[90px] h-[50px]">
+      <div className={styles.loadingImageContainer}>
         <Image
           src="/assets/loading.gif"
           alt="Loader..."
@@ -62,7 +62,6 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
 
   const initialPosition = "bottom" as DropZone["id"];
-  const EDGE_MARGIN = 8;
 
   // Calculate initial currentZoneState based on a default position
   const initialCurrentZoneState =
@@ -76,7 +75,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         }
       : null;
 
-  const [currentZoneState, setCurrentZoneState] = useState<DropZone | null>(
+  const [_currentZoneState, _setCurrentZoneState] = useState<DropZone | null>(
     initialCurrentZoneState,
   );
 
@@ -96,7 +95,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
 
   const calculateDropZones = useCallback(() => {
     const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-    const EDGE_MARGIN = 8;
+    const _EDGE_MARGIN = 8;
 
     const newZones: DropZone[] = [
       {
@@ -115,21 +114,21 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
       },
       {
         id: "left",
-        x: 60,
+        x: _EDGE_MARGIN + 60,
         y: windowHeight / 2,
         width: 0,
         height: 0,
       },
       {
         id: "right",
-        x: windowWidth - 60,
+        x: windowWidth - _EDGE_MARGIN - 60,
         y: windowHeight / 2,
         width: 0,
         height: 0,
       },
     ];
     setDropZones(newZones);
-  }, [showSearch]);
+  }, []);
 
   const currentZone = dropZones.find((zone) => zone.id === position);
 
@@ -152,8 +151,8 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   }, [currentZone, controls]);
 
   const handleDragStart = (
-    event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    _info: PanInfo,
   ) => {
     setIsDragging(true);
     if (currentZone) {
@@ -165,8 +164,8 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   };
 
   const handleDrag = (
-    event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    _info: PanInfo,
   ) => {
     let closestZone: DropZone | null = null;
     let minDistance = Infinity;
@@ -305,7 +304,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
               target.setPointerCapture(e.pointerId);
             }}
           >
-            <GripVertical className="dock-handle-icon" />
+            <span className="dock-handle-icon">≡</span>
           </div>
         </div>
       </motion.div>

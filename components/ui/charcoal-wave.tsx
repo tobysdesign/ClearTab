@@ -1,6 +1,17 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
+import styles from './charcoal-wave.module.css'
+
+interface Circle {
+  x: number
+  y: number
+  radius: number
+  color: number[]
+  vx: number
+  vy: number
+  interactive: boolean
+}
 
 export function CharcoalWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -45,7 +56,7 @@ export function CharcoalWave() {
     ]
 
     const MAX_CIRCLES = 6
-    let circles: any[] = []
+    let circles: Circle[] = []
 
     // Pre-allocate typed arrays to avoid per-frame garbage collection
     const circlesColorArray = new Float32Array(MAX_CIRCLES * 3)
@@ -285,7 +296,7 @@ export function CharcoalWave() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10 bg-[#1a1a1a]"
+      className={styles.canvas}
     />
   )
 }

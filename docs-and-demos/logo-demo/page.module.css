@@ -1,0 +1,7 @@
+.container {
+  @apply min-h-screen flex items-center justify-center bg-black p-8;
+}
+
+.logoWrapper {
+  @apply w-full max-w-4xl;
+}

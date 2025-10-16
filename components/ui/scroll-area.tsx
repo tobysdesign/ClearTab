@@ -4,6 +4,7 @@ import * as React from 'react'
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
 
 import { cn } from '@/lib/utils'
+import styles from './scroll-area.module.css'
 
 interface ScrollAreaProps
   extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
@@ -16,7 +17,7 @@ const ScrollArea = React.forwardRef<
 >(({ className, children, viewportClassName, ...props }, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
-    className={cn('relative overflow-auto group', className)}
+    className={cn(styles.root, className)}
     type="auto"
     {...props}
   >
@@ -48,7 +49,7 @@ const ScrollBar = React.forwardRef<
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-transparent group-hover:bg-border transition-colors duration-300" />
+    <ScrollAreaPrimitive.Thumb className={styles.thumb} />
   </ScrollAreaPrimitive.Scrollbar>
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.Scrollbar.displayName

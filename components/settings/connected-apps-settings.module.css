@@ -1,0 +1,35 @@
+.spaceY6 {
+  @apply space-y-6;
+}
+
+.titleLarge {
+  @apply text-lg font-medium;
+}
+
+.flexJustifyBetween {
+  @apply flex items-center justify-between;
+}
+
+.flexItemsGap2Green {
+  @apply flex items-center gap-2 text-green-500;
+}
+
+.iconMedium {
+  @apply h-5 w-5;
+}
+
+.fontMedium {
+  @apply font-medium;
+}
+
+.flexItemsGap2Muted {
+  @apply flex items-center gap-2 text-muted-foreground;
+}
+
+.iconYellow {
+  @apply h-5 w-5 text-yellow-500;
+}
+
+.iconSmall {
+  @apply ml-2 h-4 w-4;
+}

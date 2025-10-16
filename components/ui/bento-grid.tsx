@@ -1,6 +1,6 @@
+// Icons replaced with ASCII placeholders
 import * as React from 'react'
 import { ComponentPropsWithoutRef, ReactNode } from 'react';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
 import styles from './bento-grid.module.css'
 
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ const BentoCard = ({
       <Button variant="ghost" asChild size="sm" className={styles.ctaButton}>
         <a href={href}>
           {cta}
-          <ArrowRight className={styles.ctaIcon} />
+          <span className={styles.ctaIcon}>•</span>
         </a>
       </Button>
     </div>

@@ -1,0 +1,11 @@
+/* Calendar Component Styles */
+
+.weekNumber {
+  display: flex;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #8c8c8c;
+}
