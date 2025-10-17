@@ -1,4 +1,4 @@
-# ClearTab App
+## ClearTab.app – Personal Productivity Dashboard
 
 A modern note-taking and task management application with AI integration and responsive dashboard.
 
