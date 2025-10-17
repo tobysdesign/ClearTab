@@ -3,27 +3,30 @@
 import { useState, useEffect } from "react";
 import { Editor as BlockNoteEditor } from "@/components/DynamicEditor";
 
+// Define types for editor content
+type EditorContent = Record<string, unknown> | null;
+
 interface EditorProps {
-  value?: any;
-  onChange?: (value: any) => void;
+  value?: EditorContent;
+  onChange?: (value: EditorContent) => void;
   readOnly?: boolean;
-  onBlur?: () => void;
-  placeholder?: string;
+  _onBlur?: () => void; // Prefixed with _ to indicate unused
+  _placeholder?: string; // Prefixed with _ to indicate unused
   onOpenAiChat?: (selectedText: string) => void;
   onCreateTask?: (selectedText: string) => void;
 }
 
-export default function Editor({ 
-  value, 
-  onChange, 
-  readOnly, 
-  onBlur,
-  placeholder,
+export default function Editor({
+  value,
+  onChange,
+  readOnly,
+  _onBlur,
+  _placeholder,
   onOpenAiChat,
   onCreateTask
 }: EditorProps) {
   // Convert from the app's content format to BlockNote format if needed
-  const [blockNoteContent, setBlockNoteContent] = useState<any>(null);
+  const [blockNoteContent, setBlockNoteContent] = useState<EditorContent>(null);
   
   // Initialize BlockNote content from value
   useEffect(() => {
@@ -39,7 +42,7 @@ export default function Editor({
   }, [value]);
 
   // Handle content changes from BlockNote
-  const handleEditorChange = (content: any) => {
+  const handleEditorChange = (content: EditorContent) => {
     if (onChange) {
       onChange(content);
     }

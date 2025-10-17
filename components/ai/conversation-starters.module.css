@@ -1,0 +1,23 @@
+.container {
+  @apply mb-4;
+}
+
+.title {
+  @apply text-sm font-medium text-neutral-400 mb-2;
+}
+
+.startersContainer {
+  @apply flex flex-col space-y-2;
+}
+
+.starterButton {
+  @apply flex items-center justify-between w-full text-left p-2 rounded-lg bg-[#2C2C2C] hover:bg-[#363636] transition-colors;
+}
+
+.starterButton:hover {
+  background-color: #363636;
+}
+
+.starterText {
+  @apply text-sm text-neutral-200;
+}

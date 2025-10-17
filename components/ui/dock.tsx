@@ -9,9 +9,9 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import React, { PropsWithChildren, useContext, useRef } from "react";
-import GripVertical from 'lucide-react/dist/esm/icons/grip-vertical';
+import React, { useContext, useRef } from "react";
 import { cn } from "@/lib/utils";
+import styles from "./dock.module.css";
 
 export interface DockProps extends VariantProps<typeof dockVariants> {
   className?: string;
@@ -48,9 +48,7 @@ const useDockContext = () => {
   return context;
 };
 
-const dockVariants = cva(
-  "mx-auto flex w-max items-center justify-center gap-2 rounded-2xl border bg-neutral-950/10 p-2 backdrop-blur-md dark:border-white/10 dark:bg-neutral-950/30",
-);
+const dockVariants = cva(styles.dock);
 
 const Dock = React.forwardRef<HTMLDivElement, DockProps>(
   (
@@ -87,13 +85,10 @@ const Dock = React.forwardRef<HTMLDivElement, DockProps>(
           }
           onMouseLeave={() => mousePosition.set(Infinity)}
           {...props}
-          className={cn(dockVariants({ className }), {
-            "items-start": direction === "top",
-            "items-center": direction === "middle",
-            "items-end": direction === "bottom",
-          })}
+          data-direction={direction}
+          className={cn(dockVariants({ className }))}
         >
-          <div className="relative flex items-center gap-2">
+          <div className={styles.dockItemsWrapper}>
             {children}
           </div>
         </motion.div>
@@ -161,13 +156,10 @@ const DockIcon = ({
           ? { width: dimension, height: dimension }
           : { width: size, height: dimension }
       }
-      className={cn(
-        "flex cursor-pointer items-center justify-center rounded-full",
-        className,
-      )}
+      className={cn(styles.dockIcon, className)}
       {...props}
     >
-      <div className="flex items-center justify-center w-full h-full">
+      <div className={styles.dockIconInner}>
         {children}
       </div>
     </motion.div>

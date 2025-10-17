@@ -1,5 +1,6 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import * as React from 'react'
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
@@ -8,8 +9,7 @@ import { DisplaySettings } from './display-settings'
 import { CountSettings } from './count-settings'
 import { cn } from '@/lib/utils'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
-import Settings from 'lucide-react/dist/esm/icons/settings'
-import X from 'lucide-react/dist/esm/icons/x'
+import styles from './settings-drawer.module.css'
 
 type NavItem = {
   name: string
@@ -62,7 +62,7 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
 
   // Listen for global settings open events
   React.useEffect(() => {
-    const handleOpenSettings = (event: CustomEvent) => {
+    const handleOpenSettings = (event: CustomEvent<{ tab?: string }>) => {
       console.log('SettingsDrawer: Received openSettings event', event.detail)
       const { tab } = event.detail
       if (tab) {
@@ -72,8 +72,8 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
       setIsOpen(true)
     }
 
-    window.addEventListener('openSettings' as any, handleOpenSettings)
-    return () => window.removeEventListener('openSettings' as any, handleOpenSettings)
+    window.addEventListener('openSettings', handleOpenSettings as EventListener)
+    return () => window.removeEventListener('openSettings', handleOpenSettings as EventListener)
   }, [])
 
   const ActiveComponent = settingsNav.find(item => item.name === activeTab)?.component || (() => <div>Select a setting</div>)
@@ -81,19 +81,19 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80 group"
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(styles.drawerTrigger, "group")}
           data-testid="settings-drawer-trigger"
         >
-          <Settings className="h-4 w-4 group-hover:rotate-45 transition-transform duration-300" />
+          <span className={styles.settingsIcon}>*</span>
           <span className="sr-only">Open Settings</span>
         </Button>
       </DrawerTrigger>
       <DrawerContent 
         overlayVariant="settings"
-        className="max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0"
+        className={styles.drawerContent}
         style={{
           background: 'linear-gradient(rgba(38, 38, 38, 0.5) 0%, rgba(0, 0, 0, .7 ) 100%)',
           backdropFilter: 'blur(12px)'
@@ -103,46 +103,46 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
           <DrawerTitle>Settings</DrawerTitle>
         </VisuallyHidden>
         
-        <div className="flex flex-col h-[85vh]">
+        <div className={styles.container}>
           {/* Grab Handle */}
-          <div className="flex justify-center pt-2 cursor-grab active:cursor-grabbing">
-            <div className="w-12 h-1.5 rounded-full bg-[#242424]" />
+          <div className={styles.grabHandle}>
+            <div className={styles.grabBar} />
           </div>
 
           {/* Fixed Header */}
-          <div className="flex-shrink-0 flex items-center justify-between px-6 py-4">
-            <h1 className="text-lg font-medium text-white">Settings</h1>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Settings</h1>
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/10 transition-colors"
+              className={styles.closeButton}
             >
-              <X className="h-4 w-4 text-[#bbbbbb]" />
+              <span className={styles.closeIcon}>×</span>
               <span className="sr-only">Close</span>
             </Button>
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className={styles.scrollableContent}>
             {/* Sidebar Navigation with independent scroll */}
-            <div className="w-64 overflow-y-auto">
-              <nav className="p-4">
-                <ul className="space-y-2">
+            <div className={styles.sidebar}>
+              <nav className={styles.nav}>
+                <ul className={styles.navList}>
                   {settingsNav.map((item) => (
                     <li key={item.name}>
                       <button 
                         onClick={() => setActiveTab(item.name)}
                         className={cn(
-                          "w-full text-left p-3 transition-colors rounded",
-                          activeTab === item.name 
-                            ? "bg-black/30 text-white"
-                            : "text-[#bbbbbb] hover:text-white hover:bg-black/20"
+                          styles.navButton,
+                          activeTab === item.name
+                            ? styles.navButtonActive
+                            : styles.navButtonInactive
                         )}
                       >
-                        <div className="flex flex-col">
-                          <span className="font-medium text-sm">{item.name}</span>
-                          <span className="text-xs text-[#5A5A5A] mt-1">{item.description}</span>
+                        <div className={styles.navButtonContent}>
+                          <span className={styles.navButtonTitle}>{item.name}</span>
+                          <span className={styles.navButtonDescription}>{item.description}</span>
                         </div>
                       </button>
                     </li>
@@ -152,8 +152,8 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
             </div>
 
             {/* Main Content with independent scroll */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-6 rounded-lg rounded-bl-none rounded-br-none mr-[12px] bg-[#1B1B1B]">
+            <div className={styles.mainContent}>
+              <div className={styles.contentPanel}>
                 <ActiveComponent />
               </div>
             </div>

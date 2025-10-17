@@ -12,6 +12,8 @@ import { Toaster as DefaultToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
 import Script from "next/script";
+import Image from "next/image";
+import styles from "./layout.module.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,7 +28,11 @@ const tinos = Tinos({
   display: "swap",
 });
 
-export const metadata: Metadata = {
+// For extension builds, we'll conditionally disable metadata
+const isExtension = process.env.IS_EXTENSION === "true";
+
+// Only export metadata for non-extension builds
+export const metadata: Metadata = isExtension ? {} as Metadata : {
   title: "ClearTab",
   description: "Productivity at your finger tips.",
   icons: {
@@ -58,16 +64,17 @@ export default function RootLayout({
           }}
         >
           <div style={{ width: "150px", height: "82.8px" }}>
-            <img
+            <Image
               src="/assets/loading.gif"
               alt="Loading..."
-              width="500"
-              height="276"
+              width={500}
+              height={276}
               style={{
                 width: "100%",
                 height: "100%",
                 objectFit: "contain"
               }}
+              unoptimized
             />
           </div>
         </div>
@@ -78,9 +85,9 @@ export default function RootLayout({
           storageKey="theme"
         >
           <Providers>
-            <div className="relative flex min-h-screen flex-col">
+            <div className={styles.container}>
               <CharcoalWave />
-              <main className="flex-1 z-20">
+              <main className={styles.mainContent}>
                 <Suspense fallback={<Loading />}>{children}</Suspense>
               </main>
             </div>
@@ -88,17 +95,19 @@ export default function RootLayout({
             <SonnerToaster />
           </Providers>
         </ThemeProvider>
-        {/* Hotjar Tracking Code for https://bye-ai.vercel.app */}
-        <Script id="hotjar-script">
-          {`
-            (function(h,o,t,j,a,r){ h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-            h._hjSettings={hjid:3890201,hjsv:6};
-            a=o.getElementsByTagName('head')[0];
-            r=o.createElement('script');r.async=1;
-            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-            a.appendChild(r); })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-          `}
-        </Script>
+        {/* Only include Hotjar for non-extension builds */}
+        {!isExtension && (
+          <Script id="hotjar-script">
+            {`
+              (function(h,o,t,j,a,r){ h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+              h._hjSettings={hjid:3890201,hjsv:6};
+              a=o.getElementsByTagName('head')[0];
+              r=o.createElement('script');r.async=1;
+              r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+              a.appendChild(r); })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+            `}
+          </Script>
+        )}
       </body>
     </html>
   );

@@ -4,6 +4,13 @@
  * This file contains helper functions to integrate your AI assistant with the BlockNote editor
  */
 
+// Define types for BlockNote content
+type BlockContent = string | Array<{ text?: string; [key: string]: unknown }>;
+type BlockItem = {
+  content?: BlockContent;
+  [key: string]: unknown;
+};
+
 /**
  * Send a prompt to the AI assistant and get a response
  * @param prompt The prompt to send to the AI
@@ -42,16 +49,18 @@ export async function getAiResponse(prompt: string): Promise<string> {
  * @param content BlockNote content object
  * @returns Plain text representation of the content
  */
-export function extractTextFromBlocks(content: any[]): string {
+export function extractTextFromBlocks(content: BlockItem[]): string {
   if (!content || !Array.isArray(content)) return '';
-  
+
   return content.map(block => {
     if (typeof block.content === 'string') {
       return block.content;
     } else if (Array.isArray(block.content)) {
-      return block.content.map((item: any) => {
+      return block.content.map((item) => {
         if (typeof item === 'string') return item;
-        if (item.text) return item.text;
+        if (typeof item === 'object' && item !== null && 'text' in item) {
+          return item.text || '';
+        }
         return '';
       }).join(' ');
     }

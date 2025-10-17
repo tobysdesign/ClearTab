@@ -1,0 +1,83 @@
+.chatContainer {
+  @apply flex flex-col h-full p-6 bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl;
+}
+
+.messagesContainer {
+  @apply flex-grow overflow-y-auto pr-4 -mr-4 flex flex-col;
+}
+
+.messageContainer {
+  @apply mb-4 flex max-w-[80%];
+}
+
+.messageContainerUser {
+  @apply self-end;
+}
+
+.messageContainerAssistant {
+  @apply self-start;
+}
+
+.messageContent {
+  @apply rounded-lg px-4 py-2;
+}
+
+.messageContentUser {
+  @apply bg-[#292929] border border-[#434343] text-neutral-200;
+}
+
+.messageContentAssistant {
+  @apply bg-[#222222] text-neutral-300;
+}
+
+.streamingCursor {
+  @apply inline-block w-2 h-4 bg-neutral-400 ml-1 animate-pulse;
+}
+
+.thinkingContainer {
+  @apply mb-4 flex max-w-[80%] self-start;
+}
+
+.thinkingContent {
+  @apply rounded-lg px-4 py-2 bg-[#1a1a1a] text-neutral-400 border border-[#333];
+}
+
+.thinkingIndicator {
+  @apply flex items-center gap-2;
+}
+
+.thinkingDots {
+  @apply flex gap-1;
+}
+
+.thinkingDot {
+  @apply w-1 h-1 bg-neutral-400 rounded-full animate-bounce;
+}
+
+.thinkingDotDelay1 {
+  animation-delay: 0.1s;
+}
+
+.thinkingDotDelay2 {
+  animation-delay: 0.2s;
+}
+
+.thinkingText {
+  @apply text-sm italic;
+}
+
+.inputSection {
+  @apply mt-6 pt-6 border-t border-neutral-800;
+}
+
+.inputForm {
+  @apply relative;
+}
+
+.inputLabel {
+  @apply absolute -top-3 left-3 bg-[#121212] px-1 text-xs uppercase text-[#555454] tracking-[1.2px] font-medium font-mono;
+}
+
+.input {
+  @apply bg-transparent border-[#3d3d3d] h-11;
+}

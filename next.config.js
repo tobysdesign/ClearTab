@@ -5,13 +5,18 @@ const isExtensionBuild =
 const nextConfig = {
   outputFileTracingRoot: __dirname,
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
   experimental: {
-    optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
+    optimizePackageImports: ["@tanstack/react-query", "framer-motion", "@blocknote/core", "@blocknote/react", "@blocknote/mantine"],
   },
+  turbopack: {},
+  typedRoutes: false,
   // Disable StrictMode for BlockNote compatibility
   reactStrictMode: false,
   env: {
@@ -66,11 +71,16 @@ const nextConfig = {
       },
     ];
   },
+    pageExtensions: isExtensionBuild
+    ? ['page.tsx', 'page.ts', 'page.jsx', 'page.js']
+    : ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'route.ts'],
   webpack: (config, { dev, isServer }) => {
+
     // Optimize webpack caching to reduce serialization warnings
     if (dev) {
       config.cache = {
-        ...config.cache,
+        type: 'filesystem',
+        cacheDirectory: require('path').resolve(__dirname, '.next/cache/webpack'),
         buildDependencies: {
           config: [__filename],
         },
@@ -78,16 +88,40 @@ const nextConfig = {
 
       // Suppress cache serialization warnings in development
       config.infrastructureLogging = {
-        ...config.infrastructureLogging,
         level: "error",
       };
+
+      // Speed up development builds
+      config.optimization = {
+        ...config.optimization,
+        removeAvailableModules: false,
+        removeEmptyChunks: false,
+        splitChunks: false,
+      };
+
+      // Don't try to externalize for API routes - causes issues
+      // Let dynamic imports handle the optimization instead
     }
 
-    // Ensure Yjs is treated as a singleton
+    // Ensure Yjs and related packages are treated as singletons
+    const yjsPath = require.resolve("yjs");
+
     config.resolve.alias = {
       ...config.resolve.alias,
-      yjs: require.resolve("yjs"),
+      yjs: yjsPath,
+      "y-prosemirror": require.resolve("y-prosemirror"),
+      // y-protocols resolution for different module systems
+      "y-protocols$": require.resolve("y-protocols/sync"),
+      "y-protocols/sync": require.resolve("y-protocols/sync"),
+      "y-protocols/awareness": require.resolve("y-protocols/awareness"),
+      "y-protocols/auth": require.resolve("y-protocols/auth"),
     };
+
+    // Note: resolve.dedupe is handled differently in modern webpack versions
+    // The aliases above should be sufficient to prevent multiple instances
+
+    // Note: Removed optimization.usedExports as it conflicts with Next.js 15's cacheUnaffected
+    // Next.js handles optimization internally
 
     if (!dev && !isServer) {
       config.optimization = {

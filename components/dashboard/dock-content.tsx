@@ -1,14 +1,11 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import Search from 'lucide-react/dist/esm/icons/search'
-import Settings from 'lucide-react/dist/esm/icons/settings'
-import X from 'lucide-react/dist/esm/icons/x'
-import MessageSquare from 'lucide-react/dist/esm/icons/message-square'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
+import styles from './dock-content.module.css'
 
 interface DockContentProps {
     showSearch: boolean
@@ -20,14 +17,14 @@ interface DockContentProps {
     isVertical: boolean
 }
 
-export function DockContent({ 
-    showSearch, 
-    searchQuery, 
-    setSearchQuery, 
-    showSettings, 
-    setShowSettings, 
+export function DockContent({
+    showSearch,
+    searchQuery,
+    setSearchQuery,
+    showSettings: _showSettings,
+    setShowSettings: _setShowSettings,
     setShowSearch,
-    isVertical 
+    isVertical
 }: DockContentProps) {
     const { isChatOpen, openChat, closeChat } = useChatContext()
 
@@ -41,44 +38,44 @@ export function DockContent({
 
     return (
         <div className={cn(
-            "flex items-center",
-            isVertical ? "flex-col space-y-2" : "space-x-2"
+            styles.container,
+            isVertical ? styles.containerVertical : styles.containerHorizontal
         )}>
             <button
                 onClick={() => setShowSearch(!showSearch)}
                 className={cn(
-                    "rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white",
-                    showSearch && "bg-white/20 text-white shadow-lg"
+                    styles.iconButton,
+                    showSearch && styles.iconButtonActive
                 )}
             >
-                <Search className="h-4 w-4" />
+                <span className={styles.icon}>🔍</span>
             </button>
 
             <ShinyAiButton
                 onClick={handleToggleChat}
                 className={cn(
-                    isChatOpen && "bg-muted"
+                    isChatOpen && styles.aiButtonActive
                 )}
             />
 
             {showSearch && (
                 <div className={cn(
-                    "flex items-center",
-                    isVertical ? "flex-col space-y-2" : "space-x-2"
+                    styles.searchContainer,
+                    isVertical ? styles.searchContainerVertical : styles.searchContainerHorizontal
                 )}>
                     <Input
                         type="text"
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-8 w-[150px] bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:bg-white/20 focus:border-white/40"
+                        className={styles.searchInput}
                     />
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery("")}
-                            className="rounded-lg p-2 transition-all duration-200 ease-out hover:bg-white/20 hover:shadow-lg text-white/80 hover:text-white"
+                            className={styles.iconButton}
                         >
-                            <X className="h-4 w-4" />
+                            <span className={styles.icon}>×</span>
                         </button>
                     )}
                 </div>
@@ -87,4 +84,4 @@ export function DockContent({
             {/* Settings button is handled by SettingsDrawer component */}
         </div>
     )
-} 
+}

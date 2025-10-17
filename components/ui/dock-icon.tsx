@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import styles from './dock-icon.module.css'
 
 interface DockIconProps extends Omit<MotionProps, 'children'> {
   children?: React.ReactNode
@@ -72,7 +73,7 @@ export const DockIcon = ({
         {label && (
           <TooltipContent 
             side="top" 
-            className="rounded-full bg-neutral-800/90 text-white/90 border-white/10"
+            className={styles.tooltipContent}
           >
             {label}
           </TooltipContent>

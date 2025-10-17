@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useRef, type ReactNode } from 'react'
+// Icons replaced with ASCII placeholders
+import React, { useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useOutsideClick } from '@/hooks/use-outside-click'
 import { cn } from '@/lib/utils'
-import { GlowButton } from './glow-button'
-import X from 'lucide-react/dist/esm/icons/x'
 import styles from './expanding-modal.module.css'
 import { ClientOnly } from './safe-motion'
 
@@ -79,7 +78,7 @@ export function ExpandingModal({
                     className="md3-icon-button"
                     aria-label="Close dialog"
                   >
-                    <X size={20} />
+                    <span size={20}>×</span>
                   </button>
                 </motion.div>
                 {children}

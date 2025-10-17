@@ -1,12 +1,12 @@
 "use client"
 
+// Icons replaced with ASCII placeholders
 import React, { useState, useMemo, createContext, useContext } from 'react'
 import { Drawer, DrawerContent, DrawerClose } from '@/components/ui/drawer'
 import { EditTaskForm } from '@/components/widgets/edit-task-form'
 import type { Task } from '@/shared/schema'
 import { useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence } from 'framer-motion'
-import X from 'lucide-react/dist/esm/icons/x'
+import styles from './client-providers.module.css'
 
 interface ClientProvidersProps {
   children: React.ReactNode
@@ -72,8 +72,8 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         direction="right"
       >
         <DrawerContent direction="right" className="overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="text-lg font-semibold">
+          <div className={styles.header}>
+            <h2 className={styles.title}>
               {activeTask?.id ? 'Edit Task' : 'Create Task'}
             </h2>
             <DrawerClose asChild>
@@ -81,7 +81,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
                 className="md3-icon-button"
                 aria-label="Close dialog"
               >
-                <X size={20} />
+                <span size={20}>×</span>
               </button>
             </DrawerClose>
           </div>

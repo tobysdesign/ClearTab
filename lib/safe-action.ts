@@ -1,13 +1,6 @@
 import { createSafeActionClient } from 'next-safe-action'
 import { createClient } from '@/lib/supabase/server'
 
-class ActionError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'ActionError'
-  }
-}
-
 const handleServerError = (e: Error) => {
   console.error('Server action error:', e)
   return e.message || 'An unexpected error occurred'

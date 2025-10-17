@@ -1,5 +1,6 @@
 "use client"
 
+// Icons replaced with ASCII placeholders
 import { useAction } from 'next-safe-action/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -8,17 +9,16 @@ import { Button } from '@/components/ui/button'
 import { saveApiKey } from '@/lib/actions/settings'
 import { useToast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
-import Check from 'lucide-react/dist/esm/icons/check'
-import Star from 'lucide-react/dist/esm/icons/star'
 import type { ReactNode } from 'react'
+import styles from './api-settings.module.css'
 
 export function APISettings(): ReactNode {
   const { toast } = useToast()
-  const { execute, result, status } = useAction(saveApiKey)
+  const { execute, result: _result, status } = useAction(saveApiKey)
   const [showApiKeyInput, setShowApiKeyInput] = useState(false)
   const [hasApiKey, setHasApiKey] = useState(false)
   const [apiKey, setApiKey] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [_isLoading, _setIsLoading] = useState(true)
 
   // Check if user has API key on load
   useEffect(() => {
@@ -63,14 +63,14 @@ export function APISettings(): ReactNode {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className={styles.gridGap6}>
       <Card>
         <CardHeader>
           <CardTitle>Free Tier</CardTitle>
           <CardDescription>Basic features with limited usage</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="list-disc pl-5 space-y-2">
+          <ul className={styles.listDisc}>
             <li>Basic AI assistance</li>
             <li>Limited API calls</li>
             <li>Standard response time</li>
@@ -80,14 +80,14 @@ export function APISettings(): ReactNode {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-2">
+          <div className={styles.flexItemsGap2}>
             <CardTitle>Pro Tier</CardTitle>
-            <Star className="h-5 w-5 text-yellow-500" />
+            <span className={styles.starIcon}>★</span>
           </div>
           <CardDescription>Enhanced features with your own API key</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="list-disc pl-5 space-y-2 mb-6">
+          <ul className={styles.listDiscMb6}>
             <li>Advanced AI capabilities</li>
             <li>Unlimited API calls</li>
             <li>Priority response time</li>
@@ -95,13 +95,13 @@ export function APISettings(): ReactNode {
           </ul>
 
           {hasApiKey ? (
-            <div className="flex items-center gap-2 text-green-500">
-              <Check className="h-5 w-5" />
+            <div className={styles.successText}>
+              <span className={styles.checkIcon}>✓</span>
               <span>API key configured</span>
             </div>
           ) : showApiKeyInput ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className={styles.spaceY4}>
+              <div className={styles.spaceY2}>
                 <Label htmlFor="apiKey">OpenAI API Key</Label>
                 <Input
                   id="apiKey"
@@ -111,7 +111,7 @@ export function APISettings(): ReactNode {
                   placeholder="sk-..."
                 />
               </div>
-              <div className="flex gap-2">
+              <div className={styles.flexGap2}>
                 <Button
                   onClick={handleSaveApiKey}
                   disabled={!apiKey || status === 'executing'}

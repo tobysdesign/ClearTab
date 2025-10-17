@@ -7,29 +7,32 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 
 import { AddButton } from "@/components/ui/add-button";
 import { WidgetHeader } from "@/components/ui/widget-header";
 import {
   WidgetContainer,
-  WidgetContent,
+  // WidgetContent,
 } from "@/components/ui/widget-container";
-import { SimpleBlockNoteEditor } from "@/components/ui/simple-block-note-editor";
-import { EMPTY_BLOCKNOTE_CONTENT, type Note } from "@/shared/schema";
+import { QuillEditor } from "@/components/ui/quill-editor";
+import { type Note } from "@/shared/schema";
+
+// Empty Quill content
+const EMPTY_QUILL_CONTENT = { ops: [{ insert: "\n" }] };
 import { useNotes } from "@/hooks/use-notes";
-import { type Block, type BlockNoteEditor } from "@blocknote/core";
 import { AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
-import styles from "./widget.module.css";
+// import styles from "./widget.module.css";
+import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
 import { cn } from "@/lib/utils";
 import { ActionsMenu } from "@/components/ui/actions-menu";
 import { useToast } from "@/components/ui/use-toast";
 import { toast as sonnerToast } from "sonner";
-import { useDebounce } from "@/hooks/use-debounce";
-import { api } from "@/lib/api-client";
+// import { useDebounce } from "@/hooks/use-debounce";
+// import { api } from "@/lib/api-client";
 
 interface ResizablePanelsProps {
   children: [React.ReactNode, React.ReactNode];
@@ -96,27 +99,24 @@ function ResizablePanels({
   };
 
   return (
-    <div className="flex flex-row h-full w-full" ref={containerRef}>
+    <div className={notesStyles.resizablePanels} ref={containerRef}>
       <div
         style={{ width: collapsed ? 60 : currentWidth }}
-        className="flex-shrink-0"
+        className={notesStyles.resizableLeft}
       >
         {children[0]}
       </div>
       <div
-        className={cn(
-          "bg-border hover:bg-primary transition-colors cursor-col-resize flex-shrink-0",
-          collapsed ? "w-[1px]" : "w-[1px]",
-        )}
+        className={notesStyles.resizableHandle}
         onMouseDown={handleMouseDown}
       />
-      <div className="flex-grow overflow-hidden">{children[1]}</div>
+      <div className={notesStyles.resizableRight}>{children[1]}</div>
     </div>
   );
 }
 
 // Helper for deep equality check (for content)
-function isEqual(a: any, b: any): boolean {
+function _isEqual(a: any, b: any): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
@@ -139,16 +139,14 @@ export function NotesWidget() {
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
-  const editorRef = useRef<BlockNoteEditor | null>(null);
+  const [showSaveStatus, setShowSaveStatus] = useState(false);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
-  const isUpdatingEditor = useRef(false);
   const lastSavedContent = useRef<string>("");
   const lastSavedTitle = useRef<string>("");
 
   const activeNoteIdRef = useRef<string | null>(null);
   const isInitializedRef = useRef(false);
   const draftCounterRef = useRef(0);
-  const editorInitializedRef = useRef(false);
 
   // Generate unique draft ID to prevent duplicate keys
   const generateDraftId = useCallback(() => {
@@ -173,12 +171,12 @@ export function NotesWidget() {
       const blankNote = {
         id: generateDraftId(),
         title: "",
-        content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+        content: EMPTY_QUILL_CONTENT,
       };
       setActiveNote(blankNote);
       setDisplayTitle("");
       activeNoteIdRef.current = blankNote.id;
-      lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+      lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
       lastSavedTitle.current = "";
       return;
     }
@@ -194,50 +192,33 @@ export function NotesWidget() {
       const newNote = {
         id: generateDraftId(),
         title: "",
-        content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+        content: EMPTY_QUILL_CONTENT,
       };
       setActiveNote(newNote);
       setDisplayTitle("");
       activeNoteIdRef.current = newNote.id;
-      lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+      lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
       lastSavedTitle.current = "";
     }
   }, [notes, isLoadingNotes, generateDraftId]);
 
   // Effect to sync editor content - only trigger on note ID change, not content
   useEffect(() => {
-    if (!editorRef.current || !activeNote?.content) return;
+    if (!activeNote?.content) return;
 
-    const content = Array.isArray(activeNote.content) ? activeNote.content : [];
+    const content = activeNote.content;
     const contentStr = JSON.stringify(content);
 
     // Only update if content actually changed to prevent unnecessary updates
     if (contentStr === lastSavedContent.current) return;
 
-    isUpdatingEditor.current = true;
+    lastSavedContent.current = contentStr;
+    lastSavedTitle.current = activeNote.title || "";
 
-    try {
-      editorRef.current.replaceBlocks(
-        editorRef.current.document,
-        content as Block[],
-      );
-      lastSavedContent.current = contentStr;
-      lastSavedTitle.current = activeNote.title || "";
-
-      // Sync display title with the note title when content updates (but not while user is typing)
-      if (activeNote.title !== undefined && activeNote.title !== displayTitle) {
-        setDisplayTitleSafe(activeNote.title);
-      }
-    } catch (error) {
-      console.error("Failed to update editor content:", error);
+    // Sync display title with the note title when content updates (but not while user is typing)
+    if (activeNote.title !== undefined && activeNote.title !== displayTitle) {
+      setDisplayTitleSafe(activeNote.title);
     }
-
-    // Use a longer timeout to ensure all editor updates are complete
-    const timer = setTimeout(() => {
-      isUpdatingEditor.current = false;
-    }, 200);
-
-    return () => clearTimeout(timer);
   }, [activeNote?.id]); // Only depend on ID, not content to prevent refresh loops
 
   const activeNoteRef = useRef<Partial<Note> | null>(null);
@@ -255,6 +236,108 @@ export function NotesWidget() {
   useEffect(() => {
     activeNoteRef.current = activeNote;
   }, [activeNote]);
+
+  // Unified save function
+  const saveCurrentNote = useCallback(async () => {
+    if (!activeNoteRef.current || isSavingRef.current) return;
+
+    const currentNote = activeNoteRef.current;
+
+    // If it's a new note (draft) and both title and content are empty, don't save.
+    const isContentEmpty = _isEqual(currentNote.content, EMPTY_QUILL_CONTENT);
+    const isTitleEmpty = !currentNote.title || currentNote.title.trim() === "";
+    if (
+      currentNote.id?.startsWith("draft-") &&
+      isTitleEmpty &&
+      isContentEmpty
+    ) {
+      return; // Abort save for empty draft note
+    }
+    const isDraft = currentNote.id?.startsWith("draft-");
+
+    try {
+      isSavingRef.current = true;
+
+      if (isDraft) {
+        // Create new note for draft
+        const savedNoteRaw = await createNote.mutate({
+          title: currentNote.title?.trim() || "Untitled Note",
+          content: JSON.stringify(currentNote.content),
+          temporaryId: currentNote.id,
+        });
+
+        let parsedContent = savedNoteRaw.content;
+        if (typeof savedNoteRaw.content === "string") {
+          try {
+            parsedContent = JSON.parse(savedNoteRaw.content);
+          } catch (e) {
+            console.error("Could not parse content", e);
+          }
+        }
+
+        const savedNote = { ...savedNoteRaw, content: parsedContent };
+
+        // Update the active note state with the saved note
+        setActiveNote(savedNote);
+
+        // Update refs to point to the new saved note
+        activeNoteIdRef.current = savedNote.id;
+        activeNoteRef.current = savedNote;
+        lastSavedContent.current = JSON.stringify(savedNote.content);
+        lastSavedTitle.current = savedNote.title || "";
+
+        console.log("Note saved (was draft):", savedNote.id);
+      } else {
+        // Update existing note
+        const savedNoteRaw = await updateNote.mutate({
+          id: currentNote.id,
+          title: currentNote.title,
+          content: JSON.stringify(currentNote.content),
+        });
+
+        if (savedNoteRaw) {
+          let parsedContent = savedNoteRaw.content;
+          if (typeof savedNoteRaw.content === "string") {
+            try {
+              parsedContent = JSON.parse(savedNoteRaw.content);
+            } catch (e) {
+              console.error("Could not parse content", e);
+            }
+          }
+          const savedNote = { ...savedNoteRaw, content: parsedContent };
+          setActiveNote(savedNote);
+        }
+
+        lastSavedContent.current = JSON.stringify(currentNote.content);
+        lastSavedTitle.current = currentNote.title || "";
+        console.log("Note saved (existing):", currentNote.id);
+      }
+
+      // Note: Don't clear editing state here as it causes focus loss
+    } catch (error) {
+      console.error("Failed to save note:", error);
+    } finally {
+      isSavingRef.current = false;
+    }
+  }, [createNote, updateNote, setActiveNote]);
+
+  // Background save system - completely decoupled from user input
+  const backgroundSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const scheduleBackgroundSave = useCallback(() => {
+    // Clear any existing timeout
+    if (backgroundSaveTimeoutRef.current) {
+      clearTimeout(backgroundSaveTimeoutRef.current);
+    }
+
+    // Schedule save for 3 seconds from now
+    backgroundSaveTimeoutRef.current = setTimeout(() => {
+      // Only save if there are actual changes and user isn't actively typing
+      if (activeNoteRef.current && !isUserTypingRef.current) {
+        saveCurrentNote();
+      }
+    }, 3000);
+  }, [saveCurrentNote]);
 
   // Save note function (must be defined before debouncedSave)
   const saveNote = useCallback(
@@ -319,10 +402,6 @@ export function NotesWidget() {
 
   // Removed old debouncedSave - now using direct setTimeout approach in onChange handlers
 
-  const handleEditorReady = useCallback((editor: BlockNoteEditor) => {
-    editorRef.current = editor;
-  }, []);
-
   const handleTitleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newTitle = e.target.value;
@@ -340,9 +419,6 @@ export function NotesWidget() {
         // Update ref directly without triggering note re-render
         activeNoteRef.current = { ...activeNoteRef.current, title: newTitle };
 
-        // Show editing indicator
-        setIsEditing(true);
-
         // Only update list for saved notes, not drafts (to prevent input focus issues)
         if (!activeNoteRef.current.id?.startsWith("draft-")) {
           updateNoteOptimistic(activeNoteRef.current.id, { title: newTitle });
@@ -350,167 +426,67 @@ export function NotesWidget() {
       });
 
       // Clear typing flag after user stops typing
-      clearTimeout((window as any).typingTimeout);
-      (window as any).typingTimeout = setTimeout(() => {
+      setTimeout(() => {
         isUserTypingRef.current = false;
       }, 2000);
 
-      // Simple debounced save for title using same approach as body
-      console.log("Title changed, scheduling save in 2 seconds...");
-      clearTimeout((window as any).titleSaveTimeout);
-      (window as any).titleSaveTimeout = setTimeout(async () => {
-        const noteToSave = activeNoteRef.current;
-        if (!noteToSave?.id || isSavingRef.current) return;
-
-        const isDraft = noteToSave.id.startsWith("draft-");
-
-        try {
-          if (isDraft) {
-            isSavingRef.current = true;
-            setSaveStatus("saving");
-            console.log("Creating new note from title:", noteToSave.title);
-            // Create new note
-            const response = await fetch("/api/notes", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                title: noteToSave.title?.trim() || "Untitled Note",
-                content: noteToSave.content,
-              }),
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success) {
-                console.log(
-                  "Title saved by creating new note:",
-                  result.data.id,
-                );
-                // Update refs to point to the new saved note
-                activeNoteIdRef.current = result.data.id;
-                activeNoteRef.current = { ...noteToSave, id: result.data.id };
-
-                // Update state to reflect the new saved note (but keep current display title)
-                const currentDisplayTitle = displayTitle;
-                setActiveNote({
-                  ...noteToSave,
-                  id: result.data.id,
-                  title: currentDisplayTitle,
-                });
-                // Don't update displayTitle here to avoid clearing what user is typing
-
-                // Immediately update the note in the list
-                updateNoteOptimistic(result.data.id, {
-                  title: result.data.title,
-                  content: result.data.content,
-                });
-
-                setIsEditing(false);
-                setSaveStatus("saved");
-
-                // Refresh notes list to ensure persistence
-                loadNotes();
-
-                // Clear typing flag after save completes
-                setTimeout(() => {
-                  isUserTypingRef.current = false;
-                  setSaveStatus("idle");
-                }, 2000);
-              }
-            }
-            isSavingRef.current = false;
-          } else {
-            console.log("Saving title:", noteToSave.title);
-            const response = await fetch("/api/notes", {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                noteId: noteToSave.id,
-                title: noteToSave.title,
-                content: noteToSave.content,
-              }),
-            });
-
-            if (response.ok) {
-              console.log("Title saved successfully");
-              // Clear editing indicator
-              setIsEditing(false);
-            } else {
-              const errorData = await response.json();
-              console.error("Failed to save title:", errorData);
-            }
-          }
-        } catch (error) {
-          console.error("Title save failed:", error);
-          isSavingRef.current = false;
-        }
-      }, 2000);
+      // Schedule background save (won't interrupt typing)
+      scheduleBackgroundSave();
     },
-    [],
+    [scheduleBackgroundSave],
   );
 
   const handleTitleBlur = useCallback(() => {
-    if (!activeNoteRef.current) return;
-
-    // Cancel pending debounced save and save immediately on blur
-    clearTimeout((window as any).titleSaveTimeout);
-
-    const currentNote = activeNoteRef.current;
-    if (!currentNote.id?.startsWith("draft-") && currentNote.title) {
-      fetch("/api/notes", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          noteId: currentNote.id,
-          title: currentNote.title,
-          content: currentNote.content,
-        }),
-      })
-        .then((response) => {
-          if (response.ok) {
-            console.log("Title saved on blur");
-            // Clear editing indicator
-            setIsEditing(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Failed to save title on blur:", error);
-        });
+    // Save immediately on blur - cancel any pending background save
+    if (backgroundSaveTimeoutRef.current) {
+      clearTimeout(backgroundSaveTimeoutRef.current);
     }
-  }, []);
+    saveCurrentNote();
+  }, [saveCurrentNote]);
 
-  const handleSelectNote = useCallback((note: Note) => {
-    setActiveNote(note);
-    setDisplayTitleSafe(note.title || "");
-    activeNoteIdRef.current = note.id;
-    lastSavedContent.current = JSON.stringify(note.content);
-    lastSavedTitle.current = note.title || "";
-
-    // Sync editor content without re-rendering
-    if (editorRef.current) {
-      isUpdatingEditor.current = true;
-      try {
-        editorRef.current.replaceBlocks(
-          editorRef.current.document,
-          (note.content || EMPTY_BLOCKNOTE_CONTENT) as Block[],
-        );
-      } catch (error) {
-        console.error("Failed to update editor content:", error);
+  const handleSelectNote = useCallback(
+    async (note: Note) => {
+      // First, save the current note if there is one and it has changes
+      if (activeNoteRef.current && activeNoteRef.current.id !== note.id) {
+        try {
+          await saveCurrentNote();
+        } catch (error) {
+          console.error("Failed to save current note before switching:", error);
+          // Continue with switch even if save failed
+        }
       }
-      setTimeout(() => {
-        isUpdatingEditor.current = false;
-      }, 100);
-    }
-  }, []);
 
-  // Force immediate save on blur (bypasses debouncing)
+      // Parse content if it's a string (from API), otherwise use as-is
+      let parsedContent = note.content;
+      if (typeof note.content === "string") {
+        try {
+          parsedContent = JSON.parse(note.content);
+        } catch (error) {
+          console.error("Failed to parse note content:", error);
+          parsedContent = EMPTY_QUILL_CONTENT;
+        }
+      }
+
+      const noteWithParsedContent = { ...note, content: parsedContent };
+
+      // Update all references first
+      activeNoteIdRef.current = note.id;
+      activeNoteRef.current = noteWithParsedContent;
+      lastSavedContent.current = JSON.stringify(parsedContent);
+      lastSavedTitle.current = note.title || "";
+
+      // Then update state to trigger re-render
+      setActiveNote(noteWithParsedContent);
+      setDisplayTitleSafe(note.title || "");
+
+      console.log("Selected note:", note.id, "with content:", parsedContent);
+    },
+    [setDisplayTitleSafe, saveCurrentNote],
+  );
+
+  // Save handler is now handled by individual blur events
   const handleSaveOnBlur = useCallback(() => {
-    // Simplified version that doesn't use React Query mutations to avoid refresh
-    if (!activeNoteRef.current) return;
-
-    // Just clear pending timeouts, let auto-save handle actual saving
-    clearTimeout((window as any).contentSaveTimeout);
-    clearTimeout((window as any).titleSaveTimeout);
+    // No-op - saving is now handled by onBlur events
   }, []);
 
   // Add event listeners for when user clicks outside notes widget
@@ -526,35 +502,37 @@ export function NotesWidget() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [handleSaveOnBlur]);
 
-  const handleCreateNew = useCallback(() => {
-    // Clear any pending saves to avoid conflicts
-    clearTimeout((window as any).contentSaveTimeout);
-    clearTimeout((window as any).titleSaveTimeout);
+  // Save before tab closes to prevent data loss
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (activeNoteRef.current && isEditing) {
+        // Cancel background save timeout and save immediately
+        if (backgroundSaveTimeoutRef.current) {
+          clearTimeout(backgroundSaveTimeoutRef.current);
+        }
+        saveCurrentNote();
+      }
+    };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isEditing, saveCurrentNote]);
+
+  const handleCreateNew = useCallback(() => {
     // Create new draft note without state setters that cause refreshes
     const newNote = {
       id: generateDraftId(),
       title: "",
-      content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+      content: EMPTY_QUILL_CONTENT,
     };
 
     // Update refs directly to avoid re-renders
     activeNoteIdRef.current = newNote.id;
     activeNoteRef.current = newNote;
-    lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+    lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
     lastSavedTitle.current = "";
 
-    // Force editor to update with empty content
-    if (editorRef.current) {
-      isUpdatingEditor.current = true;
-      editorRef.current.replaceBlocks(
-        editorRef.current.document,
-        EMPTY_BLOCKNOTE_CONTENT as any,
-      );
-      setTimeout(() => {
-        isUpdatingEditor.current = false;
-      }, 200);
-    }
+    // Note: Editor content will be updated via the value prop in QuillEditor
 
     // Update display title and active note (minimal state changes)
     setDisplayTitle("");
@@ -570,26 +548,16 @@ export function NotesWidget() {
         const newNote = {
           id: generateDraftId(),
           title: "",
-          content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+          content: EMPTY_QUILL_CONTENT,
         };
         setActiveNote(newNote);
         setDisplayTitleSafe("");
         activeNoteIdRef.current = newNote.id;
         activeNoteRef.current = newNote;
-        lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+        lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
         lastSavedTitle.current = "";
 
-        // Clear the editor
-        if (editorRef.current) {
-          isUpdatingEditor.current = true;
-          editorRef.current.replaceBlocks(
-            editorRef.current.document,
-            EMPTY_BLOCKNOTE_CONTENT as any,
-          );
-          setTimeout(() => {
-            isUpdatingEditor.current = false;
-          }, 200);
-        }
+        // Note: Editor content will be updated via the value prop in QuillEditor
 
         return; // Don't try to delete from database
       }
@@ -607,26 +575,16 @@ export function NotesWidget() {
           const newNote = {
             id: generateDraftId(),
             title: "",
-            content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+            content: EMPTY_QUILL_CONTENT,
           };
           setActiveNote(newNote);
           setDisplayTitleSafe("");
           activeNoteIdRef.current = newNote.id;
           activeNoteRef.current = newNote;
-          lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+          lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
           lastSavedTitle.current = "";
 
-          // Clear the editor
-          if (editorRef.current) {
-            isUpdatingEditor.current = true;
-            editorRef.current.replaceBlocks(
-              editorRef.current.document,
-              EMPTY_BLOCKNOTE_CONTENT as any,
-            );
-            setTimeout(() => {
-              isUpdatingEditor.current = false;
-            }, 200);
-          }
+          // Note: Editor content will be updated via the value prop in QuillEditor
         }
 
         // Delete from database
@@ -639,23 +597,13 @@ export function NotesWidget() {
             label: "Undo",
             onClick: async () => {
               try {
-                // Recreate the note
-                const response = await fetch("/api/notes", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    title: noteToDelete.title,
-                    content: noteToDelete.content,
-                  }),
+                // Recreate the note using mutation
+                await createNote.mutate({
+                  title: noteToDelete.title,
+                  content: noteToDelete.content,
                 });
 
-                if (response.ok) {
-                  const result = await response.json();
-                  loadNotes(); // Refresh the list
-                  sonnerToast.success("Note restored");
-                } else {
-                  throw new Error("Failed to restore note");
-                }
+                sonnerToast.success("Note restored");
               } catch (error) {
                 sonnerToast.error("Failed to restore note");
               }
@@ -710,314 +658,227 @@ export function NotesWidget() {
   }, [activeNote?.id]);
 
   return (
-    <WidgetContainer data-widget="notes" className="[&_.widget-background]:!rounded-[22px]">
-      <div className="widget-flex-column widget-full-height overflow-hidden rounded-[22px]">
-        <ResizablePanels
-          defaultWidth={300}
-          collapsed={isCollapsed}
-          onToggleCollapse={handleToggleCollapse}
-        >
-          {/* Notes List */}
-          <div className="flex flex-col h-full overflow-hidden relative notes-list-panel">
-            <WidgetHeader title="Notes" className="!rounded-tl-[22px] !rounded-tr-none !rounded-b-none !justify-start">
-              <AddButton onClick={handleCreateNew} />
-            </WidgetHeader>
-            <div className="flex-1 h-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
-              {isLoadingNotes ? (
-                <WidgetLoader />
-              ) : notes.length > 0 || activeNote ? (
-                <div className="widget-list-content notes-list-fixed-padding">
-                  <AnimatePresence>
-                    {/* Show the active draft note (should be only one) */}
-                    {activeNote && activeNote.id?.startsWith("draft-") && (
-                      <>
-                        <NoteListItem
-                          key={activeNote.id}
-                          note={
-                            {
-                              ...activeNote,
-                              title: displayTitle, // Use live display title instead of stale activeNote.title
-                              content:
-                                activeNoteRef.current?.content ||
-                                activeNote.content, // Use live content
-                            } as Note
-                          }
-                          isSelected={true}
-                          onClick={() => {}} // Already selected
-                          onDelete={() =>
-                            handleDeleteNote(activeNote.id as string)
-                          }
-                          collapsed={isCollapsed}
-                          isEditing={isEditing}
-                        />
-                      </>
-                    )}
-                    {/* Then show all saved notes */}
-                    {notes.map((note) => {
-                      // Check if this saved note is the currently active note
-                      // For saved notes, only show as active if activeNote is not a draft
-                      const isActive =
-                        !activeNote?.id?.startsWith("draft-") &&
-                        activeNoteIdRef.current === note.id;
+    <WidgetContainer data-widget="notes">
+      <link rel="stylesheet" href="/styles/quill-custom.css" />
+      <ResizablePanels
+        defaultWidth={300}
+        collapsed={isCollapsed}
+        onToggleCollapse={handleToggleCollapse}
+      >
+        {/* Notes List */}
+        <div className={notesStyles.notesListPanel}>
+          <WidgetHeader title="Notes">
+            <AddButton onClick={handleCreateNew} />
+          </WidgetHeader>
+          <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
+            {isLoadingNotes ? (
+              <WidgetLoader />
+            ) : notes.length > 0 || activeNote ? (
+              <div className={notesStyles.notesListContent}>
+                <AnimatePresence>
+                  {/* Show the active draft note (should be only one) */}
+                  {activeNote && activeNote.id?.startsWith("draft-") && (
+                    <>
+                      <NoteListItem
+                        key={activeNote.id}
+                        note={
+                          {
+                            ...activeNote,
+                            title: displayTitle, // Use live display title instead of stale activeNote.title
+                            content:
+                              activeNoteRef.current?.content ||
+                              activeNote.content, // Use live content
+                          } as Note
+                        }
+                        isSelected={true}
+                        onClick={() => {}} // Already selected
+                        onDelete={() =>
+                          handleDeleteNote(activeNote.id as string)
+                        }
+                        collapsed={isCollapsed}
+                        isEditing={isEditing}
+                      />
+                    </>
+                  )}
+                  {/* Then show all saved notes */}
+                  {notes.map((note) => {
+                    // Check if this saved note is the currently active note
+                    // For saved notes, only show as active if activeNote is not a draft
+                    const isActive =
+                      !activeNote?.id?.startsWith("draft-") &&
+                      activeNoteIdRef.current === note.id;
 
-                      return (
-                        <NoteListItem
-                          key={note.id}
-                          note={note}
-                          isSelected={isActive}
-                          onClick={() => handleSelectNote(note)}
-                          onDelete={() => handleDeleteNote(note.id as string)}
-                          collapsed={isCollapsed}
-                          isEditing={isActive && isEditing}
-                        />
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <EmptyState
-                  title="No Notes"
-                  description="Create your first note."
-                />
-              )}
-            </div>
+                    return (
+                      <NoteListItem
+                        key={note.id}
+                        note={note}
+                        isSelected={isActive}
+                        onClick={() => handleSelectNote(note)}
+                        onDelete={() => handleDeleteNote(note.id as string)}
+                        collapsed={isCollapsed}
+                        isEditing={isActive && isEditing}
+                      />
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <EmptyState
+                title="No Notes"
+                description="Create your first note."
+              />
+            )}
           </div>
-          {/* Note Editor */}
-          <div className="widget-flex-column widget-full-height notes-editor-panel">
-            {activeNote ? (
-              <div className="widget-flex-column widget-full-height bg-[#151515] notes-content-panel relative">
-                {/* Header with Title and Actions - Fixed */}
-                <div className="flex-shrink-0 p-4 pb-0 bg-[#151515] z-10">
-                  <div className="flex items-start justify-between gap-1">
-                    {/* Title Input - Tab Index 1 */}
-                    <div className="flex-1 min-w-0">
-                      <textarea
-                        ref={(el) => {
-                          if (el) {
-                            (titleInputRef as any).current = el;
-                            el.style.height = 'auto';
-                            el.style.height = el.scrollHeight + 'px';
-                          }
-                        }}
-                        tabIndex={1}
-                        className="font-['Inter_Display'] font-medium text-[18px] leading-[22px] text-[#D2D2D2] border-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent placeholder:text-[#5c5c5c] placeholder:italic placeholder:font-medium w-full resize-none outline-none break-words px-3 py-2"
-                        placeholder="Untitled note"
-                        rows={1}
-                        value={displayTitle}
-                        onChange={(e) => {
-                          handleTitleChange(e);
-                          const target = e.target as HTMLTextAreaElement;
-                          target.style.height = 'auto';
-                          target.style.height = target.scrollHeight + 'px';
-                        }}
-                        onBlur={handleTitleBlur}
-                      />
-                    </div>
-                    {/* Actions Menu - Tab Index 3 */}
-                    <div tabIndex={3} className="flex-shrink-0">
-                      <ActionsMenu
-                        onDelete={handleDeleteActiveNote}
-                        isNewNote={isNewNote}
-                      />
-                    </div>
+        </div>
+        {/* Note Editor */}
+        <div className={notesStyles.notesEditorPanel}>
+          {activeNote ? (
+            <div className={notesStyles.notesContentPanel}>
+              {/* Header with Title and Actions - Fixed */}
+              <div className={notesStyles.notesEditorHeader}>
+                <div className={notesStyles.notesHeaderContent}>
+                  {/* Title Input - Tab Index 1 */}
+                  <div className={notesStyles.notesTitleContainer}>
+                    <textarea
+                      ref={(el) => {
+                        if (el) {
+                          (titleInputRef as any).current = el;
+                          el.style.height = "auto";
+                          el.style.height = el.scrollHeight + "px";
+                        }
+                      }}
+                      tabIndex={3}
+                      className={notesStyles.notesTitleInput}
+                      placeholder="Untitled note"
+                      rows={1}
+                      value={displayTitle}
+                      onChange={(e) => {
+                        handleTitleChange(e);
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = "auto";
+                        target.style.height = target.scrollHeight + "px";
+                      }}
+                      onBlur={handleTitleBlur}
+                    />
+                  </div>
+                  {/* Actions Menu - Tab Index 3 */}
+                  <div tabIndex={2} className={notesStyles.notesActions}>
+                    <ActionsMenu
+                      onDelete={handleDeleteActiveNote}
+                      isNewNote={isNewNote}
+                    />
                   </div>
                 </div>
-                {/* Save Status Indicator - Fixed Bottom Right */}
-                <div className="fixed bottom-4 right-4 z-20">
+              </div>
+              {/* Save Status Indicator - Slides up from bottom */}
+              {showSaveStatus && saveStatus !== "idle" && (
+                <div
+                  className={cn(
+                    notesStyles.saveStatus,
+                    notesStyles.saveStatusVisible,
+                  )}
+                >
                   {saveStatus === "saving" && (
-                    <div className="flex items-center gap-1 text-xs text-yellow-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <div
+                      className={cn(
+                        notesStyles.saveStatusContent,
+                        notesStyles.saveStatusSaving,
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          notesStyles.saveStatusIndicator,
+                          notesStyles.saveStatusIndicatorSaving,
+                        )}
+                      ></div>
                       Saving...
                     </div>
                   )}
                   {saveStatus === "saved" && (
-                    <div className="flex items-center gap-1 text-xs text-green-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <div
+                      className={cn(
+                        notesStyles.saveStatusContent,
+                        notesStyles.saveStatusSaved,
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          notesStyles.saveStatusIndicator,
+                          notesStyles.saveStatusIndicatorSaved,
+                        )}
+                      ></div>
                       Saved
                     </div>
                   )}
                   {saveStatus === "error" && (
-                    <div className="flex items-center gap-1 text-xs text-red-400 bg-[#1a1a1a] px-3 py-2 rounded-lg shadow-lg">
-                      <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                    <div
+                      className={cn(
+                        notesStyles.saveStatusContent,
+                        notesStyles.saveStatusError,
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          notesStyles.saveStatusIndicator,
+                          notesStyles.saveStatusIndicatorError,
+                        )}
+                      ></div>
                       Error
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* Content Editor - Scrollable - Tab Index 2 */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-4">
-                  <SimpleBlockNoteEditor
-                      key="notes-editor" // Use completely stable key to prevent any re-mounts
-                      initialContent={EMPTY_BLOCKNOTE_CONTENT} // Always use empty, sync via effects
-                      onChange={(content) => {
-                        // Guard: check if we're updating programmatically
-                        if (isUpdatingEditor.current) return;
+              {/* Content Editor - Scrollable - Tab Index 2 */}
+              <div
+                className={cn(
+                  notesStyles.notesEditorScroll,
+                  "custom-scrollbar",
+                )}
+              >
+                <QuillEditor
+                  tabIndex={4}
+                  key="stable-notes-editor" // Keep stable to prevent focus loss
+                  value={activeNote?.content}
+                  onChange={(content) => {
+                    // Just piggyback off Quill's onChange - don't interfere with editing
+                    if (!activeNoteRef.current) return;
 
-                        // Guard: check if activeNote exists
-                        if (!activeNoteRef.current) return;
+                    console.log(
+                      "QuillEditor onChange called for note:",
+                      activeNoteRef.current.id,
+                    );
 
-                        // Mark user as actively typing
-                        isUserTypingRef.current = true;
+                    // Update our data silently in background - NO STATE UPDATES
+                    activeNoteRef.current = {
+                      ...activeNoteRef.current,
+                      content,
+                    };
 
-                        // Guard: prevent unnecessary saves if content hasn't changed
-                        const contentStr = JSON.stringify(content);
-                        if (contentStr === lastSavedContent.current) return;
-
-                        // Update ref directly (no state changes)
-                        const updatedNote = {
-                          ...activeNoteRef.current,
-                          content,
-                        };
-                        activeNoteRef.current = updatedNote;
-
-                        // No forced re-render needed - content will update naturally through refs
-
-                        // Show editing indicator
-                        setIsEditing(true);
-
-                        // Immediately update the note in the list (optimistic update)
-                        if (!updatedNote.id?.startsWith("draft-")) {
-                          updateNoteOptimistic(updatedNote.id, { content });
-                        }
-
-                        // Simple debounced save that only makes API calls
-                        console.log(
-                          "Content changed, scheduling save in 1 second...",
-                        );
-                        clearTimeout((window as any).contentSaveTimeout);
-                        (window as any).contentSaveTimeout = setTimeout(
-                          async () => {
-                            const noteToSave = activeNoteRef.current;
-                            if (!noteToSave?.id || isSavingRef.current) return;
-
-                            const isDraft = noteToSave.id.startsWith("draft-");
-
-                            try {
-                              if (isDraft) {
-                                isSavingRef.current = true;
-                                setSaveStatus("saving");
-                                console.log(
-                                  "Creating new note:",
-                                  noteToSave.title,
-                                );
-                                // Create new note
-                                const response = await fetch("/api/notes", {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    title:
-                                      noteToSave.title?.trim() ||
-                                      "Untitled Note",
-                                    content: noteToSave.content,
-                                  }),
-                                });
-
-                                if (response.ok) {
-                                  const result = await response.json();
-                                  console.log(
-                                    "Note created successfully:",
-                                    result,
-                                  );
-                                  // Update refs without state changes
-                                  activeNoteIdRef.current = result.data.id;
-                                  activeNoteRef.current = result.data;
-                                  lastSavedContent.current = JSON.stringify(
-                                    result.data.content,
-                                  );
-
-                                  // Update state to reflect the new saved note (preserve current title)
-                                  const currentDisplayTitle = displayTitle;
-                                  setActiveNote({
-                                    ...result.data,
-                                    title: currentDisplayTitle,
-                                  });
-                                  // Don't update displayTitle to avoid clearing what user is typing
-
-                                  // Clear editing indicator and set save status
-                                  setIsEditing(false);
-                                  setSaveStatus("saved");
-
-                                  // Refresh notes list to ensure persistence
-                                  loadNotes();
-
-                                  // Clear typing flag after save completes
-                                  setTimeout(() => {
-                                    isUserTypingRef.current = false;
-                                    setSaveStatus("idle");
-                                  }, 2000);
-                                } else {
-                                  const errorData = await response.json();
-                                  console.error(
-                                    "Failed to create note:",
-                                    errorData,
-                                  );
-                                  setSaveStatus("error");
-                                  setTimeout(() => setSaveStatus("idle"), 3000);
-                                }
-                                isSavingRef.current = false;
-                              } else {
-                                console.log(
-                                  "Updating existing note:",
-                                  noteToSave.id,
-                                );
-                                // Update existing note
-                                const response = await fetch("/api/notes", {
-                                  method: "PUT",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    noteId: noteToSave.id,
-                                    title: noteToSave.title,
-                                    content: noteToSave.content,
-                                  }),
-                                });
-
-                                if (response.ok) {
-                                  const result = await response.json();
-                                  console.log(
-                                    "Note updated successfully:",
-                                    result,
-                                  );
-                                  lastSavedContent.current = JSON.stringify(
-                                    noteToSave.content,
-                                  );
-                                  // Clear editing indicator
-                                  setIsEditing(false);
-                                } else {
-                                  const errorData = await response.json();
-                                  console.error(
-                                    "Failed to update note:",
-                                    errorData,
-                                  );
-                                }
-                              }
-                            } catch (error) {
-                              console.error("Save failed:", error);
-                              isSavingRef.current = false;
-                            }
-                          },
-                          1000,
-                        );
-                      }}
-                      onEditorReady={handleEditorReady}
-                      editable={true}
-                      className="p-0 widget-flex-1"
-                    />
-                </div>
+                    // Schedule background save (won't interrupt typing)
+                    scheduleBackgroundSave();
+                  }}
+                  onBlur={() => {
+                    // Save immediately on blur - cancel any pending background save
+                    if (backgroundSaveTimeoutRef.current) {
+                      clearTimeout(backgroundSaveTimeoutRef.current);
+                    }
+                    saveCurrentNote();
+                  }}
+                  editable={true}
+                  className={notesStyles.notesEditorContainer}
+                />
               </div>
-            ) : (
-              <div className="widget-flex-center widget-full-height">
-                <p className="text-muted-foreground">
-                  Select or create a note.
-                </p>
-              </div>
-            )}
-          </div>
-        </ResizablePanels>
-      </div>
+            </div>
+          ) : (
+            <div className={notesStyles.notesEmptyState}>
+              <p className={notesStyles.notesEmptyText}>
+                Select or create a note.
+              </p>
+            </div>
+          )}
+        </div>
+      </ResizablePanels>
     </WidgetContainer>
   );
 }

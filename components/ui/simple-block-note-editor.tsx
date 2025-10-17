@@ -1,5 +1,6 @@
 "use client";
 
+// Icons replaced with ASCII placeholders
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/core/fonts/inter.css";
@@ -7,17 +8,16 @@ import "@blocknote/mantine/style.css";
 import "./block-note-custom.css";
 import { useEffect, useRef, memo, useState } from "react";
 import "./editor-placeholder.css";
-import type { BlockNoteEditor } from "@blocknote/core";
+// import type { BlockNoteEditor } from "@blocknote/core";
 import {
-  DefaultReactSuggestionItem,
-  getDefaultReactSlashMenuItems,
+  // DefaultReactSuggestionItem,
+  // getDefaultReactSlashMenuItems,
   FormattingToolbarController,
-  BlockTypeSelectItem,
+  // BlockTypeSelectItem,
 } from "@blocknote/react";
 import { MiniAiChat } from "./mini-ai-chat";
 import { useChatContext } from "@/hooks/use-chat-context";
-import BotIcon from "lucide-react/dist/esm/icons/bot";
-
+// 
 // Magic UI Animated Gradient Text Component
 function AnimatedGradientText({
   children,
@@ -72,13 +72,8 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
   const [dropdownPosition, setDropdownPosition] = useState({ x: 0, y: 0 });
 
   // Safely use chat context - will return null if not wrapped in ChatProvider
-  let chatContext;
-  try {
-    chatContext = useChatContext();
-  } catch (error) {
-    // Not wrapped in ChatProvider, that's okay
-    chatContext = null;
-  }
+  // Always call the hook, but handle missing context gracefully
+  const chatContext = useChatContext();
   const { setMessages: setMainChatMessages, openChat } = chatContext || {
     setMessages: () => {},
     openChat: () => {},
@@ -601,113 +596,7 @@ export const SimpleBlockNoteEditor = memo(function SimpleBlockNoteEditor({
 
   return (
     <div className={`flex flex-col h-full w-full ${className || ""}`}>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-          .formatting-dropdown {
-            position: relative;
-            display: inline-block;
-          }
-
-          .formatting-dropdown-btn {
-            background: none;
-            border: none;
-            color: #d2d2d2;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 2px;
-          }
-
-          .formatting-dropdown-btn:hover {
-            background-color: #3a3a3a;
-          }
-
-          .formatting-options {
-            position: fixed;
-            background-color: #2a2a2a;
-            min-width: 120px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 10000;
-            border-radius: 4px;
-            padding: 4px;
-            display: none;
-          }
-
-          .formatting-options.show {
-            display: block;
-          }
-
-          .formatting-options button {
-            width: 100%;
-            padding: 8px 12px;
-            text-align: left;
-            background: none;
-            border: none;
-            color: #d2d2d2;
-            cursor: pointer;
-            border-radius: 2px;
-            font-size: 14px;
-          }
-
-          .formatting-options button:hover {
-            background-color: #3a3a3a;
-          }
-
-          /* Toolbar Dividers */
-          .toolbar-divider {
-            width: 1px;
-            height: 20px;
-            background-color: #333;
-            margin: 0 12px;
-            border-radius: 1px;
-          }
-
-          /* Magic UI Animated Gradient Text */
-          .bg-gradient-to-r {
-            background-image: linear-gradient(to right, var(--tw-gradient-stops));
-          }
-
-          .from-violet-600 {
-            --tw-gradient-from: #7c3aed;
-            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(124, 58, 237, 0));
-          }
-
-          .via-indigo-600 {
-            --tw-gradient-stops: var(--tw-gradient-from), #4f46e5, var(--tw-gradient-to, rgba(79, 70, 229, 0));
-          }
-
-          .to-purple-600 {
-            --tw-gradient-to: #9333ea;
-          }
-
-          .bg-clip-text {
-            -webkit-background-clip: text;
-            background-clip: text;
-          }
-
-          .text-transparent {
-            color: transparent;
-          }
-
-          .animate-gradient {
-            background-size: 200% 200%;
-            animation: gradient 3s ease infinite;
-          }
-
-          @keyframes gradient {
-            0% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-        `,
-        }}
-      />
+      <link rel="stylesheet" href="/styles/simple-editor-toolbar.css" />
 
       <BlockNoteView
         editor={editor}

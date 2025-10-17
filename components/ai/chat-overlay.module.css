@@ -1,0 +1,47 @@
+.overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm;
+}
+
+.modal {
+  @apply relative w-full max-w-2xl mx-4;
+}
+
+.chatContainer {
+  @apply h-full flex flex-col bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl border border-neutral-800 shadow-2xl;
+}
+
+.header {
+  @apply flex-shrink-0 border-b border-neutral-800 p-4;
+}
+
+.headerContent {
+  @apply flex items-center justify-between;
+}
+
+.titleSection {
+  @apply flex items-center gap-3;
+}
+
+.title {
+  @apply text-lg font-semibold;
+}
+
+.actions {
+  @apply flex items-center gap-2;
+}
+
+.streamButton {
+  @apply text-xs px-2 h-7;
+}
+
+.iconButton {
+  @apply w-8 h-8;
+}
+
+.content {
+  @apply flex-1 p-0 min-h-0;
+}
+
+.icon {
+  @apply h-4 w-4;
+}

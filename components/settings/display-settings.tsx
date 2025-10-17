@@ -2,54 +2,55 @@
 
 import { LayoutToggle } from '@/components/ui/layout-toggle'
 import { useLayout } from '@/hooks/use-layout'
+import styles from './display-settings.module.css'
 
 export function DisplaySettings() {
   const { layout } = useLayout()
-  
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-white mb-3">Layout</h2>
-        <p className="text-sm text-white/40 mb-4">
+    <div className={styles.container}>
+      <div className={styles.section}>
+        <h2 className={styles.heading}>Layout</h2>
+        <p className={styles.description}>
           Choose how your widgets are arranged on the screen.
         </p>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div className="font-medium text-white">Current Layout</div>
-            <div className="text-sm text-white/40">
+
+        <div className={styles.layoutContainer}>
+          <div className={styles.layoutInfo}>
+            <div className={styles.layoutTitle}>Current Layout</div>
+            <div className={styles.layoutSubtitle}>
               {layout === 'two-row' ? 'Two-row grid layout' : 'Single-row layout'}
             </div>
           </div>
           <LayoutToggle variant="settings" />
         </div>
-        
-        <div className="space-y-3 text-sm text-white/40">
-          <div>
-            <strong className="text-white">Two-row layout:</strong> Notes and Tasks span the top half, with Weather, Recorder, Finance, and Schedule widgets arranged in the bottom row.
+
+        <div className={styles.detailsContainer}>
+          <div className={styles.detailItem}>
+            <strong className={styles.detailLabel}>Two-row layout:</strong> Notes and Tasks span the top half, with Weather, Recorder, Finance, and Schedule widgets arranged in the bottom row.
           </div>
-          <div>
-            <strong className="text-white">Single-row layout:</strong> Notes takes up most of the left side, with smaller widgets below it, and Tasks and Schedule on the right side.
+          <div className={styles.detailItem}>
+            <strong className={styles.detailLabel}>Single-row layout:</strong> Notes takes up most of the left side, with smaller widgets below it, and Tasks and Schedule on the right side.
           </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-lg font-medium text-white mb-3">Dock & Interface</h2>
-        <p className="text-sm text-white/40 mb-4">
+      <div className={styles.section}>
+        <h2 className={styles.heading}>Dock & Interface</h2>
+        <p className={styles.description}>
           Customize the floating dock and interface elements.
         </p>
-        <div className="text-sm text-white/40">
+        <div className={styles.comingSoon}>
           Additional dock and interface customization options coming soon.
         </div>
       </div>
 
-      <div>
-        <h2 className="text-lg font-medium text-white mb-3">Background</h2>
-        <p className="text-sm text-white/40 mb-4">
+      <div className={styles.section}>
+        <h2 className={styles.heading}>Background</h2>
+        <p className={styles.description}>
           Personalize your workspace background.
         </p>
-        <div className="text-sm text-white/40">
+        <div className={styles.comingSoon}>
           Background customization options coming soon.
         </div>
       </div>

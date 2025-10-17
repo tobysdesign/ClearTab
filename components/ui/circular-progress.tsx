@@ -1,7 +1,7 @@
 'use client'
 
-import { useId } from 'react'
 import { cn } from '@/lib/utils'
+import styles from './circular-progress.module.css'
 
 interface CircularProgressProps {
   value: number
@@ -49,7 +49,7 @@ export function CircularProgress({
           }}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className={styles.container}>
         <span className={cn("text-white", textClassName)}>
           {value}%
         </span>

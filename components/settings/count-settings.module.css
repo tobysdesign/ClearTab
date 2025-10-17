@@ -1,0 +1,346 @@
+.container {
+    @apply flex justify-center items-start p-4;
+}
+
+.cardContainer {
+    background: none;
+    border-radius: 24px;
+
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.currentSettings {
+    @apply mb-6 p-4 rounded-lg bg-white/5 border border-white/10;
+}
+
+.sectionLabel {
+    @apply text-xs text-white/50 uppercase tracking-wider mb-3;
+}
+
+.settingRow {
+    @apply flex items-center justify-between;
+}
+
+.settingLabel {
+    @apply text-sm text-white/70;
+}
+
+.settingValue {
+    @apply text-sm text-white font-medium;
+}
+
+.settingValueCapitalize {
+    @apply text-sm text-white font-medium capitalize;
+}
+
+.tabsContainer {
+    display: flex;
+    position: relative;
+    margin: -24px -24px 0 -24px;
+    gap: 8px;
+    padding: 0 40px;
+    padding-top: 16px;
+    background: none;
+}
+
+.browserTab {
+    position: relative;
+    padding: 12px 32px;
+    background: transparent;
+    border-radius: 24px 24px 0 0;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    flex: 1;
+    text-align: center;
+    gap: 16px;
+}
+
+.browserTab:hover:not(.activeTab) {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.browserTab.activeTab {
+    background: #232323;
+    color: white;
+    z-index: 3;
+    position: relative;
+}
+
+.browserTab.activeTab::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -24px;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(
+        circle at top right,
+        transparent 24px,
+        rgba(0, 0, 0, 0.8) 24px
+    );
+}
+
+.browserTab.activeTab::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -24px;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(
+        circle at top left,
+        transparent 24px,
+        rgba(0, 0, 0, 0.8) 24px
+    );
+}
+
+.browserTab:first-child {
+    margin-left: 0;
+}
+
+.browserTab:last-child {
+    margin-right: 0;
+}
+
+.tabContent {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px 24px 24px;
+    margin-top: 0;
+    background: #232323;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.titleInput {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.titleInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+.titleInput:focus {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.dateFields {
+    display: flex;
+    gap: 16px;
+}
+
+.dateField {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.previewContainer {
+    @apply mb-6 p-4 rounded-lg border transition-all;
+}
+
+.previewActive {
+    @apply bg-pink-500/10 border-pink-500/30;
+}
+
+.previewUpcoming {
+    @apply bg-blue-500/10 border-blue-500/30;
+}
+
+.previewDefault {
+    @apply bg-white/5 border-white/20;
+}
+
+.previewContent {
+    @apply flex items-start gap-3;
+}
+
+.previewIcon {
+    @apply w-4 h-4 mt-0.5 text-white/60 flex-shrink-0;
+}
+
+.previewTextContainer {
+    @apply flex-1 min-w-0;
+}
+
+.previewMessage {
+    @apply text-sm font-medium text-white;
+}
+
+.previewSubMessage {
+    @apply text-xs text-white/60 mt-1;
+}
+
+.previewDaysContainer {
+    @apply flex-shrink-0 text-right;
+}
+
+.previewDaysNumber {
+    @apply text-2xl font-bold text-white;
+}
+
+.previewDaysLabel {
+    @apply text-xs text-white/60;
+}
+
+.formContainer {
+    @apply space-y-4;
+}
+
+.gridTwoColumns {
+    @apply grid grid-cols-2 gap-4;
+}
+
+.fieldLabel {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.selectTrigger {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: white;
+    font-size: 14px;
+}
+
+.selectTrigger:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dateButton {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    color: white !important;
+    font-size: 14px !important;
+    height: auto !important;
+    width: 100% !important;
+}
+
+.dateButton:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Style the DateRangePicker specifically */
+.dateButton :global(button) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    color: white !important;
+    font-size: 14px !important;
+    height: auto !important;
+    width: 100% !important;
+}
+
+.dateButton :global(button:hover) {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.calendarContainer {
+    @apply absolute top-full left-0 mt-2 bg-black/90 border border-white/20 rounded-lg p-4 shadow-xl backdrop-blur-sm z-50;
+}
+
+.calendarWidget {
+    @apply text-white;
+}
+
+.validationContainer {
+    @apply mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30;
+    border-radius: 3px;
+}
+
+.validationText {
+    @apply text-xs text-yellow-200/90;
+}
+
+.saveButton {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px 24px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.saveButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fca5a5;
+    font-size: 14px;
+    text-align: center;
+}
+
+.success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #86efac;
+    font-size: 14px;
+    text-align: center;
+}
+
+.saveButtonContent {
+    @apply flex items-center justify-center gap-2;
+}
+
+.loadingSpinner {
+    @apply w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin;
+}
+
+.saveIcon {
+    @apply w-5 h-5;
+}
+
+.saveIconSmall {
+    @apply w-4 h-4;
+}

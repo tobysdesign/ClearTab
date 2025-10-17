@@ -1,0 +1,59 @@
+.container {
+  @apply relative min-h-screen overflow-hidden;
+}
+
+.overlay {
+  @apply absolute inset-0 z-10;
+}
+
+.imageContainer {
+  @apply relative w-full h-full flex items-center justify-center;
+}
+
+.previewImage {
+  @apply max-w-[90vw] max-h-[80vh] object-contain;
+}
+
+.drawerContent {
+  @apply h-auto bg-[#212121] border-t z-50 max-w-md mx-auto;
+}
+
+.drawerHeader {
+  @apply text-left pb-2 px-6;
+}
+
+.drawerTitle {
+  @apply text-2xl font-normal text-white;
+}
+
+.content {
+  @apply px-6 pb-6 space-y-6;
+}
+
+.description {
+  @apply space-y-4 text-left;
+}
+
+.descriptionText {
+  @apply text-base text-gray-300 leading-relaxed;
+}
+
+.buttonContainer {
+  @apply pt-4;
+}
+
+.googleButton {
+  @apply w-auto px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-full font-normal text-sm shadow-sm transition-all duration-200;
+}
+
+.googleIcon {
+  @apply mr-2;
+}
+
+.errorMessage {
+  @apply text-sm text-destructive mt-4;
+}
+
+.fullWidth {
+  @apply w-full;
+}

@@ -1,0 +1,7 @@
+.dockContainer {
+  @apply fixed bottom-4 left-1/2 -translate-x-1/2;
+}
+
+.icon {
+  @apply h-6 w-6;
+}

@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/drawer";
 import { CharcoalWave } from "@/components/ui/charcoal-wave";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import styles from "./page.module.css";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function LoginPage() {
 
     try {
       await signIn("google");
-    } catch (err) {
+    } catch {
       setError("Failed to sign in with Google. Please try again.");
     } finally {
       setIsLoading(false);
@@ -31,40 +33,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className={styles.container}>
       {/* Background shader */}
       <CharcoalWave />
 
       {/* Dummy widgets overlay */}
       <motion.div
-        className="absolute inset-0 z-10"
+        className={styles.overlay}
         initial={{ y: 0 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div className="relative w-full h-full flex items-center justify-center">
-          <img
+        <div className={styles.imageContainer}>
+          <Image
             src="/assets/dummy%20content.png"
             alt="Dashboard Preview"
-            className="max-w-[90vw] max-h-[80vh] object-contain"
+            width={1200}
+            height={800}
+            className={styles.previewImage}
+            unoptimized
           />
         </div>
       </motion.div>
 
       {/* Login drawer overlay */}
       <Drawer open={true} onOpenChange={() => {}} modal={false}>
-        <DrawerContent className="h-auto bg-[#212121] border-t z-50 max-w-md mx-auto">
-          <div className="w-full">
-            <DrawerHeader className="text-left pb-2 px-6">
-              <DrawerTitle className="text-2xl font-normal text-white">
+        <DrawerContent className={styles.drawerContent}>
+          <div className={styles.fullWidth}>
+            <DrawerHeader className={styles.drawerHeader}>
+              <DrawerTitle className={styles.drawerTitle}>
                 Just a tab away.
               </DrawerTitle>
             </DrawerHeader>
 
-            <div className="px-6 pb-6 space-y-6">
+            <div className={styles.content}>
               {/* Description */}
-              <div className="space-y-4 text-left">
-                <p className="text-base text-gray-300 leading-relaxed">
+              <div className={styles.description}>
+                <p className={styles.descriptionText}>
                   Capture thoughts, take notes, set tasks, see your schedules
                   combined for clarity. ClearTab+ boosts your productivity with
                   automation, insights and contextual synthesis with Ybot your
@@ -73,9 +78,9 @@ export default function LoginPage() {
               </div>
 
               {/* Google Sign In Button */}
-              <div className="pt-4">
+              <div className={styles.buttonContainer}>
                 <Button
-                  className="w-auto px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-300 rounded-full font-normal text-sm shadow-sm transition-all duration-200"
+                  className={styles.googleButton}
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
                   variant="outline"
@@ -84,7 +89,7 @@ export default function LoginPage() {
                     width="18"
                     height="18"
                     viewBox="0 0 18 18"
-                    className="mr-2"
+                    className={styles.googleIcon}
                   >
                     <g fill="none" fillRule="evenodd">
                       <path
@@ -110,7 +115,7 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <p className="text-sm text-destructive mt-4">{error}</p>
+                <p className={styles.errorMessage}>{error}</p>
               )}
             </div>
           </div>

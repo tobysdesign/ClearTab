@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bye Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #09090B;
+            color: #fafafa;
+            min-height: 100vh;
+        }
+
+        #root {
+            width: 100%;
+            height: 100vh;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 1.25rem;
+            color: #a1a1aa;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.bubble.css">
+</head>
+<body>
+    <div id="root">
+        <div class="loading">Loading dashboard...</div>
+    </div>
+
+    <!-- React and Next.js will be bundled here -->
+    <script src="/extension-bundle.js"></script>
+</body>
+</html>

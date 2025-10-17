@@ -294,12 +294,25 @@ export const userPreferences = pgTable(
     agentName: text("agent_name").notNull().default("Alex"),
     userName: text("user_name").notNull().default("User"),
     initialized: boolean("initialized").default(false).notNull(),
-    paydayDate: timestamp("payday_date", { mode: "date" }),
+
+    // Countdown widget settings
+    countdownTitle: text("countdown_title").default("Countdown"),
+    countdownMode: varchar("countdown_mode", {
+      enum: ["date-range", "manual-count"],
+    }).default("date-range"),
+    paydayDate: timestamp("payday_date", { mode: "date" }), // Legacy field for backwards compatibility
     paydayFrequency: varchar("payday_frequency", {
-      enum: ["weekly", "fortnightly", "monthly"],
-    }),
+      enum: ["weekly", "fortnightly", "monthly", "annual", "none"],
+    }).default("fortnightly"),
+    startDate: timestamp("start_date", { mode: "date" }),
+    endDate: timestamp("end_date", { mode: "date" }),
+    manualCount: integer("manual_count").default(0),
+
+    // Finance settings
     salary: integer("salary").default(0), // monthly salary before expenses
     expenses: integer("expenses").default(2000), // monthly expenses
+
+    // Other preferences
     location: text("location").default("San Francisco, CA"),
     openaiApiKey: text("openai_api_key"),
     theme: text("theme").default("dark"),

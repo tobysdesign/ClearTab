@@ -1,13 +1,13 @@
 'use client'
 
+// Icons replaced with ASCII placeholders
 import React from 'react'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatPanel } from './chat-panel'
 import { ShinyAiButton } from '../ui/shiny-ai-button'
 import { Button } from '@/components/ui/button'
-import X from 'lucide-react/dist/esm/icons/x'
-import MoreHorizontal from 'lucide-react/dist/esm/icons/more-horizontal'
+import styles from './chat-overlay.module.css'
 
 function ChatOverlay() {
   const {
@@ -43,44 +43,44 @@ function ChatOverlay() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className={styles.overlay}
       onClick={closeChat}
     >
           <motion.div
             layoutId="ai-chat-modal"
-          className="relative w-full max-w-2xl mx-4"
+          className={styles.modal}
             style={{
               height: '70vh',
               maxHeight: '750px',
             }}
         onClick={(e) => e.stopPropagation()}
       >
-          <motion.div className="h-full flex flex-col bg-gradient-to-b from-[#151515] to-[#121212] rounded-3xl border border-neutral-800 shadow-2xl">
-            <div className="flex-shrink-0 border-b border-neutral-800 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+          <motion.div className={styles.chatContainer}>
+            <div className={styles.header}>
+              <div className={styles.headerContent}>
+                <div className={styles.titleSection}>
               <ShinyAiButton layoutId="ai-chat-icon-transform" onClick={() => {}} />
-                  <h2 className="text-lg font-semibold">AI Chat</h2>
+                  <h2 className={styles.title}>AI Chat</h2>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className={styles.actions}>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={toggleStreamingMode}
-                    className="text-xs px-2 h-7"
+                    className={styles.streamButton}
                   >
                     {isStreamingMode ? 'Stream: ON' : 'Stream: OFF'}
                   </Button>
-                  <Button variant="ghost" size="icon" className="w-8 h-8">
-                    <MoreHorizontal className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className={styles.iconButton}>
+                    <span className={styles.icon}>•</span>
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={closeChat} className="w-8 h-8">
-                    <X className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={closeChat} className={styles.iconButton}>
+                    <span className={styles.icon}>×</span>
                   </Button>
                 </div>
         </div>
             </div>
-            <div className="flex-1 p-0 min-h-0">
+            <div className={styles.content}>
               <ChatPanel
                 messages={messages}
                 onUserInput={handleUserInput}

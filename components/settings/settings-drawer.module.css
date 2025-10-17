@@ -1,0 +1,89 @@
+/* Settings Drawer Component Styles */
+
+.drawerTrigger {
+  @apply rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80;
+}
+
+.settingsIcon {
+  @apply h-4 w-4 group-hover:rotate-45 transition-transform duration-300;
+}
+
+.drawerContent {
+  @apply max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0;
+}
+
+.container {
+  @apply flex flex-col h-[85vh];
+}
+
+.grabHandle {
+  @apply flex justify-center pt-2 cursor-grab active:cursor-grabbing;
+}
+
+.grabBar {
+  @apply w-12 h-1.5 rounded-full bg-[#242424];
+}
+
+.header {
+  @apply flex-shrink-0 flex items-center justify-between px-6 py-4;
+}
+
+.title {
+  @apply text-lg font-medium text-white;
+}
+
+.closeButton {
+  @apply rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/10 transition-colors;
+}
+
+.closeIcon {
+  @apply h-4 w-4 text-[#bbbbbb];
+}
+
+.scrollableContent {
+  @apply flex flex-1 overflow-hidden;
+}
+
+.sidebar {
+  @apply w-64 overflow-y-auto;
+}
+
+.nav {
+  @apply p-4;
+}
+
+.navList {
+  @apply space-y-2;
+}
+
+.navButton {
+  @apply w-full text-left p-3 transition-colors rounded;
+}
+
+.navButtonActive {
+  @apply bg-black/30 text-white;
+}
+
+.navButtonInactive {
+  @apply text-[#bbbbbb] hover:text-white hover:bg-black/20;
+}
+
+.navButtonContent {
+  @apply flex flex-col;
+}
+
+.navButtonTitle {
+  @apply font-medium text-sm;
+}
+
+.navButtonDescription {
+  @apply text-xs text-[#5A5A5A] mt-1;
+}
+
+.mainContent {
+  @apply flex-1 overflow-y-auto;
+}
+
+.contentPanel {
+  @apply p-6 rounded-lg rounded-bl-none rounded-br-none mr-[12px] bg-[#1B1B1B];
+}

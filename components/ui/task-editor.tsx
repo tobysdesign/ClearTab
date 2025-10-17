@@ -4,8 +4,8 @@ import { useCreateBlockNote } from "@blocknote/react"
 import { BlockNoteView } from "@blocknote/mantine"
 import "@blocknote/core/fonts/inter.css"
 import "@blocknote/mantine/style.css"
-import { useEffect, useRef, memo, useState } from 'react'
-import type { BlockNoteEditor } from "@blocknote/core"
+import { useEffect, useRef, memo } from 'react'
+// import type { BlockNoteEditor } from "@blocknote/core"
 import { Block } from "@blocknote/core"
 
 interface TaskEditorProps {
@@ -22,7 +22,7 @@ export const TaskEditor = memo(function TaskEditor({
   placeholder = "Describe the task...",
   className,
   style,
-  readOnly = false
+  readOnly: _readOnly = false
 }: TaskEditorProps & { style?: React.CSSProperties }) {
   const changeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastContentRef = useRef<string>('')

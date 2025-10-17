@@ -52,8 +52,11 @@ npm run typecheck    # TypeScript checking
 - **Database**: PostgreSQL with Drizzle ORM
 - **Styling**: Tailwind CSS with CSS custom properties for theming
 - **Auth**: NextAuth.js with session management
-- **AI Integration**: OpenAI API for chat and productivity features
+- **AI Integration**: Chrome Gemini Nano (built-in local AI)
 - **State Management**: Zustand for client state, React Query for server state
+- **Icons**: Custom SVG components (optimized for Chrome extension)
+- **Editor**: Quill with bubble theme (replacing BlockNote for performance)
+- **Date Utilities**: Native JavaScript Date methods (replacing date-fns)
 
 ### Key Directories
 
@@ -66,8 +69,9 @@ npm run typecheck    # TypeScript checking
 - **`/ui`**: Base UI components (buttons, dialogs, forms, dock, widgets)
 - **`/dashboard`**: Dashboard-specific components (bento grid, dock content)
 - **`/settings`**: Settings-related components
-- **`/widgets`**: Widget implementations (tasks, notes, weather, finance, countdown)
+- **`/widgets`**: Widget implementations (tasks, notes, weather, countdown)
 - **`/ai`**: AI chat overlay and integration components
+- **`/icons`**: Custom SVG icon components (replacing lucide-react/react-icons)
 
 #### `/server` - Backend Services
 - **Database**: Drizzle ORM setup and migrations
@@ -81,10 +85,16 @@ Claude Code Web UI for development - can be ignored for main application work.
 - **`schema.ts`**: Drizzle database schema with Zod validation
 - **Calendar types and utilities**
 
+#### `/lib` - Utility Libraries
+- **`date-utils.ts`**: Native JavaScript date utilities (replacing date-fns)
+- **`google-api-service.ts`**: Optimized Google APIs client (replacing full googleapis)
+- **`supabase-lite.ts`**: Lightweight Supabase client for extensions
+- **`ai-service.ts`**: Chrome Gemini Nano integration for local AI processing
+
 ### Database Schema (Drizzle + PostgreSQL)
 - **Users & Authentication**: NextAuth.js tables
-- **Notes**: Rich text content (BlockNote editor format)
-- **Tasks**: Due dates, priorities, completion status
+- **Notes**: Rich text content (Quill Delta format)
+- **Tasks**: Due dates, important (boolean), status
 - **Settings**: User preferences, API keys, display settings
 - **Memory Storage**: AI conversation memory and context
 
@@ -101,6 +111,18 @@ Claude Code Web UI for development - can be ignored for main application work.
 2. New components should follow established patterns and be added to style guide
 3. Use Vaul for modals, drawers, and popovers
 4. Avoid long inline Tailwind classes - use CSS classes with `@apply` or reusable components
+
+### Icon Usage
+- **DO**: Use custom SVG components from `/components/icons/`
+- **DON'T**: Import from lucide-react or react-icons (removed for performance)
+- **Pattern**: `import { IconName } from '@/components/icons'`
+- **Performance**: Tree-shakeable, zero bundle overhead
+
+### Date Handling
+- **DO**: Use utilities from `/lib/date-utils.ts`
+- **DON'T**: Import from date-fns (removed for performance)
+- **Native**: Prefer `Intl.DateTimeFormat`, `Date` methods when possible
+- **Performance**: 38MB → ~2KB bundle savings
 
 ### Layout and Overflow
 - Viewport should not be exceeded
@@ -123,18 +145,22 @@ Claude Code Web UI for development - can be ignored for main application work.
 - Environment variable `IS_EXTENSION=true` triggers static export
 - Different asset handling and CSP for extension environment
 - Popup interface matches web app functionality
+- Lightweight dependencies optimized for <50MB bundle size
+- Uses custom SVG icons, native date utilities, markdown editor
 
 ## Environment Variables
 
 ### Required
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Session encryption key
-- `OPENAI_API_KEY`: OpenAI API for AI features
 
 ### Optional Integrations
-- `MEM0_API_KEY`: AI memory service
 - `TOMORROW_IO_API_KEY`: Weather data
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: Calendar integration
+
+### Removed Dependencies
+- ~~`OPENAI_API_KEY`~~: Replaced with Chrome Gemini Nano (no API key needed)
+- ~~`MEM0_API_KEY`~~: Memory handled locally with Chrome storage
 
 ## Testing Strategy
 
@@ -152,6 +178,8 @@ Claude Code Web UI for development - can be ignored for main application work.
 - Static export build (`npm run build-extension`)
 - Manifest v3 configuration
 - Extension-specific security policies
+- Optimized for performance: <50MB bundle, fast loading
+- Uses lightweight alternatives to heavy dependencies
 
 ## Common Development Tasks
 
@@ -167,12 +195,22 @@ Claude Code Web UI for development - can be ignored for main application work.
 3. Run migration: `npm run migrate`
 
 ### AI Feature Integration
-- Use existing AI service patterns in `/lib/actions/ai.ts`
+- Use Chrome Gemini Nano via `/lib/ai-service.ts`
 - Context should include relevant user data (notes, tasks, calendar)
-- Follow established prompt patterns for consistency
+- Local AI processing for privacy and performance
+- No external API dependencies or keys required
 
 ## Performance Considerations
+
+### Chrome Extension Optimization (Priority)
+- **Bundle size target**: <50MB (down from 583MB dependencies)
+- **Custom SVG icons**: Replacing lucide-react (41MB) + react-icons (83MB)
+- **Native date utilities**: Replacing date-fns (38MB) with ~2KB utilities
+- **Lightweight editor**: Replacing BlockNote (29MB) with Quill (~500KB)
+- **Optimized clients**: Lightweight Supabase/Google API clients
+
+### General Performance
 - Image optimization (WebP/AVIF) - disabled for extension builds
 - Code splitting for animations and vendor chunks
 - React Query for efficient data fetching and caching
-- Package optimization for Tanstack Query and Framer Motion
+- Dynamic imports for heavy dependencies (googleapis)

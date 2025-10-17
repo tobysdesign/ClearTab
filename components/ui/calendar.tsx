@@ -1,11 +1,10 @@
+// Icons replaced with ASCII placeholders
 import * as React from "react"
-import ChevronDownIcon from 'lucide-react/dist/esm/icons/chevron-down'
-import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left'
-import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right'
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+import styles from './calendar.module.css'
 
 function Calendar({
   className,
@@ -129,28 +128,27 @@ function Calendar({
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation === "left") {
             return (
-              <ChevronLeftIcon className={cn("size-4 text-white", className)} {...props} />
+              <span className={cn("size-4 text-white", className)} {...props}>•</span>
             )
           }
 
           if (orientation === "right") {
             return (
-              <ChevronRightIcon
+              <span
                 className={cn("size-4 text-white", className)}
-                {...props}
-              />
+                {...props}>•</span>
             )
           }
 
           return (
-            <ChevronDownIcon className={cn("size-4 text-white", className)} {...props} />
+            <span className={cn("size-4 text-white", className)} {...props}>•</span>
           )
         },
         DayButton: CalendarDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
-              <div className="flex size-[--cell-size] items-center justify-center text-center text-[#8c8c8c]">
+              <div className={styles.weekNumber}>
                 {children}
               </div>
             </td>

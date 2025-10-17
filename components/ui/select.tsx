@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import styles from './select.module.css'
 
 const Select = React.forwardRef<
   HTMLSelectElement,
@@ -14,7 +15,7 @@ const Select = React.forwardRef<
     <div className="relative">
       <select
         className={cn(
-          'h-10 w-full appearance-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          styles.select,
           className
         )}
         ref={ref}
@@ -24,9 +25,9 @@ const Select = React.forwardRef<
       >
         {children}
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+      <div className={styles.iconContainer}>
         <svg
-          className="h-4 w-4 text-white/40"
+          className={styles.icon}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -48,7 +49,7 @@ Select.displayName = 'Select'
 const SelectTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, children, ...props }, ref) => {
+>(({ className: _className, children: _children, ..._props }, _ref) => {
     // This component is a placeholder to maintain prop compatibility
     // with the previous Radix-based component. It does not render anything itself.
     // The native <select> handles the trigger.
@@ -60,7 +61,7 @@ SelectTrigger.displayName = 'SelectTrigger'
 const SelectValue = React.forwardRef<
     HTMLSpanElement,
     React.HTMLAttributes<HTMLSpanElement> & { placeholder?: string }
->(({ placeholder, ...props }, ref) => {
+>(({ placeholder: _placeholder, ..._props }, _ref) => {
     // This component is a placeholder to maintain prop compatibility
     // with the previous Radix-based component. The native <select> shows the value.
     // The placeholder is handled by a disabled <option> in the Select component.
@@ -71,7 +72,7 @@ SelectValue.displayName = 'SelectValue'
 const SelectContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ children, ...props }, ref) => {
+>(({ children, ..._props }, _ref) => {
     // This is not a direct wrapper anymore. The children (SelectItems) will be direct children of the native select.
     // This component is being maintained for API compatibility.
   return <>{children}</>
@@ -90,14 +91,14 @@ SelectGroup.displayName = 'SelectGroup'
 const SelectItem = React.forwardRef<
   HTMLOptionElement,
   React.OptionHTMLAttributes<HTMLOptionElement>
->(({ className, children, ...props }, ref) => {
+>(({ className: _className, children: _children, ...props }, ref) => {
   return (
     <option
       ref={ref}
-      className={cn('bg-background text-foreground', className)}
+      className={cn(styles.option, _className)}
       {...props}
     >
-      {children}
+      {_children}
     </option>
   )
 })

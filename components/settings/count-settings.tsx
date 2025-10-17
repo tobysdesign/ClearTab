@@ -1,186 +1,393 @@
-'use client'
+"use client";
 
-import { Label } from '@/components/ui/label'
+// Icons replaced with ASCII placeholders
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { Button } from '@/components/ui/button'
-import { format, getDay } from 'date-fns'
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar'
-import { cn } from '@/lib/utils'
-import { useEffect, useState } from 'react'
-import { useToast } from '@/components/ui/use-toast'
-import { getPaydaySettings, savePaydaySettings } from '@/lib/actions/settings'
-import { useQueryClient } from '@tanstack/react-query'
-import Image from 'next/image'
+} from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Button } from "@/components/ui/button";
+import { format, differenceInDays, startOfDay } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { getPaydaySettings, savePaydaySettings } from "@/lib/actions/settings";
+import { useQueryClient } from "@tanstack/react-query";
+import styles from "./count-settings.module.css";
 
-const weekDays = [
-  'Sunday',
-  'Monday', 
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-]
+const _weekDays = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 
 export function CountSettings() {
-  const [frequency, setFrequency] = useState<'weekly' | 'fortnightly' | 'monthly'>('fortnightly')
-  const [dayOfWeek, setDayOfWeek] = useState<number>(0) // Default to Sunday
-  const [countDate, setCountDate] = useState<Date>()
-  const [showCalendar, setShowCalendar] = useState(false)
+  const [activeTab, setActiveTab] = useState<"recurring" | "start-end">(
+    "start-end",
+  );
+  const [frequency, setFrequency] = useState<
+    "weekly" | "fortnightly" | "monthly" | "annual"
+  >("weekly");
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [countdownTitle, setCountdownTitle] = useState<string>("Countdown");
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [hasAttemptedSave, setHasAttemptedSave] = useState(false);
+  const [currentlySaved, setCurrentlySaved] = useState<{
+    countdownTitle: string;
+    mode: "recurring" | "start-end";
+    frequency?: string;
+    startDate?: Date;
+    endDate?: Date;
+  } | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     async function fetchCountSettings() {
-      const result = await getPaydaySettings({} as any)
+      const result = await getPaydaySettings({} as Record<string, never>);
       if (result.data) {
-        const { paydayDate: date, paydayFrequency: freq } = result.data
-        if (freq) setFrequency(freq as 'weekly' | 'fortnightly' | 'monthly')
-        if (date) {
-          const loadedDate = new Date(date)
-          setCountDate(loadedDate)
-          setDayOfWeek(getDay(loadedDate))
+        const {
+          paydayDate,
+          paydayFrequency: freq,
+          countdownTitle: title,
+          startDate: sDate,
+          endDate: eDate,
+        } = result.data;
+
+        if (freq)
+          setFrequency(freq as "weekly" | "fortnightly" | "monthly" | "annual");
+        if (title) setCountdownTitle(title);
+
+        // Determine tab based on available data
+        if (sDate && eDate) {
+          setActiveTab("start-end");
+          const start = new Date(sDate);
+          const end = new Date(eDate);
+          setStartDate(start);
+          setEndDate(end);
+          setDateRange({ from: start, to: end });
+
+          // Set currently saved state
+          setCurrentlySaved({
+            countdownTitle: title || "Countdown",
+            mode: "start-end",
+            startDate: new Date(sDate),
+            endDate: new Date(eDate),
+          });
+        } else if (paydayDate && freq) {
+          setActiveTab("recurring");
+          setStartDate(new Date(paydayDate));
+
+          // Set currently saved state
+          setCurrentlySaved({
+            countdownTitle: title || "Countdown",
+            mode: "recurring",
+            frequency: freq,
+            startDate: new Date(paydayDate),
+          });
         }
       }
     }
-    fetchCountSettings()
-  }, [])
+    fetchCountSettings();
+  }, []);
 
   const handleSaveCountSettings = async () => {
-    if (!countDate) {
+    setHasAttemptedSave(true);
+
+    // Simple validation
+    if (activeTab === "start-end" && (!startDate || !endDate)) {
       toast({
-        title: 'Error',
-        description: 'Please select a count date.',
-        variant: 'destructive',
-      })
-      return
+        title: "Error",
+        description: "Please select both start and end dates.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (activeTab === "recurring" && !startDate) {
+      toast({
+        title: "Error",
+        description: "Please select a starting date.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
+    setSaveSuccess(false);
     try {
-      const result = await savePaydaySettings({
-        paydayDate: countDate,
-        paydayFrequency: frequency,
-      })
+      const settingsToSave = {
+        countdownTitle: countdownTitle.trim() || "Countdown",
+        countdownMode: activeTab === "start-end" ? "date-range" : "date-range",
+        paydayFrequency: activeTab === "start-end" ? "none" : frequency,
+        ...(activeTab === "start-end"
+          ? {
+              startDate,
+              endDate,
+              paydayDate: null,
+            }
+          : {
+              paydayDate: startDate,
+              startDate: null,
+              endDate: null,
+            }),
+      };
+
+      const result = await savePaydaySettings(settingsToSave);
 
       if (result.serverError) {
         toast({
-          title: 'Error',
+          title: "Error",
           description: result.serverError,
-          variant: 'destructive',
-        })
+          variant: "destructive",
+        });
       } else {
+        // Update currently saved state
+        setCurrentlySaved({
+          countdownTitle: countdownTitle.trim() || "Countdown",
+          mode: activeTab,
+          frequency: activeTab === "recurring" ? frequency : undefined,
+          startDate,
+          endDate,
+        });
+
+        setSaveSuccess(true);
         toast({
-          title: 'Success',
-          description: 'Count settings updated successfully',
-        })
-        queryClient.invalidateQueries({ queryKey: ['payday-settings'] })
+          title: "Success",
+          description: "Countdown settings saved successfully",
+        });
+
+        // Invalidate query to update widget
+        await queryClient.invalidateQueries({ queryKey: ["payday-settings"] });
+
+        // Reset success state after 3 seconds
+        setTimeout(() => setSaveSuccess(false), 3000);
       }
-    } catch (error) {
+    } catch {
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      })
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-  
-  const handleFrequencyChange = (value: 'weekly' | 'fortnightly' | 'monthly') => {
-    setFrequency(value)
-    // Keep the selected date for all frequency types
-  }
+  };
+
+  const handleFrequencyChange = useCallback(
+    (value: "weekly" | "fortnightly" | "monthly" | "annual") => {
+      setFrequency(value);
+    },
+    [],
+  );
+
+  const handleTabChange = useCallback((tab: "recurring" | "start-end") => {
+    setActiveTab(tab);
+  }, []);
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (range?.from && range?.to) {
+      setStartDate(range.from);
+      setEndDate(range.to);
+    } else if (range?.from) {
+      setStartDate(range.from);
+      setEndDate(undefined);
+    } else {
+      setStartDate(undefined);
+      setEndDate(undefined);
+    }
+  };
+
+  // Calculate preview of countdown
+  const countdownPreview = useMemo(() => {
+    if (activeTab === "start-end") {
+      if (!startDate || !endDate) return null;
+      const today = startOfDay(new Date());
+      const daysUntilStart = differenceInDays(startOfDay(startDate), today);
+      const daysUntilEnd = differenceInDays(startOfDay(endDate), today);
+      const totalDuration = differenceInDays(
+        startOfDay(endDate),
+        startOfDay(startDate),
+      );
+
+      if (daysUntilEnd < 0) {
+        return { status: "ended", message: "Event has ended", days: 0 };
+      } else if (daysUntilStart > 0) {
+        return {
+          status: "upcoming",
+          message: `${daysUntilStart} days until start`,
+          days: daysUntilStart,
+        };
+      } else {
+        return {
+          status: "active",
+          message: `Event in progress`,
+          subMessage: `${daysUntilEnd} days remaining`,
+          days: daysUntilEnd,
+        };
+      }
+    } else {
+      // Recurring mode
+      if (!startDate) return null;
+      const today = startOfDay(new Date());
+      const nextOccurrence = startOfDay(startDate);
+
+      if (nextOccurrence < today) {
+        return {
+          status: "recurring",
+          message: "Recurring countdown active",
+          subMessage: `Next occurrence will be calculated`,
+          days: 0,
+        };
+      } else {
+        const daysUntil = differenceInDays(nextOccurrence, today);
+        return {
+          status: "recurring",
+          message: `${daysUntil} days until next occurrence`,
+          subMessage: `Repeats ${frequency}`,
+          days: daysUntil,
+        };
+      }
+    }
+  }, [activeTab, startDate, endDate, frequency]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-medium text-white mb-3">Count Settings</h2>
-        <p className="text-sm text-white mb-4">
-          Configure your counter.
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        {/* Recurrence Section */}
-        <div>
-          <h3 className="text-lg font-medium text-white mb-4">Reuccrence</h3>
-          <Select
-            value={frequency}
-            onValueChange={handleFrequencyChange}
-          >
-            <SelectTrigger className="bg-[#111111] border border-[#2A2A2A] text-white">
-              <SelectValue placeholder="Select frequency" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="weekly">Weekly</SelectItem>
-              <SelectItem value="fortnightly">Fortnightly</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Start On Section */}
-        <div>
-          <h3 className="text-lg font-medium text-white mb-4">Start on</h3>
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowCalendar(!showCalendar)}
-              className={cn(
-                'justify-start text-left font-normal bg-[#111111] border border-[#2A2A2A] text-white hover:bg-[#1A1A1A] w-full',
-                !countDate && 'text-400/40'
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {countDate ? format(countDate, frequency === 'monthly' ? 'do' : 'PPP') : 'Pick a date'}
-            </Button>
-            {showCalendar && (
-              <div className="rounded-md border bg-popover p-4">
-                <Calendar
-                  mode="single"
-                  selected={countDate}
-                  onSelect={date => {
-                    setCountDate(date)
-                    setShowCalendar(false)
-                  }}
-                  initialFocus
-                />
-              </div>
+    <div className={styles.container}>
+      <div className={styles.cardContainer}>
+        {/* Browser-style Tabs */}
+        <div className={styles.tabsContainer}>
+          <div
+            className={cn(
+              styles.browserTab,
+              activeTab === "recurring" && styles.activeTab,
             )}
+            onClick={() => handleTabChange("recurring")}
+          >
+            <span>Single</span>
+          </div>
+          <div
+            className={cn(
+              styles.browserTab,
+              activeTab === "start-end" && styles.activeTab,
+            )}
+            onClick={() => handleTabChange("start-end")}
+          >
+            <span>Range</span>
           </div>
         </div>
 
-        {/* Save Button */}
-        <Button
-          onClick={handleSaveCountSettings}
-          disabled={isSubmitting}
-          className="w-full bg-white text-black hover:bg-white/40 rounded-full py-3"
-        >
-          {isSubmitting ? (
-            <div className="relative w-[45px] h-[25px] mr-2">
-              <Image
-                src="/assets/loading.gif"
-                alt="Loading..."
-                fill
-                className="object-contain"
-                sizes="100vw"
-                priority
-              />
+        <div className={styles.tabContent}>
+          {/* Title Input - common to both tabs */}
+          <div className={styles.field}>
+            <p className={styles.fieldLabel}>COUNTING DOWN TO:</p>
+            <Input
+              value={countdownTitle}
+              onChange={(e) => setCountdownTitle(e.target.value)}
+              placeholder="example: My birthday"
+              className={styles.titleInput}
+            />
+          </div>
+
+          {/* Tab Content */}
+          <div
+            style={{ display: activeTab === "recurring" ? "block" : "none" }}
+          >
+            <div className={styles.dateFields}>
+              <div className={styles.dateField}>
+                <p className={styles.fieldLabel}>DATE RANGE</p>
+                <DatePicker
+                  date={startDate}
+                  onSelect={setStartDate}
+                  placeholder="22/07/25"
+                  className={styles.dateButton}
+                />
+              </div>
+              <div className={styles.dateField}>
+                <p className={styles.fieldLabel}>RECUR</p>
+                <Select value={frequency} onValueChange={handleFrequencyChange}>
+                  <SelectTrigger className={styles.selectTrigger}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="fortnightly">Fortnightly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          ) : null}
-          {isSubmitting ? 'Saving...' : 'Save Settings'}
-        </Button>
+          </div>
+
+          <div
+            style={{ display: activeTab === "start-end" ? "block" : "none" }}
+          >
+            <div className={styles.dateFields}>
+              <div className={styles.dateField}>
+                <p className={styles.fieldLabel}>START</p>
+                <DatePicker
+                  date={startDate}
+                  onSelect={setStartDate}
+                  placeholder="22/07/25"
+                  className={styles.dateButton}
+                />
+              </div>
+              <div className={styles.dateField}>
+                <p className={styles.fieldLabel}>END</p>
+                <DatePicker
+                  date={endDate}
+                  onSelect={setEndDate}
+                  placeholder="23/07/25"
+                  className={styles.dateButton}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Validation Feedback */}
+          {hasAttemptedSave &&
+            activeTab === "start-end" &&
+            (!startDate || !endDate) && (
+              <div className={styles.error}>
+                Please select both start and end dates
+              </div>
+            )}
+          {hasAttemptedSave && activeTab === "recurring" && !startDate && (
+            <div className={styles.error}>Please select a starting date</div>
+          )}
+
+          {/* Save Button */}
+          <Button
+            onClick={handleSaveCountSettings}
+            disabled={isSubmitting}
+            className={styles.saveButton}
+          >
+            {isSubmitting ? "Saving..." : "Save"}
+          </Button>
+
+          {/* Success Message */}
+          {saveSuccess && (
+            <div className={styles.success}>
+              Countdown settings saved successfully!
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  )
+  );
 }

@@ -6,20 +6,54 @@ import { eq, desc, and } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Development bypass for testing
+    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let allTasks;
+
+    if (devBypass) {
+      // Return mock tasks for development
+      console.log('🔧 Development mode: Bypassing auth for tasks API');
+      allTasks = [
+        {
+          id: '1',
+          title: 'Review dashboard functionality',
+          completed: false,
+          isCompleted: false,
+          priority: 'high',
+          dueDate: new Date(Date.now() + 24*60*60*1000).toISOString(),
+          userId: '00000000-0000-4000-8000-000000000000',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          title: 'Test extension build',
+          completed: true,
+          isCompleted: true,
+          priority: 'medium',
+          dueDate: null,
+          userId: '00000000-0000-4000-8000-000000000000',
+          createdAt: new Date(Date.now() - 24*60*60*1000).toISOString(),
+          updatedAt: new Date(Date.now() - 24*60*60*1000).toISOString()
+        }
+      ];
+    } else {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      allTasks = await db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.userId, user.id))
+        .orderBy(desc(tasks.createdAt));
     }
-
-    const allTasks = await db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.userId, user.id))
-      .orderBy(desc(tasks.createdAt));
 
     return NextResponse.json({ data: allTasks });
   } catch (error) {

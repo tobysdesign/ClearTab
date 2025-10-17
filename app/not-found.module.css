@@ -1,0 +1,19 @@
+.container {
+  @apply flex flex-col items-center justify-center min-h-screen p-4;
+}
+
+.content {
+  @apply text-center space-y-4;
+}
+
+.title {
+  @apply text-2xl font-bold;
+}
+
+.message {
+  @apply text-muted-foreground;
+}
+
+.buttonContainer {
+  @apply flex gap-2;
+}

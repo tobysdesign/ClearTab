@@ -1,0 +1,27 @@
+/* Scroll Shadows Component Styles */
+
+.container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.topShadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, var(--shadow-color), transparent);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.bottomShadow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, var(--shadow-color), transparent);
+  z-index: 10;
+  pointer-events: none;
+}

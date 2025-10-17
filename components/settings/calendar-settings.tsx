@@ -14,7 +14,8 @@ import {
 import type { ConnectedAccountWithEmail } from '@/shared/types'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
+import styles from './calendar-settings.module.css'
 
 interface Calendar {
   id: string
@@ -28,11 +29,24 @@ export function CalendarSettings() {
   const [calendars, setCalendars] = useState<Calendar[]>([])
   const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [loadingCalendars, setLoadingCalendars] = useState(true)
+  const [supabase, setSupabase] = useState<any>(null)
   const queryClient = useQueryClient()
 
-  const supabase = createClient()
+  // Initialize Supabase client based on environment
+  useEffect(() => {
+    const initSupabase = async () => {
+      const client = await getSupabaseClient()
+      setSupabase(client)
+    }
+    initSupabase()
+  }, [])
 
   const handleGoogleSignIn = async () => {
+    if (!supabase) {
+      console.warn('No Supabase client available for Google sign in (extension mode)')
+      return
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -127,9 +141,9 @@ export function CalendarSettings() {
       <CardHeader>
         <CardTitle>Manage Calendars</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex justify-between items-center">
-          <p className="text-muted-foreground">
+      <CardContent className={styles.spaceY6}>
+        <div className={styles.flexJustifyBetween}>
+          <p className={styles.textMuted}>
             Connect and manage your Google Calendars.
           </p>
           <Button onClick={handleGoogleSignIn}>
@@ -138,23 +152,23 @@ export function CalendarSettings() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+          <div className={styles.spaceY4}>
+            <Skeleton className={styles.skeletonFull} />
+            <Skeleton className={styles.skeletonFull} />
           </div>
         ) : (
-          <Accordion type="multiple" className="w-full" defaultValue={accounts.map(a => a.id)}>
+          <Accordion type="multiple" className={styles.accordionFull} defaultValue={accounts.map(a => a.id)}>
             {accounts.map((account) => (
               <AccordionItem value={account.id} key={account.id}>
                 <AccordionTrigger>{account.email}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="space-y-4">
+                  <div className={styles.spaceY4}>
                     {calendars
                       .filter((cal) => cal.connectedAccountId === account.id)
                       .map((cal) => (
                         <div
                           key={cal.id}
-                          className="flex items-center justify-between"
+                          className={styles.flexItemsJustifyBetween}
                         >
                           <Label htmlFor={cal.id}>{cal.summary}</Label>
                           <Switch
@@ -174,7 +188,7 @@ export function CalendarSettings() {
                     {calendars.filter(
                       (cal) => cal.connectedAccountId === account.id,
                     ).length === 0 && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className={styles.textSmMuted}>
                         No calendars found for this account.
                       </p>
                     )}

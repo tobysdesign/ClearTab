@@ -1,0 +1,49 @@
+/* Display Settings Component Styles */
+
+.container {
+  @apply space-y-6;
+}
+
+.section {
+  /* Base section styling - no specific classes needed as it's just a div */
+}
+
+.heading {
+  @apply text-lg font-medium text-white mb-3;
+}
+
+.description {
+  @apply text-sm text-white/40 mb-4;
+}
+
+.layoutContainer {
+  @apply flex items-center justify-between mb-4;
+}
+
+.layoutInfo {
+  /* Base container for layout info - no specific classes needed */
+}
+
+.layoutTitle {
+  @apply font-medium text-white;
+}
+
+.layoutSubtitle {
+  @apply text-sm text-white/40;
+}
+
+.detailsContainer {
+  @apply space-y-3 text-sm text-white/40;
+}
+
+.detailItem {
+  /* Base container for detail items - no specific classes needed */
+}
+
+.detailLabel {
+  @apply text-white;
+}
+
+.comingSoon {
+  @apply text-sm text-white/40;
+}

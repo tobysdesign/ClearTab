@@ -1,16 +1,32 @@
 "use client";
 
+// Icons replaced with ASCII placeholders
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import Calendar from "lucide-react/dist/esm/icons/calendar";
 import { useQuery } from "@tanstack/react-query";
 
-import { createClient } from "@/lib/supabase/client";
+import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
+import styles from './schedule-settings.module.css';
 
 export function ScheduleSettings() {
-  const supabase = createClient();
+  const [supabase, setSupabase] = React.useState<any>(null);
+
+  // Initialize Supabase client based on environment
+  React.useEffect(() => {
+    const initSupabase = async () => {
+      const client = await getSupabaseClient()
+      setSupabase(client)
+    }
+    initSupabase()
+  }, [])
 
   const handleGoogleSignIn = async () => {
+    if (!supabase) {
+      console.warn('No Supabase client available for Google sign in (extension mode)')
+      return
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -36,9 +52,9 @@ export function ScheduleSettings() {
 
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className={styles.container}>
         <EmptyState
-          renderIcon={() => <Calendar className="h-6 w-6 text-white/40" />}
+          renderIcon={() => <span className={styles.calendarIcon}>◊</span>}
           title="Connect your calendar"
           description="See your schedule at a glance by connecting your Google Calendar."
           action={{
@@ -51,10 +67,10 @@ export function ScheduleSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={styles.settingsContainer}>
       <div>
-        <h2 className="text-lg font-medium mb-2">Connected Calendars</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <h2 className={styles.heading}>Connected Calendars</h2>
+        <p className={styles.description}>
           Manage your connected Google Calendars and customize how they appear.
         </p>
         <Button variant="outline" onClick={handleGoogleSignIn}>
@@ -63,8 +79,8 @@ export function ScheduleSettings() {
       </div>
 
       <div>
-        <h2 className="text-lg font-medium mb-2">Display Settings</h2>
-        <p className="text-sm text-muted-foreground">
+        <h2 className={styles.heading}>Display Settings</h2>
+        <p className={styles.descriptionOnly}>
           Customize how your calendar events are displayed in the schedule
           widget.
         </p>

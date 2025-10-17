@@ -1,6 +1,6 @@
+// Icons replaced with ASCII placeholders
 import * as React from "react"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"
-import ChevronDownIcon from 'lucide-react/dist/esm/icons/chevron-down'
 import styles from './accordion.module.css'
 
 import { cn } from "@/lib/utils"
@@ -30,14 +30,14 @@ function AccordionTrigger({
   ...props
 }: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
   return (
-    <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Header className={styles.header}>
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(styles.trigger, className)}
         {...props}
       >
         {children}
-        <ChevronDownIcon className={styles.icon} />
+        <span className={styles.icon}>•</span>
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

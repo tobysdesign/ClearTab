@@ -1,0 +1,37 @@
+/* Editor Component Styles */
+
+.skeletonContainer {
+  @apply flex flex-col gap-2;
+}
+
+.skeletonFirst {
+  @apply h-8 w-full;
+}
+
+.skeletonSecond {
+  @apply h-8 w-3/4;
+}
+
+.skeletonThird {
+  @apply h-8 w-5/6;
+}
+
+.skeletonFourth {
+  @apply h-8 w-2/3;
+}
+
+.editorContainer {
+  @apply relative flex flex-col;
+}
+
+.editorContent {
+  @apply h-full;
+}
+
+.actionButtons {
+  @apply absolute bottom-2 right-2 flex gap-2 z-10;
+}
+
+.actionButton {
+  @apply shadow-md;
+}

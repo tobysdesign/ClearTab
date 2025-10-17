@@ -1,9 +1,7 @@
+// Icons replaced with ASCII placeholders
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { cn } from "@/lib/utils"
-import Check from 'lucide-react/dist/esm/icons/check'
-import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right'
-import Circle from 'lucide-react/dist/esm/icons/circle'
 import styles from './dropdown-menu.module.css'
 
 const DropdownMenu = DropdownMenuPrimitive.Root
@@ -30,7 +28,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className={styles.arrowIcon} />
+    <span className={styles.arrowIcon}>•</span>
   </DropdownMenuPrimitive.SubTrigger>
 ))
 DropdownMenuSubTrigger.displayName =
@@ -90,7 +88,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   >
     <span className={styles.indicatorWrapper}>
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className={styles.checkIcon} />
+        <span className={styles.checkIcon}>✓</span>
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -110,7 +108,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   >
     <span className={styles.indicatorWrapper}>
       <DropdownMenuPrimitive.ItemIndicator>
-        <Circle className={styles.radioIcon} />
+        <span className={styles.radioIcon}>•</span>
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

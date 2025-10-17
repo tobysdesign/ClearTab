@@ -1,0 +1,29 @@
+/* Weather Settings Component Styles */
+
+.container {
+  @apply grid gap-6;
+}
+
+.cardContent {
+  @apply space-y-6;
+}
+
+.fieldContainer {
+  @apply space-y-2;
+}
+
+.notificationsContainer {
+  @apply space-y-4;
+}
+
+.notificationsInner {
+  @apply space-y-2;
+}
+
+.notificationItem {
+  @apply flex items-center justify-between;
+}
+
+.cursorPointer {
+  @apply cursor-pointer;
+}

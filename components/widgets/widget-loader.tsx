@@ -1,4 +1,6 @@
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import styles from './widget-loader.module.css'
 
 interface WidgetLoaderProps {
   className?: string
@@ -7,13 +9,13 @@ interface WidgetLoaderProps {
 
 export function WidgetLoader({ className = '', minHeight = 'min-h-[16rem]' }: WidgetLoaderProps) {
   return (
-    <div className={`relative w-full h-full flex items-center justify-center ${className} ${minHeight} animate-pulse`}>
-      <div className="relative w-[60px] h-[50px]">
+    <div className={cn(styles.container, className, minHeight)}>
+      <div className={styles.imageContainer}>
         <Image
           src="/assets/loading.gif"
           alt="Loading..."
           fill
-          className="object-contain"
+          className={styles.image}
           sizes="60px"
           priority
         />
