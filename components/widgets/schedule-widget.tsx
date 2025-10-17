@@ -3,7 +3,7 @@
 // Icons replaced with ASCII placeholders
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { format, parseISO, isToday, isAfter, isBefore } from 'date-fns'
+import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
 
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'

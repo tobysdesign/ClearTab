@@ -24,7 +24,7 @@ cp manifest.extension.json out/manifest.json
 
 # 5. Copy the icons
 echo "Copying icons..."
-cp -r chrome-extension/icons out/
+cp -r public/images out/icons
 
 # 6. Package the extension
 echo "Packaging extension..."

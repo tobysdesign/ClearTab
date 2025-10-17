@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 // Removed CalendarIcon as it's not used directly in JSX
-import { format } from 'date-fns'
+import { format } from '@/lib/date-utils'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'

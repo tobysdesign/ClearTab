@@ -18,7 +18,7 @@ import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
 // Icons replaced with ASCII placeholders
-import { format } from "date-fns";
+import { format } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 

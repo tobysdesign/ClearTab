@@ -17,7 +17,7 @@ import { EMPTY_BLOCKNOTE_CONTENT, type BlockNoteContent } from "@/shared/schema"
 import tasksStyles from "@/components/widgets/tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
-import { format } from "date-fns";
+import { format } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { useExtensionStorage } from "../hooks/use-extension-storage";
 

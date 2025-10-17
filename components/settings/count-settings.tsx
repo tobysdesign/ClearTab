@@ -12,7 +12,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays, startOfDay } from "date-fns";
+import { format, differenceInDays, startOfDay } from "@/lib/date-utils";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useMemo, useCallback, memo } from "react";

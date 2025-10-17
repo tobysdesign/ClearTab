@@ -14,7 +14,7 @@ import {
   isBefore,
   startOfDay,
   addMonths,
-} from "date-fns";
+} from "@/lib/date-utils";
 import { useQuery } from "@tanstack/react-query";
 import { getPaydaySettings } from "@/lib/actions/settings";
 // import { WidgetActions } from "@/components/dashboard/widget-actions";

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
-import { format, getDay } from 'date-fns'
+import { format, getDay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
