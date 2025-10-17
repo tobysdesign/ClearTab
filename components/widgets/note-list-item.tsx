@@ -1,12 +1,17 @@
-'use client'
+"use client";
 
-import React, { useMemo, useCallback } from 'react'
-import { ClientOnly } from '@/components/ui/safe-motion'
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Block } from '@blocknote/core'
+import React, { useMemo, useCallback } from "react";
+import { ClientOnly } from "@/components/ui/safe-motion";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Block } from "@blocknote/core";
 
 interface NoteListItemProps {
   note: {
@@ -25,43 +30,87 @@ interface NoteListItemProps {
   isEditing?: boolean;
 }
 
-export const NoteListItem = React.memo(function NoteListItem({ note, isSelected, onClick, onDelete, collapsed = false, isRecentlyUpdated = false, isEditing = false }: NoteListItemProps) {
+export const NoteListItem = React.memo(function NoteListItem({
+  note,
+  isSelected,
+  onClick,
+  onDelete,
+  collapsed = false,
+  isRecentlyUpdated = false,
+  isEditing = false,
+}: NoteListItemProps) {
   // Memoized function to get a preview from Block[] content
   const preview = useMemo(() => {
-    function getBlocksPreview(blocks: any): string {
-      if (!blocks || blocks.length === 0) return "Empty note";
+    function getContentPreview(content: any): string {
+      if (!content) return "Empty note";
 
-      // Concatenate text content from all blocks for a preview
       try {
-        const previewText = blocks.map((block: any) => {
-          if (block.content && Array.isArray(block.content)) {
-            return block.content.map((item: any) =>
-              typeof item === 'object' && item.type === 'text' && item.text ? item.text : ''
-            ).join('');
-          }
-          return '';
-        }).join(' ');
+        // If content is a string, try to parse it
+        let parsedContent;
+        if (typeof content === "string") {
+          parsedContent = JSON.parse(content);
+        } else {
+          parsedContent = content;
+        }
 
-        return previewText.trim() === '' ? "Empty note" : previewText.substring(0, 100) + (previewText.length > 100 ? '...' : '');
+        // Handle Quill delta format
+        if (parsedContent.ops && Array.isArray(parsedContent.ops)) {
+          const previewText = parsedContent.ops
+            .map((op: any) => (typeof op.insert === "string" ? op.insert : ""))
+            .join("")
+            .replace(/\n/g, " ")
+            .trim();
+          return previewText === ""
+            ? "Empty note"
+            : previewText.substring(0, 100) +
+                (previewText.length > 100 ? "..." : "");
+        }
+
+        // Handle BlockNote format (legacy support)
+        if (Array.isArray(parsedContent)) {
+          const previewText = parsedContent
+            .map((block: any) => {
+              if (block.content && Array.isArray(block.content)) {
+                return block.content
+                  .map((item: any) =>
+                    typeof item === "object" &&
+                    item.type === "text" &&
+                    item.text
+                      ? item.text
+                      : "",
+                  )
+                  .join("");
+              }
+              return "";
+            })
+            .join(" ");
+
+          return previewText.trim() === ""
+            ? "Empty note"
+            : previewText.substring(0, 100) +
+                (previewText.length > 100 ? "..." : "");
+        }
+
+        return "Empty note";
       } catch (error) {
         console.error("Error generating preview:", error);
         return "Error generating preview";
       }
     }
 
-    return getBlocksPreview(note.content as Block[]);
+    return getContentPreview(note.content);
   }, [note.content]);
 
   // Memoized function to get initials
   const initials = useMemo(() => {
     function getInitials(title: string) {
-      const words = title.split(' ');
+      const words = title.split(" ").filter((w) => w.length > 0);
       if (words.length > 1) {
         return (words[0][0] + words[1][0]).toUpperCase();
-      } else if (title.length > 0) {
-        return title[0].toUpperCase();
+      } else if (words.length === 1) {
+        return words[0][0].toUpperCase();
       }
-      return 'N'; // Default for empty title
+      return "N"; // Default for empty title
     }
 
     return getInitials(note.title || "Untitled Note");
@@ -69,7 +118,11 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
 
   // Memoized check if title is empty or just "Untitled note"
   const isPlaceholderTitle = useMemo(() => {
-    return !note.title || note.title === "Untitled note" || note.title === "Untitled Note";
+    return (
+      !note.title ||
+      note.title === "Untitled note" ||
+      note.title === "Untitled Note"
+    );
   }, [note.title]);
 
   // Determine what to show in the list - title or content
@@ -90,25 +143,62 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
   }, [displayText]);
 
   // Memoized event handlers to prevent re-creation on every render
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onClick();
-  }, [onClick]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onClick();
+    },
+    [onClick],
+  );
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete();
-  }, [onDelete]);
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete();
+    },
+    [onDelete],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick],
+  );
 
   if (collapsed) {
     return (
       <ClientOnly>
-        <motion.div layout initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1, y: isRecentlyUpdated ? [0, -20, 0] : 0 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30, duration: isRecentlyUpdated ? 0.5 : 0.3 }}
-          className={cn("h-10 w-10 mx-auto flex items-center justify-center rounded-full cursor-pointer transition-colors relative", isSelected ? "bg-[#292929] border border-[#434343]" : "bg-[#222222] border-[#222222] hover:bg-[#3D3D3D] hover:border-[#252323]", isRecentlyUpdated && "animate-promote")}
+        <motion.div
+          layout
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+            y: isRecentlyUpdated ? [0, -20, 0] : 0,
+          }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 30,
+            duration: isRecentlyUpdated ? 0.5 : 0.3,
+          }}
+          className={cn(
+            "h-10 w-10 mx-auto flex items-center justify-center rounded-full cursor-pointer transition-colors relative",
+            isSelected
+              ? "bg-[#292929] border border-[#434343]"
+              : "bg-[#222222] border-[#222222] hover:bg-[#3D3D3D] hover:border-[#252323]",
+            isRecentlyUpdated && "animate-promote",
+          )}
           onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
           title={displayText}
         >
-
           <span className="font-bold text-xs text-[#c4c4c4]">{initials}</span>
         </motion.div>
       </ClientOnly>
@@ -117,22 +207,33 @@ export const NoteListItem = React.memo(function NoteListItem({ note, isSelected,
 
   return (
     <ClientOnly>
-      <motion.div layout initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className={cn("widget-list-item widget-list-item--notes flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border", isSelected && "widget-list-item--active", isRecentlyUpdated && "animate-highlight")}
+      <motion.div
+        layout
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: -20, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className={cn(
+          "widget-list-item widget-list-item--notes flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border",
+          isSelected && "widget-list-item--active",
+          isRecentlyUpdated && "animate-highlight",
+        )}
         onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
       >
-
-
         <div className="flex justify-between w-full items-start notelist">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className={cn(
-              "font-inter-display overflow-hidden truncate flex-1",
-              shouldShowAsPlaceholder
-                ? "font-medium text-[14px] text-[#5c5c5c] italic"
-                : note.title && note.title.trim() !== ""
-                  ? "font-medium text-[14px] text-[#c4c4c4]" // Title styles
-                  : "font-normal text-[12px] text-[#c4c4c4]" // Content as title styles
-            )}>
+            <div
+              className={cn(
+                "font-inter-display overflow-hidden truncate flex-1",
+                shouldShowAsPlaceholder
+                  ? "font-medium text-[14px] text-[#5c5c5c] italic"
+                  : note.title && note.title.trim() !== ""
+                    ? "font-medium text-[14px] text-[#c4c4c4]" // Title styles
+                    : "font-normal text-[12px] text-[#c4c4c4]", // Content as title styles
+              )}
+            >
               {displayText}
             </div>
             {isEditing && (

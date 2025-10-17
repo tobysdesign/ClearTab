@@ -39,7 +39,7 @@ async function updateNote(
   updatedNote: Partial<Note> & { id: string }
 ): Promise<Note> {
   const { id, ...data } = updatedNote
-  const res = await api.put(`/api/notes/${id}`, data)
+  const res = await api.put(`/api/notes`, { noteId: id, ...data })
 
   if (!res.ok) {
     const errorText = await res.text()

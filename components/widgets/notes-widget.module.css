@@ -39,7 +39,6 @@
     flex-grow: 1;
 
     /* box model */
-    overflow: hidden;
 }
 
 /* Notes Widget: Main Container */
@@ -120,7 +119,7 @@
 
     /* box model */
     gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0;
 }
 
 .notesTitleContainer {
@@ -150,7 +149,7 @@
 
 .notesTitleInput::placeholder {
     /* typography */
-    color: #8d8d8d;
+    color: #565656;
     font-style: normal;
     font-weight: 400;
 }
@@ -258,7 +257,7 @@
     flex: 1;
 
     /* box model */
-    overflow-y: auto;
+    overflow-y: visible;
     overflow-x: visible;
 }
 
@@ -270,6 +269,14 @@
     /* box model */
     padding: 0 1.5rem;
     overflow: visible;
+
+    /* visual */
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+}
+
+.notesEditorContainer .ql-editor {
+    padding: 0.5rem 0.75rem;
 }
 
 /* Notes Widget: Empty State */
@@ -287,4 +294,8 @@
 .notesEmptyText {
     /* typography */
     color: hsl(var(--muted-foreground));
+}
+
+.ql-bubble {
+    z-index: 10;
 }

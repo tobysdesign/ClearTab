@@ -11,6 +11,9 @@ storybook-static
 .vercel/
 .turbo/
 .env.local
+out/
+extension.zip
+.env.ext
 # Cache
 .next/cache/
 node_modules/.cache/

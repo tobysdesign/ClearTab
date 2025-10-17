@@ -1,6 +1,10 @@
 // API client that automatically includes session ID in requests
 
+const IS_EXTENSION = process.env.IS_EXTENSION === 'true';
+const API_URL = IS_EXTENSION ? 'https://cleartab.app' : '';
+
 export async function apiRequest(url: string, options: RequestInit = {}): Promise<Response> {
+  const fullUrl = `${API_URL}${url}`;
   const sessionId = typeof window !== 'undefined' ? localStorage.getItem('session_id') : null
   
   const headers = {
@@ -13,7 +17,7 @@ export async function apiRequest(url: string, options: RequestInit = {}): Promis
     headers['Authorization'] = `Bearer ${sessionId}`
   }
   
-  const response = await fetch(url, {
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
     credentials: 'include' // Still include cookies as fallback

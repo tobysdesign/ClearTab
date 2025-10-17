@@ -1,15 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Bye - Personal Dashboard",
+  "name": "ClearTab Dashboard",
   "version": "1.0.0",
-  "description": "A personal dashboard and productivity app that takes over your new tab page",
+  "description": "A personal dashboard and productivity app that takes over your new tab page.",
   "icons": {
     "16": "icons/16.png",
     "48": "icons/48.png",
     "128": "icons/128.png"
   },
   "action": {
-    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/16.png",
       "48": "icons/48.png",
@@ -24,19 +23,16 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "host_permissions": ["*://*.bye.app/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;"
+  },
+  "host_permissions": ["*://*.supabase.co/*"],
   "web_accessible_resources": [
     {
       "resources": [
-        "index.html",
-        "extension-app/*",
-        "*.js",
-        "*.css",
-        "fonts/*",
-        "icons/*",
-        "assets/*",
-        "animations/*",
-        "next/*"
+        "_next/static/*/*",
+        "_next/static/css/*",
+        "_next/static/chunks/pages/*"
       ],
       "matches": ["<all_urls>"]
     }

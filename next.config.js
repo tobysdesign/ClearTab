@@ -71,7 +71,11 @@ const nextConfig = {
       },
     ];
   },
+    pageExtensions: isExtensionBuild
+    ? ['page.tsx', 'page.ts', 'page.jsx', 'page.js']
+    : ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'route.ts'],
   webpack: (config, { dev, isServer }) => {
+
     // Optimize webpack caching to reduce serialization warnings
     if (dev) {
       config.cache = {
