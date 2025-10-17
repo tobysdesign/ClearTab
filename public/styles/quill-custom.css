@@ -1,0 +1,6 @@
+.ql-editor.ql-blank::before {
+    color: #565656 !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    opacity: 0.6 !important;
+}

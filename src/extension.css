@@ -1,0 +1,252 @@
+/* Extension-specific CSS optimized for performance */
+
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #09090B;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard layout */
+.extension-dashboard {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.extension-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #21262d 100%);
+  z-index: -1;
+}
+
+.extension-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  gap: 40px;
+}
+
+/* Header */
+.extension-header {
+  text-align: center;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.time-display {
+  font-size: 4rem;
+  font-weight: 300;
+  color: #f8fafc;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.date-display {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* Widgets grid */
+.extension-widgets {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-height: calc(100vh - 280px);
+}
+
+.extension-widget-column {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Widget base styles */
+.extension-widget {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.extension-widget:hover {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(71, 85, 105, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.extension-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.extension-widget-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.extension-widget-content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(71, 85, 105, 0.5) transparent;
+}
+
+.extension-widget-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.extension-widget-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.extension-widget-content::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+  border-radius: 3px;
+}
+
+/* Widget items */
+.extension-widget-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(51, 65, 85, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(71, 85, 105, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.extension-widget-item:hover {
+  background: rgba(51, 65, 85, 0.5);
+  border-color: rgba(71, 85, 105, 0.4);
+}
+
+.extension-widget-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Empty states */
+.extension-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #64748b;
+}
+
+.extension-empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.extension-empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* Footer */
+.extension-footer {
+  text-align: center;
+  animation: fadeIn 1s ease-out;
+}
+
+.extension-status {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.extension-error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.extension-loading {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .extension-widgets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .extension-widgets {
+    grid-template-columns: 1fr;
+  }
+
+  .extension-content {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .time-display {
+    font-size: 3rem;
+  }
+}
+
+/* Performance optimizations */
+.extension-widget-content {
+  contain: layout style paint;
+}
+
+.extension-widget-item {
+  contain: layout style;
+}
+
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
+}
