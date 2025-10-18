@@ -14,6 +14,8 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:prewarm": "npm run dev & sleep 10 && node scripts/prewarm-simple.js",
+    "prewarm": "node scripts/prewarm-simple.js",
     "dev:3001": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
@@ -30,9 +32,6 @@
     "build:ext": "dotenv -e .env.ext next build"
   },
   "dependencies": {
-    "@blocknote/core": "^0.33.0",
-    "@blocknote/mantine": "^0.33.0",
-    "@blocknote/react": "^0.33.0",
     "@hookform/resolvers": "^5.1.1",
     "@lottiefiles/dotlottie-react": "^0.14.3",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -52,8 +51,6 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.6",
     "glob": "^11.0.3",
-    "google-auth-library": "^10.1.0",
-    "googleapis": "^150.0.1",
     "next": "^15.3.4",
     "next-themes": "^0.2.1",
     "punycode": "^2.3.1",
@@ -67,6 +64,9 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.17",
     "vaul": "^1.1.2",
+    "y-prosemirror": "^1.3.7",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.27",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
