@@ -2,6 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import { useState, useEffect } from 'react'
+import { CheckIcon } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import styles from './recorder-widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
@@ -382,7 +383,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
                               <div className={styles.controlButtonInner}>
-                                <span className={styles.controlIcon}>✓</span>
+                                <CheckIcon size={16} className="text-white" />
                               </div>
                             </button>
                           </TooltipTrigger>
@@ -434,7 +435,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               className={cn(styles.controlButton, styles.doneButton)}
                             >
                               <div className={styles.controlButtonInner}>
-                                <span className={styles.controlIcon}>✓</span>
+                                <CheckIcon size={16} className="text-white" />
                               </div>
                             </button>
                           </TooltipTrigger>

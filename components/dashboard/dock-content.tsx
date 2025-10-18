@@ -1,8 +1,10 @@
 'use client'
 
-// Icons replaced with ASCII placeholders
+// Custom SVG icon components
+import { CloseIcon, SearchIcon } from '@/components/icons'
 import { Input } from '@/components/ui/input'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
+import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
 import styles from './dock-content.module.css'
@@ -48,7 +50,7 @@ export function DockContent({
                     showSearch && styles.iconButtonActive
                 )}
             >
-                <span className={styles.icon}>🔍</span>
+                <SearchIcon size={16} className="text-white/60" />
             </button>
 
             <ShinyAiButton
@@ -75,13 +77,13 @@ export function DockContent({
                             onClick={() => setSearchQuery("")}
                             className={styles.iconButton}
                         >
-                            <span className={styles.icon}>×</span>
+                            <CloseIcon size={16} className="text-white/60" />
                         </button>
                     )}
                 </div>
             )}
 
-            {/* Settings button is handled by SettingsDrawer component */}
+            <SettingsTrigger />
         </div>
     )
 }

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { connectedAccounts } from "@/shared/schema";
 import { eq } from "drizzle-orm";
-import { google } from "googleapis";
+import { lightweightGoogleApi } from "@/lib/lightweight-google-api";
 
 // This route is specifically for linking secondary accounts.
 // It avoids the main /auth/callback to prevent conflicts with Supabase's client-side auth handler.
@@ -31,22 +31,31 @@ export async function GET(request: NextRequest) {
       throw new Error("User not authenticated. Please sign in again.");
     }
 
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      redirectUri,
-    );
-
-    const { tokens } = await oauth2Client.getToken(code);
-    const { access_token, refresh_token, expiry_date } = tokens;
+    const tokens = await lightweightGoogleApi.exchangeCodeForTokens(code, redirectUri);
+    const { access_token, refresh_token, expires_in } = tokens;
 
     if (!access_token) {
       throw new Error("Failed to retrieve access token from Google.");
     }
 
-    oauth2Client.setCredentials({ access_token });
-    const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
-    const { data: userInfo } = await oauth2.userinfo.get();
+    // Calculate expiry date from expires_in seconds
+    const expiry_date = expires_in ? Date.now() + (expires_in * 1000) : null;
+
+    const userEmail = await lightweightGoogleApi.getUserInfo({ accessToken: access_token });
+
+    // For Google API, we need to make a separate request to get the user ID
+    // This is a simplified approach - in production you might want to cache this
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+      },
+    });
+
+    if (!userInfoResponse.ok) {
+      throw new Error("Failed to retrieve user info from Google.");
+    }
+
+    const userInfo = await userInfoResponse.json();
 
     if (!userInfo.id) {
       throw new Error("Failed to retrieve user info from Google.");

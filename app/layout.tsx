@@ -12,7 +12,8 @@ import { Toaster as DefaultToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
 import Script from "next/script";
-import Image from "next/image";
+import { BrandedLoader } from "@/components/ui/branded-loader";
+import { SettingsDrawer } from "@/components/settings/settings-drawer";
 import styles from "./layout.module.css";
 
 const inter = Inter({
@@ -63,20 +64,7 @@ export default function RootLayout({
             zIndex: 9999,
           }}
         >
-          <div style={{ width: "150px", height: "82.8px" }}>
-            <Image
-              src="/assets/loading.gif"
-              alt="Loading..."
-              width={500}
-              height={276}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain"
-              }}
-              unoptimized
-            />
-          </div>
+          <BrandedLoader size="large" />
         </div>
         <ThemeProvider
           attribute="class"
@@ -91,6 +79,7 @@ export default function RootLayout({
                 <Suspense fallback={<Loading />}>{children}</Suspense>
               </main>
             </div>
+            <SettingsDrawer />
             <DefaultToaster />
             <SonnerToaster />
           </Providers>

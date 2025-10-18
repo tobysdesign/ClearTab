@@ -51,7 +51,7 @@
 }
 
 .avatar {
-  @apply w-9 h-9 rounded-full bg-white/10 flex items-center justify-center overflow-hidden;
+  @apply w-9 h-9 rounded-full bg-white/10 flex items-center justify-center overflow-hidden relative;
 }
 
 .avatarImage {

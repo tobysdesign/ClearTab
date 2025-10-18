@@ -3,11 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { Button } from './button'
-import { createTaskFromText } from '@/components/widgets/tasks-widget'
-import { Block } from '@blocknote/core'
-import { SimpleBlockNoteEditor } from './simple-block-note-editor'
-import { EMPTY_BLOCKNOTE_CONTENT } from '@/shared/schema'
+import { QuillEditor } from './quill-editor'
+import { EMPTY_QUILL_CONTENT } from '@/shared/schema'
 import styles from './editor.module.css'
 
 // Skeleton component to show while editor is loading
@@ -23,8 +20,8 @@ function EditorSkeleton() {
 }
 
 export interface EditorProps {
-  value?: Block[]
-  onChange?: (value: Block[]) => void
+  value?: any
+  onChange?: (value: any) => void
   className?: string
   placeholder?: string
   editable?: boolean
@@ -46,52 +43,9 @@ export function Editor({
   readOnly = false
 }: EditorProps) {
   const [isMounted, setIsMounted] = useState(false)
-  const [selectedText, setSelectedText] = useState<string>('')
-  const [hasSelection, setHasSelection] = useState(false)
-  const [isCreatingTask, setIsCreatingTask] = useState(false)
-
-  // Handle selection changes to enable/disable AI buttons
-  const _handleSelectionChange = useCallback((text: string) => {
-    setSelectedText(text)
-    setHasSelection(!!text.trim())
-  }, [])
-
-  // Handle AI chat button click
-  const handleAiChatClick = useCallback(() => {
-    if (selectedText && onOpenAiChat) {
-      onOpenAiChat(selectedText)
-    }
-  }, [selectedText, onOpenAiChat])
-
-  // Handle task creation button click
-  const handleCreateTaskClick = useCallback(async () => {
-    if (!selectedText) return
-    
-    try {
-      setIsCreatingTask(true)
-      
-      if (onCreateTask) {
-        // Use the callback if provided (for test page)
-        onCreateTask(selectedText)
-      } else {
-        // Otherwise use the direct API function
-        const task = await createTaskFromText(selectedText)
-        if (task) {
-          // Show success feedback
-          console.log("Task created:", task)
-          // Could add toast notification here
-        }
-      }
-    } catch (error) {
-      console.error("Failed to create task:", error)
-      // Could add error toast here
-    } finally {
-      setIsCreatingTask(false)
-    }
-  }, [selectedText, onCreateTask])
 
   // Handle content change
-  const handleContentChange = useCallback((newContent: Block[]) => {
+  const handleContentChange = useCallback((newContent: any) => {
     if (onChange) {
       onChange(newContent);
     }
@@ -108,37 +62,17 @@ export function Editor({
 
   return (
     <div className={cn(styles.editorContainer, className)}>
-      <SimpleBlockNoteEditor
-        initialContent={value || EMPTY_BLOCKNOTE_CONTENT as Block[]}
+      <QuillEditor
+        value={value || EMPTY_QUILL_CONTENT}
         onChange={handleContentChange}
         editable={editable && !readOnly}
         className={styles.editorContent}
+        placeholder={_placeholder}
+        onOpenAiChat={onOpenAiChat}
+        onCreateTask={onCreateTask}
+        onBlur={_onBlur}
+        readOnly={readOnly}
       />
-      
-      {/* AI action buttons that appear when text is selected */}
-      {hasSelection && !readOnly && (
-        <div className={styles.actionButtons}>
-          {onOpenAiChat && (
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              onClick={handleAiChatClick}
-              className={styles.actionButton}
-            >
-              Ask AI
-            </Button>
-          )}
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            onClick={handleCreateTaskClick}
-            disabled={isCreatingTask}
-            className="shadow-md"
-          >
-            {isCreatingTask ? "Creating..." : "Create Task"}
-          </Button>
-        </div>
-      )}
     </div>
   )
 }

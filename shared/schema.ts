@@ -24,43 +24,16 @@ function generateUUID(): string {
     return v.toString(16);
   });
 }
-import { Block } from "@blocknote/core";
+// Quill Delta Content Schemas (replacing BlockNote for lighter bundle)
+import { QuillDeltaSchema, EMPTY_QUILL_CONTENT, type QuillDelta } from "@/lib/quill-utils";
 
-// BlockNote Content Schemas
-const BlockNoteTextNodeSchema = z.object({
-  type: z.literal("text"),
-  text: z.string(),
-  styles: z.record(z.any()).optional(), // Styles can be any object
-});
+export const QuillContentSchema = QuillDeltaSchema;
+export { EMPTY_QUILL_CONTENT };
 
-const BlockNoteBlockPropsSchema = z.record(z.any()); // Block properties can be any object
-
-export const BlockNoteBlockSchema = z.lazy(() =>
-  z.object({
-    id: z.string(),
-    type: z.string(),
-    props: BlockNoteBlockPropsSchema.optional(),
-    content: z
-      .array(
-        z.union([BlockNoteTextNodeSchema, z.lazy(() => BlockNoteBlockSchema)]),
-      )
-      .optional(), // Blocks can contain text nodes or other blocks
-    children: z.array(z.string()).optional(), // BlockNote blocks also have a 'children' array of string IDs
-    data: z.record(z.any()).optional(), // Generic data field
-  }),
-);
-
-export const BlockNoteContentSchema = z.array(BlockNoteBlockSchema);
-
-// Standard empty content structure for BlockNote
-export const EMPTY_BLOCKNOTE_CONTENT = [
-  {
-    id: "default-paragraph",
-    type: "paragraph",
-    content: [],
-    props: {},
-  },
-];
+// Legacy BlockNote content type for migration
+export type BlockNoteContent = any; // Keep for migration purposes
+export const EMPTY_BLOCKNOTE_CONTENT = EMPTY_QUILL_CONTENT; // Redirect to Quill format
+export const BlockNoteContentSchema = QuillDeltaSchema; // Redirect to Quill schema
 
 export const user = pgTable(
   "user",
@@ -252,9 +225,9 @@ export const tasks = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     content: jsonb("content")
-      .default(EMPTY_BLOCKNOTE_CONTENT)
-      .$type<typeof BlockNoteContentSchema._type>()
-      .notNull(), // Use BlockNote content schema
+      .default(EMPTY_QUILL_CONTENT)
+      .$type<typeof QuillContentSchema._type>()
+      .notNull(), // Use Quill content schema
     isCompleted: boolean("is_completed").default(false).notNull(), // New field for completion status
     isHighPriority: boolean("is_high_priority").default(false).notNull(), // New field for high priority (boolean)
     dueDate: timestamp("due_date", { mode: "date" }),
@@ -277,7 +250,7 @@ export const tasks = pgTable(
 
 // Explicitly define Task type to ensure correct content typing and new isHighPriority field
 export type Task = Omit<typeof tasks.$inferSelect, "content" | "priority"> & {
-  content: Block[];
+  content: QuillDelta;
   isHighPriority: boolean;
 };
 
@@ -437,7 +410,7 @@ export type User = typeof user.$inferSelect;
 export interface Note {
   id: string;
   title: string;
-  content: Block[];
+  content: QuillDelta;
   userId: string;
   createdAt: Date;
   updatedAt: Date;

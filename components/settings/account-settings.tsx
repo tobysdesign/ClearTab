@@ -2,6 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import { Button } from "@/components/ui/button";
+import { CloseIcon } from '@/components/icons';
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedAccountWithEmail } from "@/shared/types";
@@ -217,7 +218,7 @@ export function AccountSettings() {
               disabled={disconnectCalendarMutation.isPending}
               className={styles.disconnectButton}
             >
-              <span className={styles.iconXsMr}>×</span>
+              <CloseIcon size={14} className="mr-1" />
               Disconnect
             </Button>
           ) : (
@@ -272,7 +273,7 @@ export function AccountSettings() {
                   disabled={removeAccountMutation.isPending}
                   className={styles.removeButton}
                 >
-                  <span className={styles.iconXs}>×</span>
+                  <CloseIcon size={12} />
                 </Button>
               </div>
             ))}

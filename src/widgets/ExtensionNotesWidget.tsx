@@ -15,8 +15,8 @@ import {
   WidgetContainer,
   // WidgetContent,
 } from "@/components/ui/widget-container";
-import { SimpleBlockNoteEditor } from "../components/ui/simple-block-note-editor";
-import { EMPTY_BLOCKNOTE_CONTENT, type Note } from "@/shared/schema";
+import { SimpleQuillEditor } from "../components/ui/simple-quill-editor";
+import { EMPTY_QUILL_CONTENT, type Note, type QuillDelta } from "@/shared/schema";
 import { useNotes } from "../hooks/use-extension-notes";
 import { AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "@/components/widgets/widget-loader";
@@ -171,7 +171,7 @@ export function ExtensionNotesWidget() {
       const blankNote = {
         id: generateDraftId(),
         title: "",
-        content: [],
+        content: EMPTY_QUILL_CONTENT,
       };
       setActiveNote(blankNote);
       setDisplayTitle("");
@@ -193,12 +193,12 @@ export function ExtensionNotesWidget() {
       const newNote = {
         id: generateDraftId(),
         title: "",
-        content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+        content: EMPTY_QUILL_CONTENT,
       };
       setActiveNote(newNote);
       setDisplayTitle("");
       activeNoteIdRef.current = newNote.id;
-      lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+      lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
       lastSavedTitle.current = "";
     }
   }, [notes, isLoadingNotes, generateDraftId]);
@@ -207,7 +207,7 @@ export function ExtensionNotesWidget() {
   useEffect(() => {
     if (!editorRef.current || !activeNote?.content) return;
 
-    const content = Array.isArray(activeNote.content) ? activeNote.content : [];
+    const content = activeNote.content || EMPTY_QUILL_CONTENT;
     const contentStr = JSON.stringify(content);
 
     // Only update if content actually changed to prevent unnecessary updates
@@ -216,10 +216,7 @@ export function ExtensionNotesWidget() {
     isUpdatingEditor.current = true;
 
     try {
-      editorRef.current.replaceBlocks(
-        editorRef.current.document,
-        content as Block[],
-      );
+      editorRef.current.setContents(content);
       lastSavedContent.current = contentStr;
       lastSavedTitle.current = activeNote.title || "";
 
@@ -318,7 +315,7 @@ export function ExtensionNotesWidget() {
 
   // Removed old debouncedSave - now using direct setTimeout approach in onChange handlers
 
-  const handleEditorReady = useCallback((editor: BlockNoteEditor) => {
+  const handleEditorReady = useCallback((editor: any) => {
     editorRef.current = editor;
   }, []);
 
@@ -489,10 +486,7 @@ export function ExtensionNotesWidget() {
     if (editorRef.current) {
       isUpdatingEditor.current = true;
       try {
-        editorRef.current.replaceBlocks(
-          editorRef.current.document,
-          (note.content || EMPTY_BLOCKNOTE_CONTENT) as Block[],
-        );
+        editorRef.current.setContents(note.content || EMPTY_QUILL_CONTENT);
       } catch (error) {
         console.error("Failed to update editor content:", error);
       }
@@ -534,22 +528,19 @@ export function ExtensionNotesWidget() {
     const newNote = {
       id: generateDraftId(),
       title: "",
-      content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+      content: EMPTY_QUILL_CONTENT,
     };
 
     // Update refs directly to avoid re-renders
     activeNoteIdRef.current = newNote.id;
     activeNoteRef.current = newNote;
-    lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+    lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
     lastSavedTitle.current = "";
 
     // Force editor to update with empty content
     if (editorRef.current) {
       isUpdatingEditor.current = true;
-      editorRef.current.replaceBlocks(
-        editorRef.current.document,
-        EMPTY_BLOCKNOTE_CONTENT as any,
-      );
+      editorRef.current.setContents(EMPTY_QUILL_CONTENT);
       setTimeout(() => {
         isUpdatingEditor.current = false;
       }, 200);
@@ -569,22 +560,19 @@ export function ExtensionNotesWidget() {
         const newNote = {
           id: generateDraftId(),
           title: "",
-          content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+          content: EMPTY_QUILL_CONTENT,
         };
         setActiveNote(newNote);
         setDisplayTitleSafe("");
         activeNoteIdRef.current = newNote.id;
         activeNoteRef.current = newNote;
-        lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+        lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
         lastSavedTitle.current = "";
 
         // Clear the editor
         if (editorRef.current) {
           isUpdatingEditor.current = true;
-          editorRef.current.replaceBlocks(
-            editorRef.current.document,
-            EMPTY_BLOCKNOTE_CONTENT as any,
-          );
+          editorRef.current.setContents(EMPTY_QUILL_CONTENT);
           setTimeout(() => {
             isUpdatingEditor.current = false;
           }, 200);
@@ -606,22 +594,19 @@ export function ExtensionNotesWidget() {
           const newNote = {
             id: generateDraftId(),
             title: "",
-            content: EMPTY_BLOCKNOTE_CONTENT as Block[],
+            content: EMPTY_QUILL_CONTENT,
           };
           setActiveNote(newNote);
           setDisplayTitleSafe("");
           activeNoteIdRef.current = newNote.id;
           activeNoteRef.current = newNote;
-          lastSavedContent.current = JSON.stringify(EMPTY_BLOCKNOTE_CONTENT);
+          lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
           lastSavedTitle.current = "";
 
           // Clear the editor
           if (editorRef.current) {
             isUpdatingEditor.current = true;
-            editorRef.current.replaceBlocks(
-              editorRef.current.document,
-              EMPTY_BLOCKNOTE_CONTENT as any,
-            );
+            editorRef.current.setContents(EMPTY_QUILL_CONTENT);
             setTimeout(() => {
               isUpdatingEditor.current = false;
             }, 200);
@@ -886,9 +871,9 @@ export function ExtensionNotesWidget() {
                   "custom-scrollbar",
                 )}
               >
-                <SimpleBlockNoteEditor
+                <SimpleQuillEditor
                   key="notes-editor" // Use completely stable key to prevent any re-mounts
-                  initialContent={EMPTY_BLOCKNOTE_CONTENT} // Always use empty, sync via effects
+                  initialContent={EMPTY_QUILL_CONTENT} // Always use empty, sync via effects
                   onChange={(content) => {
                     // Guard: check if we're updating programmatically
                     if (isUpdatingEditor.current) return;
@@ -903,13 +888,14 @@ export function ExtensionNotesWidget() {
                     const contentStr = JSON.stringify(content);
                     if (contentStr === lastSavedContent.current) return;
 
-                    // Detect if this is a significant change (large paste, image upload, etc.)
-                    const previousLength = lastSavedContent.current
-                      ? JSON.parse(lastSavedContent.current).length
-                      : 0;
-                    const currentLength = content.length;
+                    // Detect if this is a significant change (large paste, etc.)
+                    const previousContent = lastSavedContent.current
+                      ? JSON.parse(lastSavedContent.current)
+                      : EMPTY_QUILL_CONTENT;
+                    const previousLength = JSON.stringify(previousContent).length;
+                    const currentLength = contentStr.length;
                     const lengthDiff = Math.abs(currentLength - previousLength);
-                    const isSignificantChange = lengthDiff > 5; // More than 5 blocks changed (indicates paste/large edit)
+                    const isSignificantChange = lengthDiff > 100; // More than 100 chars changed (indicates paste/large edit)
 
                     // Update ref directly (no state changes)
                     const updatedNote = {

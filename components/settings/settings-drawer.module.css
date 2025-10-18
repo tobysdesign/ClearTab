@@ -1,13 +1,5 @@
 /* Settings Drawer Component Styles */
 
-.drawerTrigger {
-  @apply rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80;
-}
-
-.settingsIcon {
-  @apply h-4 w-4 group-hover:rotate-45 transition-transform duration-300;
-}
-
 .drawerContent {
   @apply max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0;
 }
@@ -17,7 +9,7 @@
 }
 
 .grabHandle {
-  @apply flex justify-center pt-2 cursor-grab active:cursor-grabbing;
+  @apply flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0;
 }
 
 .grabBar {
@@ -25,7 +17,7 @@
 }
 
 .header {
-  @apply flex-shrink-0 flex items-center justify-between px-6 py-4;
+  @apply flex-shrink-0 flex items-center justify-between px-6 py-3;
 }
 
 .title {
@@ -37,7 +29,8 @@
 }
 
 .closeIcon {
-  @apply h-4 w-4 text-[#bbbbbb];
+  width: 1rem;
+  height: 1rem;
 }
 
 .scrollableContent {

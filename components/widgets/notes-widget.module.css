@@ -98,7 +98,7 @@
     height: 100%;
 
     /* visual */
-    background-color: #151515;
+
     border-radius: 0 24px 24px 0;
 }
 
@@ -152,12 +152,6 @@
     color: #565656;
     font-style: normal;
     font-weight: 400;
-}
-
-.notesTitleInput:focus-visible {
-    /* state */
-    ring: 0;
-    ring-offset: 0;
 }
 
 .notesActions {
@@ -271,7 +265,6 @@
     overflow: visible;
 
     /* visual */
-    background: rgba(255, 255, 255, 0.02);
     border-radius: 8px;
 }
 

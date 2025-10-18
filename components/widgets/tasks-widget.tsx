@@ -13,12 +13,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "@/app/client-providers";
-import { EMPTY_BLOCKNOTE_CONTENT, type BlockNoteContent } from "@/shared/schema"; // Corrected import path
+import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/lib/quill-utils";
 import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
+import { CloseIcon } from "@/components/icons";
 // Icons replaced with ASCII placeholders
-import { format } from "date-fns";
+import { format } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 
@@ -50,7 +51,7 @@ async function createTask(
   title: string,
   isCompleted: boolean,
   isHighPriority: boolean,
-  content: BlockNoteContent,
+  content: QuillDelta,
 ): Promise<Task> {
   const res = await api.post("/api/tasks", {
     title,
@@ -164,7 +165,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
       title: string;
       isCompleted: boolean;
       isHighPriority: boolean;
-      content: BlockNoteContent;
+      content: QuillDelta;
     }) => {
       try {
         // Create task on server
@@ -210,7 +211,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
       title: "New Task",
       isCompleted: false,
       isHighPriority: false,
-      content: EMPTY_BLOCKNOTE_CONTENT, // Use BlockNote's empty content structure
+      content: EMPTY_QUILL_CONTENT, // Use Quill's empty content structure
     });
   }
 
@@ -272,7 +273,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
               {tasks.length === 0 ? (
                 <EmptyState
                   renderIcon={() => (
-                    <span className={tasksStyles.tasksEmptyIcon}>×</span>
+                    <CloseIcon size={20} className="text-gray-400" />
                   )}
                   title="Not a care"
                   description="Could your first task be to add a task?"

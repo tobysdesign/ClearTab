@@ -13,12 +13,12 @@ const nextConfig = {
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
   experimental: {
-    optimizePackageImports: ["@tanstack/react-query", "framer-motion", "@blocknote/core", "@blocknote/react", "@blocknote/mantine"],
+    optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
   },
   turbopack: {},
   typedRoutes: false,
-  // Disable StrictMode for BlockNote compatibility
-  reactStrictMode: false,
+  // Enable StrictMode now that BlockNote is removed
+  reactStrictMode: true,
   env: {
     DATABASE_URL: process.env.DATABASE_URL || "",
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
@@ -34,6 +34,7 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     unoptimized: isExtensionBuild, // Disable image optimization for extension build
+    domains: ["lh3.googleusercontent.com"],
   },
   // Support for Chrome extension static export
   output: isExtensionBuild ? "export" : undefined,
@@ -72,8 +73,8 @@ const nextConfig = {
     ];
   },
     pageExtensions: isExtensionBuild
-    ? ['page.tsx', 'page.ts', 'page.jsx', 'page.js']
-    : ['page.tsx', 'page.ts', 'page.jsx', 'page.js', 'route.ts'],
+    ? ['tsx', 'ts', 'jsx', 'js']
+    : ['tsx', 'ts', 'jsx', 'js'],
   webpack: (config, { dev, isServer }) => {
 
     // Optimize webpack caching to reduce serialization warnings

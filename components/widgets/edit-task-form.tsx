@@ -2,12 +2,12 @@
 
 // Icons replaced with ASCII placeholders
 import { useEffect, useState, useTransition } from 'react'
+import { CloseIcon } from '@/components/icons'
 import type { Task } from '@/shared/schema'
 // Removed useDebouncedCallback as optimistic updates will trigger direct saves
 import { Input } from '@/components/ui/input'
 import dynamic from 'next/dynamic'
-import { Block } from '@blocknote/core'
-import { EMPTY_BLOCKNOTE_CONTENT, BlockNoteContentSchema } from '@/shared/schema'
+import { EMPTY_QUILL_CONTENT, type QuillDelta } from '@/shared/schema'
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 // Removed CalendarIcon as it's not used directly in JSX
-import { format } from 'date-fns'
+import { format } from '@/lib/date-utils'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -88,7 +88,7 @@ interface EditTaskFormProps {
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  content: BlockNoteContentSchema.optional(), // Use BlockNoteContentSchema for content
+  content: z.any().optional(), // Use QuillDelta for content
   isCompleted: z.boolean().default(false),
   isHighPriority: z.boolean().default(false), // Use isHighPriority instead of priority
   dueDate: z.date().optional().nullable(),
@@ -108,9 +108,9 @@ export function EditTaskForm({
 
   // Initialize content with either the task content or the selected text from editor
   const initialContent = task?.content || 
-    (initialDescription ? [{ type: 'paragraph', content: [{ type: 'text', text: initialDescription }] }] as Block[] : EMPTY_BLOCKNOTE_CONTENT);
+    (initialDescription ? { ops: [{ insert: initialDescription }, { insert: '\n' }] } : EMPTY_QUILL_CONTENT);
   
-  const [currentContent, setCurrentContent] = useState<Block[]>(
+  const [currentContent, setCurrentContent] = useState<QuillDelta>(
     JSON.parse(JSON.stringify(initialContent))
   );
 
@@ -139,12 +139,12 @@ export function EditTaskForm({
     if (task) {
       form.reset({
         title: task.title,
-        content: task.content || EMPTY_BLOCKNOTE_CONTENT,
+        content: task.content || EMPTY_QUILL_CONTENT,
         isCompleted: task.isCompleted,
         isHighPriority: task.isHighPriority, // Set from task
         dueDate: task.dueDate || null,
       })
-      setCurrentContent(JSON.parse(JSON.stringify(task.content || EMPTY_BLOCKNOTE_CONTENT)))
+      setCurrentContent(JSON.parse(JSON.stringify(task.content || EMPTY_QUILL_CONTENT)))
     } else if (initialDescription) {
       form.reset({
         title: getInitialTitle(),
@@ -298,7 +298,7 @@ export function EditTaskForm({
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/40 p-1"
               >
-                <span size={16}>×</span>
+                <CloseIcon size={16} className="text-white/40" />
               </button>
             )}
             <label htmlFor="dueDate" className="md3-text-field__label">

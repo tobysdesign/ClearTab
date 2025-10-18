@@ -13,11 +13,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "@/components/widgets/widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "../providers/ExtensionProvidersWrapper";
-import { EMPTY_BLOCKNOTE_CONTENT, type BlockNoteContent } from "@/shared/schema";
+import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
 import tasksStyles from "@/components/widgets/tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
-import { format } from "date-fns";
+import { CloseIcon } from "@/components/icons";
+import { format } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { useExtensionStorage } from "../hooks/use-extension-storage";
 
@@ -61,7 +62,7 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
       title: string;
       isCompleted: boolean;
       isHighPriority: boolean;
-      content: BlockNoteContent;
+      content: QuillDelta;
     }) => {
       try {
         const newTask: Task = {
@@ -103,7 +104,7 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
       title: "New Task",
       isCompleted: false,
       isHighPriority: false,
-      content: EMPTY_BLOCKNOTE_CONTENT,
+      content: EMPTY_QUILL_CONTENT,
     });
   }
 
@@ -131,7 +132,7 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
               {tasks.length === 0 ? (
                 <EmptyState
                   renderIcon={() => (
-                    <span className={tasksStyles.tasksEmptyIcon}>×</span>
+                    <CloseIcon size={20} className="text-gray-400" />
                   )}
                   title="Not a care"
                   description="Could your first task be to add a task?"

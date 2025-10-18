@@ -1,6 +1,7 @@
 // Icons replaced with ASCII placeholders
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
+import { CheckIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 import styles from './checkbox.module.css'
 
@@ -16,7 +17,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={styles.indicator}
     >
-      <span className={styles.icon}>✓</span>
+      <CheckIcon size={12} className="text-white" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

@@ -2,7 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import { addDays, format } from "@/lib/date-utils";
 import { DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";

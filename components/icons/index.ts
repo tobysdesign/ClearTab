@@ -1,0 +1,6 @@
+export { AddIcon } from './add'
+export { CheckIcon } from './check'
+export { CloseIcon } from './close'
+export { DragIcon } from './drag'
+export { SearchIcon } from './search'
+export { SettingsIcon } from './settings'

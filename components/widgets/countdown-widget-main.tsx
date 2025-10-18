@@ -14,9 +14,9 @@ import {
   isBefore,
   startOfDay,
   addMonths,
-} from "date-fns";
+} from "@/lib/date-utils";
 import { useQuery } from "@tanstack/react-query";
-import { getPaydaySettings } from "@/lib/actions/settings";
+// Payday settings deprecated - using local storage instead
 // import { WidgetActions } from "@/components/dashboard/widget-actions";
 import {
   WidgetContainer,
@@ -60,15 +60,17 @@ export function CountdownWidget({
     recurrenceInDays: RECURRENCE_DAYS["fortnightly"],
   });
 
-  // Fetch payday settings from database
+  // Payday settings deprecated - using local storage instead
   const { data: paydayData, isLoading } = useQuery({
     queryKey: ["payday-settings"],
     queryFn: async () => {
-      const result = await getPaydaySettings({} as any);
-      if (result?.serverError) {
-        throw new Error(result.serverError);
-      }
-      return result.data;
+      // Return default settings since payday settings are deprecated
+      return {
+        countdownTitle: "Countdown",
+        countdownMode: "manual-count",
+        manualCount: 14,
+        paydayFrequency: "fortnightly"
+      };
     },
   });
 

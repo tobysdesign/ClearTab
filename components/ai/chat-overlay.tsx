@@ -2,6 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import React from 'react'
+import { CloseIcon } from '@/components/icons'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatPanel } from './chat-panel'
@@ -75,7 +76,7 @@ function ChatOverlay() {
                     <span className={styles.icon}>•</span>
                   </Button>
                   <Button variant="ghost" size="icon" onClick={closeChat} className={styles.iconButton}>
-                    <span className={styles.icon}>×</span>
+                    <CloseIcon size={16} className="text-white/60" />
                   </Button>
                 </div>
         </div>

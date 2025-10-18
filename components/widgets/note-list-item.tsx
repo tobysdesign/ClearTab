@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Block } from "@blocknote/core";
+
 
 interface NoteListItemProps {
   note: {

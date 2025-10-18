@@ -1,12 +1,13 @@
 "use client"
 
 // Icons replaced with ASCII placeholders
+import { CheckIcon } from '@/components/icons'
 import { useAction } from 'next-safe-action/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { saveApiKey } from '@/lib/actions/settings'
+import { saveApiKey } from '@/lib/actions/extension-stubs'
 import { useToast } from '@/components/ui/use-toast'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -96,7 +97,7 @@ export function APISettings(): ReactNode {
 
           {hasApiKey ? (
             <div className={styles.successText}>
-              <span className={styles.checkIcon}>✓</span>
+              <CheckIcon size={16} className="text-green-400" />
               <span>API key configured</span>
             </div>
           ) : showApiKeyInput ? (

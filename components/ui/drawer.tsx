@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 import { DialogTitle } from "@/components/ui/dialog";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 
 import { cn } from "@/lib/utils";
 import styles from './drawer.module.css';
@@ -50,8 +49,9 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
     overlayVariant?: OverlayVariant
     direction?: 'bottom' | 'right'
+    showHandle?: boolean
   }
->(({ className, children, overlayVariant = 'default', direction = 'bottom', ...props }, ref) => (
+>(({ className, children, overlayVariant = 'default', direction = 'bottom', showHandle = true, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay variant={overlayVariant} />
     <DrawerPrimitive.Content
@@ -68,10 +68,7 @@ const DrawerContent = React.forwardRef<
       }}
       {...props}
     >
-      {direction === 'bottom' && <div className={styles.handle} style={{ borderRadius: '50%' }} />}
-      <VisuallyHidden.Root>
-        <DrawerTitle>Drawer Content</DrawerTitle>
-      </VisuallyHidden.Root>
+      {direction === 'bottom' && showHandle && <div className={styles.handle} style={{ borderRadius: '50%' }} />}
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

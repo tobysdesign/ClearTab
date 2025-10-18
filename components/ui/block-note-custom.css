@@ -1,6 +1,4 @@
-/* BlockNote Editor Custom Styles */
-@import "@blocknote/core/fonts/inter.css";
-@import "@blocknote/mantine/style.css";
+/* BlockNote Editor Custom Styles - Removed imports for Quill migration */
 
 /* Editor container */
 .bn-container {

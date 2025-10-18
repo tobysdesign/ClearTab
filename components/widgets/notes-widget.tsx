@@ -16,6 +16,9 @@ import {
   // WidgetContent,
 } from "@/components/ui/widget-container";
 import { QuillEditor } from "@/components/ui/quill-editor";
+import dynamic from 'next/dynamic';
+
+const DynamicQuillEditor = dynamic(() => import("@/components/ui/quill-editor").then(mod => mod.QuillEditor), { ssr: false });
 import { type Note } from "@/shared/schema";
 
 // Empty Quill content
@@ -262,7 +265,7 @@ export function NotesWidget() {
         // Create new note for draft
         const savedNoteRaw = await createNote.mutate({
           title: currentNote.title?.trim() || "Untitled Note",
-          content: JSON.stringify(currentNote.content),
+          content: currentNote.content,
           temporaryId: currentNote.id,
         });
 
@@ -292,7 +295,7 @@ export function NotesWidget() {
         const savedNoteRaw = await updateNote.mutate({
           id: currentNote.id,
           title: currentNote.title,
-          content: JSON.stringify(currentNote.content),
+          content: currentNote.content,
         });
 
         if (savedNoteRaw) {
@@ -403,7 +406,7 @@ export function NotesWidget() {
   // Removed old debouncedSave - now using direct setTimeout approach in onChange handlers
 
   const handleTitleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newTitle = e.target.value;
 
       // Mark user as actively typing FIRST to prevent any interference
@@ -836,7 +839,7 @@ export function NotesWidget() {
                   "custom-scrollbar",
                 )}
               >
-                <QuillEditor
+                <DynamicQuillEditor
                   tabIndex={4}
                   key="stable-notes-editor" // Keep stable to prevent focus loss
                   value={activeNote?.content}

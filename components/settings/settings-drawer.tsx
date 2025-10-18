@@ -1,8 +1,9 @@
 'use client'
 
-// Icons replaced with ASCII placeholders
+// Custom SVG icon components
 import * as React from 'react'
-import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from '@/components/ui/drawer'
+import { CloseIcon } from '@/components/icons'
+import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { AccountSettings } from './account-settings'
 import { DisplaySettings } from './display-settings'
@@ -79,21 +80,16 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
   const ActiveComponent = settingsNav.find(item => item.name === activeTab)?.component || (() => <div>Select a setting</div>)
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(styles.drawerTrigger, "group")}
-          data-testid="settings-drawer-trigger"
-        >
-          <span className={styles.settingsIcon}>*</span>
-          <span className="sr-only">Open Settings</span>
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent 
+    <Drawer
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      shouldScaleBackground={false}
+      modal={true}
+    >
+      <DrawerContent
         overlayVariant="settings"
         className={styles.drawerContent}
+        showHandle={false}
         style={{
           background: 'linear-gradient(rgba(38, 38, 38, 0.5) 0%, rgba(0, 0, 0, .7 ) 100%)',
           backdropFilter: 'blur(12px)'
@@ -101,8 +97,9 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
       >
         <VisuallyHidden>
           <DrawerTitle>Settings</DrawerTitle>
+          <DrawerDescription>Application settings and preferences</DrawerDescription>
         </VisuallyHidden>
-        
+
         <div className={styles.container}>
           {/* Grab Handle */}
           <div className={styles.grabHandle}>
@@ -112,14 +109,14 @@ export function SettingsDrawer({ initialTab = 'Display options' }: SettingsDrawe
           {/* Fixed Header */}
           <div className={styles.header}>
             <h1 className={styles.title}>Settings</h1>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost-icon"
               size="icon"
               onClick={() => setIsOpen(false)}
               className={styles.closeButton}
             >
-              <span className={styles.closeIcon}>×</span>
               <span className="sr-only">Close</span>
+              <CloseIcon size={16} className={styles.closeIcon} />
             </Button>
           </div>
 

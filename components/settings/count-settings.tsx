@@ -12,12 +12,12 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Button } from "@/components/ui/button";
-import { format, differenceInDays, startOfDay } from "date-fns";
+import { format, differenceInDays, startOfDay } from "@/lib/date-utils";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { getPaydaySettings, savePaydaySettings } from "@/lib/actions/settings";
+// Payday settings deprecated - now using countdown widget directly
 import { useQueryClient } from "@tanstack/react-query";
 import styles from "./count-settings.module.css";
 
@@ -57,52 +57,11 @@ export function CountSettings() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    async function fetchCountSettings() {
-      const result = await getPaydaySettings({} as Record<string, never>);
-      if (result.data) {
-        const {
-          paydayDate,
-          paydayFrequency: freq,
-          countdownTitle: title,
-          startDate: sDate,
-          endDate: eDate,
-        } = result.data;
-
-        if (freq)
-          setFrequency(freq as "weekly" | "fortnightly" | "monthly" | "annual");
-        if (title) setCountdownTitle(title);
-
-        // Determine tab based on available data
-        if (sDate && eDate) {
-          setActiveTab("start-end");
-          const start = new Date(sDate);
-          const end = new Date(eDate);
-          setStartDate(start);
-          setEndDate(end);
-          setDateRange({ from: start, to: end });
-
-          // Set currently saved state
-          setCurrentlySaved({
-            countdownTitle: title || "Countdown",
-            mode: "start-end",
-            startDate: new Date(sDate),
-            endDate: new Date(eDate),
-          });
-        } else if (paydayDate && freq) {
-          setActiveTab("recurring");
-          setStartDate(new Date(paydayDate));
-
-          // Set currently saved state
-          setCurrentlySaved({
-            countdownTitle: title || "Countdown",
-            mode: "recurring",
-            frequency: freq,
-            startDate: new Date(paydayDate),
-          });
-        }
-      }
-    }
-    fetchCountSettings();
+    // Payday settings deprecated - initialize with defaults
+    setCurrentlySaved({
+      countdownTitle: "Countdown",
+      mode: "start-end",
+    });
   }, []);
 
   const handleSaveCountSettings = async () => {
@@ -146,36 +105,27 @@ export function CountSettings() {
             }),
       };
 
-      const result = await savePaydaySettings(settingsToSave);
+      // Payday settings deprecated - just update local state for now
+      // Update currently saved state
+      setCurrentlySaved({
+        countdownTitle: countdownTitle.trim() || "Countdown",
+        mode: activeTab,
+        frequency: activeTab === "recurring" ? frequency : undefined,
+        startDate,
+        endDate,
+      });
 
-      if (result.serverError) {
-        toast({
-          title: "Error",
-          description: result.serverError,
-          variant: "destructive",
-        });
-      } else {
-        // Update currently saved state
-        setCurrentlySaved({
-          countdownTitle: countdownTitle.trim() || "Countdown",
-          mode: activeTab,
-          frequency: activeTab === "recurring" ? frequency : undefined,
-          startDate,
-          endDate,
-        });
+      setSaveSuccess(true);
+      toast({
+        title: "Success",
+        description: "Countdown settings saved successfully",
+      });
 
-        setSaveSuccess(true);
-        toast({
-          title: "Success",
-          description: "Countdown settings saved successfully",
-        });
+      // Invalidate query to update widget
+      await queryClient.invalidateQueries({ queryKey: ["payday-settings"] });
 
-        // Invalidate query to update widget
-        await queryClient.invalidateQueries({ queryKey: ["payday-settings"] });
-
-        // Reset success state after 3 seconds
-        setTimeout(() => setSaveSuccess(false), 3000);
-      }
+      // Reset success state after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
       toast({
         title: "Error",

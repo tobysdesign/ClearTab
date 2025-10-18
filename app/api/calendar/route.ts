@@ -3,22 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { user as userTable, connectedAccounts } from "@/shared/schema";
 import { eq } from "drizzle-orm";
-import { google } from "googleapis";
-
-function getGoogleOAuth2Client(accessToken: string, refreshToken?: string) {
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
-  );
-
-  oauth2Client.setCredentials({
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  });
-
-  return oauth2Client;
-}
+import { googleApiService, type GoogleAuth } from "@/lib/google-api-service";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,41 +32,12 @@ export async function GET(request: NextRequest) {
     // Fetch events from primary account if connected
     if (dbUser.googleCalendarConnected && dbUser.accessToken) {
       try {
-        const oauth2Client = getGoogleOAuth2Client(
-          dbUser.accessToken,
-          dbUser.refreshToken || undefined,
-        );
+        const auth: GoogleAuth = {
+          accessToken: dbUser.accessToken,
+          refreshToken: dbUser.refreshToken || undefined,
+        };
 
-        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-
-        const response = await calendar.events.list({
-          calendarId: "primary",
-          timeMin: thirtyDaysAgo.toISOString(),
-          timeMax: thirtyDaysFromNow.toISOString(),
-          singleEvents: true,
-          orderBy: "startTime",
-        });
-
-        events = (response.data.items || []).map((event) => ({
-          id: event.id || "",
-          title: event.summary || "Untitled Event",
-          start: event.start?.dateTime || event.start?.date || "",
-          end: event.end?.dateTime || event.end?.date || "",
-          description: event.description || undefined,
-          location: event.location || undefined,
-          allDay: !event.start?.dateTime,
-          color: event.colorId
-            ? `var(--google-calendar-${event.colorId})`
-            : "rgba(59, 130, 246, 0.3)",
-          calendarId: "primary",
-          calendarName: dbUser.email,
-          source: "google" as const,
-        }));
+        events = await googleApiService.getCalendarEvents(auth, dbUser.email);
       } catch (error) {
         console.error("Error fetching primary calendar:", error);
       }
@@ -97,32 +53,15 @@ export async function GET(request: NextRequest) {
       if (!account.accessToken) continue;
 
       try {
-        const oauth2Client = getGoogleOAuth2Client(
-          account.accessToken,
-          account.refreshToken || undefined,
-        );
-
-        const calendar = google.calendar({ version: "v3", auth: oauth2Client });
-
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-
-        const response = await calendar.events.list({
-          calendarId: "primary",
-          timeMin: thirtyDaysAgo.toISOString(),
-          timeMax: thirtyDaysFromNow.toISOString(),
-          singleEvents: true,
-          orderBy: "startTime",
-        });
+        const auth: GoogleAuth = {
+          accessToken: account.accessToken,
+          refreshToken: account.refreshToken || undefined,
+        };
 
         // Get account email
-        const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
         let accountEmail = "Secondary Account";
         try {
-          const { data: userInfo } = await oauth2.userinfo.get();
-          accountEmail = userInfo.email || accountEmail;
+          accountEmail = await googleApiService.getUserInfo(auth);
         } catch (e) {
           console.error(
             "Could not fetch email for secondary account:",
@@ -130,18 +69,14 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        const secondaryEvents = (response.data.items || []).map((event) => ({
-          id: `${account.id}-${event.id}` || "",
-          title: event.summary || "Untitled Event",
-          start: event.start?.dateTime || event.start?.date || "",
-          end: event.end?.dateTime || event.end?.date || "",
-          description: event.description || undefined,
-          location: event.location || undefined,
-          allDay: !event.start?.dateTime,
+        // Get calendar events
+        const secondaryEventsList = await googleApiService.getCalendarEvents(auth, accountEmail);
+
+        const secondaryEvents = secondaryEventsList.map((event) => ({
+          ...event,
+          id: `${account.id}-${event.id}`,
           color: "rgba(147, 51, 234, 0.3)", // Purple tint for secondary accounts
-          calendarId: "primary",
           calendarName: `${accountEmail} (view-only)`,
-          source: "google" as const,
         }));
 
         events.push(...secondaryEvents);

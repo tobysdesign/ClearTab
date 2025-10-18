@@ -2,6 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import * as React from "react"
+import { CloseIcon } from '@/components/icons'
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -82,7 +83,7 @@ const ToastClose = React.forwardRef<
     toast-close=""
     {...props}
   >
-    <span className="h-4 w-4">×</span>
+    <CloseIcon size={16} />
   </ToastPrimitives.Close>
 ))
 ToastClose.displayName = ToastPrimitives.Close.displayName

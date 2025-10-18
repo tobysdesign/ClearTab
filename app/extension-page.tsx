@@ -18,6 +18,7 @@ import { Inter, Tinos } from "next/font/google"
 import { cn } from "@/lib/utils"
 import React, { Suspense, useEffect } from 'react'
 import Loading from "./loading"
+import { BrandedLoader } from "@/components/ui/branded-loader"
 import styles from "./layout.module.css"
 import "@/app/globals.css"
 import "@/styles/material-3.css"
@@ -91,19 +92,7 @@ export default function ExtensionPage() {
           zIndex: 9999,
         }}
       >
-        <div style={{ width: "150px", height: "82.8px" }}>
-          <img
-            src="/assets/loading.gif"
-            alt="Loading..."
-            width={500}
-            height={276}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain"
-            }}
-          />
-        </div>
+        <BrandedLoader size="large" />
       </div>
 
       <QueryClientProvider client={queryClient}>

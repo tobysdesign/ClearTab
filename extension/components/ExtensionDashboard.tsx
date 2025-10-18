@@ -7,6 +7,7 @@ import React, { useState, useRef } from 'react'
 import { BackgroundCanvas } from './BackgroundCanvas'
 import { ExtensionDock } from './ExtensionDock'
 import { EmptyBentoGrid } from './EmptyBentoGrid'
+import { BrandedLoader } from '@/components/ui/branded-loader'
 
 export function ExtensionDashboard() {
   const [isLoading, setIsLoading] = useState(false)
@@ -21,11 +22,7 @@ export function ExtensionDashboard() {
 
       {isLoading ? (
         <div className="loading-container">
-          <img
-            src="/assets/loading.gif"
-            alt="Loading..."
-            className="loading-image"
-          />
+          <BrandedLoader size="medium" />
         </div>
       ) : (
         <>

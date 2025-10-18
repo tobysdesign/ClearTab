@@ -84,6 +84,6 @@ export default defineConfig({
   // Dependency optimization for faster builds and smaller bundles
   optimizeDeps: {
     include: ["react", "react-dom", "framer-motion", "zustand"],
-    exclude: ["next", "@blocknote/core", "@blocknote/react", "googleapis"],
+    exclude: ["next", "googleapis"],
   },
 });

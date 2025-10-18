@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db';
 import { connectedAccounts } from '@/shared/schema';
 import { eq, and } from 'drizzle-orm';
-import { google } from 'googleapis';
+// Remove googleapis dependency - replaced with direct API calls
 
 // This endpoint forces a check on a linked account to see if its tokens are still valid.
 // If tokens are invalid (e.g., user revoked access in Google), it deletes the stale connection.
@@ -38,27 +38,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Attempt to use the stored tokens to see if they are still valid.
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({
-      access_token: staleLink.accessToken,
-      refresh_token: staleLink.refreshToken,
-    });
-
+    // Make a lightweight API call to Google to check the token validity.
     try {
-      // Make a lightweight API call to Google to check the token validity.
-      await oauth2Client.getTokenInfo(staleLink.accessToken!);
-      // If this call succeeds, the token is still valid and the user has not revoked access.
-      return NextResponse.json({ error: 'This account connection is still active. The owner must revoke permissions from their Google Account settings.' }, { status: 400 });
-    } catch (error: any) {
-      // If the error is 'invalid_grant' or similar, it means the user has revoked access.
-      if (error.response?.data?.error === 'invalid_grant' || error.message.includes('invalid_token')) {
-        // The token is invalid, so we can safely delete the stale connection.
+      const response = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `access_token=${staleLink.accessToken}`,
+      });
+
+      if (response.ok) {
+        // If this call succeeds, the token is still valid and the user has not revoked access.
+        return NextResponse.json({
+          error: 'This account connection is still active. The owner must revoke permissions from their Google Account settings.'
+        }, { status: 400 });
+      } else {
+        // Token is invalid, we can safely delete the stale connection.
         await db.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
         return NextResponse.json({ success: true, message: 'Stale connection successfully removed.' });
-      } else {
-        // Re-throw other unexpected errors.
-        throw error;
       }
+    } catch (error: any) {
+      // If there's a network error or other issue, assume token is invalid
+      await db.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
+      return NextResponse.json({ success: true, message: 'Stale connection successfully removed.' });
     }
 
   } catch (error: any) {

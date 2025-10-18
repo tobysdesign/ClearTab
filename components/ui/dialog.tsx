@@ -3,6 +3,7 @@
 // Icons replaced with ASCII placeholders
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { CloseIcon } from "@/components/icons"
 import styles from './dialog.module.css'
 
 import { cn } from "@/lib/utils"
@@ -40,7 +41,7 @@ const DialogContent = React.forwardRef<
     >
       {children}
       <DialogPrimitive.Close className={styles.closeBtn}>
-        <span className={styles.closeIcon}>×</span>
+        <CloseIcon size={16} className="text-gray-500" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

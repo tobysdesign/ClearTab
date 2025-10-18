@@ -203,8 +203,8 @@ html {
     position: fixed;
 
     /* box model */
-    width: 80px;
-    height: 80px;
+    width: 150px;
+    height: 50px;
     border: 2px dashed;
     border-radius: 8px;
 
@@ -2179,8 +2179,6 @@ html[data-vaul-drawer-visible="true"] {
 [class*="card"] h2 {
     font-size: 10px;
 }
-
-@import "@blocknote/mantine/style.css";
 
 /* Editor styles */
 .editor-container {

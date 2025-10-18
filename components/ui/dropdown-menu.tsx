@@ -1,5 +1,6 @@
 // Icons replaced with ASCII placeholders
 import * as React from "react"
+import { CheckIcon } from '@/components/icons'
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { cn } from "@/lib/utils"
 import styles from './dropdown-menu.module.css'
@@ -88,7 +89,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   >
     <span className={styles.indicatorWrapper}>
       <DropdownMenuPrimitive.ItemIndicator>
-        <span className={styles.checkIcon}>✓</span>
+        <CheckIcon size={16} />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

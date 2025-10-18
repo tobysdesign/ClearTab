@@ -2,6 +2,7 @@
 
 // Icons replaced with ASCII placeholders
 import React, { useRef } from 'react'
+import { CloseIcon } from '@/components/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useOutsideClick } from '@/hooks/use-outside-click'
 import { cn } from '@/lib/utils'
@@ -78,7 +79,7 @@ export function ExpandingModal({
                     className="md3-icon-button"
                     aria-label="Close dialog"
                   >
-                    <span size={20}>×</span>
+                    <CloseIcon size={20} />
                   </button>
                 </motion.div>
                 {children}

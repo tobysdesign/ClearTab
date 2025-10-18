@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { motion, PanInfo, useAnimationControls } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { DragIcon } from "@/components/icons";
 // Icons replaced with ASCII placeholders
 import { DockContent } from "../dashboard/dock-content";
 import { ResizableBentoGrid } from "./resizable-bento-grid";
-import { SettingsDrawer } from "@/components/settings/settings-drawer";
 import { PieGuide } from "./pie-guide";
 import { type ReactNode } from "react";
-import Image from "next/image";
+import { BrandedLoader } from "@/components/ui/branded-loader";
 import styles from "./dashboard-client.module.css";
 
 interface DashboardClientProps {
@@ -28,16 +29,7 @@ interface DropZone {
 function LoadingState() {
   return (
     <div className={styles.loadingContainer}>
-      <div className={styles.loadingImageContainer}>
-        <Image
-          src="/assets/loading.gif"
-          alt="Loader..."
-          fill
-          className="object-contain"
-          priority
-          unoptimized={true}
-        />
-      </div>
+      <BrandedLoader size="medium" />
     </div>
   );
 }
@@ -68,10 +60,10 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
     typeof window !== "undefined"
       ? {
           id: initialPosition,
-          x: window.innerWidth / 2,
-          y: window.innerHeight - 60,
-          width: 0,
-          height: 0,
+          x: (window.innerWidth - 150) / 2, // Center horizontally with correct width
+          y: window.innerHeight - 52 - 10, // Bottom edge closer to border
+          width: 150, // DOCK_WIDTH_HORIZONTAL
+          height: 52, // DOCK_HEIGHT
         }
       : null;
 
@@ -95,38 +87,50 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
 
   const calculateDropZones = useCallback(() => {
     const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-    const _EDGE_MARGIN = 8;
+    const _EDGE_MARGIN = 20;
+
+    // More realistic dock dimensions based on actual content
+    const DOCK_WIDTH_HORIZONTAL = 150; // Horizontal dock width (icons + padding)
+    const DOCK_HEIGHT = 52; // Standard dock height
+    const DOCK_WIDTH_VERTICAL = 52; // Vertical dock width
 
     const newZones: DropZone[] = [
       {
         id: "top",
-        x: windowWidth / 2,
-        y: 60,
-        width: 0,
-        height: 0,
+        x: (windowWidth - DOCK_WIDTH_HORIZONTAL) / 2, // Center horizontally
+        y: 10, // Top edge closer to border
+        width: DOCK_WIDTH_HORIZONTAL,
+        height: DOCK_HEIGHT,
       },
       {
         id: "bottom",
-        x: windowWidth / 2,
-        y: windowHeight - 60,
-        width: 0,
-        height: 0,
+        x: (windowWidth - DOCK_WIDTH_HORIZONTAL) / 2, // Center horizontally
+        y: windowHeight - DOCK_HEIGHT - 10, // Bottom edge closer to border
+        width: DOCK_WIDTH_HORIZONTAL,
+        height: DOCK_HEIGHT,
       },
       {
         id: "left",
-        x: _EDGE_MARGIN + 60,
-        y: windowHeight / 2,
-        width: 0,
-        height: 0,
+        x: 10, // Left edge closer to border
+        y: (windowHeight - 150) / 2, // Center vertically
+        width: DOCK_WIDTH_VERTICAL,
+        height: 150,
       },
       {
         id: "right",
-        x: windowWidth - _EDGE_MARGIN - 60,
-        y: windowHeight / 2,
-        width: 0,
-        height: 0,
+        x: windowWidth - DOCK_WIDTH_VERTICAL - 10, // Right edge closer to border
+        y: (windowHeight - 150) / 2, // Center vertically
+        width: DOCK_WIDTH_VERTICAL,
+        height: 150,
       },
     ];
+
+    console.log("🔧 Calculating drop zones:", {
+      windowWidth,
+      windowHeight,
+      newZones: newZones.map(zone => ({ id: zone.id, x: zone.x, y: zone.y }))
+    });
+
     setDropZones(newZones);
   }, []);
 
@@ -140,6 +144,11 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
 
   useEffect(() => {
     if (currentZone) {
+      console.log("🚀 Positioning dock:", {
+        position,
+        currentZone: { id: currentZone.id, x: currentZone.x, y: currentZone.y }
+      });
+
       controls.start(
         {
           x: currentZone.x,
@@ -148,7 +157,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         { type: "spring", stiffness: 500, damping: 40 },
       );
     }
-  }, [currentZone, controls]);
+  }, [currentZone, controls, position]);
 
   const handleDragStart = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -156,6 +165,7 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   ) => {
     setIsDragging(true);
     if (currentZone) {
+      // Calculate the center of the dock for pie guide positioning
       setDragOrigin({
         x: currentZone.x + currentZone.width / 2,
         y: currentZone.y + currentZone.height / 2,
@@ -173,11 +183,11 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
     const validZones = dropZones.filter((z) => z.id !== position);
 
     for (const zone of validZones) {
-      const zoneCenterX = zone.x + zone.width / 2;
-      const zoneCenterY = zone.y + zone.height / 2;
+      const zoneCenterX = zone.x;
+      const zoneCenterY = zone.y;
       const distance = Math.sqrt(
-        Math.pow(info.point.x - zoneCenterX, 2) +
-          Math.pow(info.point.y - zoneCenterY, 2),
+        Math.pow(_info.point.x - zoneCenterX, 2) +
+          Math.pow(_info.point.y - zoneCenterY, 2),
       );
 
       if (distance < minDistance) {
@@ -262,52 +272,62 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
                 nearestZoneId === zone.id ? "drop-zone-active" : "drop-zone-inactive",
               )}
               style={{
-                left: zone.x,
-                top: zone.y,
+                left: zone.x + zone.width / 2,
+                top: zone.y + zone.height / 2,
+                width: zone.id === 'left' || zone.id === 'right' ? '52px' : '150px',
+                height: zone.id === 'left' || zone.id === 'right' ? '150px' : '50px',
               }}
             />
           );
         })}
 
-      <motion.div
-        drag
-        dragConstraints={containerRef}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        dragMomentum={false}
-        className="dock-container"
-        animate={controls}
-      >
-        <div
-          className={cn(
-            "dock-content",
-            isVertical ? "dock-content-vertical" : "dock-content-horizontal",
-          )}
+      {typeof window !== 'undefined' && createPortal(
+        <motion.div
+          drag
+          dragConstraints={{
+            left: 0,
+            right: typeof window !== 'undefined' ? window.innerWidth - 100 : 1000,
+            top: 0,
+            bottom: typeof window !== 'undefined' ? window.innerHeight - 100 : 1000,
+          }}
+          onDragStart={handleDragStart}
+          onDrag={handleDrag}
+          onDragEnd={handleDragEnd}
+          dragMomentum={false}
+          className="dock-container"
+          animate={controls}
+          initial={currentZone ? { x: currentZone.x, y: currentZone.y } : { x: typeof window !== 'undefined' ? (window.innerWidth - 200) / 2 + 29 : 500, y: typeof window !== 'undefined' ? window.innerHeight - 20 - 60 + 25 : 700 }}
+          style={{ position: 'fixed', top: 0, left: 0, zIndex: 30 }}
         >
-          <DockContent
-            showSearch={showSearch}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            showSettings={showSettings}
-            setShowSettings={setShowSettings}
-            setShowSearch={setShowSearch}
-            isVertical={isVertical}
-          />
-
-          <SettingsDrawer />
-
           <div
-            className="dock-handle"
-            onPointerDown={(e) => {
-              const target = e.currentTarget as HTMLDivElement;
-              target.setPointerCapture(e.pointerId);
-            }}
+            className={cn(
+              "dock-content",
+              isVertical ? "dock-content-vertical" : "dock-content-horizontal",
+            )}
           >
-            <span className="dock-handle-icon">≡</span>
+            <DockContent
+              showSearch={showSearch}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              showSettings={showSettings}
+              setShowSettings={setShowSettings}
+              setShowSearch={setShowSearch}
+              isVertical={isVertical}
+            />
+
+            <div
+              className="dock-handle"
+              onPointerDown={(e) => {
+                const target = e.currentTarget as HTMLDivElement;
+                target.setPointerCapture(e.pointerId);
+              }}
+            >
+              <DragIcon size={16} className="text-white/60" />
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>,
+        document.body
+      )}
     </div>
   );
 }

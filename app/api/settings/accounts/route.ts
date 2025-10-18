@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db";
 import { connectedAccounts, user as userTable } from "@/shared/schema";
 import { eq, and } from "drizzle-orm";
-import { google } from "googleapis";
+import { lightweightGoogleApi } from "@/lib/lightweight-google-api";
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,19 +29,12 @@ export async function GET(request: NextRequest) {
             return { ...account, email: "Unknown" };
           }
 
-          const oauth2Client = new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-          );
+          const auth = {
+            accessToken: account.accessToken,
+            refreshToken: account.refreshToken || undefined,
+          };
 
-          oauth2Client.setCredentials({
-            access_token: account.accessToken,
-            refresh_token: account.refreshToken || undefined,
-          });
-
-          const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
-          const { data: userInfo } = await oauth2.userinfo.get();
-
+          const userInfo = await lightweightGoogleApi.getUserInfo(auth);
           return { ...account, email: userInfo.email || "Unknown" };
         } catch (error) {
           console.error(

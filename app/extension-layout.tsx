@@ -11,6 +11,7 @@ import { CharcoalWave } from "@/components/ui/charcoal-wave";
 import { Toaster as DefaultToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
+import { BrandedLoader } from "@/components/ui/branded-loader";
 import styles from "./layout.module.css";
 
 const inter = Inter({
@@ -66,19 +67,7 @@ export default function ExtensionLayout({ children }: ExtensionLayoutProps) {
             zIndex: 9999,
           }}
         >
-          <div style={{ width: "150px", height: "82.8px" }}>
-            <img
-              src="/assets/loading.gif"
-              alt="Loading..."
-              width={500}
-              height={276}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain"
-              }}
-            />
-          </div>
+          <BrandedLoader size="large" />
         </div>
         <ThemeProvider
           attribute="class"

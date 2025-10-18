@@ -6,6 +6,7 @@
 import React from 'react'
 import { useAuth } from '../utils/chrome-auth'
 import { ExtensionAuthPage } from './ExtensionAuthPage'
+import { BrandedLoader } from '@/components/ui/branded-loader'
 
 interface ChromeAuthProviderProps {
   children: React.ReactNode
@@ -18,11 +19,7 @@ export function ChromeAuthProvider({ children }: ChromeAuthProviderProps) {
     return (
       <div className="auth-provider">
         <div className="loading-container">
-          <img
-            src="/assets/loading.gif"
-            alt="Loading..."
-            className="loading-image"
-          />
+          <BrandedLoader size="large" />
         </div>
       </div>
     )
