@@ -3,7 +3,7 @@
 // Icons replaced with ASCII placeholders
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { format, parseISO, isToday, isAfter, isBefore } from 'date-fns'
+import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
 
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -35,10 +35,10 @@ function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: bool
     if (!timeStr) return new Date();
     return timeStr.includes('T') ? parseISO(timeStr) : new Date(parseInt(timeStr));
   };
-  
+
   const startTime = parseEventTime(event.start);
   const endTime = parseEventTime(event.end);
-  
+
   return (
     <div className={cn('widget-list-item widget-list-item--schedule', styles.eventCard, {
       [styles.eventCardCurrent]: isCurrent,
@@ -46,7 +46,7 @@ function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: bool
     })}>
       <div className={styles.eventTitle}>{event.title}</div>
       <div className={styles.eventTime}>
-        {format(startTime, 'p')} – {format(endTime, 'p')}
+        {event.allDay ? 'All day' : `${format(startTime, 'p')} – ${format(endTime, 'p')}`}
       </div>
     </div>
   )
