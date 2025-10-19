@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 // Removed CalendarIcon as it's not used directly in JSX
-import { format } from '@/lib/date-utils'
+import { format, formatDateSmart } from '@/lib/date-utils'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -27,11 +27,12 @@ import { TaskEditor } from '@/components/ui/task-editor'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import styles from './edit-task-form.module.css'
 // API functions for tasks
 async function updateTaskAPI(task: Partial<Task> & { id: string }): Promise<Task> {
   console.log('updateTaskAPI called with:', task);
-  const res = await fetch(`/api/tasks/${task.id}`, {
-    method: 'PATCH',
+  const res = await fetch(`/api/tasks`, {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task),
   })
@@ -82,7 +83,7 @@ const EditorComponent = dynamic(
 interface EditTaskFormProps {
   task?: Task | null
   onClose?: () => void
-  onSave?: () => void
+  onSave?: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void
   initialDescription?: string; // Add prop for initial description from editor selection
 }
 
@@ -137,6 +138,8 @@ export function EditTaskForm({
 
   useEffect(() => {
     if (task) {
+      console.log('EditTaskForm: Setting up form for task:', task)
+      console.log('Task content:', task.content)
       form.reset({
         title: task.title,
         content: task.content || EMPTY_QUILL_CONTENT,
@@ -166,10 +169,10 @@ export function EditTaskForm({
   }, [lastSaveResult, onSave, task])
 
   // Submit form directly on change for optimistic updates
-  const handleFormChange = () => {
-    // Only submit if there are actual changes
-    if (form.formState.isDirty) {
-      console.log('Form is dirty, submitting:', form.getValues());
+  const handleFormChange = (forceSubmit = false) => {
+    // Submit if there are actual changes OR if forced (for switches/checkboxes)
+    if (form.formState.isDirty || forceSubmit) {
+      console.log('Form is dirty or forced, submitting:', form.getValues());
       onSubmit(form.getValues());
     } else {
       console.log('Form not dirty, skipping submit');
@@ -203,70 +206,88 @@ export function EditTaskForm({
         }
         console.log('Save result:', result);
         setLastSaveResult({ data: { success: true, data: result } });
+
+        // Call onSave callback with specific task data and operation
+        if (onSave) {
+          const operation = task?.id ? 'update' : 'create';
+          onSave(result, operation);
+        }
       } catch (error) {
         console.error('Failed to save task:', error);
         setLastSaveResult({ data: { success: false, error: (error as Error).message } });
+
+        // Show user-friendly error message
+        alert(`Failed to save task: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     });
   }
 
-  // Use onChange for editor, which also triggers form submission
-  const handleEditorChange = (content: Block[]) => {
+  // Use onChange for editor, with debounced save
+  const handleEditorChange = (content: QuillDelta) => {
     console.log('Editor content changed:', content);
     setCurrentContent(content);
-    // Mark form as dirty since editor content changed
-    form.setValue('content', content, { shouldDirty: true });
-    handleFormChange(); // Trigger form submission on editor change
+    // Update form value without marking as dirty to avoid triggering saves
+    form.setValue('content', content, { shouldDirty: false });
+    // The form will be saved on blur when user finishes editing
+  };
+
+  // Check if the due date is in the past
+  const isDateInPast = (date: Date | null) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(date);
+    dueDate.setHours(0, 0, 0, 0);
+    return dueDate < today;
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-auto p-6">
-        <form className="space-y-4">
-      <div className="md3-text-field md3-text-field--with-label">
-        <div className="md3-text-field__container">
-          <input
-            id="title"
-            {...form.register('title')}
-            placeholder=" "
-            className="md3-text-field__input"
-            onBlur={handleFormChange}
-          />
-          <label htmlFor="title" className="md3-text-field__label">
-            Task Title
-          </label>
-        </div>
+    <div className={styles.formContainer}>
+      <div className={styles.formContent}>
+        <form className={styles.formFields}>
+      <div>
+        <label htmlFor="title" className={styles.fieldLabel}>
+          Task Title
+        </label>
+        <input
+          id="title"
+          {...form.register('title')}
+          placeholder="Enter task title"
+          className={styles.textInput}
+          onBlur={handleFormChange}
+        />
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="md3-text-field md3-text-field--with-label flex-shrink-0" style={{width: '120px'}}>
-          <div className="md3-text-field__container relative">
+      <div className={styles.dateAndPriorityRow}>
+        <div className={styles.datePickerContainer}>
+          <label htmlFor="dueDate" className={styles.fieldLabel}>
+            Due by (optional)
+          </label>
+          <div className="relative">
             <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
               <PopoverTrigger asChild>
                 <input
                   readOnly
-                  value={form.watch('dueDate') ? format(form.watch('dueDate') as Date, 'dd/MM/yyyy') : ''}
-                  className="md3-text-field__input cursor-pointer pr-8"
-                  placeholder=" "
+                  value={form.watch('dueDate') ? formatDateSmart(form.watch('dueDate') as Date) : ''}
+                  className={`${styles.dateInput} ${isDateInPast(form.watch('dueDate')) ? styles.dateInputPast : ''}`}
+                  placeholder="Select date"
                 />
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0 rounded-lg md3-elevation-3" 
+              <PopoverContent
+                className="w-auto p-0 rounded-lg md3-elevation-3"
                 style={{
                   backgroundColor: 'var(--md-sys-color-surface-container-high)',
                   border: '1px solid var(--md-sys-color-outline)'
                 }}
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 onClick={(e) => e.stopPropagation()}
-                onPointerDownOutside={(e) => e.preventDefault()}
-                onInteractOutside={(e) => e.preventDefault()}
               >
                 <Calendar
                   mode="single"
                   selected={form.watch('dueDate') || undefined}
                   onSelect={(date) => {
                     form.setValue('dueDate', date || null, { shouldDirty: true });
-                    handleFormChange();
+                    handleFormChange(true); // Force submit
                     setDatePickerOpen(false);
                   }}
                   className="rounded-md"
@@ -278,7 +299,7 @@ export function EditTaskForm({
                       type="button"
                       onClick={() => {
                         form.setValue('dueDate', null, { shouldDirty: true });
-                        handleFormChange();
+                        handleFormChange(true); // Force submit
                         setDatePickerOpen(false);
                       }}
                       className="w-full text-sm text-red-400 hover:text-red-300 py-1"
@@ -294,66 +315,63 @@ export function EditTaskForm({
                 type="button"
                 onClick={() => {
                   form.setValue('dueDate', null, { shouldDirty: true });
-                  handleFormChange();
+                  handleFormChange(true); // Force submit
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/40 p-1"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 p-1"
               >
                 <CloseIcon size={16} className="text-white/40" />
               </button>
             )}
-            <label htmlFor="dueDate" className="md3-text-field__label">
-              Due by (optional)
-            </label>
           </div>
         </div>
-        <div className="flex items-center space-x-3 flex-shrink-0" style={{width: 'fit-content'}}>
-          <div 
-            className={`md3-switch ${form.watch('isHighPriority') ? 'md3-switch--checked' : ''}`}
-            onClick={() => {
+        <div className={styles.priorityContainer}>
+          <div className={styles.priorityInner}>
+            <div
+              className={`md3-switch ${form.watch('isHighPriority') ? 'md3-switch--checked' : ''}`}
+              onClick={() => {
+                const newValue = !form.watch('isHighPriority');
+                form.setValue('isHighPriority', newValue, { shouldDirty: true });
+                handleFormChange(true); // Force submit
+              }}
+            >
+              <div className="md3-switch__thumb"></div>
+            </div>
+            <span className="text-sm text-white/90 cursor-pointer" onClick={() => {
               const newValue = !form.watch('isHighPriority');
               form.setValue('isHighPriority', newValue, { shouldDirty: true });
-              handleFormChange();
-            }}
-          >
-            <div className="md3-switch__thumb"></div>
+              handleFormChange(true); // Force submit
+            }}>
+              High Priority
+            </span>
           </div>
-          <label className="md3-on-surface-variant cursor-pointer whitespace-nowrap text-sm" onClick={() => {
-            const newValue = !form.watch('isHighPriority');
-            form.setValue('isHighPriority', newValue, { shouldDirty: true });
+        </div>
+      </div>
+
+      <div className={styles.descriptionField}>
+        <label className={styles.fieldLabel}>
+          Description
+        </label>
+        <TaskEditor
+          key={`task-editor-${task?.id || 'new'}`}
+          initialContent={currentContent}
+          onChange={handleEditorChange}
+          onBlur={() => {
+            // Mark form as dirty and save when user finishes editing
+            form.setValue('content', currentContent, { shouldDirty: true });
             handleFormChange();
-          }}>
-            High Priority
-          </label>
-        </div>
+          }}
+          placeholder="Describe the task..."
+          className={styles.taskEditor}
+        />
       </div>
 
-      <div className="md3-text-field md3-text-field--with-label">
-        <div className="md3-text-field__container relative">
-          <TaskEditor
-            initialContent={currentContent}
-            onChange={handleEditorChange}
-            placeholder="Describe the task..."
-            className="task-description-editor md3-text-field__input"
-            style={{
-              border: '1px solid var(--md-sys-color-outline)',
-              borderRadius: 'var(--md-sys-shape-corner-extra-small)',
-              minHeight: '80px',
-              padding: '0'
-            }}
-          />
-          <label className="md3-text-field__label">
-            Description
-          </label>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-3 pb-4">
-        <div 
+      <div className={styles.completedField}>
+        <div
           className={`md3-checkbox ${form.watch('isCompleted') ? 'md3-checkbox--checked' : ''}`}
           onClick={() => {
             const newValue = !form.watch('isCompleted');
             form.setValue('isCompleted', newValue, { shouldDirty: true });
-            handleFormChange();
+            handleFormChange(true); // Force submit
           }}
         >
           {form.watch('isCompleted') && (
@@ -365,14 +383,14 @@ export function EditTaskForm({
         <label className="md3-on-surface-variant cursor-pointer text-sm" onClick={() => {
           const newValue = !form.watch('isCompleted');
           form.setValue('isCompleted', newValue, { shouldDirty: true });
-          handleFormChange();
+          handleFormChange(true); // Force submit
         }}>
           Mark as Complete
         </label>
       </div>
         </form>
       </div>
-      <div className="p-4 border-t border-[var(--md-sys-color-outline)]">
+      <div className={styles.fixedFooter}>
         <button
           type="button"
           onClick={onClose}

@@ -1,164 +1,168 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bye Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Bye Dashboard</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #09090B;
-            color: #fafafa;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    "Helvetica Neue", Arial, sans-serif;
+                background: #09090b;
+                color: #fafafa;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 2rem;
-            text-align: center;
-        }
+            .container {
+                width: 100%;
+                max-width: 1200px;
+                padding: 2rem;
+                text-align: center;
+            }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+            h1 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
 
-        p {
-            font-size: 1.25rem;
-            color: #a1a1aa;
-            margin-bottom: 2rem;
-        }
+            p {
+                font-size: 1.25rem;
+                color: #a1a1aa;
+                margin-bottom: 2rem;
+            }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 3rem;
-        }
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                margin-top: 3rem;
+            }
 
-        .widget {
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
+            .widget {
+                background: #18181b;
+                border: 1px solid #27272a;
+                border-radius: 12px;
+                padding: 1.5rem;
+                transition: all 0.3s ease;
+            }
 
-        .widget:hover {
-            border-color: #3f3f46;
-            transform: translateY(-2px);
-        }
+            .widget:hover {
+                border-color: #3f3f46;
+                transform: translateY(-2px);
+            }
 
-        .widget h2 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: #fafafa;
-        }
+            .widget h2 {
+                font-size: 1.25rem;
+                margin-bottom: 0.5rem;
+                color: #fafafa;
+            }
 
-        .widget p {
-            font-size: 0.875rem;
-            color: #71717a;
-            margin: 0;
-        }
+            .widget p {
+                font-size: 14px;
+                color: #71717a;
+                margin: 0;
+            }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #3f3f46;
-            border-radius: 50%;
-            border-top-color: #667eea;
-            animation: spin 1s ease-in-out infinite;
-        }
+            .loading {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 2px solid #3f3f46;
+                border-radius: 50%;
+                border-top-color: #667eea;
+                animation: spin 1s ease-in-out infinite;
+            }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
 
-        .offline-badge {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: #f59e0b;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-    </style>
-</head>
-<body>
-    <div class="offline-badge">Offline Mode</div>
+            .offline-badge {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                background: #f59e0b;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="offline-badge">Offline Mode</div>
 
-    <div class="container">
-        <h1>Bye Dashboard</h1>
-        <p>Your productivity hub is loading...</p>
+        <div class="container">
+            <h1>Bye Dashboard</h1>
+            <p>Your productivity hub is loading...</p>
 
-        <div class="grid">
-            <div class="widget">
-                <h2>📝 Notes</h2>
-                <p>Quick notes and thoughts</p>
+            <div class="grid">
+                <div class="widget">
+                    <h2>📝 Notes</h2>
+                    <p>Quick notes and thoughts</p>
+                </div>
+
+                <div class="widget">
+                    <h2>✅ Tasks</h2>
+                    <p>Your to-do list</p>
+                </div>
+
+                <div class="widget">
+                    <h2>📅 Schedule</h2>
+                    <p>Calendar events</p>
+                </div>
+
+                <div class="widget">
+                    <h2>☀️ Weather</h2>
+                    <p>Current conditions</p>
+                </div>
+
+                <div class="widget">
+                    <h2>⏱️ Countdown</h2>
+                    <p>Track important dates</p>
+                </div>
+
+                <div class="widget">
+                    <h2>🎙️ Recorder</h2>
+                    <p>Voice notes</p>
+                </div>
             </div>
 
-            <div class="widget">
-                <h2>✅ Tasks</h2>
-                <p>Your to-do list</p>
-            </div>
-
-            <div class="widget">
-                <h2>📅 Schedule</h2>
-                <p>Calendar events</p>
-            </div>
-
-            <div class="widget">
-                <h2>☀️ Weather</h2>
-                <p>Current conditions</p>
-            </div>
-
-            <div class="widget">
-                <h2>⏱️ Countdown</h2>
-                <p>Track important dates</p>
-            </div>
-
-            <div class="widget">
-                <h2>🎙️ Recorder</h2>
-                <p>Voice notes</p>
-            </div>
+            <p style="margin-top: 3rem; font-size: 14px">
+                <span class="loading"></span> Initializing dashboard...
+            </p>
         </div>
 
-        <p style="margin-top: 3rem; font-size: 0.875rem;">
-            <span class="loading"></span> Initializing dashboard...
-        </p>
-    </div>
+        <script>
+            // Simple initialization
+            console.log("Extension fallback page loaded");
 
-    <script>
-        // Simple initialization
-        console.log('Extension fallback page loaded');
-
-        // Try to redirect to the main app after a delay
-        setTimeout(function() {
-            // Check if the main app might be ready
-            if (window.location.pathname === '/extension.html') {
-                console.log('Attempting to load main dashboard...');
-                // You can redirect to the React app here if needed
-                // window.location.href = '/index.html';
-            }
-        }, 3000);
-    </script>
-</body>
+            // Try to redirect to the main app after a delay
+            setTimeout(function () {
+                // Check if the main app might be ready
+                if (window.location.pathname === "/extension.html") {
+                    console.log("Attempting to load main dashboard...");
+                    // You can redirect to the React app here if needed
+                    // window.location.href = '/index.html';
+                }
+            }, 3000);
+        </script>
+    </body>
 </html>

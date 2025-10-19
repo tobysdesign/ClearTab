@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { QuillEditor } from './quill-editor'
+import dynamic from 'next/dynamic'
 import { EMPTY_QUILL_CONTENT } from '@/shared/schema'
 import styles from './editor.module.css'
 
@@ -18,6 +18,14 @@ function EditorSkeleton() {
     </div>
   )
 }
+
+const QuillEditor = dynamic(
+  () => import('./quill-editor').then(mod => mod.QuillEditor),
+  {
+    ssr: false,
+    loading: () => <EditorSkeleton />
+  }
+)
 
 export interface EditorProps {
   value?: any

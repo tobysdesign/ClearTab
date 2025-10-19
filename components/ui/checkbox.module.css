@@ -1,5 +1,5 @@
 .root {
-    @apply h-4 w-4 shrink-0 rounded-full border border-white/50 transition-colors hover:border-white data-[state=checked]:border-white data-[state=checked]:bg-transparent data-[state=checked]:text-white disabled:cursor-not-allowed disabled:opacity-50;
+    @apply h-4 w-4 shrink-0 rounded-full border border-white transition-colors hover:border-white/80 data-[state=checked]:border-white/40 data-[state=checked]:bg-transparent data-[state=checked]:text-white/40 disabled:cursor-not-allowed disabled:opacity-50;
 }
 .root.peer {
 }

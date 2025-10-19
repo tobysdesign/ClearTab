@@ -13,13 +13,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "@/app/client-providers";
-import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/lib/quill-utils";
+import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
 import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { CloseIcon } from "@/components/icons";
 // Icons replaced with ASCII placeholders
-import { format } from "@/lib/date-utils";
+import { formatDateSmart } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 
@@ -36,14 +36,21 @@ async function fetchTasks(): Promise<Task[]> {
 }
 
 async function updateTask(task: Partial<Task> & { id: string }): Promise<Task> {
-  const res = await api.patch(`/api/tasks/${task.id}`, task);
-  if (!res.ok) throw new Error("Failed to update task");
+  console.log('updateTask called with:', task);
+  const res = await api.put(`/api/tasks`, task);
+  console.log('updateTask response status:', res.status);
+  if (!res.ok) {
+    const errorBody = await res.json();
+    console.error('updateTask error:', errorBody);
+    throw new Error("Failed to update task");
+  }
   const response = await res.json();
+  console.log('updateTask success:', response);
   return response.data;
 }
 
 async function deleteTask(taskId: string): Promise<void> {
-  const res = await api.delete(`/api/tasks/${taskId}`);
+  const res = await api.delete(`/api/tasks?id=${taskId}`);
   if (!res.ok) throw new Error("Failed to delete task");
 }
 
@@ -83,8 +90,8 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
       body: JSON.stringify({
         title,
         isCompleted: false, // Default for new tasks from text
-        priority: "none", // Default for new tasks from text
-        // We'll handle the description formatting in the edit form
+        isHighPriority: false, // Default for new tasks from text
+        content: EMPTY_QUILL_CONTENT, // Use proper Quill content format
       }),
     });
 
@@ -101,30 +108,66 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
 }
 
 export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
-  const { setActiveTaskId, setNewTaskText, activeTask } = useTaskModal();
+  const { setActiveTaskId, setNewTaskText, activeTask, registerTaskUpdateCallback, unregisterTaskUpdateCallback } = useTaskModal();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
+  // Create a stable loadTasks function
+  const loadTasks = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await fetchTasks();
+      setTasks(data);
+      setIsError(false);
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   // Load tasks on mount
   useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        setIsLoading(true);
-        const data = await fetchTasks();
-        setTasks(data);
-        setIsError(false);
-      } catch {
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadTasks();
+  }, [loadTasks]);
+
+  // Handle granular task updates from modal
+  const handleTaskUpdate = useCallback((updatedTask: Task, operation: 'update' | 'create' | 'delete') => {
+    console.log('TasksWidget: handling task update', { updatedTask, operation });
+
+    setTasks(prev => {
+      switch (operation) {
+        case 'update':
+          return prev.map(task =>
+            task.id === updatedTask.id ? updatedTask : task
+          );
+        case 'create':
+          // Add new task to the beginning of the list
+          return [updatedTask, ...prev];
+        case 'delete':
+          return prev.filter(task => task.id !== updatedTask.id);
+        default:
+          return prev;
+      }
+    });
   }, []);
+
+  // Register task update callback with modal
+  useEffect(() => {
+    registerTaskUpdateCallback(handleTaskUpdate);
+    return () => {
+      unregisterTaskUpdateCallback(handleTaskUpdate);
+    };
+  }, [handleTaskUpdate, registerTaskUpdateCallback, unregisterTaskUpdateCallback]);
 
   const updateTaskLocal = useCallback(
     async (updatedTask: Partial<Task> & { id: string }) => {
+      console.log('updateTaskLocal called with:', updatedTask);
+
+      // Store original state for rollback
+      const originalTasks = [...tasks];
+
       try {
         // Optimistically update UI
         setTasks((prev) =>
@@ -132,17 +175,22 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
             task.id === updatedTask.id ? { ...task, ...updatedTask } : task,
           ),
         );
+        console.log('UI updated optimistically');
 
         // Update on server
         await updateTask(updatedTask);
+        console.log('Server update successful');
       } catch (error) {
-        // Rollback on error and reload
-        const data = await fetchTasks();
-        setTasks(data);
-        throw error;
+        console.error('updateTaskLocal error:', error);
+        // Rollback to original state immediately
+        setTasks(originalTasks);
+        console.log('Rolled back to original state due to error');
+
+        // Show user-friendly error
+        alert(`Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     },
-    [],
+    [tasks],
   );
 
   const deleteTaskLocal = useCallback(async (taskId: string) => {
@@ -225,24 +273,10 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
       isCompleted: false,
       isHighPriority: false,
       content: {
-        "paragraph-1": {
-          id: "paragraph-1",
-          type: "paragraph",
-          value: [
-            {
-              id: "paragraph-1-element",
-              type: "paragraph",
-              children: [{ text: text || "" }], // Use the full text as content
-              props: {
-                nodeType: "block",
-              },
-            },
-          ],
-          meta: {
-            order: 0,
-            depth: 0,
-          },
-        },
+        ops: [
+          { insert: _text || "" },
+          { insert: "\n" }
+        ]
       },
     });
   }
@@ -306,7 +340,11 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ x: -50, opacity: 0 }}
-                            onClick={() => setActiveTaskId(task.id)}
+                            onClick={() => {
+                              console.log('Setting active task ID:', task.id);
+                              console.log('Full task object:', task);
+                              setActiveTaskId(task.id);
+                            }}
                             className={cn(
                               "widget-list-item widget-list-item--tasks",
                               isActive && "active",
@@ -345,8 +383,13 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                               </div>
                               <div className={tasksStyles.tasksContentRight}>
                                 {task.dueDate && (
-                                  <span className={tasksStyles.taskDueDate}>
-                                    {format(new Date(task.dueDate), "d MMM")}
+                                  <span
+                                    className={cn(
+                                      tasksStyles.taskDueDate,
+                                      new Date(task.dueDate) < new Date() && "text-[#666666]"
+                                    )}
+                                  >
+                                    {formatDateSmart(task.dueDate)}
                                   </span>
                                 )}
                                 {task.isHighPriority && (

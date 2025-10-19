@@ -2,658 +2,674 @@
 
 /* Flip container */
 .flipContainer {
-  /* layout */
-  position: relative;
+    /* layout */
+    position: relative;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
+    /* box model */
+    width: 100%;
+    height: 100%;
 
-  /* visual */
-  perspective: 1000px;
-  transform-style: preserve-3d;
+    /* visual */
+    perspective: 1000px;
+    transform-style: preserve-3d;
 }
 
 .flipper {
-  /* layout */
-  position: relative;
+    /* layout */
+    position: relative;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
+    /* box model */
+    width: 100%;
+    height: 100%;
 
-  /* visual */
-  transform-style: preserve-3d;
+    /* visual */
+    transform-style: preserve-3d;
 
-  /* state */
-  transition: transform 0.8s;
+    /* state */
+    transition: transform 0.8s;
 }
 
 .flipped .flipper {
-  transform: rotateY(180deg);
+    transform: rotateY(180deg);
 }
 
-.front, .back {
-  /* layout */
-  position: absolute;
+.front,
+.back {
+    /* layout */
+    position: absolute;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
+    /* box model */
+    width: 100%;
+    height: 100%;
 
-  /* visual */
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+    /* visual */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .back {
-  transform: rotateY(180deg);
+    transform: rotateY(180deg);
 }
 
 .container {
-  /* layout */
-  position: relative;
-  overflow: visible;
+    /* layout */
+    position: relative;
+    overflow: visible;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
-  border: 1px solid #323235;
-  border-radius: 22px;
+    /* box model */
+    width: 100%;
+    height: 100%;
+    border: 1px solid #323235;
+    border-radius: 22px;
 
-  /* visual */
-  background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
-  box-shadow: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+    /* visual */
+    background: linear-gradient(
+        180deg,
+        rgb(19, 19, 19) 4%,
+        rgb(23, 21, 21) 100%
+    );
+    box-shadow:
+        0px 8px 12px 6px rgba(0, 0, 0, 0.15),
+        0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
 .content {
-  /* layout */
-  display: flex;
-  flex-direction: column;
+    /* layout */
+    display: flex;
+    flex-direction: column;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
+    /* box model */
+    width: 100%;
+    height: 100%;
 }
 
 .header {
-  /* box model */
-  padding-top: 24px;
-  padding-left: 24px;
-  padding-right: 24px;
-  padding-bottom: 0;
+    /* box model */
+    padding-top: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 0;
 }
 
 .headerText {
-  /* typography */
-  color: #d2d2d2;
-  font-size: 10px;
-  font-weight: 400;
-  line-height: normal;
+    /* typography */
+    color: #d2d2d2;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: normal;
 }
 
 .body {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  flex: 1;
-  gap: 20px;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    gap: 20px;
 
-  /* box model */
-  padding: 24px;
+    /* box model */
+    padding: 24px;
 }
 
 .buttonContainer {
-  /* layout */
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* layout */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button {
-  position: relative;
+    position: relative;
 }
 
 .buttonOuter {
-  /* layout */
-  position: relative;
+    /* layout */
+    position: relative;
 
-  /* box model */
-  width: 78.52px;
-  height: 78.52px;
-  border-radius: 1961.05px;
+    /* box model */
+    width: 78.52px;
+    height: 78.52px;
+    border-radius: 1961.05px;
 
-  /* visual */
-  background: rgba(47, 48, 51, 0.2);
-  box-shadow:
-    0px 3.92602px 28.5587px rgba(0, 0, 0, 0.26),
-    0px -3.92602px 15.7041px 3.92602px rgba(0, 0, 0, 0.57),
-    0px -3.92602px 15.7041px 3.92602px #212121,
-    0px -20px 13.7041px rgb(125 125 125 / 42%),
-    0px -20px 6.8009px rgba(255, 255, 255, 0.01);
+    /* visual */
+    background: rgba(47, 48, 51, 0.2);
+    box-shadow:
+        0px 3.92602px 28.5587px rgba(0, 0, 0, 0.26),
+        0px -3.92602px 15.7041px 3.92602px rgba(0, 0, 0, 0.57),
+        0px -3.92602px 15.7041px 3.92602px #212121,
+        0px -20px 13.7041px rgb(125 125 125 / 42%),
+        0px -20px 6.8009px rgba(255, 255, 255, 0.01);
 }
 
 .buttonBackground {
-  /* layout */
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+    /* layout */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-  /* box model */
-  border-radius: 1961.05px;
+    /* box model */
+    border-radius: 1961.05px;
 
-  /* visual */
-  background: linear-gradient(180deg,
-    rgba(45, 45, 45, 0.3) 0%,
-    rgba(25, 25, 25, 0.5) 50%,
-    rgba(15, 15, 15, 0.7) 100%
-  );
-  box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
+    /* visual */
+    background: linear-gradient(
+        180deg,
+        rgba(45, 45, 45, 0.3) 0%,
+        rgba(25, 25, 25, 0.5) 50%,
+        rgba(15, 15, 15, 0.7) 100%
+    );
+    box-shadow: inset 0px 0px 30px rgba(0, 0, 0, 0.3);
 }
 
 .buttonBorder {
-  /* layout */
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+    /* layout */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-  /* box model */
-  padding: 1px;
-  border-radius: 1961.05px;
+    /* box model */
+    padding: 1px;
+    border-radius: 1961.05px;
 
-  /* visual */
-  background: linear-gradient(180deg, rgb(121 121 121) 0%, rgb(0, 0, 0) 30%);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: source-out;
+    /* visual */
+    background: linear-gradient(180deg, rgb(121 121 121) 0%, rgb(0, 0, 0) 30%);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: source-out;
 
-  /* state */
-  pointer-events: none;
+    /* state */
+    pointer-events: none;
 }
 
 .buttonTopHighlight {
-  /* layout */
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  right: 1px;
+    /* layout */
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
 
-  /* box model */
-  height: 39px;
-  border-radius: 1961.05px 1961.05px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+    /* box model */
+    height: 39px;
+    border-radius: 1961.05px 1961.05px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 
-  /* visual */
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.05) 40%,
-    transparent 100%
-  );
+    /* visual */
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.05) 40%,
+        transparent 100%
+    );
 }
 
 .recordingDot {
-  /* layout */
-  position: absolute;
-  top: 10.828px;
-  right: 33.198px;
+    /* layout */
+    position: absolute;
+    top: 10.828px;
+    right: 33.198px;
 
-  /* box model */
-  width: 10.802px;
-  height: 10.802px;
-  border-radius: 50%;
+    /* box model */
+    width: 10.802px;
+    height: 10.802px;
+    border-radius: 50%;
 
-  /* visual */
-  background: rgba(248, 40, 10, 0.31);
-  box-shadow: 0px 2.303px 1.842px 0px rgba(0, 0, 0, 0.35) inset;
+    /* visual */
+    background: rgba(248, 40, 10, 0.31);
+    box-shadow: 0px 2.303px 1.842px 0px rgba(0, 0, 0, 0.35) inset;
 
-  /* state */
-  transition: all 0.3s ease;
+    /* state */
+    transition: all 0.3s ease;
 }
 
-.recordingDot:hover, .recordingDotHover {
-  background: rgba(248, 40, 10, 0.8);
-  box-shadow:
-    0px 2.303px 1.842px 0px rgba(0, 0, 0, 0.35) inset,
-    0 0 5px rgba(248, 40, 10, 0.8),
-    0 0 10px rgba(248, 40, 10, 0.6),
-    0 0 15px rgba(248, 40, 10, 0.4);
+.recordingDot:hover,
+.recordingDotHover {
+    background: rgba(248, 40, 10, 0.8);
+    box-shadow:
+        0px 2.303px 1.842px 0px rgba(0, 0, 0, 0.35) inset,
+        0 0 5px rgba(248, 40, 10, 0.8),
+        0 0 10px rgba(248, 40, 10, 0.6),
+        0 0 15px rgba(248, 40, 10, 0.4);
 }
 
 .microphoneIcon {
-  /* layout */
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* layout */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .micIcon {
-  /* box model */
-  width: 30.207px;
-  height: 30.207px;
+    /* box model */
+    width: 30.207px;
+    height: 30.207px;
 
-  /* typography */
-  color: #a0a0a0;
+    /* typography */
+    color: #a0a0a0;
 
-  /* visual */
-  stroke-width: 1.2;
-  opacity: 0.9;
+    /* visual */
+    stroke-width: 1.2;
+    opacity: 0.9;
 }
 
 .bodyText {
-  /* typography */
-  color: #c4c4c4;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: normal;
-  white-space: nowrap;
+    /* typography */
+    color: #555;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.2;
 }
 
 /* Recording state (back side) */
 .recordingBody {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
 
-  /* box model */
-  padding: 24px;
+    /* box model */
+    padding: 24px;
 }
 
 /* Waveform visualization */
 .waveformContainer {
-  /* layout */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 
-  /* box model */
-  width: 100%;
-  height: 48px;
-  margin-top: 16px;
+    /* box model */
+    width: 100%;
+    height: 48px;
+    margin-top: 16px;
 }
 
 .waveformBar {
-  /* box model */
-  width: 4px;
-  height: 5px;
-  border-radius: 9999px;
+    /* box model */
+    width: 4px;
+    height: 5px;
+    border-radius: 9999px;
 
-  /* visual */
-  background-color: rgba(255, 255, 255, 0.6);
+    /* visual */
+    background-color: rgba(255, 255, 255, 0.6);
 
-  /* state */
-  transition: height 0.4s ease;
+    /* state */
+    transition: height 0.4s ease;
 }
 
 .waveformBarActive {
-  animation: waveformPulse 1.2s ease-in-out infinite alternate;
+    animation: waveformPulse 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes waveformPulse {
-  0% {
-    height: 5px;
-  }
-  100% {
-    height: 25px;
-  }
+    0% {
+        height: 5px;
+    }
+    100% {
+        height: 25px;
+    }
 }
 
 /* Timer */
 .timerContainer {
-  /* layout */
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    /* layout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  /* box model */
-  margin-top: 8px;
-  margin-bottom: 16px;
+    /* box model */
+    margin-top: 8px;
+    margin-bottom: 16px;
 }
 
 .timer {
-  /* typography */
-  color: white;
-  font-family: monospace;
-  font-size: 20px;
-  font-weight: 500;
+    /* typography */
+    color: white;
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: 500;
 }
 
 /* Controls */
 .recordingControls {
-  /* layout */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: auto;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: auto;
 }
 
 .controlButton {
-  /* layout */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  /* box model */
-  padding: 0;
-  border: none;
+    /* box model */
+    padding: 0;
+    border: none;
 
-  /* visual */
-  background: transparent;
-  outline: none;
+    /* visual */
+    background: transparent;
+    outline: none;
 
-  /* state */
-  cursor: pointer;
+    /* state */
+    cursor: pointer;
 }
 
 .controlButtonInner {
-  /* layout */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  /* box model */
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
+    /* box model */
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
 
-  /* visual */
-  background: linear-gradient(180deg, #2A2A2A 0%, #1A1A1A 100%);
-  box-shadow:
-    0px 2px 4px rgba(0, 0, 0, 0.2),
-    inset 0px 1px 1px rgba(255, 255, 255, 0.1);
+    /* visual */
+    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+    box-shadow:
+        0px 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0px 1px 1px rgba(255, 255, 255, 0.1);
 
-  /* state */
-  transition: all 0.2s ease;
+    /* state */
+    transition: all 0.2s ease;
 }
 
 .controlButton:hover .controlButtonInner {
-  background: linear-gradient(180deg, #333333 0%, #222222 100%);
-  transform: translateY(-1px);
-  box-shadow:
-    0px 3px 6px rgba(0, 0, 0, 0.25),
-    inset 0px 1px 1px rgba(255, 255, 255, 0.15);
+    background: linear-gradient(180deg, #333333 0%, #222222 100%);
+    transform: translateY(-1px);
+    box-shadow:
+        0px 3px 6px rgba(0, 0, 0, 0.25),
+        inset 0px 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .controlButton:active .controlButtonInner {
-  background: linear-gradient(180deg, #222222 0%, #1A1A1A 100%);
-  transform: translateY(1px);
-  box-shadow:
-    0px 1px 2px rgba(0, 0, 0, 0.3),
-    inset 0px 1px 1px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(180deg, #222222 0%, #1a1a1a 100%);
+    transform: translateY(1px);
+    box-shadow:
+        0px 1px 2px rgba(0, 0, 0, 0.3),
+        inset 0px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .controlIcon {
-  /* box model */
-  width: 20px;
-  height: 20px;
+    /* box model */
+    width: 20px;
+    height: 20px;
 
-  /* typography */
-  color: rgba(255, 255, 255, 0.8);
+    /* typography */
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .doneButton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .doneText {
-  /* typography */
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
+    /* typography */
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
 
-  /* box model */
-  margin-top: 4px;
+    /* box model */
+    margin-top: 4px;
 }
 
 /* Permission message */
 .permissionMessage {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .permissionMessage p {
-  /* typography */
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
+    /* typography */
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
 }
 
 /* Processing state */
 .processingContainer {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .processingContainer .controlIcon {
-  /* box model */
-  width: 24px;
-  height: 24px;
+    /* box model */
+    width: 24px;
+    height: 24px;
 
-  /* typography */
-  color: rgb(96, 165, 250);
+    /* typography */
+    color: rgb(96, 165, 250);
 }
 
 .processingContainer .doneText {
-  color: rgb(96, 165, 250);
+    color: rgb(96, 165, 250);
 }
 
 /* Transcribing Screen */
 .transcribingWrapper {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
 
-  /* box model */
-  width: 100%;
-  height: 100%;
-  padding: 40px 24px;
+    /* box model */
+    width: 100%;
+    height: 100%;
+    padding: 40px 24px;
 }
 
 .transcribingContent {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .gifPlaceholder {
-  /* layout */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  /* box model */
-  width: 180px;
-  height: 180px;
-  margin-bottom: 32px;
-  border-radius: 8px;
+    /* box model */
+    width: 180px;
+    height: 180px;
+    margin-bottom: 32px;
+    border-radius: 8px;
 
-  /* visual */
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    /* visual */
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 
 .animatedDotsContainer {
-  /* layout */
-  display: flex;
-  gap: 8px;
+    /* layout */
+    display: flex;
+    gap: 8px;
 }
 
 .animatedDot {
-  /* box model */
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+    /* box model */
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
 
-  /* visual */
-  background-color: rgba(255, 255, 255, 0.8);
-  opacity: 0.2;
+    /* visual */
+    background-color: rgba(255, 255, 255, 0.8);
+    opacity: 0.2;
 
-  /* state */
-  animation: dotPulse 1.4s infinite ease-in-out both;
+    /* state */
+    animation: dotPulse 1.4s infinite ease-in-out both;
 }
 
 .animatedDot:nth-child(1) {
-  animation-delay: -0.32s;
+    animation-delay: -0.32s;
 }
 
 .animatedDot:nth-child(2) {
-  animation-delay: -0.16s;
+    animation-delay: -0.16s;
 }
 
 .animatedDot:nth-child(3) {
-  animation-delay: 0s;
+    animation-delay: 0s;
 }
 
 .animatedDot:nth-child(4) {
-  animation-delay: 0.16s;
+    animation-delay: 0.16s;
 }
 
 @keyframes dotPulse {
-  0%, 80%, 100% {
-    transform: scale(0.8);
-    opacity: 0.2;
-  }
-  40% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
+    0%,
+    80%,
+    100% {
+        transform: scale(0.8);
+        opacity: 0.2;
+    }
+    40% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 
 .transcribingTitle {
-  /* typography */
-  color: white;
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: -0.02em;
+    /* typography */
+    color: white;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
 
-  /* box model */
-  margin-bottom: 8px;
+    /* box model */
+    margin-bottom: 8px;
 }
 
 .transcribingSubtitle {
-  /* typography */
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 14px;
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.6;
+    /* typography */
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.6;
 
-  /* box model */
-  margin-bottom: auto;
+    /* box model */
+    margin-bottom: auto;
 }
 
 .okButton {
-  /* box model */
-  padding: 12px 48px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 32px;
+    /* box model */
+    padding: 12px 48px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
 
-  /* typography */
-  color: white;
-  font-size: 16px;
-  font-weight: 500;
+    /* typography */
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
 
-  /* visual */
-  background-color: rgba(255, 255, 255, 0.08);
+    /* visual */
+    background-color: rgba(255, 255, 255, 0.08);
 
-  /* state */
-  cursor: pointer;
-  transition: all 0.2s;
+    /* state */
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .okButton:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
 }
 
 .okButton:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 /* Success state */
 .successContainer {
-  /* layout */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .successContainer .controlIcon {
-  /* box model */
-  width: 24px;
-  height: 24px;
+    /* box model */
+    width: 24px;
+    height: 24px;
 
-  /* typography */
-  color: rgb(74, 222, 128);
+    /* typography */
+    color: rgb(74, 222, 128);
 }
 
 .successContainer .doneText {
-  color: rgb(74, 222, 128);
+    color: rgb(74, 222, 128);
 }
 
 /* Mute button states */
 .muteButtonActive .controlButtonInner {
-  background: linear-gradient(180deg, #4A1A1A 0%, #2A1010 100%);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  box-shadow:
-    0px 2px 4px rgba(248, 113, 113, 0.2),
-    inset 0px 1px 1px rgba(248, 113, 113, 0.1);
+    background: linear-gradient(180deg, #4a1a1a 0%, #2a1010 100%);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    box-shadow:
+        0px 2px 4px rgba(248, 113, 113, 0.2),
+        inset 0px 1px 1px rgba(248, 113, 113, 0.1);
 }
 
 .muteButtonInnerActive {
-  background: linear-gradient(180deg, #4A1A1A 0%, #2A1010 100%);
-  border: 1px solid rgba(248, 113, 113, 0.3);
+    background: linear-gradient(180deg, #4a1a1a 0%, #2a1010 100%);
+    border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
 .muteButtonActive:hover .controlButtonInner {
-  background: linear-gradient(180deg, #5A2020 0%, #3A1515 100%);
-  box-shadow:
-    0px 3px 6px rgba(248, 113, 113, 0.25),
-    inset 0px 1px 1px rgba(248, 113, 113, 0.15);
+    background: linear-gradient(180deg, #5a2020 0%, #3a1515 100%);
+    box-shadow:
+        0px 3px 6px rgba(248, 113, 113, 0.25),
+        inset 0px 1px 1px rgba(248, 113, 113, 0.15);
 }
 
 .muteButtonActive .controlIcon {
-  color: rgb(248, 113, 113);
+    color: rgb(248, 113, 113);
 }
 
 .muteTextActive {
-  color: rgb(248, 113, 113);
+    color: rgb(248, 113, 113);
 }
 
 /* Utility class for backface visibility */
 .backface-visibility-hidden {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }

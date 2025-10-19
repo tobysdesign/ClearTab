@@ -3,10 +3,22 @@
  * Reduces bundle size from 38MB to ~2KB
  */
 
-export function format(date: Date, formatStr: string): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
+export function format(date: Date | string | null | undefined, formatStr: string): string {
+  // Handle null/undefined
+  if (!date) return '';
+
+  // Convert to Date object if needed
+  const dateObj = date instanceof Date ? date : new Date(date);
+
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) {
+    console.warn('Invalid date passed to format function:', date);
+    return '';
+  }
+
+  const year = dateObj.getFullYear();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const day = dateObj.getDate().toString().padStart(2, '0');
 
   // Common arrays
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -44,28 +56,28 @@ export function format(date: Date, formatStr: string): string {
     case 'dd/MM/yyyy':
       return `${day}/${month}/${year}`;
     case 'MMM d, yyyy':
-      return `${monthNames[date.getMonth()]} ${date.getDate()}, ${year}`;
+      return `${monthNames[dateObj.getMonth()]} ${dateObj.getDate()}, ${year}`;
     case 'EEEE do \'of\' MMMM':
-      return `${dayNames[date.getDay()]} ${getOrdinal(date.getDate())} of ${monthNamesFull[date.getMonth()]}`;
+      return `${dayNames[dateObj.getDay()]} ${getOrdinal(dateObj.getDate())} of ${monthNamesFull[dateObj.getMonth()]}`;
     case 'EEEE':
-      return dayNames[date.getDay()];
+      return dayNames[dateObj.getDay()];
     case 'EEE':
-      return dayNamesShort[date.getDay()];
+      return dayNamesShort[dateObj.getDay()];
     case 'MMMM':
-      return monthNamesFull[date.getMonth()];
+      return monthNamesFull[dateObj.getMonth()];
     case 'MMM':
-      return monthNames[date.getMonth()];
+      return monthNames[dateObj.getMonth()];
     case 'dd':
       return day;
     case 'p':
-      return formatTime(date);
+      return formatTime(dateObj);
     default:
       // For unknown formats, try to use native toLocaleDateString/toLocaleTimeString
       if (formatStr.includes('p') || formatStr.includes('h') || formatStr.includes('H')) {
-        return formatTime(date);
+        return formatTime(dateObj);
       }
       // Fallback to ISO string
-      return date.toISOString().split('T')[0];
+      return dateObj.toISOString().split('T')[0];
   }
 }
 
@@ -145,4 +157,33 @@ export function formatDistanceToNow(date: Date): string {
   if (diffInDays < 30) return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
 
   return format(date, 'MMM d, yyyy');
+}
+
+export function formatDateSmart(date: Date | string | null | undefined): string {
+  // Handle null/undefined
+  if (!date) return '';
+
+  // Convert to Date object if needed
+  const dateObj = date instanceof Date ? date : new Date(date);
+
+  // Check if the date is valid
+  if (isNaN(dateObj.getTime())) {
+    console.warn('Invalid date passed to formatDateSmart function:', date);
+    return '';
+  }
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const dateYear = dateObj.getFullYear();
+
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+
+  // If it's the same year, show DD/MM
+  if (dateYear === currentYear) {
+    return `${day}/${month}`;
+  }
+
+  // If it's a different year, show DD/MM/YYYY
+  return `${day}/${month}/${dateYear}`;
 }

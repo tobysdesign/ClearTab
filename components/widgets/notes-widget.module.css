@@ -193,7 +193,7 @@
     gap: 0.5rem;
 
     /* typography */
-    font-size: 0.875rem;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -253,6 +253,7 @@
     /* box model */
     overflow-y: visible;
     overflow-x: visible;
+    cursor: text;
 }
 
 /* Notes Widget: Editor Container */
@@ -266,10 +267,19 @@
 
     /* visual */
     border-radius: 8px;
+
+    /* interaction */
+    cursor: text;
 }
 
 .notesEditorContainer .ql-editor {
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem 0.5rem 10px;
+    min-height: 300px;
+    cursor: text;
+}
+
+.notesEditorContainer .ql-editor.ql-blank::before {
+    left: 10px;
 }
 
 /* Notes Widget: Empty State */

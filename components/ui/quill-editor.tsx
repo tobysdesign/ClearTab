@@ -5,7 +5,7 @@ import Quill from "quill";
 import "quill/dist/quill.bubble.css";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { createTaskFromText } from "@/components/widgets/tasks-widget";
+// Removed circular import - createTaskFromText functionality moved to context
 
 interface QuillEditorProps {
   value?: any;
@@ -177,11 +177,7 @@ export function QuillEditor({
         // Use the callback if provided
         onCreateTask(selectedText);
       } else {
-        // Otherwise use the direct API function
-        const task = await createTaskFromText(selectedText);
-        if (task) {
-          console.log("Task created:", task);
-        }
+        console.log("No onCreateTask callback provided");
       }
     } catch (error) {
       console.error("Failed to create task:", error);
@@ -192,7 +188,7 @@ export function QuillEditor({
 
   return (
     <div className={cn("relative", className)}>
-      <div ref={editorRef} className="min-h-[300px] w-full" />
+      <div ref={editorRef} className="w-full" />
 
       {/* AI action buttons that appear when text is selected */}
       {hasSelection && !readOnly && (

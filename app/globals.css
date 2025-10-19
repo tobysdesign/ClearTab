@@ -166,7 +166,7 @@ html {
     text-align: center;
 }
 .text-sm {
-    font-size: 0.875rem;
+    font-size: 14px;
 }
 .text-lg {
     font-size: 1.125rem;
@@ -1788,7 +1788,7 @@ body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
     font-family: "Inter", sans-serif;
     letter-spacing: -0.05em;
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 14px;
     color: #000000;
     -webkit-font-smoothing: antialiased;
     text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);

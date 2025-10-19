@@ -57,14 +57,14 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "modal",
-        direction === 'right' 
-          ? "fixed top-0 right-0 bottom-0 z-50 flex h-screen w-[33.333333%] min-w-[300px] flex-col border bg-[#111111]"
-          : "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[80vh] flex-col border bg-[#111111]",
+        "modal focus:outline-none",
+        direction === 'right'
+          ? "fixed top-20 right-10 z-50 w-[33.333333%] min-w-[300px] bg-[#111111]"
+          : "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[80vh] flex-col bg-[#111111]",
         className
       )}
       style={{
-        borderRadius: direction === 'right' ? '10px 0 0 10px' : '10px 10px 0 0',
+        borderRadius: direction === 'right' ? '12px' : '10px 10px 0 0',
       }}
       {...props}
     >

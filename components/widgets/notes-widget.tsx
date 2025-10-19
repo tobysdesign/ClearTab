@@ -15,10 +15,15 @@ import {
   WidgetContainer,
   // WidgetContent,
 } from "@/components/ui/widget-container";
-import { QuillEditor } from "@/components/ui/quill-editor";
 import dynamic from 'next/dynamic';
 
-const DynamicQuillEditor = dynamic(() => import("@/components/ui/quill-editor").then(mod => mod.QuillEditor), { ssr: false });
+const DynamicQuillEditor = dynamic(
+  () => import("@/components/ui/quill-editor").then(mod => mod.QuillEditor),
+  {
+    ssr: false,
+    loading: () => null
+  }
+);
 import { type Note } from "@/shared/schema";
 
 // Empty Quill content
@@ -838,6 +843,13 @@ export function NotesWidget() {
                   notesStyles.notesEditorScroll,
                   "custom-scrollbar",
                 )}
+                onClick={() => {
+                  // Focus the Quill editor when clicking anywhere in the content area
+                  const editorElement = document.querySelector('.ql-editor') as HTMLElement;
+                  if (editorElement) {
+                    editorElement.focus();
+                  }
+                }}
               >
                 <DynamicQuillEditor
                   tabIndex={4}

@@ -1,115 +1,115 @@
 .eventCard {
-  @apply relative p-3 rounded-lg mb-3 border transition-colors;
+    @apply relative p-3 rounded-lg mb-3 border transition-colors;
 }
 
 .eventCardCurrent {
-  @apply bg-[#5c5c5c] border-[#5c5c5c];
+    @apply bg-[#5c5c5c] border-[#5c5c5c];
 }
 
 .eventCardDefault {
-  @apply bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545];
+    @apply bg-[#222222] border-[#222222] hover:bg-[#454545] hover:border-[#454545];
 }
 
 .eventTitle {
-  @apply text-white text-sm mb-1;
+    @apply text-white text-sm mb-1;
 }
 
 .eventTime {
-  @apply text-white/40 text-xs;
+    @apply text-white/40 text-xs;
 }
 
 .daySection {
-  @apply mb-6 relative;
+    @apply mb-6 relative;
 }
 
 .currentTimeIndicator {
-  @apply absolute left-0 right-0 z-20 pointer-events-none;
+    @apply absolute left-0 right-0 z-20 pointer-events-none;
 }
 
 .currentTimeLine {
-  @apply absolute left-0 right-0 h-0.5 bg-rose-400;
+    @apply absolute left-0 right-0 h-0.5 bg-rose-400;
 }
 
 .currentTimeDot {
-  @apply absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-rose-400 rounded-full -ml-1;
+    @apply absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-rose-400 rounded-full -ml-1;
 }
 
 .dayHeader {
-  @apply text-xs text-white/40 mb-4 px-1;
+    @apply text-xs text-white/40 mb-4 px-1;
 }
 
 .container {
-  @apply flex h-full;
+    @apply flex h-full;
 }
 
 .sidebar {
-  @apply flex flex-col w-[120px] h-full justify-between flex-shrink-0 pb-[24px] border-r border-[#323235];
+    @apply flex flex-col w-[120px] h-full justify-between flex-shrink-0 pb-[24px] border-r border-[#323235];
 }
 
 .sidebarHeader {
-  @apply min-h-[60px] flex items-center py-[14px] px-[24px];
+    @apply min-h-[60px] flex items-center py-[14px] px-[24px];
 }
 
 /* Removed - using global widget-title class directly */
 
 .sidebarContent {
-  @apply flex flex-col justify-between flex-1 px-[24px];
+    @apply flex flex-col justify-between flex-1 px-[24px];
 }
 
 .sidebarFooter {
-  @apply flex flex-col items-start;
+    @apply flex flex-col items-start;
 }
 
 .dayDateContainer {
-  @apply flex flex-col items-start mb-1;
+    @apply flex flex-col items-start mb-1;
 }
 
 .dayText {
-  @apply flex items-center text-xs font-medium text-white/40 uppercase mb-1;
+    @apply flex items-center text-xs font-medium text-white/40 uppercase mb-1;
 }
 
 .todayDot {
-  @apply w-2 h-2 rounded-full bg-rose-400 mr-2;
+    @apply w-2 h-2 rounded-full bg-rose-400 mr-2;
 }
 
 /* Removed - using global bigNumber class directly */
 
 .monthText {
-  color: #555454;
-  font-family: 'Inter Display', sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.2;
+    color: #555;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1em;
 }
 
 .rightContent {
-  @apply flex-1 overflow-hidden;
+    @apply flex-1 overflow-hidden;
 }
 
 .scrollContainer {
-  @apply h-full overflow-y-auto p-3;
+    @apply h-full overflow-y-auto p-3;
 }
 
 .errorContainer {
-  @apply flex flex-col items-center justify-center p-6 text-center;
+    @apply flex flex-col items-center justify-center p-6 text-center;
 }
 
 .errorTitle {
-  @apply font-bold text-destructive;
+    @apply font-bold text-destructive;
 }
 
 .errorMessage {
-  @apply text-sm text-muted-foreground;
+    @apply text-sm text-muted-foreground;
 }
 
 .emptyStateContainer {
-  @apply pt-20;
+    @apply pt-20;
 }
 
 .relativeContainer {
-  @apply relative;
+    @apply relative;
 }
 
 .calendarIcon {
-  @apply h-6 w-6 text-white/40;
+    @apply h-6 w-6 text-white/40;
 }

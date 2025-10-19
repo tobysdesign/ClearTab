@@ -1,0 +1,82 @@
+.taskEditorWrapper {
+  width: 100%;
+}
+
+.taskEditorBase {
+  width: 100%;
+  min-height: 120px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  color: white;
+}
+
+.taskEditorBase :global(.ql-container) {
+  border: none;
+  font-family: inherit;
+}
+
+.taskEditorBase :global(.ql-editor) {
+  padding: 0.5rem 0.75rem;
+  color: white;
+  min-height: 120px;
+  max-height: none; /* Allow unlimited growth */
+}
+
+.taskEditorBase :global(.ql-editor.ql-blank::before) {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: normal;
+  left: 0.75rem;
+  right: 0.75rem;
+}
+
+.taskEditorBase :global(.ql-toolbar) {
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+}
+
+.taskEditorBase::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.taskEditorBase:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.taskEditorLoading {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  color: rgba(255, 255, 255, 0.5);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-height: 650px) {
+  .taskEditorBase {
+    min-height: 80px; /* Smaller on mobile */
+  }
+
+  .taskEditorBase :global(.ql-editor) {
+    min-height: 80px; /* Smaller on mobile */
+    max-height: none; /* Allow unlimited growth */
+  }
+
+  .taskEditorLoading {
+    min-height: 80px;
+  }
+}

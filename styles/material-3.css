@@ -346,7 +346,7 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--md-sys-color-outline);
+  border: 2px solid var(--md-sys-color-primary);
   border-radius: var(--md-sys-shape-corner-extra-small);
   background-color: transparent;
   cursor: pointer;
@@ -358,15 +358,16 @@
 }
 
 .md3-checkbox--checked {
-  background-color: var(--md-sys-color-primary);
-  border-color: var(--md-sys-color-primary);
+  background-color: var(--md-sys-color-outline);
+  border-color: var(--md-sys-color-outline);
+  opacity: 0.6;
 }
 
 .md3-checkbox__checkmark {
   display: none;
   width: 10px;
   height: 10px;
-  color: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-on-surface);
 }
 
 .md3-checkbox--checked .md3-checkbox__checkmark {

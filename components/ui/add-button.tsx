@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { AddIcon } from '@/components/icons'
 
 interface AddButtonProps extends ButtonProps {
   tooltip?: string
@@ -15,7 +16,7 @@ interface AddButtonProps extends ButtonProps {
 export function AddButton({ tooltip, children, ...props }: AddButtonProps) {
   const button = (
     <Button size="icon" variant="ghost-icon" {...props}>
-      {children || '+'}
+      {children || <AddIcon size={16} />}
     </Button>
   )
 

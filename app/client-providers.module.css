@@ -1,7 +1,20 @@
 .header {
-  @apply flex items-center justify-between p-4 border-b border-border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--md-sys-color-outline);
 }
 
 .title {
-  @apply text-lg font-semibold;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.modalContainer :global([data-vaul-drawer][data-vaul-drawer-direction="right"]) {
+  margin-top: 80px !important; /* Space at top of screen */
+  margin-bottom: 0 !important;
+  height: auto !important; /* Remove fixed height */
+  max-height: calc(100vh - 80px) !important; /* Allow scrolling if needed */
+  min-height: auto !important;
 }

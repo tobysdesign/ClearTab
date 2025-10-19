@@ -1,0 +1,47 @@
+.ghostIcon {
+    border: 1px solid #252525;
+    background-color: #1a1a1a;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.ghostIcon:hover {
+    background-color: #252525;
+}
+
+.iconSize {
+    height: 2rem; /* 32px */
+    width: 2rem; /* 32px */
+    border-radius: 50%;
+}
+
+.baseButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    border: none;
+}
+
+.baseButton:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.baseButton:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.baseButton svg {
+    pointer-events: none;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    color: #eee;
+}

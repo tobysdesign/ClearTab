@@ -7,24 +7,51 @@ import { googleApiService, type GoogleAuth } from "@/lib/google-api-service";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Development bypass for testing
+    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    let user;
+    let dbUser;
 
-    // Get user from database
-    const [dbUser] = await db
-      .select()
-      .from(userTable)
-      .where(eq(userTable.id, user.id))
-      .limit(1);
+    if (devBypass) {
+      console.log('🔧 Development mode: Bypassing auth for calendar API');
+      // Use default development user ID
+      const userId = '00000000-0000-4000-8000-000000000000';
 
-    if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      // Get or create development user
+      try {
+        [dbUser] = await db
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+          .limit(1);
+      } catch (error) {
+        // User might not exist in dev mode, return empty calendar
+        console.log('🔧 Development mode: No user found, returning empty calendar');
+        return NextResponse.json({ data: [] });
+      }
+    } else {
+      const supabase = await createClient();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+
+      if (!authUser) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      user = authUser;
+
+      // Get user from database
+      [dbUser] = await db
+        .select()
+        .from(userTable)
+        .where(eq(userTable.id, user.id))
+        .limit(1);
+
+      if (!dbUser) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
     }
 
     let events: any[] = [];
@@ -44,10 +71,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch events from secondary accounts
+    const userId = devBypass ? '00000000-0000-4000-8000-000000000000' : user.id;
     const secondaryAccounts = await db
       .select()
       .from(connectedAccounts)
-      .where(eq(connectedAccounts.userId, user.id));
+      .where(eq(connectedAccounts.userId, userId));
 
     for (const account of secondaryAccounts) {
       if (!account.accessToken) continue;

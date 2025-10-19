@@ -69,7 +69,7 @@ export function CountdownWidget({
         countdownTitle: "Countdown",
         countdownMode: "manual-count",
         manualCount: 14,
-        paydayFrequency: "fortnightly"
+        paydayFrequency: "fortnightly",
       };
     },
   });
@@ -218,7 +218,12 @@ export function CountdownWidget({
       <div
         ref={ref}
         className={countdownStyles.dotsGrid}
-        style={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}
+        style={{
+          display: "grid",
+          placeItems: "center",
+          width: "100%",
+          height: "100%",
+        }}
       />
     );
   }
@@ -270,8 +275,10 @@ export function CountdownWidget({
                 </AnimatePresence>
               </ClientOnly>
               <div className={countdownStyles.labelRow}>
-                <span className={countdownStyles.daysLabel}>Days until</span>
-                <span className={countdownStyles.eventLabel}>{countdownTitle}</span>
+                <span className={countdownStyles.daysLabel}>Days until </span>
+                <span className={countdownStyles.eventLabel}>
+                  {countdownTitle}
+                </span>
               </div>
             </div>
           </div>
