@@ -1,5 +1,9 @@
 .container {
-    @apply flex justify-center items-start p-4;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 1rem;
+    padding-top: 0;
 }
 
 .cardContainer {
@@ -13,27 +17,43 @@
 }
 
 .currentSettings {
-    @apply mb-6 p-4 rounded-lg bg-white/5 border border-white/10;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sectionLabel {
-    @apply text-xs text-white/50 uppercase tracking-wider mb-3;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
 }
 
 .settingRow {
-    @apply flex items-center justify-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .settingLabel {
-    @apply text-sm text-white/70;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .settingValue {
-    @apply text-sm text-white font-medium;
+    font-size: 0.875rem;
+    color: white;
+    font-weight: 500;
 }
 
 .settingValueCapitalize {
-    @apply text-sm text-white font-medium capitalize;
+    font-size: 0.875rem;
+    color: white;
+    font-weight: 500;
+    text-transform: capitalize;
 }
 
 .tabsContainer {
@@ -74,31 +94,31 @@
     position: relative;
 }
 
-.browserTab.activeTab::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: -24px;
-    width: 24px;
-    height: 24px;
-    background: radial-gradient(
-        circle at top right,
-        transparent 24px,
-        rgba(0, 0, 0, 0.8) 24px
-    );
-}
-
 .browserTab.activeTab::before {
     content: "";
     position: absolute;
     bottom: 0;
-    right: -24px;
-    width: 24px;
-    height: 24px;
+    left: -18px;
+    width: 18px;
+    height: 18px;
     background: radial-gradient(
         circle at top left,
-        transparent 24px,
-        rgba(0, 0, 0, 0.8) 24px
+        transparent 18px,
+        #232323 18px
+    );
+}
+
+.browserTab.activeTab::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: -18px;
+    width: 18px;
+    height: 18px;
+    background: radial-gradient(
+        circle at top right,
+        transparent 18px,
+        #232323 18px
     );
 }
 
@@ -158,59 +178,85 @@
 }
 
 .previewContainer {
-    @apply mb-6 p-4 rounded-lg border transition-all;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+    transition: all 0.2s ease;
 }
 
 .previewActive {
-    @apply bg-pink-500/10 border-pink-500/30;
+    background: rgba(236, 72, 153, 0.1);
+    border-color: rgba(236, 72, 153, 0.3);
 }
 
 .previewUpcoming {
-    @apply bg-blue-500/10 border-blue-500/30;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
 }
 
 .previewDefault {
-    @apply bg-white/5 border-white/20;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .previewContent {
-    @apply flex items-start gap-3;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
 }
 
 .previewIcon {
-    @apply w-4 h-4 mt-0.5 text-white/60 flex-shrink-0;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.125rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
 }
 
 .previewTextContainer {
-    @apply flex-1 min-w-0;
+    flex: 1;
+    min-width: 0;
 }
 
 .previewMessage {
-    @apply text-sm font-medium text-white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
 }
 
 .previewSubMessage {
-    @apply text-xs text-white/60 mt-1;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.25rem;
 }
 
 .previewDaysContainer {
-    @apply flex-shrink-0 text-right;
+    flex-shrink: 0;
+    text-align: right;
 }
 
 .previewDaysNumber {
-    @apply text-2xl font-bold text-white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
 }
 
 .previewDaysLabel {
-    @apply text-xs text-white/60;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .formContainer {
-    @apply space-y-4;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .gridTwoColumns {
-    @apply grid grid-cols-2 gap-4;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 
 .fieldLabel {
@@ -269,20 +315,34 @@
 }
 
 .calendarContainer {
-    @apply absolute top-full left-0 mt-2 bg-black/90 border border-white/20 rounded-lg p-4 shadow-xl backdrop-blur-sm z-50;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0.5rem;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
+    z-index: 50;
 }
 
 .calendarWidget {
-    @apply text-white;
+    color: white;
 }
 
 .validationContainer {
-    @apply mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.3);
     border-radius: 3px;
 }
 
 .validationText {
-    @apply text-xs text-yellow-200/90;
+    font-size: 0.75rem;
+    color: rgba(254, 240, 138, 0.9);
 }
 
 .saveButton {
@@ -330,17 +390,33 @@
 }
 
 .saveButtonContent {
-    @apply flex items-center justify-center gap-2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .loadingSpinner {
-    @apply w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .saveIcon {
-    @apply w-5 h-5;
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .saveIconSmall {
-    @apply w-4 h-4;
+    width: 1rem;
+    height: 1rem;
 }

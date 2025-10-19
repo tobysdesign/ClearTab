@@ -13,10 +13,13 @@ if (!connectionString) {
 
 // Create postgres connection with optimized settings for API routes
 const client = postgres(connectionString, {
-  max: 5,                 // Smaller pool for API routes
-  idle_timeout: 10,       // Close connections faster
-  connect_timeout: 5,     // Shorter timeout
-  ssl: process.env.NODE_ENV === 'production'
+  max: 10,                // Increase pool size
+  idle_timeout: 20,       // Keep connections longer
+  connect_timeout: 10,    // Longer timeout for stability
+  max_lifetime: 60 * 30,  // 30 minutes max connection lifetime
+  ssl: process.env.NODE_ENV === 'production',
+  prepare: false,         // Disable prepared statements for better performance
+  transform: postgres.camel, // Transform to camelCase automatically
 })
 
 // Create drizzle database instance without full schema

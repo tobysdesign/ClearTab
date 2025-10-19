@@ -365,14 +365,23 @@ export function ScheduleWidget() {
             <div></div>
 
             {/* Footer with day/date stacked and month */}
-            <div className={styles.sidebarFooter}>
+            <div
+              className={styles.sidebarFooter}
+              onClick={() => {
+                // Scroll to today
+                if (todayRef.current) {
+                  todayRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' })
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               {/* Day and date stacked */}
               <div className={styles.dayDateContainer}>
                 <div className={styles.dayText}>
                   {isToday(visibleDate) && <div className={styles.todayDot} />}
                   {format(visibleDate, 'EEE')}
                 </div>
-                <div className="bigNumber" style={{ marginBottom: '0px', lineHeight: '0.9' }}>
+                <div className="bigNumber">
                   {format(visibleDate, 'dd')}
                 </div>
               </div>

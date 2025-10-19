@@ -71,9 +71,10 @@
     /* typography */
     color: #c4c4c4;
     font-family: "Inter Display", sans-serif;
-    font-size: 50px;
+    font-size: 48px;
     font-weight: 300;
-    line-height: 1;
+    line-height: 1em;
+    margin-bottom: 4px;
     letter-spacing: -0.01em;
     text-align: center;
 }

@@ -68,7 +68,7 @@ const DrawerContent = React.forwardRef<
       }}
       {...props}
     >
-      {direction === 'bottom' && showHandle && <div className={styles.handle} style={{ borderRadius: '50%' }} />}
+      {direction === 'bottom' && showHandle && <div className={styles.handle} />}
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

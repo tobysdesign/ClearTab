@@ -66,19 +66,19 @@ export function QuillEditor({
       }
     }
 
-    // Set initial content
+    // Set initial content - only if value exists and has content
     if (value) {
       if (typeof value === "string") {
         try {
           const parsed = JSON.parse(value);
-          if (parsed.ops) {
+          if (parsed.ops && parsed.ops.length > 0) {
             quill.setContents(parsed);
           }
         } catch {
           // If it's not JSON, treat as plain text
           quill.setText(value);
         }
-      } else if (value.ops) {
+      } else if (value.ops && value.ops.length > 0) {
         quill.setContents(value);
       }
     }
@@ -119,8 +119,7 @@ export function QuillEditor({
 
   // Update content when value changes externally
   useEffect(() => {
-    if (quillRef.current) {
-      console.log("QuillEditor value changed:", value);
+    if (quillRef.current && value !== undefined) {
       let contentToSet;
 
       if (typeof value === "string") {
@@ -134,26 +133,18 @@ export function QuillEditor({
           quillRef.current.setText(value);
           return;
         }
-      } else if (value && value.ops) {
+      } else if (value && value.ops && value.ops.length > 0) {
         contentToSet = value;
-      } else if (!value) {
+      } else if (!value || (value.ops && value.ops.length === 0)) {
         // Handle empty/null value by setting empty content
         contentToSet = { ops: [{ insert: "\n" }] };
       }
 
       if (contentToSet) {
         const currentContent = quillRef.current.getContents();
-        console.log(
-          "Setting Quill content:",
-          contentToSet,
-          "Current:",
-          currentContent,
-        );
+        // Only update if content is actually different to prevent cursor jumping
         if (JSON.stringify(currentContent) !== JSON.stringify(contentToSet)) {
           quillRef.current.setContents(contentToSet);
-          console.log("Quill content updated!");
-        } else {
-          console.log("Content is the same, not updating");
         }
       }
     }

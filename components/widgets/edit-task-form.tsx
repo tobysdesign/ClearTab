@@ -367,7 +367,7 @@ export function EditTaskForm({
 
       <div className={styles.completedField}>
         <div
-          className={`md3-checkbox ${form.watch('isCompleted') ? 'md3-checkbox--checked' : ''}`}
+          className={`${styles.completedCheckbox} ${form.watch('isCompleted') ? styles.checked : ''}`}
           onClick={() => {
             const newValue = !form.watch('isCompleted');
             form.setValue('isCompleted', newValue, { shouldDirty: true });
@@ -375,12 +375,12 @@ export function EditTaskForm({
           }}
         >
           {form.watch('isCompleted') && (
-            <svg className="md3-checkbox__checkmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg className={styles.checkmark} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <polyline points="20,6 9,17 4,12"></polyline>
             </svg>
           )}
         </div>
-        <label className="md3-on-surface-variant cursor-pointer text-sm" onClick={() => {
+        <label className={styles.completedLabel} onClick={() => {
           const newValue = !form.watch('isCompleted');
           form.setValue('isCompleted', newValue, { shouldDirty: true });
           handleFormChange(true); // Force submit
@@ -394,7 +394,7 @@ export function EditTaskForm({
         <button
           type="button"
           onClick={onClose}
-          className="md3-button md3-button--filled w-full"
+          className={styles.doneButton}
         >
           Done
         </button>

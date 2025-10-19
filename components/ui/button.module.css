@@ -40,8 +40,13 @@
 
 .baseButton svg {
     pointer-events: none;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-    color: #eee;
+    color: #aaa;
+    transition: color 0.2s ease;
+}
+
+.baseButton:hover svg {
+    color: #fff;
 }

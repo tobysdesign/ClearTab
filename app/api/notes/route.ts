@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
 
+// Simple in-memory cache for development
+const notesCache = new Map<string, { data: any[], timestamp: number }>();
+const CACHE_TTL = 30 * 1000; // 30 seconds
+
 export async function GET(request: NextRequest) {
   try {
     // Development bypass for testing
@@ -8,12 +12,20 @@ export async function GET(request: NextRequest) {
 
     if (devBypass) {
       // Development mode: use minimal dependencies
+      const userId = '00000000-0000-4000-8000-000000000000';
+
+      // Check cache first
+      const cached = notesCache.get(userId);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log('🔧 Development mode: Returning cached notes');
+        return NextResponse.json({ success: true, data: cached.data });
+      }
+
       const [{ dbMinimal }, { notes }] = await Promise.all([
         import('@/lib/db-minimal'),
         import('@/lib/notes-schema')
       ]);
 
-      const userId = '00000000-0000-4000-8000-000000000000';
       console.log('🔧 Development mode: Bypassing auth for notes API');
 
       // Fetch notes from database using Drizzle
@@ -22,6 +34,9 @@ export async function GET(request: NextRequest) {
         .from(notes)
         .where(eq(notes.userId, userId))
         .orderBy(desc(notes.updatedAt));
+
+      // Cache the result
+      notesCache.set(userId, { data: allNotes || [], timestamp: Date.now() });
 
       return NextResponse.json({ success: true, data: allNotes || [] });
     } else {
@@ -99,6 +114,9 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    // Invalidate cache
+    notesCache.delete(userId);
+
     return NextResponse.json({ success: true, data: newNote });
   } catch (error) {
     console.error('Error creating note:', error);
@@ -159,6 +177,13 @@ export async function PUT(request: NextRequest) {
 
     if (!updatedNote) {
       return NextResponse.json({ success: false, error: 'Note not found' }, { status: 404 });
+    }
+
+    // Invalidate cache
+    if (devBypass) {
+      notesCache.delete('00000000-0000-4000-8000-000000000000');
+    } else {
+      notesCache.delete(userId);
     }
 
     return NextResponse.json({ success: true, data: updatedNote });

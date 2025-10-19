@@ -56,6 +56,9 @@ export default function LoginPage() {
         </div>
       </motion.div>
 
+      {/* Overlay between background and login form */}
+      <div className={styles.backgroundOverlay} />
+
       {/* Login drawer overlay */}
       <Drawer open={true} onOpenChange={() => {}} modal={false}>
         <DrawerContent className={styles.drawerContent}>
@@ -68,14 +71,6 @@ export default function LoginPage() {
 
             <div className={styles.content}>
               {/* Description */}
-              <div className={styles.description}>
-                <p className={styles.descriptionText}>
-                  Capture thoughts, take notes, set tasks, see your schedules
-                  combined for clarity. ClearTab+ boosts your productivity with
-                  automation, insights and contextual synthesis with Ybot your
-                  AI assistant.
-                </p>
-              </div>
 
               {/* Google Sign In Button */}
               <div className={styles.buttonContainer}>
@@ -114,9 +109,15 @@ export default function LoginPage() {
                 </Button>
               </div>
 
-              {error && (
-                <p className={styles.errorMessage}>{error}</p>
-              )}
+              {error && <p className={styles.errorMessage}>{error}</p>}
+            </div>
+            <div className={styles.description}>
+              <p className={styles.descriptionText}>
+                Capture thoughts, take notes, set tasks, see your schedules
+                combined for clarity. ClearTab+ boosts your productivity with
+                automation, insights and contextual synthesis with Ybot your AI
+                assistant.
+              </p>
             </div>
           </div>
         </DrawerContent>

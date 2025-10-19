@@ -1,6 +1,5 @@
 'use client'
 
-// Icons replaced with ASCII placeholders
 import React from 'react'
 import {
   Popover,
@@ -8,6 +7,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Button } from './button'
+import { MoreActionsIcon } from '@/components/icons'
 import styles from './actions-menu.module.css'
 
 interface ActionsMenuProps {
@@ -29,7 +29,7 @@ export const ActionsMenu = React.memo(function ActionsMenu({ onDelete, isNewNote
       <PopoverTrigger asChild>
         <Button variant="ghost-icon" size="icon">
           <span className={styles.srOnly}>Open menu</span>
-          <span className={styles.icon}>•</span>
+          <MoreActionsIcon size={16} />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className={styles.popoverContent}>

@@ -322,8 +322,7 @@ html {
 }
 
 .modal-header {
-    padding: var(--space-4);
-    border-bottom: 1px solid hsl(var(--color-border));
+    padding: 1rem 1rem 0.5rem 1rem;
 }
 
 .modal-body {
@@ -2459,9 +2458,10 @@ textarea::placeholder {
 .bigNumber {
     font-family: "Inter Display", sans-serif;
     font-size: 48px;
-    line-height: 40px;
+    line-height: 1em;
     font-weight: 300;
-    letter-spacing: 0.05em;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
     color: #d2d2d2;
 }
 /* List item primary text */

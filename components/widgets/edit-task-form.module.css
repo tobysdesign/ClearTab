@@ -105,9 +105,59 @@
 
 .fixedFooter {
     padding: 1rem;
-    border-top: 1px solid var(--md-sys-color-outline);
     background: var(--md-sys-color-surface-container-high);
     margin-top: 2rem;
+}
+
+.doneButton {
+    background: white !important;
+    color: #1a1a1a !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.doneButton:hover {
+    background: #f0f0f0 !important;
+}
+
+.completedCheckbox {
+    width: 16px;
+    height: 16px;
+    border: 1px solid white;
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.completedCheckbox:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.completedCheckbox.checked {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.completedCheckbox .checkmark {
+    width: 16px;
+    height: 16px;
+    stroke: rgba(255, 255, 255, 0.4);
+}
+
+.completedLabel {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    cursor: pointer;
 }
 
 /* Mobile responsive layout */
@@ -117,8 +167,8 @@
     }
 
     .dateAndPriorityRow {
-        flex-direction: column;
-        align-items: stretch;
+        display: flex;
+        align-items: end;
         gap: 1rem;
     }
 
