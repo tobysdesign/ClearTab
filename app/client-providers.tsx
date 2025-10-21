@@ -231,7 +231,8 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
               </DrawerClose>
             )}
           </div>
-          <EditTaskForm 
+          <EditTaskForm
+            key={activeTask?.id || newTaskText || 'new-task'}
             task={activeTask}
             onClose={handleModalClose}
             onSave={handleModalSave}
