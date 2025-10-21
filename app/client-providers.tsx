@@ -2,8 +2,20 @@
 
 import React, { useState, useMemo, createContext, useContext, useEffect, useCallback } from 'react'
 import { Drawer, DrawerContent, DrawerClose, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { EditTaskForm } from '@/components/widgets/edit-task-form'
+import dynamic from 'next/dynamic'
 import type { Task } from '@/shared/schema'
+
+const EditTaskForm = dynamic(
+  () => import('@/components/widgets/edit-task-form').then(mod => ({ default: mod.EditTaskForm })),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ padding: '2rem', color: 'white' }}>
+        Loading form...
+      </div>
+    )
+  }
+)
 import { useQueryClient } from '@tanstack/react-query'
 import { CloseIcon } from '@/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
