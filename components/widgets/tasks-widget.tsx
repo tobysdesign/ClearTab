@@ -255,12 +255,9 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   }
 
   function handleAddTask() {
-    createTaskLocal({
-      title: "New Task",
-      isCompleted: false,
-      isHighPriority: false,
-      content: EMPTY_QUILL_CONTENT, // Use Quill's empty content structure
-    });
+    // Open modal immediately without creating task server-side
+    // Task will be created on first save in the form
+    setNewTaskText('');
   }
 
   // Function to handle creating a task from editor text

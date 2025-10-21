@@ -86,6 +86,7 @@ interface EditTaskFormProps {
   task?: Task | null
   onClose?: () => void
   onSave?: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void
+  onCancel?: () => void // Add cancel handler for deleting draft tasks
   initialDescription?: string; // Add prop for initial description from editor selection
 }
 
@@ -103,6 +104,7 @@ export function EditTaskForm({
   task,
   onClose,
   onSave,
+  onCancel,
   initialDescription = ''
 }: EditTaskFormProps) {
   const [isPending, startTransition] = useTransition();
@@ -130,11 +132,11 @@ export function EditTaskForm({
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      title: getInitialTitle(),
+      title: task?.title || '',
       content: initialContent, // Use initialContent for default value
       isCompleted: task?.isCompleted || false,
       isHighPriority: task?.isHighPriority || false, // Default to false
-      dueDate: task?.dueDate || null, // Optional - no default date
+      dueDate: task?.dueDate ? (typeof task.dueDate === 'string' ? new Date(task.dueDate) : task.dueDate) : null,
     },
   })
 
@@ -142,12 +144,15 @@ export function EditTaskForm({
     if (task) {
       console.log('EditTaskForm: Setting up form for task:', task)
       console.log('Task content:', task.content)
+      // Convert string dates to Date objects if needed
+      const taskDueDate = task.dueDate ? (typeof task.dueDate === 'string' ? new Date(task.dueDate) : task.dueDate) : null;
+      
       form.reset({
         title: task.title,
         content: task.content || EMPTY_QUILL_CONTENT,
         isCompleted: task.isCompleted,
         isHighPriority: task.isHighPriority, // Set from task
-        dueDate: task.dueDate || null,
+        dueDate: taskDueDate,
       })
       setCurrentContent(JSON.parse(JSON.stringify(task.content || EMPTY_QUILL_CONTENT)))
     } else if (initialDescription) {
@@ -254,7 +259,7 @@ export function EditTaskForm({
                 form.setValue('title', value, { shouldDirty: true });
                 handleFormChange();
               }}
-              placeholder="New Task"
+              placeholder="Enter task title"
             />
           </FormField>
 
@@ -345,7 +350,7 @@ export function EditTaskForm({
       <FormButtons
         mode={task ? 'edit' : 'create'}
         onPrimary={onClose}
-        onSecondary={onClose}
+        onSecondary={onCancel || onClose}
       />
     </div>
   );

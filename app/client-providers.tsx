@@ -109,18 +109,45 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
   const handleDeleteTask = async () => {
     if (!activeTask?.id) return;
 
+    // Optimistically close modal and update UI immediately
+    const taskToDelete = activeTask;
+    handleModalSave(taskToDelete, 'delete');
+
+    // Delete in background
     try {
-      const res = await fetch(`/api/tasks?id=${activeTask.id}`, {
+      const res = await fetch(`/api/tasks?id=${taskToDelete.id}`, {
         method: 'DELETE',
       });
 
-      if (!res.ok) throw new Error('Failed to delete task');
-
-      handleModalSave(activeTask, 'delete');
+      if (!res.ok) {
+        // If delete fails, refresh the task list
+        console.error('Failed to delete task');
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      }
     } catch (error) {
       console.error('Error deleting task:', error);
-      alert('Failed to delete task');
+      // Refresh task list on error
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
+  };
+
+  const handleCancelTask = async () => {
+    // For create mode - if it's a draft task, delete it
+    if (activeTask?.id && activeTask.id.startsWith('draft-')) {
+      try {
+        const res = await fetch(`/api/tasks?id=${activeTask.id}`, {
+          method: 'DELETE',
+        });
+
+        if (res.ok) {
+          handleModalSave(activeTask, 'delete');
+        }
+      } catch (error) {
+        console.error('Error deleting draft task:', error);
+      }
+    }
+    // Close the modal
+    handleModalClose();
   };
 
   const contextValue = useMemo(() => ({
@@ -155,12 +182,11 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
 
             {/* Show actions menu for edit mode, X button for create mode */}
             {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? (
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 text-white/40 hover:text-white hover:bg-white/10"
+                    variant="ghost-icon"
+                    size="icon"
                   >
                     ⋮
                   </Button>
@@ -189,6 +215,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
             task={activeTask}
             onClose={handleModalClose}
             onSave={handleModalSave}
+            onCancel={handleCancelTask}
             initialDescription={newTaskText || undefined}
           />
         </DrawerContent>

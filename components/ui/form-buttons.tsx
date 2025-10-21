@@ -41,7 +41,7 @@ export function FormButtons({
           onClick={onPrimary}
           className={styles.createButton}
         >
-          {primaryText || 'Create task'}
+          {primaryText || 'Create Task'}
         </button>
         <button
           type="button"

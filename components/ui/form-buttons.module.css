@@ -9,20 +9,21 @@
 }
 
 .createButton {
-  background: white !important;
+  background: #C4C4C4 !important;
   color: #1a1a1a !important;
-  border: none;
+  border: 1px solid #E6E6E6;
   border-radius: 8px;
-  padding: 12px 24px;
+  padding: 8px 16px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   flex: 1;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .createButton:hover {
-  background: #f0f0f0 !important;
+  background: #ffffff !important;
+  border-color: #ffffff;
 }
 
 .cancelButton {
@@ -43,21 +44,21 @@
 }
 
 .doneButton {
-  background: #131313 !important;
-  color: white !important;
-  border: 1px solid #4E4E4E;
+  background: #454545 !important;
+  color: #D2D2D2 !important;
+  border: 1px solid #3E3E3E;
   border-radius: 8px;
-  padding: 12px 24px;
+  padding: 8px 16px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .doneButton:hover {
-  background: #252525 !important;
-  border-color: #6E6E6E;
+  background: #414141 !important;
+  border-color: #4D4D4D;
 }
 
 .checkboxField {

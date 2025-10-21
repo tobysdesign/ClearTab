@@ -1,17 +1,18 @@
 .ghostIcon {
     border: 1px solid #252525;
-    background-color: #1a1a1a;
-    color: white;
+    background-color: #2a2426;
+    color: #ccc;
     transition: all 0.2s ease;
 }
 
 .ghostIcon:hover {
+    color: #eee;
     background-color: #252525;
 }
 
 .iconSize {
-    height: 2rem; /* 32px */
-    width: 2rem; /* 32px */
+    height: 32px;
+    width: 32px;
     border-radius: 50%;
 }
 

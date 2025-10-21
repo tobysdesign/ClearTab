@@ -22,13 +22,13 @@
 /* Login Widget Styles */
 .loginWidget {
     height: auto;
-    width: 250px;
-    max-width: 250px;
-    background: rgb(255 255 255 / 13%);
+    width: 300px;
+    max-width: 300px;
+    background: linear-gradient(0deg, #0d70ec75, #00a3fc7a);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    padding: 2.5rem 1.5rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -36,8 +36,27 @@
     text-align: left;
     box-sizing: border-box;
     margin: 0;
+    position: relative;
 }
 
+.insetWidget {
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='10' ry='10' stroke='white' stroke-width='2' stroke-dasharray='6%2c 22' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
+    border-radius: 10px;
+    padding: 2rem;
+}
+
+.logoWrap span {
+    background: hsl(0deg 0% 86% / 76%);
+    border-radius: 4px;
+    border-bottom-left-radius: 10px 7px;
+    color: #1f5886;
+    padding: 3px 4px;
+    font-weight: 800;
+    position: absolute;
+    top: 36px;
+    left: 229px;
+    corner-bottom-left-shape: scoop;
+}
 /* Remove any inherited padding from panel-motion wrapper and parent panels */
 .panel-motion:has(.loginWidget) {
     padding: 0 !important;
@@ -58,8 +77,8 @@
 }
 
 .loginTitle {
-    font-size: 3rem;
-    font-weight: 600;
+    font-size: 4rem;
+    font-weight: 900;
     color: hsl(0 0% 86% / 1);
     margin: 0;
     line-height: 1.1;
