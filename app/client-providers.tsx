@@ -48,6 +48,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
   const queryClient = useQueryClient();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const [newTaskText, setNewTaskText] = useState<string | null>(null)
+  const [isCreatingNew, setIsCreatingNew] = useState(false)
   const [taskUpdateCallbacks, setTaskUpdateCallbacks] = useState<Set<(updatedTask: Task, operation: 'update' | 'create' | 'delete') => void>>(new Set())
 
   // Fetch individual task data when activeTaskId changes
@@ -84,6 +85,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
   const handleModalClose = () => {
     setActiveTaskId(null);
     setNewTaskText(null);
+    setIsCreatingNew(false);
   };
 
   const registerTaskUpdateCallback = useCallback((callback: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void) => {
@@ -170,13 +172,19 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     unregisterTaskUpdateCallback,
   }), [activeTask, registerTaskUpdateCallback, unregisterTaskUpdateCallback]);
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[PERF] Drawer state:', { activeTaskId, newTaskText, shouldOpen: !!(activeTaskId || newTaskText), timestamp: Date.now() });
+  }, [activeTaskId, newTaskText]);
+
   return (
     <TaskModalContext.Provider value={contextValue}>
       {children}
       <div className={styles.modalContainer}>
         <Drawer
-          open={!!(activeTaskId || newTaskText)}
+          open={!!(activeTaskId || newTaskText !== null || isCreatingNew)}
           onOpenChange={(open) => {
+            console.log('[PERF] Drawer onOpenChange:', open, Date.now());
             if (!open) {
               handleModalClose();
             }

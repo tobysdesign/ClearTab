@@ -255,9 +255,12 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   }
 
   function handleAddTask() {
+    console.log('[PERF] handleAddTask clicked at:', Date.now());
     // Open modal immediately without creating task server-side
     // Task will be created on first save in the form
-    setNewTaskText('');
+    // Use a space character instead of empty string to trigger drawer opening
+    setNewTaskText(' ');
+    console.log('[PERF] setNewTaskText called at:', Date.now());
   }
 
   // Function to handle creating a task from editor text
