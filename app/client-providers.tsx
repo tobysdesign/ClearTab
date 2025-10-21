@@ -53,11 +53,9 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
 
   // Fetch individual task data when activeTaskId changes
   const [activeTask, setActiveTask] = useState<Task | null>(null)
-  const [isLoadingTask, setIsLoadingTask] = useState(false)
 
   useEffect(() => {
     const fetchTask = async (taskId: string) => {
-      setIsLoadingTask(true)
       try {
         console.log('Fetching task with ID:', taskId)
         // Fetch single task instead of all tasks for better performance
@@ -73,8 +71,6 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
       } catch (error) {
         console.error('Error fetching task:', error)
         setActiveTask(null)
-      } finally {
-        setIsLoadingTask(false)
       }
     }
 
@@ -83,7 +79,6 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     } else if (newTaskText !== null) {
       // For new tasks, set activeTask to null immediately to open drawer
       setActiveTask(null)
-      setIsLoadingTask(false)
     }
   }, [activeTaskId, newTaskText])
 
@@ -238,20 +233,14 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
               </DrawerClose>
             )}
           </div>
-          {isLoadingTask ? (
-            <div style={{ padding: '2rem', color: 'white' }}>
-              Loading task...
-            </div>
-          ) : (
-            <EditTaskForm
-              key={activeTask?.id || newTaskText || 'new-task'}
-              task={activeTask}
-              onClose={handleModalClose}
-              onSave={handleModalSave}
-              onCancel={handleCancelTask}
-              initialDescription={newTaskText || undefined}
-            />
-          )}
+          <EditTaskForm
+            key={activeTask?.id || newTaskText || 'new-task'}
+            task={activeTask}
+            onClose={handleModalClose}
+            onSave={handleModalSave}
+            onCancel={handleCancelTask}
+            initialDescription={newTaskText || undefined}
+          />
         </DrawerContent>
         </Drawer>
       </div>
