@@ -24,7 +24,25 @@ export async function GET(request: NextRequest) {
       userId = user.id;
     }
 
-    // Always query the database, using default user ID in dev mode
+    // Check if fetching a single task by ID
+    const { searchParams } = new URL(request.url);
+    const taskId = searchParams.get('id');
+
+    if (taskId) {
+      // Fetch single task
+      const [task] = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)));
+
+      if (!task) {
+        return NextResponse.json({ error: "Task not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ data: task });
+    }
+
+    // Fetch all tasks
     const allTasks = await db
       .select()
       .from(tasks)

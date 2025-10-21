@@ -45,15 +45,14 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     const fetchTask = async (taskId: string) => {
       try {
         console.log('Fetching task with ID:', taskId)
-        const response = await fetch('/api/tasks')
+        // Fetch single task instead of all tasks for better performance
+        const response = await fetch(`/api/tasks?id=${taskId}`)
         if (response.ok) {
           const data = await response.json()
-          console.log('All tasks from API:', data.data)
-          const foundTask = data.data?.find((task: Task) => task.id === taskId)
-          console.log('Found task:', foundTask)
-          setActiveTask(foundTask || null)
+          console.log('Task from API:', data.data)
+          setActiveTask(data.data || null)
         } else {
-          console.error('Failed to fetch tasks')
+          console.error('Failed to fetch task')
           setActiveTask(null)
         }
       } catch (error) {
@@ -64,10 +63,11 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
 
     if (activeTaskId) {
       fetchTask(activeTaskId)
-    } else {
+    } else if (newTaskText !== null) {
+      // For new tasks, set activeTask to null immediately to open drawer
       setActiveTask(null)
     }
-  }, [activeTaskId])
+  }, [activeTaskId, newTaskText])
 
   const handleModalClose = () => {
     setActiveTaskId(null);
