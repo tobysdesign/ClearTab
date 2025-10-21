@@ -60,16 +60,28 @@ export function CountdownWidget({
     recurrenceInDays: RECURRENCE_DAYS["fortnightly"],
   });
 
-  // Payday settings deprecated - using local storage instead
+  // Load settings from preferences API
   const { data: paydayData, isLoading } = useQuery({
-    queryKey: ["payday-settings"],
+    queryKey: ["preferences"],
     queryFn: async () => {
-      // Return default settings since payday settings are deprecated
+      try {
+        const response = await fetch('/api/preferences');
+        if (response.ok) {
+          const { data } = await response.json();
+          return data || {
+            countdownTitle: "Countdown",
+            countdownMode: "date-range",
+            paydayFrequency: "none",
+          };
+        }
+      } catch (error) {
+        console.error('Error loading preferences:', error);
+      }
+      // Fallback to defaults
       return {
         countdownTitle: "Countdown",
-        countdownMode: "manual-count",
-        manualCount: 14,
-        paydayFrequency: "fortnightly",
+        countdownMode: "date-range",
+        paydayFrequency: "none",
       };
     },
   });

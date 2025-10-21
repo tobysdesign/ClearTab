@@ -57,11 +57,40 @@ export function CountdownWidgetSettings() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Payday settings deprecated - initialize with defaults
-    setCurrentlySaved({
-      countdownTitle: "Countdown",
-      mode: "start-end",
-    });
+    // Load settings from API
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/preferences');
+        if (response.ok) {
+          const { data } = await response.json();
+          if (data) {
+            // Load saved settings
+            setCountdownTitle(data.countdownTitle || 'Countdown');
+            if (data.countdownMode === 'manual-count') {
+              setActiveTab('recurring');
+            } else {
+              setActiveTab('start-end');
+            }
+            if (data.startDate) setStartDate(new Date(data.startDate));
+            if (data.endDate) setEndDate(new Date(data.endDate));
+            if (data.paydayDate) setStartDate(new Date(data.paydayDate));
+            if (data.paydayFrequency && data.paydayFrequency !== 'none') {
+              setFrequency(data.paydayFrequency);
+            }
+            setCurrentlySaved({
+              countdownTitle: data.countdownTitle || 'Countdown',
+              mode: data.countdownMode === 'manual-count' ? 'recurring' : 'start-end',
+              frequency: data.paydayFrequency,
+              startDate: data.startDate ? new Date(data.startDate) : undefined,
+              endDate: data.endDate ? new Date(data.endDate) : undefined,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading countdown settings:', error);
+      }
+    };
+    loadSettings();
   }, []);
 
   const handleSaveCountSettings = async () => {
@@ -88,24 +117,42 @@ export function CountdownWidgetSettings() {
     setIsSubmitting(true);
     setSaveSuccess(false);
     try {
+      // Prepare dates - use startOfDay to avoid timezone issues
+      const prepareDate = (date: Date | undefined) => {
+        if (!date) return null;
+        const d = new Date(date);
+        d.setHours(12, 0, 0, 0); // Set to noon to avoid timezone shifts
+        return d.toISOString();
+      };
+
       const settingsToSave = {
         countdownTitle: countdownTitle.trim() || "Countdown",
         countdownMode: activeTab === "start-end" ? "date-range" : "date-range",
         paydayFrequency: activeTab === "start-end" ? "none" : frequency,
         ...(activeTab === "start-end"
           ? {
-              startDate,
-              endDate,
+              startDate: prepareDate(startDate),
+              endDate: prepareDate(endDate),
               paydayDate: null,
             }
           : {
-              paydayDate: startDate,
+              paydayDate: prepareDate(startDate),
               startDate: null,
               endDate: null,
             }),
       };
 
-      // Payday settings deprecated - just update local state for now
+      // Save to API
+      const response = await fetch('/api/preferences', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsToSave),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save settings');
+      }
+
       // Update currently saved state
       setCurrentlySaved({
         countdownTitle: countdownTitle.trim() || "Countdown",
@@ -122,7 +169,7 @@ export function CountdownWidgetSettings() {
       });
 
       // Invalidate query to update widget
-      await queryClient.invalidateQueries({ queryKey: ["payday-settings"] });
+      await queryClient.invalidateQueries({ queryKey: ["preferences"] });
 
       // Reset success state after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000);
