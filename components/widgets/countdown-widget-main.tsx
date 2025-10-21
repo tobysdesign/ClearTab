@@ -78,8 +78,10 @@ export function CountdownWidget({
   useEffect(() => {
     if (!paydayData) return;
 
-    const { countdownMode, manualCount, endDate, startDate, paydayFrequency } =
-      paydayData;
+    const { countdownMode, manualCount, paydayFrequency } = paydayData;
+    const endDate = (paydayData as any).endDate;
+    const startDate = (paydayData as any).startDate;
+    const paydayDate = (paydayData as any).paydayDate;
 
     if (countdownMode === "manual-count") {
       // Manual count mode - just use the manual count
@@ -88,7 +90,7 @@ export function CountdownWidget({
         daysLeft: manualCount || 0,
         recurrenceInDays: 14, // Default for dot display
       });
-    } else if (countdownMode === "date-range" || paydayData.paydayDate) {
+    } else if (countdownMode === "date-range" || paydayDate) {
       // Date-based mode
       const today = startOfDay(new Date());
 
@@ -96,19 +98,19 @@ export function CountdownWidget({
         // One-time countdown to end date
         const targetDate = endDate
           ? new Date(endDate)
-          : new Date(paydayData.paydayDate);
+          : new Date(paydayDate);
         const daysLeft = differenceInDays(startOfDay(targetDate), today);
 
         setSettings({
           nextPayday: targetDate,
           daysLeft: Math.max(0, daysLeft),
-          recurrenceInDays: Math.max(14, Math.abs(daysLeft)), // Use days left or default
+          recurrenceInDays: Math.max(14, Math.abs(daysLeft)) as RecurrenceDays, // Use days left or default
         });
-      } else if (paydayFrequency && (endDate || paydayData.paydayDate)) {
+      } else if (paydayFrequency && (endDate || paydayDate)) {
         // Recurring countdown
         const lastPayday = startDate
           ? new Date(startDate)
-          : new Date(paydayData.paydayDate);
+          : new Date(paydayDate);
         const recurrenceInDays = RECURRENCE_DAYS[paydayFrequency];
 
         // Calculate next occurrence
@@ -241,11 +243,11 @@ export function CountdownWidget({
   }
 
   // For start/end mode, calculate event duration
-  const isStartEndMode = paydayData?.startDate && paydayData?.endDate;
+  const isStartEndMode = (paydayData as any)?.startDate && (paydayData as any)?.endDate;
   const eventDurationDays = isStartEndMode
     ? differenceInDays(
-        new Date(paydayData.endDate),
-        new Date(paydayData.startDate),
+        new Date((paydayData as any).endDate),
+        new Date((paydayData as any).startDate),
       )
     : 0;
 

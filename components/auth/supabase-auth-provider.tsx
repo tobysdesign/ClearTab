@@ -28,17 +28,17 @@ interface SupabaseAuthProviderProps {
 }
 
 export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
-  console.log("SupabaseAuthProvider: Component rendering");
+  // console.log("SupabaseAuthProvider: Component rendering");
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [supabase] = useState(() => {
-    console.log("SupabaseAuthProvider: Creating Supabase client");
+    // console.log("SupabaseAuthProvider: Creating Supabase client");
     return createClient();
   });
 
   useEffect(() => {
-    console.log("SupabaseAuthProvider: useEffect triggered!");
+    // console.log("SupabaseAuthProvider: useEffect triggered!");
 
     if (!supabase) {
       console.error("SupabaseAuthProvider: No supabase client!");
@@ -50,9 +50,9 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
 
     // Initialize session immediately from storage (fast, synchronous check)
     const initSession = async () => {
-      console.log(
-        "SupabaseAuthProvider: Checking for existing session in storage",
-      );
+      // console.log(
+      //   "SupabaseAuthProvider: Checking for existing session in storage",
+      // );
 
       try {
         // Quick check for session in storage without waiting for network
@@ -63,12 +63,12 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
 
         if (!mounted) return;
 
-        console.log("SupabaseAuthProvider: Session check result:", {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          email: session?.user?.email,
-          error: error?.message,
-        });
+        // console.log("SupabaseAuthProvider: Session check result:", {
+        //   hasSession: !!session,
+        //   hasUser: !!session?.user,
+        //   email: session?.user?.email,
+        //   error: error?.message,
+        // });
 
         if (session && session.user) {
           // Generate or retrieve session ID
@@ -145,13 +145,17 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]); // Include supabase in dependency array
+  }, []); // Empty dependency array - supabase is created once in useState
 
   const signIn = async (provider: "google") => {
+    // Check if there's a callbackUrl in the current URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const callbackUrl = urlParams.get('callbackUrl') || '/';
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(callbackUrl)}`,
         scopes:
           "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
         queryParams: {

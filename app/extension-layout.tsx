@@ -37,7 +37,7 @@ export default function ExtensionLayout({ children }: ExtensionLayoutProps) {
     document.title = "ClearTab";
 
     // Set favicon
-    const favicon = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    const favicon = (document.querySelector("link[rel*='icon']") || document.createElement('link')) as HTMLLinkElement;
     favicon.type = 'image/svg+xml';
     favicon.rel = 'icon';
     favicon.href = '/dibs.svg';

@@ -386,7 +386,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                   <span
                                     className={cn(
                                       tasksStyles.taskDueDate,
-                                      new Date(task.dueDate) < new Date() && "text-[#666666]"
+                                      new Date(task.dueDate) < new Date() && tasksStyles.taskDueDateOverdue
                                     )}
                                   >
                                     {formatDateSmart(task.dueDate)}

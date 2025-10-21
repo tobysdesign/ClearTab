@@ -3,12 +3,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  border-bottom: 1px solid var(--md-sys-color-outline);
 }
 
 .title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .modalContainer :global([data-vaul-drawer][data-vaul-drawer-direction="right"]) {

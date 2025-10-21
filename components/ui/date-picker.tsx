@@ -18,6 +18,7 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: (date: Date) => boolean;
   className?: string;
+  hideIcon?: boolean;
 }
 
 export function DatePicker({
@@ -26,6 +27,7 @@ export function DatePicker({
   placeholder = "Pick a date",
   disabled,
   className,
+  hideIcon = false,
 }: DatePickerProps) {
   return (
     <Popover>
@@ -33,12 +35,12 @@ export function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-between text-left font-normal bg-transparent border border-white/20 text-white rounded-lg hover:bg-white/10",
+            "w-full justify-between text-left font-normal bg-transparent border-none text-white rounded-lg hover:bg-white/10",
             !date && "text-muted-foreground",
             className
           )}
         >
-          <span className="mr-2 h-4 w-4">◊</span>
+          {!hideIcon && <span className="mr-2 h-4 w-4">◊</span>}
           {date ? format(date, "dd/MM/yy") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>

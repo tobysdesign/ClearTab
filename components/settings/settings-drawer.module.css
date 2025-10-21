@@ -78,5 +78,8 @@
 }
 
 .contentPanel {
-  @apply p-6 rounded-lg rounded-bl-none rounded-br-none mr-[12px] bg-[#1B1B1B];
+  padding: 1.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  margin-right: 12px;
+  background-color: #2A2A2A;
 }

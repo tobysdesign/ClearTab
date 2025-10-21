@@ -36,7 +36,7 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
       try {
         // Update task in Chrome Storage
         const updatedTasks = tasks.map((task) =>
-          task.id === updatedTask.id ? { ...task, ...updatedTask, updatedAt: new Date().toISOString() } : task
+          task.id === updatedTask.id ? { ...task, ...updatedTask, updatedAt: new Date() } : task
         );
         setTasks(updatedTasks);
       } catch (error) {
@@ -73,8 +73,8 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
           isHighPriority: newTaskData.isHighPriority,
           dueDate: null,
           userId: 'extension-user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         };
 
         const updatedTasks = [newTask, ...tasks];

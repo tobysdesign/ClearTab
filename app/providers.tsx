@@ -10,9 +10,19 @@ import ClientProviders from "./client-providers";
 import { SupabaseAuthProvider } from "@/components/auth/supabase-auth-provider";
 import { usePathname } from "next/navigation";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+function ChatOverlayWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAuthPage = pathname === "/login";
+  
+  return (
+    <>
+      {children}
+      {!isAuthPage && <ChatOverlay />}
+    </>
+  );
+}
+
+export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryProvider>
@@ -21,8 +31,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <LayoutProvider>
             <TooltipProvider>
               <ChatProvider>
-                {children}
-                {!isAuthPage && <ChatOverlay />}
+                <ChatOverlayWrapper>
+                  {children}
+                </ChatOverlayWrapper>
               </ChatProvider>
             </TooltipProvider>
           </LayoutProvider>

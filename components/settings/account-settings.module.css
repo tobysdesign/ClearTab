@@ -1,17 +1,25 @@
 .spaceY4 {
-  @apply space-y-4;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .card {
-  @apply p-4 bg-[#111111] rounded-lg border border-[#2A2A2A];
+  padding: 1rem;
+  background-color: #2A2A2A;
+  border-radius: 0.5rem;
+  border: 1px solid #3A3A3A;
 }
 
 .textWhite60 {
-  @apply text-white/60 text-sm;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
 }
 
 .flexItemsGap2 {
-  @apply flex items-center gap-2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .textYellow400 {
@@ -115,11 +123,28 @@
 }
 
 .accountItem {
-  @apply flex items-center justify-between p-2 rounded bg-[#0A0A0A] border border-[#1A1A1A];
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #3A3A3A;
+  border: 1px solid #4A4A4A;
+  margin-bottom: 0.75rem;
+}
+
+.accountRow {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #3A3A3A;
+  border: 1px solid #4A4A4A;
+  margin-bottom: 0.75rem;
 }
 
 .accountItemContent {
-  @apply flex items-center gap-2 min-w-0;
+  @apply flex items-center gap-3 min-w-0;
 }
 
 .userIconSmall {
@@ -130,8 +155,20 @@
   @apply min-w-0;
 }
 
+.accountNameRow {
+  @apply flex items-center gap-2;
+}
+
+.accountName {
+  @apply text-sm font-medium text-white truncate;
+}
+
 .accountEmail {
-  @apply text-xs text-white/90 truncate;
+  @apply text-xs text-white/60 truncate;
+}
+
+.accountActions {
+  @apply flex-shrink-0;
 }
 
 .removeButton {
@@ -168,4 +205,77 @@
 
 .signedInContainer {
   @apply text-xs text-white/60;
+}
+
+/* New layout styles */
+.sectionTitle {
+  @apply text-lg font-semibold text-white mb-1;
+}
+
+.sectionDescription {
+  @apply text-sm text-white/60;
+}
+
+.visibleLabel {
+  @apply text-sm text-white/60;
+}
+
+.toggleSwitch {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors;
+}
+
+.toggleSwitch input {
+  @apply sr-only;
+}
+
+.toggleSlider {
+  @apply absolute left-0 top-0 h-6 w-11 rounded-full bg-[#2A2A2A] transition-colors duration-200;
+}
+
+.toggleSlider::before {
+  @apply absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white/80 transition-transform duration-200 content-[''];
+}
+
+.toggleSwitch input:checked + .toggleSlider {
+  @apply bg-white;
+}
+
+.toggleSwitch input:checked + .toggleSlider::before {
+  @apply transform translate-x-5 bg-black;
+}
+
+.primaryBadge {
+  @apply px-2 py-1 text-xs font-medium bg-white/10 text-white rounded;
+}
+
+.menuButton {
+  @apply h-8 w-8 p-0 text-white/40 hover:text-white hover:bg-white/10;
+}
+
+.linkAccountItem {
+  @apply mt-4 pt-4 border-t border-[#1A1A1A];
+}
+
+.linkAccountButton {
+  @apply w-full flex items-center justify-center gap-2 py-3 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg border border-dashed border-[#2A2A2A];
+}
+
+.iconPlus {
+  @apply text-lg font-normal;
+}
+
+.columnHeaders {
+  @apply flex items-center justify-between p-3 mb-2 text-xs font-medium text-white/60 border-b border-[#1A1A1A];
+}
+
+.accountColumn {
+  @apply flex-1;
+}
+
+.visibilityColumn {
+  @apply w-20 text-center flex justify-center;
+}
+
+.actionsColumn {
+  @apply w-16 text-center flex justify-center;
 }

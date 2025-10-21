@@ -136,7 +136,7 @@ function DaySection({
 
 export function ScheduleWidget() {
   // Use auth
-  const { loading } = useAuth()
+  const { loading, user } = useAuth()
   
   
   // Check if we have session cookies as a workaround for auth loading issues
@@ -146,15 +146,37 @@ export function ScheduleWidget() {
     data: events = [],
     isLoading,
     error,
-  } = useQuery<CalendarEvent[]>({
+    refetch
+  } = useQuery({
     queryKey: ['schedule'],
     enabled: !loading || hasSessionCookies, // Enable query if not loading OR if we have session cookies
-    queryFn: async () => {
+    retry: (failureCount, error) => {
+      const errorWithMeta = error as Error & { errorType?: string; status?: number };
+      // Retry auth errors up to 2 times (token refresh might fix it)
+      if (errorWithMeta.errorType === 'AUTH_EXPIRED' && failureCount < 2) {
+        return true;
+      }
+      // Don't retry other errors
+      return false;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    queryFn: async (): Promise<CalendarEvent[]> => {
       try {
         const res = await api.get('/api/calendar')
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to fetch schedule');
+          // Create error with additional metadata
+          const error = new Error(errorData.error || 'Failed to fetch schedule') as Error & { 
+            errorType?: string; 
+            userMessage?: string; 
+            status?: number;
+            userEmail?: string;
+          };
+          error.errorType = errorData.errorType;
+          error.userMessage = errorData.message;
+          error.status = res.status;
+          error.userEmail = errorData.userEmail;
+          throw error;
         }
         const json = await res.json()
         
@@ -165,18 +187,18 @@ export function ScheduleWidget() {
         
         const eventsFromServer = json.data || []
         if (!Array.isArray(eventsFromServer)) return []
-        return eventsFromServer.map((event: { id: string; title: string; start?: string; startTime?: string; end?: string; endTime?: string; description?: string; location?: string; allDay?: boolean; color?: string; calendarId?: string; calendarName?: string; source?: string }) => ({
+        return eventsFromServer.map((event: { id: string; title: string; start?: string; startTime?: string; end?: string; endTime?: string; description?: string; location?: string; allDay?: boolean; color?: string; calendarId?: string; calendarName?: string; source?: string }): CalendarEvent => ({
           id: event.id,
           title: event.title,
           start: event.start || event.startTime || '',
           end: event.end || event.endTime || '',
-          description: event.description,
-          location: event.location,
-          allDay: event.allDay,
-          color: event.color,
-          calendarId: event.calendarId,
-          calendarName: event.calendarName,
-          source: event.source || 'google',
+          description: event.description || '',
+          location: event.location || '',
+          allDay: event.allDay || false,
+          color: event.color || '',
+          calendarId: event.calendarId || '',
+          calendarName: event.calendarName || '',
+          source: (event.source as 'google' | 'local') || 'google',
         }))
       } catch (error) {
         console.error('Error fetching schedule:', error)
@@ -200,7 +222,8 @@ export function ScheduleWidget() {
   const groupedEvents = useMemo(() => {
     const now = new Date()
     const twoWeeksAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000))
-    return [...events]
+    const eventsArray = Array.isArray(events) ? events : []
+    return [...eventsArray]
       .filter(event => {
         // Include events from 2 weeks ago onwards
         try {
@@ -278,7 +301,11 @@ export function ScheduleWidget() {
   }
 
   if (error) {
-    const isAuthError = error.message.includes('Google Calendar not connected');
+    const errorWithMeta = error as Error & { errorType?: string; userMessage?: string; status?: number; userEmail?: string };
+    const isAuthError = error.message.includes('Google Calendar not connected') || errorWithMeta.errorType === 'AUTH_EXPIRED';
+    const isAuthExpired = errorWithMeta.errorType === 'AUTH_EXPIRED';
+    const displayEmail = errorWithMeta.userEmail || user?.email || 'your account';
+    
     return (
       <WidgetContainer>
         <WidgetHeader title="Schedule" />
@@ -286,10 +313,13 @@ export function ScheduleWidget() {
           {isAuthError ? (
              <EmptyState
               renderIcon={() => <span className={styles.calendarIcon}>◊</span>}
-              title="Connect your calendar"
-              description="See your schedule at a glance by connecting your Google Calendar."
+              title={isAuthExpired ? "Calendar connection expired" : "Connect your calendar"}
+              description={isAuthExpired 
+                ? `Calendar access for ${displayEmail} has expired. We're attempting to refresh it automatically, or you can reconnect manually.`
+                : "See your schedule at a glance by connecting your Google Calendar."
+              }
               action={{
-                label: "Connect Calendar",
+                label: isAuthExpired ? "Reconnect Calendar" : "Connect Calendar",
                 onClick: async () => {
                   try {
                     console.log('Connecting calendar - starting OAuth flow...');
@@ -337,7 +367,7 @@ export function ScheduleWidget() {
           ) : (
             <>
               <p className={styles.errorTitle}>Error loading schedule</p>
-              <p className={styles.errorMessage}>{error.message}</p>
+              <p className={styles.errorMessage}>{errorWithMeta.userMessage || error.message}</p>
             </>
           )}
         </div>

@@ -137,24 +137,33 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
 
       // Get AI response
-      const response = await askAi(userMessage, hasSeenOnboarding, onboardingStep, userName, agentName)
+      const onboardingStepNumber = typeof onboardingStep === 'string' ?
+        ({ "welcome": 1, "agent-name": 2, "user-name": 3, "setup-complete": 4 }[onboardingStep] || 1) :
+        onboardingStep || 1
+      const response = await askAi(userMessage, hasSeenOnboarding, onboardingStepNumber, userName, agentName)
 
       if (response.success && response.data) {
         // Handle onboarding steps
         if (!hasSeenOnboarding && response.data.onboardingStep) {
-          setOnboardingStep(response.data.onboardingStep)
-          
-          // Complete onboarding with both names
-        if (response.data.setupComplete) {
+          const stepMap = {
+            1: "welcome" as const,
+            2: "agent-name" as const,
+            3: "user-name" as const,
+            4: "setup-complete" as const,
+          }
+          setOnboardingStep(stepMap[response.data.onboardingStep as keyof typeof stepMap] || "welcome")
+
+          // Complete onboarding when setup is complete
+          if (response.data.onboardingStep === 4) {
             completeOnboarding({ userName: userMessage, agentName: 'Toby' }) // Defaulting agent name for now
-        }
+          }
         }
 
         // Add AI response to chat
-        const aiMessage = response.data.data || ''
+        const aiMessage = response.data.response || ''
         setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }])
       } else {
-        throw new Error(response.error || 'Failed to get AI response')
+        throw new Error(response.serverError || 'Failed to get AI response')
       }
     } catch (error) {
       console.error('Error processing message:', error)

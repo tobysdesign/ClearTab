@@ -7,7 +7,9 @@ import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from '@/compone
 import { Button } from '@/components/ui/button'
 import { AccountSettings } from './account-settings'
 import { DisplaySettings } from './display-settings'
-import { CountSettings } from './count-settings'
+import { CountdownWidgetSettings } from './countdown-widget-settings'
+import { NotesVoiceTasksSettings } from './notes-voice-tasks-settings'
+import { WeatherSettings } from './weather-settings'
 import { cn } from '@/lib/utils'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import styles from './settings-drawer.module.css'
@@ -24,20 +26,20 @@ const settingsNav: NavItem[] = [
     description: 'Dock, Widget and Background',
     component: DisplaySettings
   },
-  { 
+  {
     name: 'Notes, Tasks & Voice',
     description: 'Written and Voice notes',
-    component: () => <div>Notes Settings</div>
+    component: NotesVoiceTasksSettings
   },
-  { 
-    name: 'Count',
+  {
+    name: 'Countdown Widget',
     description: 'Countdown and recurrence settings',
-    component: CountSettings
+    component: CountdownWidgetSettings
   },
-  { 
+  {
     name: 'Weather',
     description: 'Set location(s) and localisation',
-    component: () => <div>Weather Settings</div>
+    component: WeatherSettings
   },
   { 
     name: 'Account',

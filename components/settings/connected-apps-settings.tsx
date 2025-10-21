@@ -38,7 +38,7 @@ export function ConnectedAppsSettings() {
     getSession();
   }, [supabase]);
 
-  const isGoogleConnected = session?.user?.app_metadata?.provider === "google";
+  const isGoogleConnected = (session?.user as any)?.app_metadata?.provider === "google";
 
   const handleConnectGoogle = async () => {
     if (!supabase) {

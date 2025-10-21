@@ -1,22 +1,34 @@
 .datePickerContainer {
+    width: 120px;
     flex-shrink: 0;
-    width: 140px;
 }
 
 .priorityContainer {
-    flex-shrink: 0;
-    height: 32px;
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    height: 68px;
 }
 
 .priorityInner {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    height: 100%;
 }
 
 .fieldLabel {
     display: block;
+}
+
+.datePickerPopover {
+    width: auto;
+    padding: 0;
+    border-radius: 0.5rem;
+}
+
+.datePickerClearButton {
+    padding: 0.5rem;
+    border-top: 1px solid var(--md-sys-color-outline);
     font-size: 14px;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.9);
@@ -105,8 +117,47 @@
 
 .fixedFooter {
     padding: 1rem;
-    background: var(--md-sys-color-surface-container-high);
     margin-top: 2rem;
+}
+
+.buttonColumn {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+}
+
+.createButton {
+    background: white !important;
+    color: #1a1a1a !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.createButton:hover {
+    background: #f0f0f0 !important;
+}
+
+.cancelButton {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    color: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .doneButton {

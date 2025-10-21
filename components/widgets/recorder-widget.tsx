@@ -246,7 +246,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <WidgetHeader title="Recorder" className="!justify-start" />
+                <WidgetHeader title="Voice notes" className="!justify-start" />
 
                 {/* Body */}
                 <div className={styles.body}>
@@ -293,7 +293,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             <div className={styles.container}>
               <div className={styles.content}>
                 {/* Header */}
-                <WidgetHeader title="Recorder" className="!justify-start" />
+                <WidgetHeader title="Voice notes" className="!justify-start" />
 
                 {/* Body */}
                 <div className={styles.recordingBody}>

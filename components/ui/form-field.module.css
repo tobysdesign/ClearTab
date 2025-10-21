@@ -1,0 +1,111 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 300;
+  color: #C4C4C4;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.textInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 0.375rem;
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.textInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.textInput:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dateInput {
+  width: 120px;
+  padding: 0.5rem 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 0.375rem;
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.dateInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dateInput:focus {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.priorityToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 68px;
+  align-items: flex-end;
+  padding-bottom: 0.5rem;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.switchChecked {
+  background-color: white;
+}
+
+.switchThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.switchChecked .switchThumb {
+  transform: translateX(20px);
+  background-color: #1a1a1a;
+}
+
+.priorityLabel {
+  color: #5A5A5A;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.priorityToggle:has(.switchChecked) .priorityLabel {
+  color: #D2D2D2;
+}

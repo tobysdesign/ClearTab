@@ -3,7 +3,6 @@
 // Icons replaced with ASCII placeholders
 import { CheckIcon } from '@/components/icons'
 import { useAction } from 'next-safe-action/hooks'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -36,7 +35,7 @@ export function APISettings(): ReactNode {
           variant: 'destructive',
         })
       } finally {
-        setIsLoading(false)
+        _setIsLoading(false)
       }
     }
     checkApiKey()
@@ -64,76 +63,73 @@ export function APISettings(): ReactNode {
   }
 
   return (
-    <div className={styles.gridGap6}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Free Tier</CardTitle>
-          <CardDescription>Basic features with limited usage</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className={styles.listDisc}>
-            <li>Basic AI assistance</li>
-            <li>Limited API calls</li>
-            <li>Standard response time</li>
-          </ul>
-        </CardContent>
-      </Card>
+    <div className={styles.container}>
+      <div className={styles.formSection}>
+        <div className={styles.sectionTitle}>Free Tier</div>
+        <div className={styles.sectionDescription}>Basic features with limited usage</div>
 
-      <Card>
-        <CardHeader>
-          <div className={styles.flexItemsGap2}>
-            <CardTitle>Pro Tier</CardTitle>
-            <span className={styles.starIcon}>★</span>
+        <ul className={styles.featureList}>
+          <li>Basic AI assistance</li>
+          <li>Limited API calls</li>
+          <li>Standard response time</li>
+        </ul>
+      </div>
+
+      <div className={styles.formSection}>
+        <div className={styles.tierHeader}>
+          <div className={styles.sectionTitle}>Pro Tier</div>
+          <span className={styles.starIcon}>★</span>
+        </div>
+        <div className={styles.sectionDescription}>Enhanced features with your own API key</div>
+
+        <ul className={styles.featureList}>
+          <li>Advanced AI capabilities</li>
+          <li>Unlimited API calls</li>
+          <li>Priority response time</li>
+          <li>Custom model selection</li>
+        </ul>
+
+        {hasApiKey ? (
+          <div className={styles.successRow}>
+            <CheckIcon size={16} className={styles.successIcon} />
+            <span>API key configured</span>
           </div>
-          <CardDescription>Enhanced features with your own API key</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className={styles.listDiscMb6}>
-            <li>Advanced AI capabilities</li>
-            <li>Unlimited API calls</li>
-            <li>Priority response time</li>
-            <li>Custom model selection</li>
-          </ul>
-
-          {hasApiKey ? (
-            <div className={styles.successText}>
-              <CheckIcon size={16} className="text-green-400" />
-              <span>API key configured</span>
+        ) : showApiKeyInput ? (
+          <div className={styles.apiKeyForm}>
+            <div className={styles.formRow}>
+              <Label htmlFor="apiKey" className={styles.formLabel}>OpenAI API Key</Label>
+              <Input
+                id="apiKey"
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-..."
+                className={styles.formInput}
+              />
             </div>
-          ) : showApiKeyInput ? (
-            <div className={styles.spaceY4}>
-              <div className={styles.spaceY2}>
-                <Label htmlFor="apiKey">OpenAI API Key</Label>
-                <Input
-                  id="apiKey"
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-..."
-                />
-              </div>
-              <div className={styles.flexGap2}>
-                <Button
-                  onClick={handleSaveApiKey}
-                  disabled={!apiKey || status === 'executing'}
-                >
-                  {status === 'executing' ? 'Saving...' : 'Save API Key'}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowApiKeyInput(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
+            <div className={styles.buttonRow}>
+              <Button
+                onClick={handleSaveApiKey}
+                disabled={!apiKey || status === 'executing'}
+                className={styles.saveButton}
+              >
+                {status === 'executing' ? 'Saving...' : 'Save API Key'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowApiKeyInput(false)}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
             </div>
-          ) : (
-            <Button onClick={() => setShowApiKeyInput(true)}>
-              Add API Key
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ) : (
+          <Button onClick={() => setShowApiKeyInput(true)} className={styles.addButton}>
+            Add API Key
+          </Button>
+        )}
+      </div>
     </div>
   )
 } 

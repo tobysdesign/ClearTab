@@ -6,6 +6,7 @@ import {
   PanelResizeHandle,
 } from 'react-resizable-panels'
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
@@ -20,6 +21,7 @@ interface ResizableBentoGridProps {
     tasks: ReactNode
     searchQuery: string
     dockPosition: 'top' | 'left' | 'right' | 'bottom'
+    login?: ReactNode
 }
 
 export function ResizableBentoGrid({
@@ -27,9 +29,16 @@ export function ResizableBentoGrid({
   tasks,
   dockPosition,
   searchQuery: _searchQuery,
+  login,
 }: ResizableBentoGridProps) {
   const padding = useDockPadding(dockPosition)
   const { layout } = useLayout()
+
+  console.log('ResizableBentoGrid: Current layout is:', layout)
+
+  useEffect(() => {
+    console.log('ResizableBentoGrid: Layout changed to:', layout)
+  }, [layout])
 
   const motionProps = (delay: number) => ({
     initial: { opacity: 0, y: 20 },
@@ -38,60 +47,131 @@ export function ResizableBentoGrid({
     className: styles.panelMotion,
   })
 
-  const renderTwoRowLayout = () => (
-    <PanelGroup direction="vertical" className="panel-group">
-      {/* Top Row */}
-      <Panel defaultSize={50} minSize={30}>
-        <PanelGroup direction="horizontal" className="panel-group">
-          <Panel defaultSize={50} minSize={8}>
-            <motion.div {...motionProps(0.25)} className="panel-motion">
-              {notes}
+  const renderTwoRowLayout = () => {
+    // If login prop is provided, render layout with login column
+    if (login) {
+      return (
+        <PanelGroup key="login-two-row-layout" direction="horizontal" className="panel-group">
+          {/* Login Column - spans 2 rows */}
+          <Panel defaultSize={20} minSize={15} maxSize={30}>
+            <motion.div {...motionProps(0.1)} className="panel-motion">
+              {login}
             </motion.div>
           </Panel>
           <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <Panel defaultSize={50} minSize={8}>
-            <motion.div {...motionProps(0.5)} className="panel-motion">
-              {tasks}
-            </motion.div>
+
+          {/* Main Content Area */}
+          <Panel defaultSize={80} minSize={70}>
+            <PanelGroup direction="vertical" className="panel-group">
+              {/* Top Row */}
+              <Panel defaultSize={50} minSize={30}>
+                <PanelGroup direction="horizontal" className="panel-group">
+                  <Panel defaultSize={50} minSize={8}>
+                    <motion.div {...motionProps(0.25)} className="panel-motion">
+                      {notes}
+                    </motion.div>
+                  </Panel>
+                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <Panel defaultSize={50} minSize={8}>
+                    <motion.div {...motionProps(0.5)} className="panel-motion">
+                      {tasks}
+                    </motion.div>
+                  </Panel>
+                </PanelGroup>
+              </Panel>
+
+              <PanelResizeHandle className={styles.resizeHandleVertical} />
+
+              {/* Bottom Row */}
+              <Panel defaultSize={50} minSize={30}>
+                <PanelGroup direction="horizontal" className="panel-group">
+                  <Panel defaultSize={25}>
+                    <motion.div {...motionProps(0.75)} className="panel-motion">
+                      <WeatherWidgetNew />
+                    </motion.div>
+                  </Panel>
+                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <Panel defaultSize={25}>
+                    <motion.div {...motionProps(0.85)} className="panel-motion">
+                      <RecorderWidget />
+                    </motion.div>
+                  </Panel>
+                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <Panel defaultSize={25}>
+                    <motion.div {...motionProps(1)} className="panel-motion">
+                      <CountdownWidget />
+                    </motion.div>
+                  </Panel>
+                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <Panel defaultSize={25}>
+                    <motion.div {...motionProps(1.25)} className="panel-motion">
+                      <ScheduleWidget />
+                    </motion.div>
+                  </Panel>
+                </PanelGroup>
+              </Panel>
+            </PanelGroup>
           </Panel>
         </PanelGroup>
-      </Panel>
+      )
+    }
 
-      <PanelResizeHandle className={styles.resizeHandleVertical} />
+    // Original layout without login
+    return (
+      <PanelGroup key="two-row-layout" direction="vertical" className="panel-group">
+        {/* Top Row */}
+        <Panel defaultSize={50} minSize={30}>
+          <PanelGroup direction="horizontal" className="panel-group">
+            <Panel defaultSize={50} minSize={8}>
+              <motion.div {...motionProps(0.25)} className="panel-motion">
+                {notes}
+              </motion.div>
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={50} minSize={8}>
+              <motion.div {...motionProps(0.5)} className="panel-motion">
+                {tasks}
+              </motion.div>
+            </Panel>
+          </PanelGroup>
+        </Panel>
 
-      {/* Bottom Row */}
-      <Panel defaultSize={50} minSize={30}>
-        <PanelGroup direction="horizontal" className="panel-group">
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.75)} className="panel-motion">
-              <WeatherWidgetNew />
-            </motion.div>
-          </Panel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.85)} className="panel-motion">
-              <RecorderWidget />
-            </motion.div>
-          </Panel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(1)} className="panel-motion">
-              <CountdownWidget />
-            </motion.div>
-          </Panel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(1.25)} className="panel-motion">
-              <ScheduleWidget />
-            </motion.div>
-          </Panel>
-        </PanelGroup>
-      </Panel>
-    </PanelGroup>
-  )
+        <PanelResizeHandle className={styles.resizeHandleVertical} />
+
+        {/* Bottom Row */}
+        <Panel defaultSize={50} minSize={30}>
+          <PanelGroup direction="horizontal" className="panel-group">
+            <Panel defaultSize={25}>
+              <motion.div {...motionProps(0.75)} className="panel-motion">
+                <WeatherWidgetNew />
+              </motion.div>
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={25}>
+              <motion.div {...motionProps(0.85)} className="panel-motion">
+                <RecorderWidget />
+              </motion.div>
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={25}>
+              <motion.div {...motionProps(1)} className="panel-motion">
+                <CountdownWidget />
+              </motion.div>
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={25}>
+              <motion.div {...motionProps(1.25)} className="panel-motion">
+                <ScheduleWidget />
+              </motion.div>
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    )
+  }
 
   const renderSingleRowLayout = () => (
-    <PanelGroup direction="horizontal" className={styles.singleRowPanelGroup}>
+    <PanelGroup key="single-row-layout" direction="horizontal" className={styles.singleRowPanelGroup}>
       <Panel defaultSize={67} minSize={30}>
         <PanelGroup direction="vertical" className="panel-group">
           <Panel defaultSize={60} minSize={25}>
@@ -114,7 +194,7 @@ export function ResizableBentoGrid({
                 </motion.div>
               </Panel>
               <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-              <Panel defaultSize={33}>
+              <Panel defaultSize={34}>
                 <motion.div {...motionProps(1)} className="panel-motion">
                   <RecorderWidget />
                 </motion.div>
@@ -144,6 +224,7 @@ export function ResizableBentoGrid({
 
   return (
     <motion.div
+      key={layout} // Force re-render when layout changes
       animate={{
         paddingTop: padding.paddingTop,
         paddingRight: padding.paddingRight,

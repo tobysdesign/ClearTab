@@ -90,19 +90,20 @@ export async function GET(request: NextRequest) {
           accessToken: access_token,
           refreshToken: refresh_token || existingLink.refreshToken,
           tokenExpiry: expiry_date ? new Date(expiry_date) : null,
-          updatedAt: new Date(),
-        })
+        } as any)
         .where(eq(connectedAccounts.id, existingLink.id));
     } else {
       // If the link does not exist, insert a new record for the current user.
-      await db.insert(connectedAccounts).values({
+      const insertValues = {
         userId: primaryUser.id,
         provider: "google",
         providerAccountId: providerAccountId,
         accessToken: access_token,
         refreshToken: refresh_token || null,
         tokenExpiry: expiry_date ? new Date(expiry_date) : null,
-      });
+      };
+
+      await db.insert(connectedAccounts).values(insertValues);
     }
 
     return NextResponse.redirect(`${origin}${next}`);

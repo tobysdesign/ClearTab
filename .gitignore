@@ -29,3 +29,17 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Development notes and documentation
+CLAUDE.md
+WARP.md
+Instructions.md
+DEPLOYMENT.md
+SUPABASE_SETUP.md
+docs-and-demos/
+docs/
+claude-mcp-config-backup.json
+project-transfer.json
+*.mcp.json
+auth.json
+tsconfig.tsbuildinfo

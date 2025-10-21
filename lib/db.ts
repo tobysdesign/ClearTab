@@ -11,10 +11,13 @@ if (!connectionString) {
 
 // Create postgres connection with proper pooling and timeouts
 const client = postgres(connectionString, {
-  max: 10,                // Connection pool size
+  max: 5,                 // Reduced connection pool size for Supabase
   idle_timeout: 20,       // Close idle connections after 20 seconds
-  connect_timeout: 10,    // 10 second connection timeout
-  ssl: process.env.NODE_ENV === 'production' // Only use SSL in production
+  connect_timeout: 30,    // Increased connection timeout for Supabase
+  ssl: 'require',         // Always require SSL for Supabase
+  transform: {
+    undefined: null       // Transform undefined to null for Postgres
+  }
 })
 
 // Create drizzle database instance with schema

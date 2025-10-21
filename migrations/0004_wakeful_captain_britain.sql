@@ -1,0 +1,1 @@
+ALTER TABLE "tasks" ALTER COLUMN "content" SET DEFAULT '{"ops":[{"insert":"\n"}]}'::jsonb;

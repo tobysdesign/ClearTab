@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Accordion,
   AccordionContent,
@@ -137,40 +136,36 @@ export function CalendarSettings() {
   const isLoading = loadingAccounts || loadingCalendars
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Manage Calendars</CardTitle>
-      </CardHeader>
-      <CardContent className={styles.spaceY6}>
-        <div className={styles.flexJustifyBetween}>
-          <p className={styles.textMuted}>
-            Connect and manage your Google Calendars.
-          </p>
-          <Button onClick={handleGoogleSignIn}>
+    <div className={styles.container}>
+      <div className={styles.formSection}>
+        <div className={styles.sectionTitle}>Manage Calendars</div>
+        <div className={styles.sectionDescription}>
+          Connect and manage your Google Calendars.
+        </div>
+
+        <div className={styles.connectRow}>
+          <Button onClick={handleGoogleSignIn} className={styles.connectButton}>
             Connect Google Calendar
           </Button>
         </div>
 
         {isLoading ? (
-          <div className={styles.spaceY4}>
-            <Skeleton className={styles.skeletonFull} />
-            <Skeleton className={styles.skeletonFull} />
+          <div className={styles.loadingContainer}>
+            <Skeleton className={styles.loadingSkeleton} />
+            <Skeleton className={styles.loadingSkeleton} />
           </div>
         ) : (
-          <Accordion type="multiple" className={styles.accordionFull} defaultValue={accounts.map(a => a.id)}>
+          <Accordion type="multiple" className={styles.accordion} defaultValue={accounts.map(a => a.id)}>
             {accounts.map((account) => (
               <AccordionItem value={account.id} key={account.id}>
                 <AccordionTrigger>{account.email}</AccordionTrigger>
                 <AccordionContent>
-                  <div className={styles.spaceY4}>
+                  <div className={styles.calendarList}>
                     {calendars
                       .filter((cal) => cal.connectedAccountId === account.id)
                       .map((cal) => (
-                        <div
-                          key={cal.id}
-                          className={styles.flexItemsJustifyBetween}
-                        >
-                          <Label htmlFor={cal.id}>{cal.summary}</Label>
+                        <div key={cal.id} className={styles.toggleRow}>
+                          <Label htmlFor={cal.id} className={styles.toggleLabel}>{cal.summary}</Label>
                           <Switch
                             id={cal.id}
                             checked={cal.isEnabled}
@@ -188,7 +183,7 @@ export function CalendarSettings() {
                     {calendars.filter(
                       (cal) => cal.connectedAccountId === account.id,
                     ).length === 0 && (
-                      <p className={styles.textSmMuted}>
+                      <p className={styles.emptyMessage}>
                         No calendars found for this account.
                       </p>
                     )}
@@ -198,7 +193,7 @@ export function CalendarSettings() {
             ))}
           </Accordion>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 } 

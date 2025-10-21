@@ -19,7 +19,7 @@ import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import { useToast } from "@/components/ui/use-toast";
 // Payday settings deprecated - now using countdown widget directly
 import { useQueryClient } from "@tanstack/react-query";
-import styles from "./count-settings.module.css";
+import styles from "./countdown-widget-settings.module.css";
 
 const _weekDays = [
   "Sunday",
@@ -31,7 +31,7 @@ const _weekDays = [
   "Saturday",
 ];
 
-export function CountSettings() {
+export function CountdownWidgetSettings() {
   const [activeTab, setActiveTab] = useState<"recurring" | "start-end">(
     "start-end",
   );
@@ -242,13 +242,13 @@ export function CountSettings() {
 
         <div className={styles.tabContent}>
           {/* Title Input - common to both tabs */}
-          <div className={styles.field}>
-            <p className={styles.fieldLabel}>COUNTING DOWN TO:</p>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>COUNTING DOWN TO:</label>
             <Input
               value={countdownTitle}
               onChange={(e) => setCountdownTitle(e.target.value)}
               placeholder="example: My birthday"
-              className={styles.titleInput}
+              className={styles.formInput}
             />
           </div>
 
@@ -256,20 +256,21 @@ export function CountSettings() {
           <div
             style={{ display: activeTab === "recurring" ? "block" : "none" }}
           >
-            <div className={styles.dateFields}>
-              <div className={styles.dateField}>
-                <p className={styles.fieldLabel}>DATE RANGE</p>
+            <div className={styles.formGrid}>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>DATE RANGE</label>
                 <DatePicker
                   date={startDate}
                   onSelect={setStartDate}
                   placeholder="22/07/25"
-                  className={styles.dateButton}
+                  className={styles.dateInput}
+                  hideIcon={true}
                 />
               </div>
-              <div className={styles.dateField}>
-                <p className={styles.fieldLabel}>RECUR</p>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>RECUR</label>
                 <Select value={frequency} onValueChange={handleFrequencyChange}>
-                  <SelectTrigger className={styles.selectTrigger}>
+                  <SelectTrigger className={styles.formSelect}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -287,23 +288,25 @@ export function CountSettings() {
           <div
             style={{ display: activeTab === "start-end" ? "block" : "none" }}
           >
-            <div className={styles.dateFields}>
-              <div className={styles.dateField}>
-                <p className={styles.fieldLabel}>START</p>
+            <div className={styles.formGrid}>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>START</label>
                 <DatePicker
                   date={startDate}
                   onSelect={setStartDate}
                   placeholder="22/07/25"
-                  className={styles.dateButton}
+                  className={styles.dateInput}
+                  hideIcon={true}
                 />
               </div>
-              <div className={styles.dateField}>
-                <p className={styles.fieldLabel}>END</p>
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>END</label>
                 <DatePicker
                   date={endDate}
                   onSelect={setEndDate}
                   placeholder="23/07/25"
-                  className={styles.dateButton}
+                  className={styles.dateInput}
+                  hideIcon={true}
                 />
               </div>
             </div>
@@ -327,7 +330,7 @@ export function CountSettings() {
             disabled={isSubmitting}
             className={styles.saveButton}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {isSubmitting ? "Saving..." : "Set countdown"}
           </Button>
 
           {/* Success Message */}

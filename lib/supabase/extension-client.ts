@@ -35,8 +35,7 @@ export function createExtensionClient() {
         detectSessionInUrl: false, // Disable session detection from URL
       },
       realtime: {
-        // Completely disable realtime to prevent WebSocket connections
-        disabled: true,
+        // Minimize realtime activity to prevent WebSocket issues
         params: {
           eventsPerSecond: 0,
         },

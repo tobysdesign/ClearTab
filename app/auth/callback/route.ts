@@ -29,35 +29,24 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.user) {
+      const userInsertValues = {
+        email: data.user.email!,
+        name:
+          data.user.user_metadata?.full_name ||
+          data.user.user_metadata?.name ||
+          "User",
+        googleId: data.user.user_metadata?.provider_id,
+        googleCalendarConnected: !!data.session.provider_token,
+        accessToken: data.session.provider_token || null,
+        refreshToken: data.session.provider_refresh_token || null,
+      } as const;
+
       await db
         .insert(userTable)
-        .values({
-          id: data.user.id,
-          email: data.user.email!,
-          name:
-            data.user.user_metadata?.full_name ||
-            data.user.user_metadata?.name ||
-            "User",
-          googleId: data.user.user_metadata?.provider_id,
-          googleCalendarConnected: !!data.session.provider_token,
-          accessToken: data.session.provider_token || null,
-          refreshToken: data.session.provider_refresh_token || null,
-          updatedAt: new Date(),
-        })
+        .values(userInsertValues)
         .onConflictDoUpdate({
           target: userTable.id,
-          set: {
-            email: data.user.email!,
-            name:
-              data.user.user_metadata?.full_name ||
-              data.user.user_metadata?.name ||
-              "User",
-            googleId: data.user.user_metadata?.provider_id,
-            googleCalendarConnected: !!data.session.provider_token,
-            accessToken: data.session.provider_token || null,
-            refreshToken: data.session.provider_refresh_token || null,
-            updatedAt: new Date(),
-          },
+          set: userInsertValues,
         });
     }
 

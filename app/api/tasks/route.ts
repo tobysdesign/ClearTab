@@ -10,7 +10,6 @@ export async function GET(request: NextRequest) {
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
     const defaultUserId = '00000000-0000-4000-8000-000000000000';
 
-    let allTasks;
     let userId = defaultUserId;
 
     if (!devBypass) {
@@ -26,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Always query the database, using default user ID in dev mode
-    allTasks = await db
+    const allTasks = await db
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId))
@@ -65,25 +64,25 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, content, dueDate, isHighPriority, isCompleted, description, priority } = body;
 
+    const insertValues = {
+      userId: userId,
+      title: title || "Untitled Task",
+      content: content || (description
+        ? {
+            ops: [
+              { insert: description },
+              { insert: "\n" }
+            ]
+          }
+        : { ops: [{ insert: "\n" }] }),
+      dueDate: dueDate ? new Date(dueDate) : null,
+      isHighPriority: isHighPriority !== undefined ? isHighPriority : (priority === "high"),
+      isCompleted: isCompleted || false,
+    } as const;
+
     const [newTask] = await db
       .insert(tasks)
-      .values({
-        userId: userId,
-        title: title || "Untitled Task",
-        content: content || (description
-          ? {
-              ops: [
-                { insert: description },
-                { insert: "\n" }
-              ]
-            }
-          : { ops: [{ insert: "\n" }] }),
-        dueDate: dueDate ? new Date(dueDate) : null,
-        isHighPriority: isHighPriority !== undefined ? isHighPriority : (priority === "high"),
-        isCompleted: isCompleted || false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(insertValues)
       .returning();
 
     return NextResponse.json({ data: newTask });

@@ -15,7 +15,7 @@ import {
   WidgetContainer,
   // WidgetContent,
 } from "@/components/ui/widget-container";
-import { SimpleQuillEditor } from "../components/ui/simple-quill-editor";
+import { QuillEditor } from "@/components/ui/quill-editor";
 import { EMPTY_QUILL_CONTENT, type Note, type QuillDelta } from "@/shared/schema";
 import { useNotes } from "../hooks/use-extension-notes";
 import { AnimatePresence } from "framer-motion";
@@ -147,6 +147,8 @@ export function ExtensionNotesWidget() {
   const isInitializedRef = useRef(false);
   const draftCounterRef = useRef(0);
   const _editorInitializedRef = useRef(false);
+  const editorRef = useRef<any>(null);
+  const isUpdatingEditor = useRef(false);
 
   // Generate unique draft ID to prevent duplicate keys
   const generateDraftId = useCallback(() => {
@@ -320,7 +322,7 @@ export function ExtensionNotesWidget() {
   }, []);
 
   const handleTitleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const newTitle = e.target.value;
 
       // Mark user as actively typing FIRST to prevent any interference
@@ -871,9 +873,9 @@ export function ExtensionNotesWidget() {
                   "custom-scrollbar",
                 )}
               >
-                <SimpleQuillEditor
+                <QuillEditor
                   key="notes-editor" // Use completely stable key to prevent any re-mounts
-                  initialContent={EMPTY_QUILL_CONTENT} // Always use empty, sync via effects
+                  value={EMPTY_QUILL_CONTENT} // Always use empty, sync via effects
                   onChange={(content) => {
                     // Guard: check if we're updating programmatically
                     if (isUpdatingEditor.current) return;
@@ -1039,7 +1041,6 @@ export function ExtensionNotesWidget() {
                       1000,
                     );
                   }}
-                  onEditorReady={handleEditorReady}
                   editable={true}
                   className={notesStyles.notesEditorContainer}
                 />

@@ -49,26 +49,60 @@ interface ResizablePanelsProps {
   maxWidth?: number;
   collapsed?: boolean;
   onToggleCollapse: () => void;
+  onWidthChange?: (width: number) => void;
 }
 
 function ResizablePanels({
   children,
   defaultWidth = 300,
-  minWidth = 120,
+  minWidth = 50,
   maxWidth = 500,
   collapsed = false,
   onToggleCollapse,
+  onWidthChange,
 }: ResizablePanelsProps) {
   const [currentWidth, setCurrentWidth] = useState(defaultWidth);
+  const [containerWidth, setContainerWidth] = useState(0);
   const isResizing = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const collapseTriggered = useRef(false);
 
   useEffect(() => {
     if (!collapsed) {
-      setCurrentWidth(defaultWidth);
+      // Set proportional width: 1/3 of container width, but respect right panel minimum
+      if (containerWidth > 0) {
+        const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4);
+        const proportionalWidth = Math.max(minWidth, Math.min(containerWidth / 3, maxAllowedWidth));
+        setCurrentWidth(proportionalWidth);
+      } else {
+        setCurrentWidth(defaultWidth);
+      }
     }
-  }, [collapsed, defaultWidth]);
+  }, [collapsed, defaultWidth, containerWidth, minWidth, maxWidth]);
+
+  // Track container width changes for proportional resizing
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const newContainerWidth = entry.contentRect.width;
+        setContainerWidth(newContainerWidth);
+        
+        // Update currentWidth proportionally if not currently resizing
+        if (!isResizing.current && newContainerWidth > 0) {
+          // Ensure right panel gets at least 60% by limiting left panel to max 40%
+          const maxAllowedWidth = Math.min(maxWidth, newContainerWidth * 0.4);
+          const proportionalWidth = Math.max(minWidth, Math.min(newContainerWidth / 3, maxAllowedWidth));
+          setCurrentWidth(proportionalWidth);
+          onWidthChange?.(proportionalWidth);
+        }
+      }
+    });
+    
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, [minWidth, maxWidth, onWidthChange]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,31 +120,20 @@ function ResizablePanels({
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing.current || !containerRef.current) return;
-    let newWidth =
-      e.clientX - containerRef.current.getBoundingClientRect().left;
-    const collapseThreshold = 90;
-
-    if (!collapseTriggered.current) {
-      if (!collapsed && newWidth < collapseThreshold) {
-        onToggleCollapse();
-        collapseTriggered.current = true;
-      } else if (collapsed && newWidth > collapseThreshold) {
-        onToggleCollapse();
-        collapseTriggered.current = true;
-      }
-    }
-
-    if (!collapsed) {
-      newWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
-      setCurrentWidth(newWidth);
-    }
+    let newWidth = e.clientX - containerRef.current.getBoundingClientRect().left;
+    
+    // Constrain to min/max width and container size (right panel gets at least 60%)
+    const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4); // Max 40% of container (so right gets 60%)
+    newWidth = Math.max(minWidth, Math.min(newWidth, maxAllowedWidth));
+    setCurrentWidth(newWidth);
+    onWidthChange?.(newWidth);
   };
 
   return (
     <div className={notesStyles.resizablePanels} ref={containerRef}>
       <div
-        style={{ width: collapsed ? 60 : currentWidth }}
-        className={notesStyles.resizableLeft}
+        style={{ width: currentWidth }}
+        className={`${notesStyles.resizableLeft} ${currentWidth < 100 ? 'collapsed' : ''}`}
       >
         {children[0]}
       </div>
@@ -142,6 +165,7 @@ export function NotesWidget() {
   const [activeNote, setActiveNote] = useState<Partial<Note> | null>(null);
   const [displayTitle, setDisplayTitle] = useState<string>("");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(300);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [saveStatus, setSaveStatus] = useState<
@@ -672,6 +696,7 @@ export function NotesWidget() {
         defaultWidth={300}
         collapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
+        onWidthChange={setPanelWidth}
       >
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
@@ -703,7 +728,7 @@ export function NotesWidget() {
                         onDelete={() =>
                           handleDeleteNote(activeNote.id as string)
                         }
-                        collapsed={isCollapsed}
+                        collapsed={panelWidth < 100}
                         isEditing={isEditing}
                       />
                     </>
@@ -723,7 +748,8 @@ export function NotesWidget() {
                         isSelected={isActive}
                         onClick={() => handleSelectNote(note)}
                         onDelete={() => handleDeleteNote(note.id as string)}
-                        collapsed={isCollapsed}
+                        collapsed={panelWidth < 100}
+
                         isEditing={isActive && isEditing}
                       />
                     );

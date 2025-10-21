@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@/server/db';
+import { db } from '@/lib/db';
 import { tasks, BlockNoteContentSchema } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 import { action } from '@/lib/safe-action';

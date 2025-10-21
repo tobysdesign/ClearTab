@@ -1,0 +1,37 @@
+.panelMotion {
+  /* Required class for motion div */
+}
+
+.resizeHandleHorizontal {
+  /* box model */
+  width: 1px;
+  margin-left: 8px;
+  margin-right: 8px;
+
+  /* visual */
+  background-color: hsl(var(--border));
+
+  /* state */
+  transition: colors 0.3s ease-out;
+}
+
+.resizeHandleHorizontal:hover {
+  background-color: #FF4F4F;
+}
+
+.resizeHandleVertical {
+  /* box model */
+  height: 1px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+
+  /* visual */
+  background-color: hsl(var(--border));
+
+  /* state */
+  transition: colors 0.3s ease-out;
+}
+
+.resizeHandleVertical:hover {
+  background-color: #FF4F4F;
+}

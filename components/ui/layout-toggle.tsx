@@ -42,7 +42,10 @@ export function LayoutToggle({ variant = 'dock' }: LayoutToggleProps) {
   return (
     <Button
       variant="outline"
-      onClick={toggleLayout}
+      onClick={() => {
+        console.log('Settings button clicked, current layout:', layout)
+        toggleLayout()
+      }}
       className={styles.settingsButton}
     >
       {layout === 'two-row' ? (

@@ -6,6 +6,8 @@ import { EditTaskForm } from '@/components/widgets/edit-task-form'
 import type { Task } from '@/shared/schema'
 import { useQueryClient } from '@tanstack/react-query'
 import { CloseIcon } from '@/components/icons'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
 import styles from './client-providers.module.css'
 
 interface ClientProvidersProps {
@@ -97,7 +99,29 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         console.error('Error calling task update callback:', error);
       }
     });
+
+    // Close modal after delete
+    if (operation === 'delete') {
+      handleModalClose();
+    }
   }, [queryClient, taskUpdateCallbacks]);
+
+  const handleDeleteTask = async () => {
+    if (!activeTask?.id) return;
+
+    try {
+      const res = await fetch(`/api/tasks?id=${activeTask.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Failed to delete task');
+
+      handleModalSave(activeTask, 'delete');
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task');
+    }
+  };
 
   const contextValue = useMemo(() => ({
     setActiveTaskId,
@@ -123,19 +147,43 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         <DrawerContent direction="right" overlayVariant="settings" className="overflow-hidden">
           <div className={styles.header}>
             <DrawerTitle className={styles.title}>
-              {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? 'Edit Task' : 'Create Task'}
+              {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? 'EDIT TASK' : 'CREATE TASK'}
             </DrawerTitle>
             <DrawerDescription className="sr-only">
               {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? 'Edit the selected task details' : 'Create a new task with title, description, and due date'}
             </DrawerDescription>
-            <DrawerClose asChild>
-              <button
-                className="md3-icon-button"
-                aria-label="Close dialog"
-              >
-                <CloseIcon size={20} />
-              </button>
-            </DrawerClose>
+
+            {/* Show actions menu for edit mode, X button for create mode */}
+            {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 text-white/40 hover:text-white hover:bg-white/10"
+                  >
+                    ⋮
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={handleDeleteTask}
+                    className="text-red-400 focus:text-red-300"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <DrawerClose asChild>
+                <button
+                  className="md3-icon-button"
+                  aria-label="Close dialog"
+                >
+                  <CloseIcon size={20} />
+                </button>
+              </DrawerClose>
+            )}
           </div>
           <EditTaskForm 
             task={activeTask}

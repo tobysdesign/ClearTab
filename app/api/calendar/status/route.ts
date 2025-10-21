@@ -1,43 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { user as userTable } from '@/shared/schema';
-import { eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ connected: false, error: 'Unauthorized' }, { status: 401 });
+    if (!supabase) {
+      return NextResponse.json({
+        success: true,
+        connected: false,
+        message: "Supabase client not available"
+      });
     }
 
-    const [dbUser] = await db
-      .select({
-        googleCalendarConnected: userTable.googleCalendarConnected,
-        lastCalendarSync: userTable.lastCalendarSync,
-      })
-      .from(userTable)
-      .where(eq(userTable.id, user.id))
-      .limit(1);
+    // Get the current user session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-    if (!dbUser) {
-      return NextResponse.json({ connected: false });
+    if (sessionError || !session) {
+      return NextResponse.json({
+        success: true,
+        connected: false,
+        message: "Not authenticated"
+      });
     }
 
+    // Check if user has Google provider tokens with calendar scopes
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({
+        success: true,
+        connected: false,
+        message: "User not found"
+      });
+    }
+
+    // Check if user logged in with Google and has required metadata
+    const isGoogleUser = user.app_metadata?.provider === 'google' ||
+                        user.identities?.some(identity => identity.provider === 'google');
+
+    if (!isGoogleUser) {
+      return NextResponse.json({
+        success: true,
+        connected: false,
+        message: "Not signed in with Google"
+      });
+    }
+
+    // If user is authenticated with Google, assume calendar access
+    // (since our OAuth flow requests calendar scopes)
     return NextResponse.json({
-      connected: dbUser.googleCalendarConnected,
-      lastSync: dbUser.lastCalendarSync,
+      success: true,
+      connected: true,
+      message: "Google Calendar connected"
     });
 
   } catch (error) {
-    console.error('Calendar status API error:', error);
-    return NextResponse.json(
-      { connected: false, error: 'Failed to fetch calendar status' },
-      { status: 500 },
-    );
+    console.error('Error checking calendar status:', error);
+    return NextResponse.json({
+      success: false,
+      connected: false,
+      error: 'Failed to check calendar status'
+    }, { status: 500 });
   }
 }

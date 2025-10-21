@@ -27,7 +27,12 @@ export async function apiRequest(url: string, options: RequestInit = {}): Promis
   if (response.status === 401 && typeof window !== 'undefined') {
     // Clear the invalid session
     localStorage.removeItem('session_id')
-    
+
+    // Don't redirect if already on login page to prevent infinite loops
+    if (window.location.pathname === '/login') {
+      return response
+    }
+
     // Redirect to login with callback URL
     const currentUrl = window.location.href
     window.location.href = `/login?callbackUrl=${encodeURIComponent(currentUrl)}`

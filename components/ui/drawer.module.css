@@ -28,4 +28,52 @@
   width: 100px;
   background-color: hsl(var(--muted));
   border-radius: 0.25rem;
+}
+
+.content {
+  outline: none;
+}
+
+.contentBottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  margin-top: 1.5rem;
+  display: flex;
+  height: 80vh;
+  flex-direction: column;
+  background-color: #111111;
+  border-radius: 10px 10px 0 0;
+}
+
+.contentRight {
+  position: fixed;
+  top: 5rem;
+  right: 2.5rem;
+  z-index: 50;
+  width: 33.333333%;
+  min-width: 300px;
+  background-color: #111111;
+  border-radius: 12px;
+}
+
+.header {
+  /* Empty for now - styling handled by login page */
+}
+
+.footer {
+  /* Empty for now - styling handled by pages that use it */
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, #6b7280);
 } 

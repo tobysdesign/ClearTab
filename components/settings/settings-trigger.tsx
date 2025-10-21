@@ -4,6 +4,7 @@ import * as React from 'react'
 import { SettingsIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import styles from './settings-trigger.module.css'
 
 interface SettingsTriggerProps {
   className?: string
@@ -24,12 +25,12 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
       size="icon"
       onClick={handleClick}
       className={cn(
-        "rounded-lg p-2 hover:bg-white/20 transition-all duration-200 ease-out text-white/60 hover:text-white/80 group",
+        styles.settingsTrigger,
         className
       )}
       data-testid="settings-trigger"
     >
-      <SettingsIcon size={16} className="text-white/60 group-hover:rotate-45 transition-transform duration-300" />
+      <SettingsIcon size={16} className={styles.settingsIcon} />
       <span className="sr-only">Open Settings</span>
     </Button>
   )

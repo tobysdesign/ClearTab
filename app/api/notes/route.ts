@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
       const [{ dbMinimal }, { notes }] = await Promise.all([
         import('@/lib/db-minimal'),
-        import('@/lib/notes-schema')
+        import('@/shared/schema')
       ]);
 
       console.log('🔧 Development mode: Bypassing auth for notes API');
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
         import('@/lib/supabase/server'),
         import('@/lib/db-minimal'),
-        import('@/lib/notes-schema')
+        import('@/shared/schema')
       ]);
 
       const supabase = await createClient();
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
       import('@/lib/supabase/server'),
       import('@/lib/db-minimal'),
-      import('@/lib/notes-schema')
+      import('@/shared/schema')
     ]);
 
     // Development bypass for testing
@@ -105,13 +105,15 @@ export async function POST(request: NextRequest) {
     const { title, content } = body;
 
     // Create note in database using Drizzle
+    const insertValues = {
+      userId: userId,
+      title: title || 'Untitled',
+      content: content || { ops: [{ insert: '\n' }] }
+    } as const;
+
     const [newNote] = await dbMinimal
       .insert(notes)
-      .values({
-        userId: userId,
-        title: title || 'Untitled',
-        content: content || JSON.stringify({ ops: [{ insert: '\n' }] })
-      })
+      .values(insertValues)
       .returning();
 
     // Invalidate cache
@@ -137,7 +139,7 @@ export async function PUT(request: NextRequest) {
     const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
       import('@/lib/supabase/server'),
       import('@/lib/db-minimal'),
-      import('@/lib/notes-schema')
+      import('@/shared/schema')
     ]);
 
     // Development bypass for testing
@@ -165,13 +167,14 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update note in database using Drizzle
+    const updateValues = {
+      title: title || 'Untitled',
+      content: content || { ops: [{ insert: '\n' }] }
+    } as const;
+
     const [updatedNote] = await dbMinimal
       .update(notes)
-      .set({
-        title: title || 'Untitled',
-        content: content || JSON.stringify({ ops: [{ insert: '\n' }] }),
-        updatedAt: new Date()
-      })
+      .set(updateValues)
       .where(eq(notes.id, noteId))
       .returning();
 
@@ -199,7 +202,7 @@ export async function DELETE(request: NextRequest) {
     const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
       import('@/lib/supabase/server'),
       import('@/lib/db-minimal'),
-      import('@/lib/notes-schema')
+      import('@/shared/schema')
     ]);
 
     // Development bypass for testing

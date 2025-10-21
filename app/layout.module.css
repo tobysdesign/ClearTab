@@ -1,7 +1,24 @@
 .container {
-  @apply relative flex min-h-screen flex-col;
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
 }
 
 .mainContent {
-  @apply flex-1 z-20;
+  flex: 1;
+  z-index: 20;
+}
+
+.initialLoader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #09090B;
+  z-index: 9999;
 }

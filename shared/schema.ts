@@ -29,6 +29,7 @@ import { QuillDeltaSchema, EMPTY_QUILL_CONTENT, type QuillDelta } from "@/lib/qu
 
 export const QuillContentSchema = QuillDeltaSchema;
 export { EMPTY_QUILL_CONTENT };
+export type { QuillDelta };
 
 // Legacy BlockNote content type for migration
 export type BlockNoteContent = any; // Keep for migration purposes

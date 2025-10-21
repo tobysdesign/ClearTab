@@ -57,15 +57,10 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "modal focus:outline-none",
-        direction === 'right'
-          ? "fixed top-20 right-10 z-50 w-[33.333333%] min-w-[300px] bg-[#111111]"
-          : "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[80vh] flex-col bg-[#111111]",
+        styles.content,
+        direction === 'right' ? styles.contentRight : styles.contentBottom,
         className
       )}
-      style={{
-        borderRadius: direction === 'right' ? '12px' : '10px 10px 0 0',
-      }}
       {...props}
     >
       {direction === 'bottom' && showHandle && <div className={styles.handle} />}
@@ -80,7 +75,7 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("modal-header", className)}
+    className={cn(styles.header, className)}
     {...props}
   />
 );
@@ -91,7 +86,7 @@ const DrawerFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("modal-footer", className)}
+    className={cn(styles.footer, className)}
     {...props}
   />
 );
@@ -103,10 +98,7 @@ const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogTitle
     ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none",
-      className
-    )}
+    className={cn(styles.title, className)}
     {...props}
   />
 ));
@@ -118,7 +110,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn(styles.description, className)}
     {...props}
   />
 ));

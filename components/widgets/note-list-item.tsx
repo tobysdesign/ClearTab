@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import styles from './note-list-item.module.css';
 
 
 interface NoteListItemProps {
@@ -66,30 +67,6 @@ export const NoteListItem = React.memo(function NoteListItem({
                 (previewText.length > 100 ? "..." : "");
         }
 
-        // Handle BlockNote format (legacy support)
-        if (Array.isArray(parsedContent)) {
-          const previewText = parsedContent
-            .map((block: any) => {
-              if (block.content && Array.isArray(block.content)) {
-                return block.content
-                  .map((item: any) =>
-                    typeof item === "object" &&
-                    item.type === "text" &&
-                    item.text
-                      ? item.text
-                      : "",
-                  )
-                  .join("");
-              }
-              return "";
-            })
-            .join(" ");
-
-          return previewText.trim() === ""
-            ? "Empty note"
-            : previewText.substring(0, 100) +
-                (previewText.length > 100 ? "..." : "");
-        }
 
         return "Empty note";
       } catch (error) {
@@ -188,10 +165,10 @@ export const NoteListItem = React.memo(function NoteListItem({
             duration: isRecentlyUpdated ? 0.5 : 0.3,
           }}
           className={cn(
-            "h-10 w-10 mx-auto flex items-center justify-center rounded-full cursor-pointer transition-colors relative",
+            styles.collapsedItem,
             isSelected
-              ? "bg-[#292929] border border-[#434343]"
-              : "bg-[#222222] border-[#222222] hover:bg-[#3D3D3D] hover:border-[#252323]",
+              ? styles.collapsedItemSelected
+              : styles.collapsedItemDefault,
             isRecentlyUpdated && "animate-promote",
           )}
           onClick={handleClick}
@@ -199,7 +176,7 @@ export const NoteListItem = React.memo(function NoteListItem({
           tabIndex={0}
           title={displayText}
         >
-          <span className="font-bold text-xs text-[#c4c4c4]">{initials}</span>
+          <span className={styles.collapsedInitials}>{initials}</span>
         </motion.div>
       </ClientOnly>
     );
@@ -214,7 +191,8 @@ export const NoteListItem = React.memo(function NoteListItem({
         exit={{ y: -20, opacity: 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
         className={cn(
-          "widget-list-item widget-list-item--notes flex flex-col items-start w-full text-left rounded-lg p-3 mb-1 relative group transition-colors cursor-pointer border",
+          "widget-list-item widget-list-item--notes",
+          styles.expandedItem,
           isSelected && "widget-list-item--active",
           isRecentlyUpdated && "animate-highlight",
         )}
@@ -222,30 +200,30 @@ export const NoteListItem = React.memo(function NoteListItem({
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <div className="flex justify-between w-full items-start notelist">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className={styles.itemHeader}>
+          <div className={styles.itemContent}>
             <div
               className={cn(
-                "font-inter-display overflow-hidden truncate flex-1",
+                styles.itemTitle,
                 shouldShowAsPlaceholder
-                  ? "font-medium text-[14px] text-[#5c5c5c] italic"
+                  ? styles.titlePlaceholder
                   : note.title && note.title.trim() !== ""
-                    ? "font-medium text-[14px] text-[#c4c4c4]" // Title styles
-                    : "font-normal text-[12px] text-[#c4c4c4]", // Content as title styles
+                    ? styles.titleActive // Title styles
+                    : styles.titleContent, // Content as title styles
               )}
             >
               {displayText}
             </div>
             {isEditing && (
-              <div className="flex-shrink-0">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+              <div className={styles.editingIndicator}>
+                <div className={styles.editingDot} />
               </div>
             )}
           </div>
         </div>
         {/* Only show preview if we're showing a title (not content as title) */}
         {note.title && note.title.trim() !== "" && (
-          <div className="font-inter-display font-normal text-[12px] leading-[15px] text-[#8D8D8D] w-full overflow-hidden note-preview">
+          <div className={styles.itemPreview}>
             {preview}
           </div>
         )}

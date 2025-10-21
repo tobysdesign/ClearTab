@@ -20,10 +20,10 @@ export function useNotes() {
         const noteToSave: Note = {
           id: newNote.temporaryId || `note-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           title: newNote.title || 'Untitled Note',
-          content: newNote.content || [],
+          content: newNote.content || { ops: [{ insert: '\n' }] },
           userId: 'extension-user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         }
 
         const updatedNotes = [noteToSave, ...notes]
@@ -48,7 +48,7 @@ export function useNotes() {
         const savedNote: Note = {
           ...noteToUpdate,
           ...updatedNote,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         }
 
         const updatedNotes = notes.map(note =>

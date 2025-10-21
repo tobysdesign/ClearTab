@@ -1,29 +1,90 @@
 /* Weather Settings Component Styles */
 
 .container {
-  @apply grid gap-6;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.cardContent {
-  @apply space-y-6;
+.formSection {
+  padding: 1rem;
+  background-color: #111111;
+  border-radius: 0.5rem;
+  border: 1px solid #2A2A2A;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.fieldContainer {
-  @apply space-y-2;
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 0.25rem;
 }
 
-.notificationsContainer {
-  @apply space-y-4;
+.sectionDescription {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1rem;
 }
 
-.notificationsInner {
-  @apply space-y-2;
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.notificationItem {
-  @apply flex items-center justify-between;
+.formLabel {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.cursorPointer {
-  @apply cursor-pointer;
+.formInput {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.formInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.formInput:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.formSelect {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.toggleLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
 }

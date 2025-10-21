@@ -49,21 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.variable, tinos.variable)}>
-        <div
-          id="initial-loader"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            background: "#09090B",
-            zIndex: 9999,
-          }}
-        >
+        <div id="initial-loader" className={styles.initialLoader}>
           <BrandedLoader size="large" />
         </div>
         <ThemeProvider

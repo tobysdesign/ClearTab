@@ -27,36 +27,60 @@ export function AccountSettings() {
   const { data: isCalendarConnected, isLoading: calendarLoading } = useQuery({
     queryKey: ["googleCalendarConnected"],
     queryFn: async () => {
-      const res = await fetch("/api/calendar/status", {
-        credentials: "include",
-      });
-      if (!res.ok) return false;
-      const data = await res.json();
-      return data.connected;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+      try {
+        const res = await fetch("/api/calendar/status", {
+          credentials: "include",
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return data.connected;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.warn('Calendar status check failed:', error);
+        return false;
+      }
     },
     enabled: !!user?.id,
+    retry: false, // Don't retry on failure
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   const { data: connectedAccounts = [], isLoading: accountsLoading } = useQuery(
     {
       queryKey: ["connectedAccounts"],
       queryFn: async () => {
-        const res = await fetch("/api/settings/accounts", {
-          credentials: "include",
-        });
-        if (!res.ok) {
-          console.error("Failed to fetch connected accounts:", res.status);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+        try {
+          const res = await fetch("/api/settings/accounts", {
+            credentials: "include",
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          if (!res.ok) {
+            console.error("Failed to fetch connected accounts:", res.status);
+            return [];
+          }
+          const data = await res.json();
+          console.log("Connected accounts:", data);
+          // Filter out the primary account if it appears in the connected accounts list
+          // Note: providerAccountId field not in type yet, so for now return all accounts
+          return data as ConnectedAccountWithEmail[];
+        } catch (error) {
+          clearTimeout(timeoutId);
+          console.warn('Connected accounts check failed:', error);
           return [];
         }
-        const data = await res.json();
-        console.log("Connected accounts:", data);
-        // Filter out the primary account if it appears in the connected accounts list
-        return data.filter(
-          (account: ConnectedAccountWithEmail) =>
-            account.providerAccountId !== user.user_metadata?.provider_id,
-        ) as ConnectedAccountWithEmail[];
       },
       enabled: !!user?.id,
+      retry: false, // Don't retry on failure
+      staleTime: 30000, // Cache for 30 seconds
     },
   );
 
@@ -176,14 +200,130 @@ export function AccountSettings() {
 
   return (
     <div className={styles.spaceY4}>
-      {/* Primary Account */}
+      {/* Schedule Section */}
       <div className={styles.card}>
-        <div className={styles.flexJustifyBetweenMb3}>
-          <h3 className={styles.primaryAccountTitle}>Primary Account</h3>
+        <div className={styles.mb3}>
+          <h3 className={styles.sectionTitle}>Schedule</h3>
+          <p className={styles.sectionDescription}>
+            Accounts list here are shown in the schedule widget
+          </p>
         </div>
 
-        <div className={styles.flexJustifyBetween}>
-          <div className={styles.flexItemsGap3}>
+        {/* Column Headers */}
+        <div className={styles.columnHeaders}>
+          <div className={styles.accountColumn}>Account</div>
+          <div className={styles.visibilityColumn}>Visibility</div>
+          <div className={styles.actionsColumn}>Actions</div>
+        </div>
+
+        {/* Primary Account */}
+        <div className={styles.accountRow}>
+          <div className={styles.accountColumn}>
+            <div className={styles.accountItemContent}>
+              <div className={styles.avatar}>
+                {user.user_metadata?.avatar_url ? (
+                  <Image
+                    src={user.user_metadata.avatar_url}
+                    alt=""
+                    fill
+                    className={styles.avatarImage}
+                  />
+                ) : (
+                  <span className={styles.userIcon}>👤</span>
+                )}
+              </div>
+              <div className={styles.accountDetails}>
+                <div className={styles.accountNameRow}>
+                  <div className={styles.accountName}>
+                    {user.user_metadata?.full_name ||
+                      user.email?.split("@")[0] ||
+                      "User"}
+                  </div>
+                  <span className={styles.primaryBadge}>Primary</span>
+                </div>
+                <div className={styles.accountEmail}>
+                  {user.email || "No email"}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.visibilityColumn}>
+            <label className={styles.toggleSwitch}>
+              <input
+                type="checkbox"
+                defaultChecked={true}
+              />
+              <span className={styles.toggleSlider}></span>
+            </label>
+          </div>
+          <div className={styles.actionsColumn}>
+            {/* Empty for primary account */}
+          </div>
+        </div>
+
+        {/* Additional Accounts */}
+        {connectedAccounts.map((account) => (
+          <div key={account.id} className={styles.accountRow}>
+            <div className={styles.accountColumn}>
+              <div className={styles.accountItemContent}>
+                <div className={styles.avatar}>
+                  <span className={styles.userIcon}>👤</span>
+                </div>
+                <div className={styles.accountDetails}>
+                  <div className={styles.accountName}>
+                    {account.email.split("@")[0]}
+                  </div>
+                  <div className={styles.accountEmail}>
+                    {account.email}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={styles.visibilityColumn}>
+              <label className={styles.toggleSwitch}>
+                <input type="checkbox" defaultChecked />
+                <span className={styles.toggleSlider}></span>
+              </label>
+            </div>
+            <div className={styles.actionsColumn}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeAccountMutation.mutate(account.id)}
+                disabled={removeAccountMutation.isPending}
+                className={styles.menuButton}
+              >
+                ⋮
+              </Button>
+            </div>
+          </div>
+        ))}
+
+        {/* Link additional Google Calendar */}
+        <div className={styles.linkAccountItem}>
+          <Button
+            variant="ghost"
+            onClick={() => addAccountMutation.mutate()}
+            disabled={addAccountMutation.isPending}
+            className={styles.linkAccountButton}
+          >
+            <span className={styles.iconPlus}>+</span>
+            Link additional Google Calendar
+          </Button>
+        </div>
+      </div>
+
+      {/* Account Section */}
+      <div className={styles.card}>
+        <div className={styles.mb3}>
+          <h3 className={styles.sectionTitle}>Account</h3>
+          <p className={styles.sectionDescription}>
+            The account you sign into Cleartab with
+          </p>
+        </div>
+
+        <div className={styles.accountItem}>
+          <div className={styles.accountItemContent}>
             <div className={styles.avatar}>
               {user.user_metadata?.avatar_url ? (
                 <Image
@@ -196,121 +336,26 @@ export function AccountSettings() {
                 <span className={styles.userIcon}>👤</span>
               )}
             </div>
-            <div>
-              <div className={styles.userNameText}>
+            <div className={styles.accountDetails}>
+              <div className={styles.accountName}>
                 {user.user_metadata?.full_name ||
                   user.email?.split("@")[0] ||
                   "User"}
               </div>
-              <div className={styles.userEmailText}>
+              <div className={styles.accountEmail}>
                 {user.email || "No email"}
               </div>
             </div>
           </div>
-
-          {calendarLoading ? (
-            <div className={styles.loadingPlaceholder} />
-          ) : isCalendarConnected ? (
+          <div className={styles.accountActions}>
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => disconnectCalendarMutation.mutate()}
-              disabled={disconnectCalendarMutation.isPending}
-              className={styles.disconnectButton}
+              onClick={() => (window.location.href = "/logout")}
+              className={styles.signOutButton}
             >
-              <CloseIcon size={14} className="mr-1" />
-              Disconnect
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleConnectCalendar}
-              className={styles.disconnectButton}
-            >
-              <span className={styles.iconXsMr}>◊</span>
-              Connect
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Additional Schedule Accounts */}
-      <div className={styles.card}>
-        <div className={styles.mb3}>
-          <h3 className={styles.additionalAccountsTitle}>
-            Additional schedule accounts
-          </h3>
-          <p className={styles.additionalAccountsDescription}>
-            Accounts listed below are view only for visibility in schedule
-            widget
-          </p>
-        </div>
-
-        {accountsLoading ? (
-          <div className={styles.py3}>
-            <div className={styles.loadingLine} />
-          </div>
-        ) : connectedAccounts.length > 0 ? (
-          <div className={styles.spaceY2}>
-            {connectedAccounts.map((account) => (
-              <div
-                key={account.id}
-                className={styles.accountItem}
-              >
-                <div className={styles.accountItemContent}>
-                  <span className={styles.userIconSmall}>👤</span>
-                  <div className={styles.accountDetails}>
-                    <div className={styles.accountEmail}>
-                      {account.email}
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeAccountMutation.mutate(account.id)}
-                  disabled={removeAccountMutation.isPending}
-                  className={styles.removeButton}
-                >
-                  <CloseIcon size={12} />
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.noAccountsRow}>
-            <p className={styles.additionalAccountsDescription}>No additional accounts</p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => addAccountMutation.mutate()}
-              disabled={addAccountMutation.isPending}
-              className={styles.addAccountButton}
-              title="Note: Adding an account will switch your primary account"
-            >
-              <span className={styles.iconXsMr1}>+</span>
-              Add
+              Sign out
             </Button>
           </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className={styles.card}>
-        <div className={styles.flexJustifyBetween}>
-          <div className={styles.signedInContainer}>
-            Signed in as <span className={styles.signedInEmailSpan}>{user.email}</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => (window.location.href = "/logout")}
-            className={styles.signOutButton}
-          >
-            <span className={styles.iconXsMr}>•</span>
-            Sign Out
-          </Button>
         </div>
       </div>
     </div>

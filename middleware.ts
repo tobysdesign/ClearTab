@@ -3,11 +3,6 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Temporarily disable middleware logic for debugging
-  return NextResponse.next({ request });
-
-  // Original middleware logic (commented out)
-  /*
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -63,7 +58,6 @@ export async function middleware(request: NextRequest) {
   }
 
   return supabaseResponse
-  */
 }
 
 export const config = {
