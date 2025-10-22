@@ -10,6 +10,7 @@ import { WidgetHeader } from "@/components/ui/widget-header";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { BrandedLoader } from "@/components/ui/branded-loader";
 import {
   getSupabaseClient,
   isExtensionEnvironment,
@@ -316,7 +317,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   };
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
       <ClientOnly>
         <div
           className={cn(
@@ -419,13 +420,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                       <div className={styles.transcribingWrapper}>
                         <div className={styles.transcribingContent}>
                           <div className={styles.gifPlaceholder}>
-                            {/* GIF placeholder - will be replaced with actual GIF */}
-                            <div className={styles.animatedDotsContainer}>
-                              <div className={styles.animatedDot}></div>
-                              <div className={styles.animatedDot}></div>
-                              <div className={styles.animatedDot}></div>
-                              <div className={styles.animatedDot}></div>
-                            </div>
+                            <BrandedLoader size="small" />
                           </div>
                           <h2 className={styles.transcribingTitle}>
                             Transcribing note...
@@ -458,7 +453,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         <div className={styles.recordingControls}>
                           {state === "recording" && (
                             <>
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={toggleMute}
@@ -488,7 +483,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={pauseRecording}
@@ -508,7 +503,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={handleStopRecording}
@@ -534,7 +529,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                           {state === "paused" && (
                             <>
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={toggleMute}
@@ -564,7 +559,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={resumeRecording}
@@ -584,7 +579,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={200}>
+                              <Tooltip delayDuration={0} disableHoverableContent={true}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={handleStopRecording}

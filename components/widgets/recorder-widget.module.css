@@ -761,7 +761,11 @@
         var(--p) calc(100% + var(--h)),
         max(0%, var(--p) - var(--b) / 2) 100%
     );
+    /* Note: border-image fills the tail with the same color as background */
     border-image: conic-gradient(#2a2426 0 0) fill 0 /
         var(--r) calc(100% - var(--p) - var(--b) / 2) 0 calc(var(--p) - var(--b) / 2) /
         0 0 var(--h) 0;
+    
+    /* Force consistent appearance */
+    z-index: 9999;
 }

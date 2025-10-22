@@ -3,31 +3,38 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import styles from './weather-widget-new.module.css'
+import { PartlyCloudyIcon, SunIcon, CloudIcon, RainIcon } from '@/components/ui/weather-icons'
 
 const weatherData = [
   {
-    date: 'Tuesday 14th July',
+    label: 'Today',
     location: 'Sydney, NSW',
     temperature: '28',
     condition: 'Cloudy with low chance of rain',
     high: '29',
-    low: '6'
+    low: '6',
+    icon: 'partly-cloudy'
   },
   {
-    date: 'Wednesday 15th July',
+    label: 'Tomorrow',
     location: 'Sydney, NSW',
     temperature: '26',
     condition: 'Partly cloudy',
     high: '27',
-    low: '5'
+    low: '5',
+    icon: 'partly-cloudy'
   },
   {
-    date: 'Thursday 16th July',
+    label: '5 Day Forecast',
     location: 'Sydney, NSW',
-    temperature: '24',
-    condition: 'Light rain',
-    high: '25',
-    low: '4'
+    isForecast: true,
+    forecast: [
+      { day: 'Thu', icon: 'partly-cloudy', high: '22', low: '4' },
+      { day: 'Fri', icon: 'sun', high: '19', low: '5' },
+      { day: 'Sat', icon: 'cloud', high: '20', low: '8' },
+      { day: 'Sun', icon: 'rain', high: '19', low: '9' },
+      { day: 'Mon', icon: 'partly-cloudy', high: '18', low: '5' },
+    ]
   }
 ]
 
@@ -131,30 +138,53 @@ export function WeatherWidgetNew() {
                 onClick={handleCardClick}
               >
               <div className={styles.cardHeader}>
-                <div className={styles.date}>{day.date}</div>
+                <div className={styles.date}>{day.label}</div>
                 <div className={styles.location}>{day.location}</div>
               </div>
               
-              <div className={styles.cardCenter}>
-                {/* Weather icon placeholder */}
-              </div>
+              {day.isForecast ? (
+                <div className={styles.forecastGrid}>
+                  {day.forecast?.map((item, i) => (
+                    <div key={i} className={styles.forecastDay}>
+                      <div className={styles.forecastDayLabel}>{item.day}</div>
+                      <div className={styles.forecastIcon}>
+                        {item.icon === 'sun' && <SunIcon size={40} />}
+                        {item.icon === 'cloud' && <CloudIcon size={40} />}
+                        {item.icon === 'partly-cloudy' && <PartlyCloudyIcon size={40} />}
+                        {item.icon === 'rain' && <RainIcon size={40} />}
+                      </div>
+                      <div className={styles.forecastTemp}>
+                        <span className={styles.forecastHigh}>{item.high}°</span>
+                        {' '}
+                        <span className={styles.forecastLow}>{item.low}°</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className={styles.cardCenter}>
+                    {/* Weather icon */}
+                  </div>
 
-              <div className={styles.cardFooter}>
-                <div className={styles.mainTempCol}>
-                  <div className={styles.temperature}>{day.temperature}°</div>
-                  <div className={styles.condition}>{day.condition}</div>
-                </div>
-                <div className={styles.tempGroup}>
-                  <div className={styles.tempCol}>
-                    <div className={styles.highTemp}>{day.high}°</div>
-                    <div className={styles.tempLabel}>High</div>
+                  <div className={styles.cardFooter}>
+                    <div className={styles.mainTempCol}>
+                      <div className={styles.temperature}>{day.temperature}°</div>
+                      <div className={styles.condition}>{day.condition}</div>
+                    </div>
+                    <div className={styles.tempGroup}>
+                      <div className={styles.tempCol}>
+                        <div className={styles.highTemp}>{day.high}°</div>
+                        <div className={styles.tempLabel}>High</div>
+                      </div>
+                      <div className={styles.tempCol}>
+                        <div className={styles.lowTemp}>{day.low}°</div>
+                        <div className={styles.tempLabel}>Low</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.tempCol}>
-                    <div className={styles.lowTemp}>{day.low}°</div>
-                    <div className={styles.tempLabel}>Low</div>
-                  </div>
-                </div>
-              </div>
+                </>
+              )}
                 </motion.div>
               </motion.div>
             </motion.div>

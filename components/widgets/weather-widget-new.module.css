@@ -142,3 +142,63 @@
     transform-origin: bottom left;
     transition: transform 0.3s spring;
 }
+
+/* 5-day forecast grid */
+.forecastGrid {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    padding: 16px 0;
+}
+
+.forecastDay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    transition: background 0.2s;
+}
+
+.forecastDay:first-child {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.forecastDay:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.forecastDayLabel {
+    color: #c4c4c4;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.forecastIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+}
+
+.forecastTemp {
+    display: flex;
+    gap: 4px;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.forecastHigh {
+    color: #c4c4c4;
+}
+
+.forecastLow {
+    color: #666;
+}
