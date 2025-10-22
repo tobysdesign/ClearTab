@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { isExtension, saveAudioToExtensionStorage, getEnvironmentConfig } from '@/lib/chrome-extension-utils'
 
-export type RecordingState = 'idle' | 'requesting-permission' | 'recording' | 'paused' | 'processing'
+export type RecordingState = 'idle' | 'requesting-permission' | 'permission-denied' | 'recording' | 'paused' | 'processing'
 
 interface UseAudioRecorderOptions {
   onTranscriptionComplete?: (text: string) => void
@@ -45,20 +45,26 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
       return true
     } catch (error: any) {
       console.error('Error accessing microphone:', error)
-      setState('idle')
       
       let errorMessage = 'Failed to access microphone. Please check permissions.'
       
       if (error.name === 'NotAllowedError') {
+        setState('permission-denied')
         errorMessage = 'Microphone access denied. Please allow microphone permissions in your browser settings and try again.'
       } else if (error.name === 'NotFoundError') {
+        setState('idle')
         errorMessage = 'No microphone found. Please connect a microphone and try again.'
       } else if (error.name === 'NotSupportedError') {
+        setState('idle')
         errorMessage = 'Microphone access is not supported in this browser.'
       } else if (error.name === 'NotReadableError') {
+        setState('idle')
         errorMessage = 'Microphone is already in use by another application. Please close other apps using the microphone and try again.'
       } else if (error.name === 'SecurityError') {
+        setState('idle')
         errorMessage = 'Microphone access blocked due to security restrictions. Please ensure you are using HTTPS or localhost.'
+      } else {
+        setState('idle')
       }
       
       onError?.(errorMessage)

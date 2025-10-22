@@ -428,7 +428,38 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         <div className={styles.recordingControls}>
                           {state === "requesting-permission" && (
                             <div className={styles.permissionMessage}>
-                              <p>Requesting microphone permission...</p>
+                              <img
+                                src="/icons/si_info-line.svg"
+                                alt="Info"
+                                className={styles.permissionIcon}
+                              />
+                              <div>
+                                <p className={styles.permissionTitle}>Requesting microphone permission</p>
+                                <p>If you don't see the request, click the (i) icon next to the URL address bar.</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {state === "permission-denied" && (
+                            <div className={cn(styles.permissionMessage, styles.permissionMessageBlocked)}>
+                              <img
+                                src="/icons/si_info-line.svg"
+                                alt="Info"
+                                className={cn(styles.permissionIcon, styles.permissionIconBlocked)}
+                              />
+                              <div>
+                                <p className={styles.permissionTitle}>Microphone permissions blocked</p>
+                                <p>To enable, click the (i) icon next to the URL address bar.</p>
+                                <button
+                                  onClick={() => {
+                                    reset();
+                                    handleStartRecording();
+                                  }}
+                                  className={styles.permissionRetry}
+                                >
+                                  Click here to retry
+                                </button>
+                              </div>
                             </div>
                           )}
 
