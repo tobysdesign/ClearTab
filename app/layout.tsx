@@ -48,6 +48,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preload critical icons */}
+        <link rel="preload" href="/icons/si_info-line.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/icons/si_mic-fill.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/icons/si_pause-fill.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/icons/si_record-fill.svg" as="image" type="image/svg+xml" />
+        <link rel="preload" href="/icons/pu.svg" as="image" type="image/svg+xml" />
+      </head>
       <body className={cn(inter.variable, tinos.variable)}>
         <ThemeProvider
           attribute="class"
@@ -67,6 +75,30 @@ export default function RootLayout({
             <SonnerToaster />
           </Providers>
         </ThemeProvider>
+        {/* Filter out noisy preload warnings in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <Script id="filter-preload-warnings" strategy="beforeInteractive">
+            {`
+              (function() {
+                const originalWarn = console.warn;
+                const originalLog = console.log;
+                const filterPattern = /preload|woff2|was preloaded using link/i;
+                
+                console.warn = function(...args) {
+                  const message = String(args[0] || '');
+                  if (filterPattern.test(message)) return;
+                  originalWarn.apply(console, args);
+                };
+                
+                console.log = function(...args) {
+                  const message = String(args[0] || '');
+                  if (filterPattern.test(message)) return;
+                  originalLog.apply(console, args);
+                };
+              })();
+            `}
+          </Script>
+        )}
         {/* Only include Hotjar for non-extension builds */}
         {!isExtension && (
           <Script id="hotjar-script">

@@ -1161,58 +1161,6 @@ html {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@font-face {
-    font-family: "PP Eiko";
-    src:
-        url("/fonts/ppeiko/ppeiko-lightitalic-webfont.woff2") format("woff2"),
-        url("/fonts/ppeiko/ppeiko-lightitalic-webfont.woff") format("woff");
-    font-weight: 300;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "PP Eiko";
-    src:
-        url("/fonts/ppeiko/ppeiko-regularitalic-webfont.woff2") format("woff2"),
-        url("/fonts/ppeiko/ppeiko-regularitalic-webfont.woff") format("woff");
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Neue Montreal";
-    src: url("/fonts/PPNeueMontreal-Thin.woff2") format("woff2");
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Neue Montreal";
-    src: url("/fonts/PPNeueMontreal-Book.woff2") format("woff2");
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Neue Montreal";
-    src: url("/fonts/PPNeueMontreal-Regular.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Freight Display Pro";
-    src: url("/fonts/FreightDispPro-Book.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
 @layer base {
     :root {
         --font-inter-display: "Inter Display", system-ui, sans-serif;
@@ -2534,4 +2482,3 @@ textarea::placeholder {
     font-weight: 300;
     color: #8d8d8d;
 }
-

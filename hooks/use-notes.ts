@@ -117,16 +117,14 @@ export function useNotes() {
     }
   }
 
-  // Delete note locally first, then sync to server
+  // Delete note - only remove from UI after successful server deletion
   const deleteNoteMutation = {
     mutate: async (id: string) => {
-      try {
-        await deleteNote(id)
-        setNotes(prev => prev.filter(note => note.id !== id))
-        return { id }
-      } catch (error) {
-        throw error
-      }
+      // Delete from server first
+      await deleteNote(id)
+      // Only remove from UI if server deletion succeeded
+      setNotes(prev => prev.filter(note => note.id !== id))
+      return { id }
     }
   }
 

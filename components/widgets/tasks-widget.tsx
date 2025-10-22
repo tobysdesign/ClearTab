@@ -22,6 +22,7 @@ import { CloseIcon } from "@/components/icons";
 import { formatDateSmart } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
+import { toast as sonnerToast } from "sonner";
 
 interface TasksWidgetProps {
   searchQuery?: string;
@@ -195,15 +196,26 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
 
   const deleteTaskLocal = useCallback(async (taskId: string) => {
     try {
-      // Optimistically update UI
-      setTasks((prev) => prev.filter((task) => task.id !== taskId));
-
-      // Delete from server
+      // Delete from server first (pessimistic delete)
       await deleteTask(taskId);
+      
+      // Only remove from UI if server deletion succeeded
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      
+      // Show simple success toast
+      sonnerToast.success("Task deleted", {
+        duration: 3000,
+      });
     } catch (error) {
-      // Rollback on error and reload
+      // Reload on error to sync with server
       const data = await fetchTasks();
       setTasks(data);
+      
+      // Show error toast
+      sonnerToast.error("Failed to delete task", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+      
       throw error;
     }
   }, []);

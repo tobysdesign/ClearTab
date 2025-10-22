@@ -73,6 +73,18 @@
         0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
+.containerInfoState {
+    /* visual */
+    background: linear-gradient(180deg, rgb(32 41 81 / 65%) 4%, rgba(23, 21, 21, 0.5) 100%), linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.05) 100%);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.containerErrorState {
+    /* visual */
+    background:linear-gradient(180deg, rgb(115 54 54 / 95%) 4%, rgb(52 26 26 / 95%) 100%);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
 .content {
     /* layout */
     display: flex;
@@ -413,7 +425,7 @@
 
     /* box model */
     width: 100%;
-    padding: 20px 16px;
+    padding: 14px;
     border-radius: 12px;
 
     /* visual */
@@ -452,25 +464,38 @@
     /* typography */
     color: white;
     font-size: 14px;
-    font-weight: 500;
-    margin: 0 0 6px 0;
+    font-weight: 400;
+    margin: 0 0 12px 0;
 }
 
+.permissionText {
+    /* typography */
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: left;
+
+    /* box model */
+    margin: 0;
+    max-width: 260px;
+}
+.containerErrorState .recordingBody{align-items: start;}
 .permissionRetry {
     /* box model */
-    padding: 6px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    margin-top: 8px;
+    
+    
+    
+    
 
     /* typography */
-    color: white;
-    font-size: 12px;
+    color: #ddd;
+    font-size: 13px;
     font-weight: 500;
     text-decoration: underline;
+    margin-top:12px;
 
     /* visual */
-    background: rgba(255, 255, 255, 0.05);
+    
 
     /* state */
     cursor: pointer;

@@ -625,26 +625,9 @@ export function NotesWidget() {
         // Delete from database
         await deleteNote.mutate(noteId);
 
-        // Show success toast with undo option
+        // Show simple success toast
         sonnerToast.success("Note deleted", {
-          description: `"${noteToDelete.title || "Untitled Note"}" has been deleted.`,
-          action: {
-            label: "Undo",
-            onClick: async () => {
-              try {
-                // Recreate the note using mutation
-                await createNote.mutate({
-                  title: noteToDelete.title,
-                  content: noteToDelete.content,
-                });
-
-                sonnerToast.success("Note restored");
-              } catch (error) {
-                sonnerToast.error("Failed to restore note");
-              }
-            },
-          },
-          duration: 10000, // Give user 10 seconds to undo
+          duration: 3000,
         });
       } catch (error) {
         const errorMessage = (error as Error).message || "Please try again.";
@@ -883,7 +866,7 @@ export function NotesWidget() {
                 <DynamicQuillEditor
                   tabIndex={4}
                   key="stable-notes-editor" // Keep stable to prevent focus loss
-                  value={activeNote?.content}
+                  value={activeNoteRef.current?.content || activeNote?.content}
                   onChange={(content) => {
                     // Just piggyback off Quill's onChange - don't interfere with editing
                     if (!activeNoteRef.current) return;

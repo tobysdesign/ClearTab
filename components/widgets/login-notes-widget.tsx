@@ -98,12 +98,12 @@ function ResizablePanels({
   // Track container width changes for proportional resizing
   React.useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newContainerWidth = entry.contentRect.width;
         setContainerWidth(newContainerWidth);
-        
+
         // Update currentWidth proportionally if not currently resizing
         if (!isResizing.current && newContainerWidth > 0) {
           // Ensure right panel gets at least 60% by limiting left panel to max 40%
@@ -114,7 +114,7 @@ function ResizablePanels({
         }
       }
     });
-    
+
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
   }, [minWidth, maxWidth, onWidthChange]);
@@ -136,7 +136,7 @@ function ResizablePanels({
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing.current || !containerRef.current) return;
     let newWidth = e.clientX - containerRef.current.getBoundingClientRect().left;
-    
+
     // Constrain to min/max width and container size (right panel gets at least 60%)
     const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4); // Max 40% of container (so right gets 60%)
     newWidth = Math.max(minWidth, Math.min(newWidth, maxAllowedWidth));
@@ -165,7 +165,7 @@ function ResizablePanels({
 export function LoginNotesWidget() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [panelWidth, setPanelWidth] = useState(300);
-  
+
   const handleToggleCollapse = () => {
     setIsCollapsed(prev => !prev);
   };
@@ -216,7 +216,7 @@ export function LoginNotesWidget() {
             </div>
           </div>
         </div>
-        
+
         {/* Note Editor */}
         <div className={notesStyles.notesEditorPanel}>
           <div className={notesStyles.notesContentPanel}>
@@ -224,8 +224,8 @@ export function LoginNotesWidget() {
               <div className={notesStyles.notesHeaderContent}>
                 <div className={notesStyles.notesTitleContainer}>
                   <textarea
-                    value={mockNotes[0].title} 
-                    readOnly 
+                    value={mockNotes[0].title}
+                    readOnly
                     className={notesStyles.notesTitleInput}
                     style={{ cursor: 'default' }}
                     rows={1}
@@ -234,8 +234,8 @@ export function LoginNotesWidget() {
               </div>
             </div>
             <div className={notesStyles.notesEditorScroll}>
-              <div className={notesStyles.notesEditorContainer} style={{ 
-                padding: '16px',
+              <div className={notesStyles.notesEditorContainer} style={{
+                padding: '0',
                 lineHeight: '1.6',
                 color: 'var(--foreground)',
                 cursor: 'default'

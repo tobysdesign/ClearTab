@@ -375,7 +375,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
             {/* Back Side (Recording) */}
             <div className={styles.back}>
-              <div className={styles.container}>
+              <div className={cn(styles.container, {
+                [styles.containerInfoState]: state === "requesting-permission",
+                [styles.containerErrorState]: state === "permission-denied"
+              })}>
                 <div className={styles.content}>
                   {/* Header */}
                   <WidgetHeader
@@ -386,40 +389,32 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                   {/* Body */}
                   <div className={styles.recordingBody}>
                     {state === "requesting-permission" || state === "permission-denied" ? (
-                      <div className={cn(styles.permissionMessage, {
-                        [styles.permissionMessageBlocked]: state === "permission-denied"
-                      })}>
-                        <img
-                          src="/icons/si_info-line.svg"
-                          alt="Info"
-                          className={cn(styles.permissionIcon, {
-                            [styles.permissionIconBlocked]: state === "permission-denied"
-                          })}
-                        />
-                        <div>
-                          <p className={styles.permissionTitle}>
-                            {state === "requesting-permission" 
-                              ? "Requesting microphone permission" 
-                              : "Microphone permissions blocked"}
-                          </p>
-                          <p>
-                            {state === "requesting-permission"
-                              ? "If you don't see the request, click the (i) icon next to the URL address bar."
-                              : "To enable, click the (i) icon next to the URL address bar."}
-                          </p>
-                          {state === "permission-denied" && (
-                            <button
-                              onClick={() => {
-                                reset();
-                                handleStartRecording();
-                              }}
-                              className={styles.permissionRetry}
-                            >
-                              Click here to retry
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                      <>
+                        <p className={styles.permissionTitle}>
+                          {state === "requesting-permission"
+                            ? "Requesting microphone permission"
+                            : "Microphone permissions blocked"}
+                        </p>
+                        <p className={styles.permissionText}>
+                          {state === "requesting-permission"
+                            ? (
+                              <>If you don't see the request, click the <img src="/icons/si_info-line.svg" alt="info icon" style={{ display: "inline", width: "14px", height: "14px", verticalAlign: "middle" }} /> icon next to the URL address bar.</>
+                            ) : (
+                              <>To enable, click the <img src="/icons/si_info-line.svg" alt="info icon" style={{ display: "inline", width: "14px", height: "14px", verticalAlign: "middle"}} /> icon next to the URL address bar.</>
+                            )}
+                        </p>
+                        {state === "permission-denied" && (
+                          <button
+                            onClick={() => {
+                              reset();
+                              handleStartRecording();
+                            }}
+                            className={styles.permissionRetry}
+                          >
+                            Click here to retry
+                          </button>
+                        )}
+                      </>
                     ) : state === "processing" && !showSuccess ? (
                       <div className={styles.transcribingWrapper}>
                         <div className={styles.transcribingContent}>

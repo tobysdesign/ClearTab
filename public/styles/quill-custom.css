@@ -4,3 +4,23 @@
     font-weight: 400 !important;
     opacity: 0.6 !important;
 }
+
+/* Fix bubble menu backdrop blur */
+.ql-bubble .ql-tooltip {
+    background-color: rgba(68, 68, 68, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    /* Add slight border for better definition */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Arrow should match */
+.ql-bubble .ql-tooltip-arrow {
+    border-bottom-color: rgba(68, 68, 68, 0.8) !important;
+}
+
+.ql-bubble .ql-tooltip.ql-flip .ql-tooltip-arrow {
+    border-top-color: rgba(68, 68, 68, 0.8) !important;
+    border-bottom-color: transparent !important;
+}
+.ql-editor {padding: 0  15ox !important;}

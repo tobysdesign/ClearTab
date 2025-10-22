@@ -34,8 +34,6 @@ export function ResizableBentoGrid({
   const padding = useDockPadding(dockPosition)
   const { layout } = useLayout()
 
-  console.log('ResizableBentoGrid: Current layout is:', layout)
-
   useEffect(() => {
     console.log('ResizableBentoGrid: Layout changed to:', layout)
   }, [layout])

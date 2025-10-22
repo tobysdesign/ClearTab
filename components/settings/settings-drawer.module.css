@@ -1,85 +1,85 @@
 /* Settings Drawer Component Styles */
 
 .drawerContent {
-  @apply max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0;
+    @apply max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0;
 }
 
 .container {
-  @apply flex flex-col h-[85vh];
+    @apply flex flex-col h-[85vh];
 }
 
 .grabHandle {
-  @apply flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0;
+    @apply flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0;
 }
 
 .grabBar {
-  @apply w-12 h-1.5 rounded-full bg-[#242424];
+    @apply w-12 h-1.5 rounded-full bg-[#242424];
 }
 
 .header {
-  @apply flex-shrink-0 flex items-center justify-between px-6 py-3;
+    @apply flex-shrink-0 flex items-center justify-between px-6 py-3;
 }
 
 .title {
-  @apply text-lg font-medium text-white;
+    @apply text-lg font-medium text-white/80;
 }
 
 .closeButton {
-  @apply rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/10 transition-colors;
+    @apply rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/10 transition-colors;
 }
 
 .closeIcon {
-  width: 1rem;
-  height: 1rem;
+    width: 1rem;
+    height: 1rem;
 }
 
 .scrollableContent {
-  @apply flex flex-1 overflow-hidden;
+    @apply flex flex-1 overflow-hidden;
 }
 
 .sidebar {
-  @apply w-64 overflow-y-auto;
+    @apply w-64 overflow-y-auto;
 }
 
 .nav {
-  @apply p-4;
+    @apply p-4;
 }
 
 .navList {
-  @apply space-y-2;
+    @apply space-y-2;
 }
 
 .navButton {
-  @apply w-full text-left p-3 transition-colors rounded;
+    @apply w-full text-left p-3 transition-colors rounded;
 }
 
 .navButtonActive {
-  @apply bg-black/30 text-white;
+    @apply bg-black/30 text-white;
 }
 
 .navButtonInactive {
-  @apply text-[#bbbbbb] hover:text-white hover:bg-black/20;
+    @apply text-[#bbbbbb] hover:text-white hover:bg-black/20;
 }
 
 .navButtonContent {
-  @apply flex flex-col;
+    @apply flex flex-col;
 }
 
 .navButtonTitle {
-  @apply font-medium text-sm;
+    @apply font-medium text-sm;
 }
 
 .navButtonDescription {
-  @apply text-xs text-[#5A5A5A] mt-1;
+    @apply text-xs text-[#5A5A5A] mt-1;
 }
 
 .mainContent {
-  @apply flex-1 overflow-y-auto;
+    @apply flex-1 overflow-y-auto;
 }
 
 .contentPanel {
-  padding: 1.5rem;
-  border-radius: 0.5rem 0.5rem 0 0;
-  margin-right: 12px;
-  background-color: #2A2A2A;
+    padding: 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    margin-right: 12px;
+    background-color: #2a2a2a;
 }
