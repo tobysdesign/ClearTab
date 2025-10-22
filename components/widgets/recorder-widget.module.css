@@ -260,7 +260,7 @@
     flex: 1;
 
     /* box model */
-    padding: 24px;
+    padding: 0 24px 24px;
 }
 
 /* Waveform visualization */
@@ -300,16 +300,15 @@
     align-items: center;
 
     /* box model */
-    margin-top: 8px;
     margin-bottom: 16px;
 }
 
 .timer {
     /* typography */
-    color: white;
-    font-family: monospace;
-    font-size: 20px;
-    font-weight: 500;
+    color: #ccc;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 300;
 }
 
 /* Controls */
@@ -353,25 +352,25 @@
     border-radius: 50%;
 
     /* visual */
-    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+    background-color: #2a2426;
     box-shadow:
         0px 2px 4px rgba(0, 0, 0, 0.2),
-        inset 0px 1px 1px rgba(255, 255, 255, 0.1);
+        inset 0px 1px 1px rgba(255, 255, 255, 0.05);
 
     /* state */
     transition: all 0.2s ease;
 }
 
 .controlButton:hover .controlButtonInner {
-    background: linear-gradient(180deg, #333333 0%, #222222 100%);
+    background-color: #3a3436;
     transform: translateY(-1px);
     box-shadow:
         0px 3px 6px rgba(0, 0, 0, 0.25),
-        inset 0px 1px 1px rgba(255, 255, 255, 0.15);
+        inset 0px 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 .controlButton:active .controlButtonInner {
-    background: linear-gradient(180deg, #222222 0%, #1a1a1a 100%);
+    background-color: #2a2426;
     transform: translateY(1px);
     box-shadow:
         0px 1px 2px rgba(0, 0, 0, 0.3),
@@ -384,10 +383,7 @@
     height: 16px;
 
     /* typography */
-    color: rgba(255, 255, 255, 0.8);
-
-    /* visual */
-    filter: brightness(0.9);
+    color: #ccc;
 }
 
 .doneButton {
@@ -639,4 +635,42 @@
 .backface-visibility-hidden {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+}
+
+/* Custom tooltip styles */
+.tooltip {
+    /* typography */
+    color: #ccc;
+    font-size: 11px;
+    font-weight: 400;
+    text-align: center;
+
+    /* box model */
+    padding: 6px 10px;
+    border-radius: 6px;
+
+    /* visual */
+    background-color: #2a2426;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+
+    /* triangle dimension */
+    --b: 10px; /* base */
+    --h: 5px; /* height */
+    --p: 50%; /* triangle position (0%:left 100%:right) */
+    --r: 6px; /* the radius */
+
+    border-radius: var(--r) var(--r) min(var(--r), 100% - var(--p) - var(--b) / 2) min(var(--r), var(--p) - var(--b) / 2) / var(--r);
+    clip-path: polygon(
+        0 100%,
+        0 0,
+        100% 0,
+        100% 100%,
+        min(100%, var(--p) + var(--b) / 2) 100%,
+        var(--p) calc(100% + var(--h)),
+        max(0%, var(--p) - var(--b) / 2) 100%
+    );
+    border-image: conic-gradient(#2a2426 0 0) fill 0 /
+        var(--r) calc(100% - var(--p) - var(--b) / 2) 0 calc(var(--p) - var(--b) / 2) /
+        0 0 var(--h) 0;
 }

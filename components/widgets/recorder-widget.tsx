@@ -434,7 +434,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                           {state === "recording" && (
                             <>
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={toggleMute}
@@ -459,12 +459,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>{isMuted ? "Unmute" : "Mute"}</p>
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={pauseRecording}
@@ -479,12 +479,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>Pause</p>
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={handleStopRecording}
@@ -501,7 +501,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>Done</p>
                                 </TooltipContent>
                               </Tooltip>
@@ -510,7 +510,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                           {state === "paused" && (
                             <>
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={toggleMute}
@@ -535,12 +535,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>{isMuted ? "Unmute" : "Mute"}</p>
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={resumeRecording}
@@ -555,12 +555,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>Resume</p>
                                 </TooltipContent>
                               </Tooltip>
 
-                              <Tooltip delayDuration={0}>
+                              <Tooltip delayDuration={200}>
                                 <TooltipTrigger asChild>
                                   <button
                                     onClick={handleStopRecording}
@@ -577,7 +577,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     </div>
                                   </button>
                                 </TooltipTrigger>
-                                <TooltipContent side="top">
+                                <TooltipContent side="top" className={styles.tooltip}>
                                   <p>Done</p>
                                 </TooltipContent>
                               </Tooltip>
