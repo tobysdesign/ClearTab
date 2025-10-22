@@ -409,11 +409,11 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 16px;
+    gap: 12px;
 
     /* box model */
     width: 100%;
-    padding: 24px;
+    padding: 20px 16px;
     border-radius: 12px;
 
     /* visual */
@@ -424,9 +424,10 @@
 .permissionMessage p {
     /* typography */
     color: rgba(255, 255, 255, 0.9);
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.4;
     margin: 0;
+    max-width: 220px;
 }
 
 .permissionMessageBlocked {
@@ -436,8 +437,8 @@
 
 .permissionIcon {
     /* box model */
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
 
     /* typography */
     color: rgba(59, 130, 246, 0.8);
@@ -450,21 +451,21 @@
 .permissionTitle {
     /* typography */
     color: white;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
-    margin: 0 0 4px 0;
+    margin: 0 0 6px 0;
 }
 
 .permissionRetry {
     /* box model */
-    padding: 8px 20px;
+    padding: 6px 16px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 6px;
     margin-top: 8px;
 
     /* typography */
     color: white;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     text-decoration: underline;
 
