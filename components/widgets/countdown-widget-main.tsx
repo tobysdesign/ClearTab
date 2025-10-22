@@ -29,7 +29,6 @@ import { useEffect, useState, useLayoutEffect, useRef } from "react";
 import countdownStyles from "./countdown-widget-main.module.css";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 // Icons replaced with ASCII placeholders
 
 interface CountdownWidgetProps {

@@ -1,12 +1,14 @@
 'use client'
 
 // Custom SVG icon components
-import { CloseIcon, SearchIcon } from '@/components/icons'
+import { CloseIcon } from '@/components/icons'
+import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
+import { useLayout } from '@/hooks/use-layout'
 import styles from './dock-content.module.css'
 
 interface DockContentProps {
@@ -25,10 +27,11 @@ export function DockContent({
     setSearchQuery,
     showSettings: _showSettings,
     setShowSettings: _setShowSettings,
-    setShowSearch,
+    setShowSearch: _setShowSearch,
     isVertical
 }: DockContentProps) {
     const { isChatOpen, openChat, closeChat } = useChatContext()
+    const { layout, toggleLayout } = useLayout()
 
     const handleToggleChat = () => {
         if (isChatOpen) {
@@ -44,13 +47,15 @@ export function DockContent({
             isVertical ? styles.containerVertical : styles.containerHorizontal
         )}>
             <button
-                onClick={() => setShowSearch(!showSearch)}
-                className={cn(
-                    styles.iconButton,
-                    showSearch && styles.iconButtonActive
-                )}
+                onClick={toggleLayout}
+                className={styles.iconButton}
+                title={`Switch to ${layout === 'two-row' ? 'single' : 'two'} row layout`}
             >
-                <SearchIcon size={16} className="text-white/60" />
+                <LayoutToggleIcon 
+                    isToggled={layout === 'single-row'}
+                    size={16}
+                    className="text-white/60"
+                />
             </button>
 
             <ShinyAiButton

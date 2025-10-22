@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { userPreferences } from '@/shared/schema';
+import { dbMinimal } from '@/lib/db-minimal';
+import { userPreferences } from '@/shared/schema-tables';
 import { eq } from 'drizzle-orm';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -13,7 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const [prefs] = await db
+    const [prefs] = await dbMinimal
       .select()
       .from(userPreferences)
       .where(eq(userPreferences.userId, user.id));
@@ -37,7 +40,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     
     // Upsert user preferences
-    const [updated] = await db
+    const [updated] = await dbMinimal
       .insert(userPreferences)
       .values({
         userId: user.id,

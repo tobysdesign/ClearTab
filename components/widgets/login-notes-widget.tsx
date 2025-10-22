@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from 'react'
 import { AddButton } from '@/components/ui/add-button'
-import { WidgetHeader } from '@/components/ui/widget-header'
 import { WidgetContainer } from '@/components/ui/widget-container'
 import type { Note } from '@/shared/schema'
 import { motion, AnimatePresence } from 'framer-motion'

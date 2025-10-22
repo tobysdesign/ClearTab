@@ -14,11 +14,10 @@ export default function Loading() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#09090B",
         zIndex: 9999,
       }}
     >
-      <BrandedLoader size="large" />
+      <BrandedLoader size="medium" />
     </div>
   );
 }

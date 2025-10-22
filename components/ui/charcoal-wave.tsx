@@ -243,7 +243,18 @@ export function CharcoalWave() {
       }
     }
 
+    let lastRenderTime = 0
+    const targetFPS = 30 // Lower FPS to reduce performance impact
+    const frameInterval = 1000 / targetFPS
+
     function render(now: number) {
+      // Throttle to target FPS
+      if (now - lastRenderTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(render)
+        return
+      }
+      lastRenderTime = now
+
       const elapsed = (now - startTime) / 1000.0
       updateCircles()
 

@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/db";
-import { user as userTable, connectedAccounts } from "@/shared/schema";
 import { eq } from "drizzle-orm";
-import { googleApiService, type GoogleAuth } from "@/lib/google-api-service";
+import type { GoogleAuth } from "@/lib/google-api-service";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    // Lazy load dependencies to reduce initial bundle size
+    const [{ createClient }, { dbMinimal }, { user: userTable, connectedAccounts }, { googleApiService }] = await Promise.all([
+      import('@/lib/supabase/server'),
+      import('@/lib/db-minimal'),
+      import('@/shared/schema-tables'),
+      import('@/lib/google-api-service'),
+    ]);
+
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
@@ -20,7 +25,7 @@ export async function GET(request: NextRequest) {
 
       // Get or create development user
       try {
-        [dbUser] = await db
+        [dbUser] = await dbMinimal
           .select()
           .from(userTable)
           .where(eq(userTable.id, userId))
@@ -84,7 +89,7 @@ export async function GET(request: NextRequest) {
       user = authUser;
 
       // Get user from database
-      [dbUser] = await db
+      [dbUser] = await dbMinimal
         .select()
         .from(userTable)
         .where(eq(userTable.id, user.id))
@@ -119,7 +124,7 @@ export async function GET(request: NextRequest) {
                 auth.accessToken = refreshedTokens.access_token;
                 
                 // Update the database with new access token
-                await db
+                await dbMinimal
                   .update(userTable)
                   .set({ accessToken: refreshedTokens.access_token })
                   .where(eq(userTable.id, dbUser.id));
@@ -158,7 +163,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch events from secondary accounts
     const userId = devBypass ? '00000000-0000-4000-8000-000000000000' : user.id;
-    const secondaryAccounts = await db
+    const secondaryAccounts = await dbMinimal
       .select()
       .from(connectedAccounts)
       .where(eq(connectedAccounts.userId, userId));
@@ -184,7 +189,7 @@ export async function GET(request: NextRequest) {
               auth.accessToken = refreshedTokens.access_token;
               
               // Update database with new token
-              await db
+              await dbMinimal
                 .update(connectedAccounts)
                 .set({ accessToken: refreshedTokens.access_token })
                 .where(eq(connectedAccounts.id, account.id));
@@ -223,7 +228,7 @@ export async function GET(request: NextRequest) {
               auth.accessToken = refreshedTokens.access_token;
               
               // Update database with new token
-              await db
+              await dbMinimal
                 .update(connectedAccounts)
                 .set({ accessToken: refreshedTokens.access_token })
                 .where(eq(connectedAccounts.id, account.id));
@@ -260,7 +265,7 @@ export async function GET(request: NextRequest) {
           console.log(
             `Detected invalid grant for account ${account.id}. Deleting stale connection.`,
           );
-          await db
+          await dbMinimal
             .delete(connectedAccounts)
             .where(eq(connectedAccounts.id, account.id));
         }

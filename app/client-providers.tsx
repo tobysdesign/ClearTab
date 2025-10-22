@@ -174,10 +174,6 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     unregisterTaskUpdateCallback,
   }), [activeTask, registerTaskUpdateCallback, unregisterTaskUpdateCallback]);
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('[PERF] Drawer state:', { activeTaskId, newTaskText, shouldOpen: !!(activeTaskId || newTaskText), timestamp: Date.now() });
-  }, [activeTaskId, newTaskText]);
 
   return (
     <TaskModalContext.Provider value={contextValue}>
@@ -186,7 +182,6 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         <Drawer
           open={!!(activeTaskId || newTaskText !== null || isCreatingNew)}
           onOpenChange={(open) => {
-            console.log('[PERF] Drawer onOpenChange:', open, Date.now());
             if (!open) {
               handleModalClose();
             }

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq, desc } from 'drizzle-orm';
+import { createClient } from '@/lib/supabase/server';
+import { dbMinimal } from '@/lib/db-minimal';
+import { notes } from '@/shared/schema-tables';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // Simple in-memory cache for development
 const notesCache = new Map<string, { data: any[], timestamp: number }>();
 const CACHE_TTL = 30 * 1000; // 30 seconds
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
@@ -20,11 +26,6 @@ export async function GET(request: NextRequest) {
         console.log('🔧 Development mode: Returning cached notes');
         return NextResponse.json({ success: true, data: cached.data });
       }
-
-      const [{ dbMinimal }, { notes }] = await Promise.all([
-        import('@/lib/db-minimal'),
-        import('@/shared/schema')
-      ]);
 
       console.log('🔧 Development mode: Bypassing auth for notes API');
 
@@ -41,12 +42,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: allNotes || [] });
     } else {
       // Production mode: full auth check
-      const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
-        import('@/lib/supabase/server'),
-        import('@/lib/db-minimal'),
-        import('@/shared/schema')
-      ]);
-
       const supabase = await createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -77,13 +72,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Lazy load only essential dependencies
-    const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema')
-    ]);
-
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
@@ -135,13 +123,6 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Lazy load only essential dependencies
-    const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema')
-    ]);
-
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
@@ -198,13 +179,6 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Lazy load only essential dependencies
-    const [{ createClient }, { dbMinimal }, { notes }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema')
-    ]);
-
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 

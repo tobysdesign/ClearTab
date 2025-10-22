@@ -1,28 +1,21 @@
 'use client'
 
 // Icons replaced with ASCII placeholders
-import { useEffect, useState, useTransition } from 'react'
-import { CloseIcon } from '@/components/icons'
+import React, { useEffect, useState, useTransition } from 'react'
 import type { Task } from '@/shared/schema'
 // Removed useDebouncedCallback as optimistic updates will trigger direct saves
-import { Input } from '@/components/ui/input'
 import dynamic from 'next/dynamic'
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from '@/shared/schema'
 
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
 // Removed CalendarIcon as it's not used directly in JSX
-import { format, formatDateSmart } from '@/lib/date-utils'
+import { formatDateSmart } from '@/lib/date-utils'
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
-import { motion } from 'framer-motion'
 import { TaskEditor } from '@/components/ui/task-editor'
 import { FormField, FormRow, TextInput, DateInput, PriorityToggle } from '@/components/ui/form-field'
 import { FormButtons, CheckboxField } from '@/components/ui/form-buttons'
@@ -112,8 +105,11 @@ export function EditTaskForm({
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   // Initialize content with either the task content or the selected text from editor
-  const initialContent = task?.content || 
-    (initialDescription ? { ops: [{ insert: initialDescription }, { insert: '\n' }] } : EMPTY_QUILL_CONTENT);
+  // Use useMemo to prevent recreating on every render
+  const initialContent = React.useMemo(() => {
+    return task?.content || 
+      (initialDescription ? { ops: [{ insert: initialDescription }, { insert: '\n' }] } : EMPTY_QUILL_CONTENT);
+  }, [task?.id, initialDescription]); // Only recreate if task ID or initialDescription changes
   
   const [currentContent, setCurrentContent] = useState<QuillDelta>(
     JSON.parse(JSON.stringify(initialContent))
@@ -164,7 +160,8 @@ export function EditTaskForm({
         dueDate: null, // Optional - no default date for new tasks
       });
     }
-  }, [task, initialDescription, form, initialContent])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task?.id, initialDescription]) // Only run when task ID or initialDescription changes
 
   useEffect(() => {
     // Only call onSave for new task creation, not for updates

@@ -2,7 +2,6 @@
 
 // Icons replaced with ASCII placeholders
 import { Button } from "@/components/ui/button";
-import { CloseIcon } from '@/components/icons';
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedAccountWithEmail } from "@/shared/types";

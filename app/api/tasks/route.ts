@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/db";
-import { tasks } from "@/shared/schema";
+import { dbMinimal } from "@/lib/db-minimal";
+import { tasks } from "@/shared/schema-tables";
 import { eq, desc, and } from "drizzle-orm";
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     if (taskId) {
       // Fetch single task
-      const [task] = await db
+      const [task] = await dbMinimal
         .select()
         .from(tasks)
         .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)));
@@ -43,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all tasks
-    const allTasks = await db
+    const allTasks = await dbMinimal
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId))
@@ -98,7 +101,7 @@ export async function POST(request: NextRequest) {
       isCompleted: isCompleted || false,
     } as const;
 
-    const [newTask] = await db
+    const [newTask] = await dbMinimal
       .insert(tasks)
       .values(insertValues)
       .returning();
@@ -183,7 +186,7 @@ export async function PUT(request: NextRequest) {
 
     console.log('PUT /api/tasks - Update data:', updateData);
 
-    const [updatedTask] = await db
+    const [updatedTask] = await dbMinimal
       .update(tasks)
       .set(updateData)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
@@ -238,7 +241,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await db
+    await dbMinimal
       .delete(tasks)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
 

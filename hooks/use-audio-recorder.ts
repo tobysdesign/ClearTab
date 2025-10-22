@@ -13,11 +13,15 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
   const [duration, setDuration] = useState(0)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [isMuted, setIsMuted] = useState(false)
+  const [audioData, setAudioData] = useState<Uint8Array>(new Uint8Array(50))
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationFrameRef = useRef<number | null>(null)
 
   const startTimer = useCallback(() => {
     intervalRef.current = setInterval(() => {
@@ -74,6 +78,59 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     setAudioBlob(null)
     setDuration(0)
 
+    // Set up Web Audio API for visualization
+    const audioContext = new AudioContext()
+    const analyser = audioContext.createAnalyser()
+    analyser.fftSize = 1024 // Even larger FFT for better frequency resolution
+    analyser.smoothingTimeConstant = 0.3 // Much less smoothing for faster response
+    analyser.minDecibels = -90 // Adjust dynamic range
+    analyser.maxDecibels = -10
+    
+    const source = audioContext.createMediaStreamSource(streamRef.current)
+    source.connect(analyser)
+    
+    audioContextRef.current = audioContext
+    analyserRef.current = analyser
+
+    // Start audio visualization loop with throttling for slower update rate
+    let lastUpdateTime = 0
+    const updateInterval = 100 // Update every 100ms (10 times per second) for slower, smoother scrolling
+    
+    const updateAudioData = (timestamp: number) => {
+      if (!analyserRef.current) return
+      
+      // Throttle updates to control scroll speed
+      if (timestamp - lastUpdateTime < updateInterval) {
+        animationFrameRef.current = requestAnimationFrame(updateAudioData)
+        return
+      }
+      
+      lastUpdateTime = timestamp
+      
+      const bufferLength = analyser.frequencyBinCount
+      const dataArray = new Uint8Array(bufferLength)
+      analyserRef.current.getByteFrequencyData(dataArray)
+      
+      // Sample more bars from the frequency data for higher fidelity
+      const numBars = 50
+      const sampledData = new Uint8Array(numBars)
+      
+      // Focus on lower frequencies where voice is most prominent
+      // Sample from bins representing roughly 85Hz to 3000Hz
+      const startBin = Math.floor(85 * bufferLength / (audioContext.sampleRate / 2))
+      const endBin = Math.floor(3000 * bufferLength / (audioContext.sampleRate / 2))
+      const binRange = endBin - startBin
+      
+      for (let i = 0; i < numBars; i++) {
+        const binIndex = Math.floor(startBin + (i / numBars) * binRange)
+        sampledData[i] = dataArray[binIndex]
+      }
+      
+      setAudioData(sampledData)
+      animationFrameRef.current = requestAnimationFrame(updateAudioData)
+    }
+    animationFrameRef.current = requestAnimationFrame(updateAudioData)
+
     const mediaRecorder = new MediaRecorder(streamRef.current, {
       mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
     })
@@ -90,6 +147,16 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
       const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType })
       console.log('Created audio blob, size:', blob.size)
       setAudioBlob(blob)
+      
+      // Stop audio visualization
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close()
+        audioContextRef.current = null
+      }
     }
 
     mediaRecorderRef.current = mediaRecorder
@@ -236,6 +303,17 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     setAudioBlob(null)
     setIsMuted(false)
     setState('idle')
+    setAudioData(new Uint8Array(50))
+    
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    
+    if (audioContextRef.current) {
+      audioContextRef.current.close()
+      audioContextRef.current = null
+    }
     
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop())
@@ -248,6 +326,7 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     duration,
     audioBlob,
     isMuted,
+    audioData,
     startRecording,
     pauseRecording,
     resumeRecording,

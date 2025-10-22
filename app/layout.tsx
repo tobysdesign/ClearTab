@@ -49,9 +49,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.variable, tinos.variable)}>
-        <div id="initial-loader" className={styles.initialLoader}>
-          <BrandedLoader size="large" />
-        </div>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

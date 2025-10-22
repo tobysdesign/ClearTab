@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { connectedAccounts } from '@/shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { dbMinimal } from '@/lib/db-minimal';
+import { connectedAccounts } from '@/shared/schema-tables';
+import { eq } from 'drizzle-orm';
 // Remove googleapis dependency - replaced with direct API calls
 
 // This endpoint forces a check on a linked account to see if its tokens are still valid.
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find the stale connection in our database.
-    const [staleLink] = await db
+    const [staleLink] = await dbMinimal
       .select()
       .from(connectedAccounts)
       .where(eq(connectedAccounts.providerAccountId, providerAccountId))
@@ -55,16 +55,16 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       } else {
         // Token is invalid, we can safely delete the stale connection.
-        await db.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
+        await dbMinimal.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
         return NextResponse.json({ success: true, message: 'Stale connection successfully removed.' });
       }
-    } catch (error: any) {
+    } catch {
       // If there's a network error or other issue, assume token is invalid
-      await db.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
+      await dbMinimal.delete(connectedAccounts).where(eq(connectedAccounts.id, staleLink.id));
       return NextResponse.json({ success: true, message: 'Stale connection successfully removed.' });
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Force revoke check error:", error);
     return NextResponse.json(
       { error: error.message || 'Failed to check account status' },

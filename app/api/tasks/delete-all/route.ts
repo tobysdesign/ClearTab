@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db';
-import { tasks } from '@/shared/schema';
+import { dbMinimal } from '@/lib/db-minimal';
+import { tasks } from '@/shared/schema-tables';
 import { eq } from 'drizzle-orm';
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(_request: NextRequest) {
   try {
     const supabase = await createClient();
 
@@ -32,7 +32,7 @@ export async function DELETE(request: NextRequest) {
     const userId = user.id;
 
     // Delete all tasks for the current user
-    const deletedTasks = await db
+    const deletedTasks = await dbMinimal
       .delete(tasks)
       .where(eq(tasks.userId, userId))
       .returning();

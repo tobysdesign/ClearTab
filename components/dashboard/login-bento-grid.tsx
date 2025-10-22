@@ -6,7 +6,6 @@ import {
   PanelResizeHandle,
 } from 'react-resizable-panels'
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 // Import the actual login widgets
 import { LoginNotesWidget } from '@/components/widgets/login-notes-widget'

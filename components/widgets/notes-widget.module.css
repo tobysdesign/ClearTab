@@ -12,11 +12,11 @@
 .resizableLeft {
     /* layout */
     flex-shrink: 0;
-    
+
     /* container */
     container-type: inline-size;
     container-name: notes-panel;
-    
+
     /* state */
     transition: width 150ms ease-out;
 }
@@ -30,7 +30,7 @@
     min-width: 2px;
 
     /* visual */
-    background-color: transparent;
+    background-color: #28282b;
 
     /* state */
     cursor: col-resize;
@@ -40,7 +40,7 @@
 
 /* Larger hit area for easier grabbing */
 .resizableHandle::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -8px;
@@ -52,19 +52,19 @@
 
 .resizableHandle:hover {
     /* visual */
-    background-color: #FF4F4F;
+    background-color: #ff4f4f;
 }
 
 .resizableHandle:active {
     /* visual */
-    background-color: #FF4F4F;
+    background-color: #ff4f4f;
 }
 
 .resizableRight {
     /* layout */
     flex: 1;
     min-width: 0; /* Allow flex item to shrink below content size */
-    
+
     /* box model */
 }
 
@@ -97,12 +97,12 @@
         height: 100% !important;
         padding: 14px 5px !important;
     }
-    
+
     .notesListPanel .widget-title,
     .notesListPanel .widget-header button {
         display: none !important;
     }
-    
+
     .notesListContent {
         padding: 0 0.5rem !important;
         display: flex !important;
@@ -118,12 +118,14 @@
 }
 
 /* Class-based fallback for collapsed state - using :global() for global classes */
-.resizablePanels .resizableLeft:global(.collapsed) .notesListPanel :global(.widget-header) {
+.resizablePanels
+    .resizableLeft:global(.collapsed)
+    .notesListPanel
+    :global(.widget-header) {
     flex-direction: column;
     padding: 14px 5px;
     justify-content: center;
 }
-
 
 .resizablePanels .resizableLeft:global(.collapsed) .notesListContent {
     padding: 0 0.5rem;
@@ -144,11 +146,10 @@
 .notesListContent {
     /* box model */
     padding: 0 0.75rem;
-    
+
     /* state */
     transition: padding 150ms ease-out;
 }
-
 
 /* Notes Widget: Editor Panel */
 .notesEditorPanel {
@@ -374,5 +375,15 @@
 }
 
 .ql-bubble {
-    z-index: 10;
+    z-index: 20;
+}
+.ql-bubble .ql-toolbar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    float: left;
+    height: 22px;
+    padding: 3px 0px;
+    width: 20px;
 }

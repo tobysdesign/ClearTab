@@ -4,13 +4,6 @@ import React, { useMemo, useCallback } from "react";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import styles from './note-list-item.module.css';
 
 

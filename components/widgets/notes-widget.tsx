@@ -448,8 +448,11 @@ export function NotesWidget() {
         // Update display title immediately (no editor re-render)
         setDisplayTitle(newTitle);
 
-        // Update ref directly without triggering note re-render
+        // Update ref AND state to preserve content
         activeNoteRef.current = { ...activeNoteRef.current, title: newTitle };
+        
+        // Update activeNote state to keep editor content in sync
+        setActiveNote(prev => prev ? { ...prev, title: newTitle } : prev);
 
         // Only update list for saved notes, not drafts (to prevent input focus issues)
         if (!activeNoteRef.current.id?.startsWith("draft-")) {
