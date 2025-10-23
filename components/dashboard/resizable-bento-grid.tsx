@@ -14,6 +14,7 @@ import { ScheduleWidget } from '@/components/widgets/schedule-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useLayout } from '@/hooks/use-layout'
+import { MobileCompactLayout } from './mobile-compact-layout'
 import styles from './resizable-bento-grid.module.css'
 
 interface ResizableBentoGridProps {
@@ -235,47 +236,10 @@ export function ResizableBentoGrid({
   }, [])
 
   const renderMobileLayout = () => (
-    <PanelGroup key="mobile-layout" direction="vertical" className={styles.mobilePanelGroup}>
-      {/* Notes - Full width */}
-      <Panel defaultSize={40} minSize={20}>
-        <motion.div {...motionProps(0.1)} className="panel-motion">
-          {notes}
-        </motion.div>
-      </Panel>
-
-      {/* Tasks - Full width */}
-      <Panel defaultSize={40} minSize={20}>
-        <motion.div {...motionProps(0.25)} className="panel-motion">
-          {tasks}
-        </motion.div>
-      </Panel>
-
-      {/* Other widgets in a row */}
-      <Panel defaultSize={20} minSize={10}>
-        <PanelGroup direction="horizontal" className="panel-group">
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.5)} className="panel-motion">
-              <WeatherWidgetNew />
-            </motion.div>
-          </Panel>
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.6)} className="panel-motion">
-              <RecorderWidget />
-            </motion.div>
-          </Panel>
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.7)} className="panel-motion">
-              <CountdownWidget />
-            </motion.div>
-          </Panel>
-          <Panel defaultSize={25}>
-            <motion.div {...motionProps(0.8)} className="panel-motion">
-              <ScheduleWidget />
-            </motion.div>
-          </Panel>
-        </PanelGroup>
-      </Panel>
-    </PanelGroup>
+    <MobileCompactLayout
+      notes={notes}
+      tasks={tasks}
+    />
   )
 
   return (
