@@ -17,7 +17,6 @@ const nextConfig = {
   },
   turbopack: {},
   typedRoutes: false,
-  // Enable StrictMode now that BlockNote is removed
   reactStrictMode: true,
   env: {
     DATABASE_URL: process.env.DATABASE_URL || "",
@@ -104,22 +103,9 @@ const nextConfig = {
       // Let dynamic imports handle the optimization instead
     }
 
-    // Ensure Yjs and related packages are treated as singletons
-    const yjsPath = require.resolve("yjs");
-
     config.resolve.alias = {
       ...config.resolve.alias,
-      yjs: yjsPath,
-      "y-prosemirror": require.resolve("y-prosemirror"),
-      // y-protocols resolution for different module systems
-      "y-protocols$": require.resolve("y-protocols/sync"),
-      "y-protocols/sync": require.resolve("y-protocols/sync"),
-      "y-protocols/awareness": require.resolve("y-protocols/awareness"),
-      "y-protocols/auth": require.resolve("y-protocols/auth"),
     };
-
-    // Note: resolve.dedupe is handled differently in modern webpack versions
-    // The aliases above should be sufficient to prevent multiple instances
 
     // Note: Removed optimization.usedExports as it conflicts with Next.js 15's cacheUnaffected
     // Next.js handles optimization internally

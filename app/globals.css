@@ -489,7 +489,7 @@ html {
     background-color: #fb7185;
 }
 
-/* Countdown widget styles */
+/* qCountdown widget styles */
 .countdown-container {
     position: relative;
     display: flex;
@@ -2134,26 +2134,6 @@ html[data-vaul-drawer-visible="true"] {
     width: 100%;
 }
 
-.bn-container {
-    border: none !important;
-    background: transparent !important;
-    color: var(--foreground) !important;
-}
-
-.bn-container .bn-block-content {
-    color: var(--foreground) !important;
-}
-
-/* Make sure BlockNote toolbar matches our theme */
-.bn-toolbar {
-    background-color: var(--card) !important;
-    border-color: var(--border) !important;
-    height: 38px;
-}
-
-.bn-toolbar button {
-    color: var(--foreground) !important;
-}
 
 /* Widget list item content styling */
 .widget-list-item-content {
@@ -2223,20 +2203,6 @@ html[data-vaul-drawer-visible="true"] {
     text-decoration: underline;
 }
 
-/* Custom styles for BlockNote toolbar */
-
-.bn-toolbar button:hover {
-    background-color: var(--accent) !important;
-}
-
-/* BlockNote customizations */
-.bn-container .bn-block-type-dropdown-item-text {
-    display: none !important;
-}
-
-.bn-container .bn-toolbar button[data-test-id="create-link"] {
-    display: none !important;
-}
 
 [data-panel] {
     overflow: visible !important;
@@ -2280,84 +2246,11 @@ textarea::placeholder {
     font-style: italic;
 }
 
-/* Custom styles for EditTaskForm */
-.task-editor-description .bn-placeholder {
-    font-style: italic;
-    font-weight: 200; /* Extra-Light */
-    color: #3a3a3a !important;
-}
 
 .task-important-switch[data-state="unchecked"] > span {
     background-color: #4d4949;
 }
 
-/* Notes editor placeholder style */
-.notes-editor-placeholder .bn-placeholder {
-    font-style: italic;
-    font-weight: 300;
-    color: #3a3a3a !important;
-}
-
-/* Fix for any links or special text that might be blue */
-.bn-container a,
-.bn-container [data-node-type="link"],
-.bn-container .ProseMirror a {
-    color: #d2d2d2 !important;
-    text-decoration: underline;
-}
-
-/* Ensure all text in the editor is the right color */
-.bn-container .ProseMirror * {
-    color: #d2d2d2 !important;
-    background-color: #151515 !important;
-}
-
-/* Fix for any default browser styling that might be overriding our colors */
-.bn-container input,
-.bn-container textarea,
-.bn-container [contenteditable="true"] {
-    color: #d2d2d2 !important;
-    caret-color: #d2d2d2;
-    background-color: #151515 !important;
-}
-
-/* Remove any pink/accent colors from BlockNote editor */
-.bn-container .ProseMirror-selectednode,
-.bn-container .ProseMirror-focused,
-.bn-container .bn-block-content:focus,
-.bn-container .bn-block-content:focus-within,
-.bn-container .ProseMirror::selection,
-.bn-container .ProseMirror ::-moz-selection {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    outline: none !important;
-    border: none !important;
-}
-
-/* Remove any pink borders from editor elements only - NOT the widget container */
-.bn-container,
-.bn-container *,
-.notes-editor *,
-[data-widget="notes"] .bn-container,
-[data-widget="notes"] .bn-container *,
-[data-widget="notes"] [contenteditable],
-[data-widget="notes"] .ProseMirror,
-[data-widget="notes"] .ProseMirror * {
-    border-color: transparent !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Specifically target any elements with pink/rose colors */
-
-/* Hide any BlockNote UI elements that might be pink */
-.bn-container .bn-drag-handle,
-.bn-container .bn-side-menu,
-.bn-container .bn-block-side-menu,
-.bn-container [data-test-id*="pink"],
-.bn-container [data-test-id*="rose"],
-.bn-container [data-test-id*="accent"] {
-    display: none !important;
-}
 
 /* Target resizable panels and dividers that might be pink */
 .resizable-handle,

@@ -8,14 +8,6 @@
   position: absolute;
 }
 
-/* Custom styling for the BlockNote editor */
-.editor-with-custom-placeholder {
-  --block-note-text-color: #D2D2D2;
-  --block-note-heading-text-color: #F5F5F5;
-  --block-note-background: transparent;
-  --block-note-block-background: #222222;
-  --block-note-highlight-color: #2F4156;
-}
 
 /* Make sure the editor fills the container */
 .editor-with-custom-placeholder > div {
@@ -57,13 +49,3 @@
   padding-left: 24px;
 }
 
-/* Improve the appearance of the slash menu */
-.bn-slash-menu {
-  background-color: #222222 !important;
-  border: 1px solid #2A2A2A !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-}
-
-.bn-slash-menu .bn-menu-item.bn-active {
-  background-color: #2F4156 !important;
-} 

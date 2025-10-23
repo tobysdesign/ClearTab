@@ -29,18 +29,18 @@
         0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Row 1 - Header aligned right */
+/* Header for 5-day forecast card */
 .cardHeader {
-    text-align: left;
+text-align:left;
+    
 }
 
 .date {
-    color: #c4c4c4;
+    color: #bbb;
     font-family: "Inter Display", sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 1.2;
-    margin-bottom: 2px;
+    line-height: 1.0;
 }
 
 .location {
@@ -51,47 +51,50 @@
     line-height: 1.2;
 }
 
-/* Row 2 - Weather icon area */
-.cardCenter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
+/* 2-Column Grid Layout for Today/Tomorrow cards */
+.weatherCardGrid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4px;
+    height: 100%;
+    padding: 0;
 }
 
-.weatherIcon {
-    width: 60px;
-    height: 60px;
-    opacity: 0.8;
-}
-
-/* Row 3 - 3 column layout */
-.cardFooter {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
-}
-
-/* Col 1 - Big temperature */
-.mainTempCol {
+.leftCol {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
+    justify-content: end;
+    gap: 0px;
 }
 
-.temperature {
+.rightCol {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: flex-end;
+    gap: 0px;
+}
+
+/* Left Column */
+.dayLabel {
+    color: #c4c4c4;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.bigTemp {
     color: #c4c4c4;
     font-family: "Inter Display", sans-serif;
     font-size: 48px;
     font-weight: 300;
-    line-height: 1em;
-    margin-bottom: 4px;
+    line-height: 1em;    
     letter-spacing: -0.01em;
+    margin-bottom:4px;
 }
 
-.condition {
+.tempRange {
     color: #555;
     font-family: "Inter Display", sans-serif;
     font-size: 14px;
@@ -99,36 +102,41 @@
     line-height: 1.2;
 }
 
-/* Col 2 & 3 - High/Low temps grouped together */
-.tempGroup {
-    display: flex;
-    gap: 8px;
-    align-items: flex-end;
-}
-
-.tempCol {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.highTemp,
-.lowTemp {
+.highTemp {
     color: #c4c4c4;
-    font-family: "Inter Display", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 2px;
 }
 
-.tempLabel {
+.lowTemp {
+    color: #666;
+}
+
+/* Right Column */
+.locationLabel {
     color: #555;
     font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 400;
-    line-height: 1;
+    line-height: 1.2;
+    text-align: right;
+}
+
+.weatherIconContainer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: end;
+    flex: 1;
+    margin-bottom: 10px;
+    transform: scale(.5);
+    transform-origin: bottom;
+}
+
+.conditionText {
+    color: #555;
+    font-family: "Inter Display", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: right;
 }
 
 .cardBack:hover {
@@ -146,53 +154,55 @@
 /* 5-day forecast grid */
 .forecastGrid {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     justify-content: space-between;
     align-items: center;
     flex: 1;
-    padding: 16px 0;
+    padding: 8px 0;
 }
 
 .forecastDay {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     flex: 1;
-    padding: 12px 8px;
-    border-radius: 12px;
+    padding: 8px 4px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.02);
     transition: background 0.2s;
 }
 
 .forecastDay:first-child {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.forecastDay:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
 .forecastDayLabel {
     color: #c4c4c4;
     font-family: "Inter Display", sans-serif;
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .forecastIcon {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 48px;
+    height: 32px;
+    font-size: 0.5em;
+    transform: scale(0.6);
 }
 
 .forecastTemp {
     display: flex;
-    gap: 4px;
+    flex-direction: column;
+    gap: 2px;
     font-family: "Inter Display", sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
+    align-items: center;
 }
 
 .forecastHigh {

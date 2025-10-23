@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/lib/db';
-import { tasks, BlockNoteContentSchema } from '@/shared/schema';
+import { tasks, QuillContentSchema } from '@/shared/schema';
 import { eq } from 'drizzle-orm';
 import { action } from '@/lib/safe-action';
 import { z } from 'zod';
@@ -9,9 +9,9 @@ import { ActionResponse } from '@/types/actions';
 
 const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  content: BlockNoteContentSchema.optional(),
+  content: QuillContentSchema.optional(),
   isCompleted: z.boolean().default(false),
-  isHighPriority: z.boolean().default(false), // Use isHighPriority
+  isHighPriority: z.boolean().default(false),
   dueDate: z.date().nullable().optional(),
   order: z.number().nullable().optional(),
 });
@@ -19,9 +19,9 @@ const createTaskSchema = z.object({
 const updateTaskSchema = z.object({
   id: z.string(),
   title: z.string().min(1, 'Title is required').optional(),
-  content: BlockNoteContentSchema.optional(),
+  content: QuillContentSchema.optional(),
   isCompleted: z.boolean().optional(),
-  isHighPriority: z.boolean().optional(), // Use isHighPriority
+  isHighPriority: z.boolean().optional(),
   dueDate: z.date().nullable().optional(),
   order: z.number().nullable().optional(),
 });

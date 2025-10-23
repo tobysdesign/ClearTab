@@ -4,7 +4,7 @@
 export interface Note {
   id: string;
   title: string;
-  content: any; // BlockNote content
+  content: any; // Quill Delta content
   created_at: string;
   updated_at: string;
 }

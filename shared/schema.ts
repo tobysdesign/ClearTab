@@ -24,17 +24,12 @@ function generateUUID(): string {
     return v.toString(16);
   });
 }
-// Quill Delta Content Schemas (replacing BlockNote for lighter bundle)
+// Quill Delta Content Schemas
 import { QuillDeltaSchema, EMPTY_QUILL_CONTENT, type QuillDelta } from "@/lib/quill-utils";
 
 export const QuillContentSchema = QuillDeltaSchema;
 export { EMPTY_QUILL_CONTENT };
 export type { QuillDelta };
-
-// Legacy BlockNote content type for migration
-export type BlockNoteContent = any; // Keep for migration purposes
-export const EMPTY_BLOCKNOTE_CONTENT = EMPTY_QUILL_CONTENT; // Redirect to Quill format
-export const BlockNoteContentSchema = QuillDeltaSchema; // Redirect to Quill schema
 
 export const user = pgTable(
   "user",

@@ -10,7 +10,7 @@ export interface ApiConfig {
 export interface Note {
   id: string
   title: string
-  content: any // BlockNote or Editor.js format
+  content: any // Quill Delta format
   createdAt: string
   updatedAt: string
   userId: string

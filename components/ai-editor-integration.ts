@@ -1,10 +1,10 @@
 'use client';
 
 /**
- * This file contains helper functions to integrate your AI assistant with the BlockNote editor
+ * This file contains helper functions to integrate your AI assistant with the Quill editor
  */
 
-// Define types for BlockNote content
+// Define types for editor content
 type BlockContent = string | Array<{ text?: string; [key: string]: unknown }>;
 type BlockItem = {
   content?: BlockContent;
@@ -45,8 +45,8 @@ export async function getAiResponse(prompt: string): Promise<string> {
 }
 
 /**
- * Helper function to extract text from BlockNote content
- * @param content BlockNote content object
+ * Helper function to extract text from editor content
+ * @param content Editor content object
  * @returns Plain text representation of the content
  */
 export function extractTextFromBlocks(content: BlockItem[]): string {

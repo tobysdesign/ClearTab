@@ -1,7 +1,7 @@
 "use client";
 
 // Icons replaced with ASCII placeholders
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useMemo } from "react";
 import { CheckIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
@@ -15,16 +15,162 @@ import {
   getSupabaseClient,
   isExtensionEnvironment,
 } from "@/lib/extension-utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip } from "react-tooltip";
 
 interface RecorderWidgetProps {
   className?: string;
 }
+
+interface RecordingControlsProps {
+  state: string;
+  isMuted: boolean;
+  showSuccess: boolean;
+  onToggleMute: () => void;
+  onPause: () => void;
+  onResume: () => void;
+  onStop: () => void;
+}
+
+const RecordingControls = memo(function RecordingControls({
+  state,
+  isMuted,
+  showSuccess,
+  onToggleMute,
+  onPause,
+  onResume,
+  onStop,
+}: RecordingControlsProps) {
+  if (state === "recording") {
+    return (
+      <>
+        <button
+          onClick={onToggleMute}
+          className={styles.controlButton}
+          data-tooltip-id="recording-tooltip"
+          data-tooltip-content={isMuted ? "Unmute" : "Mute"}
+        >
+          <div className={styles.controlButtonInner}>
+            <img
+              src={
+                isMuted
+                  ? "/icons/si_micMute-fill.svg"
+                  : "/icons/si_mic-fill.svg"
+              }
+              alt={isMuted ? "Unmute" : "Mute"}
+              className={styles.controlIcon}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onPause}
+          className={styles.controlButton}
+          data-tooltip-id="recording-tooltip"
+          data-tooltip-content="Pause"
+        >
+          <div className={styles.controlButtonInner}>
+            <img
+              src="/icons/si_pause-fill.svg"
+              alt="Pause"
+              className={styles.controlIcon}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onStop}
+          className={cn(styles.controlButton, styles.doneButton)}
+          data-tooltip-id="recording-tooltip"
+          data-tooltip-content="Done"
+        >
+          <div className={styles.controlButtonInner}>
+            <CheckIcon size={16} className={styles.checkIcon} />
+          </div>
+        </button>
+
+        <Tooltip
+          id="recording-tooltip"
+          place="top"
+          className={styles.reactTooltip}
+          openOnClick={false}
+          delayShow={20}
+          delayHide={0}
+        />
+      </>
+    );
+  }
+
+  if (state === "paused") {
+    return (
+      <>
+        <button
+          onClick={onToggleMute}
+          className={styles.controlButton}
+          data-tooltip-id="paused-tooltip"
+          data-tooltip-content={isMuted ? "Unmute" : "Mute"}
+        >
+          <div className={styles.controlButtonInner}>
+            <img
+              src={
+                isMuted
+                  ? "/icons/si_micMute-fill.svg"
+                  : "/icons/si_mic-fill.svg"
+              }
+              alt={isMuted ? "Unmute" : "Mute"}
+              className={styles.controlIcon}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onResume}
+          className={styles.controlButton}
+          data-tooltip-id="paused-tooltip"
+          data-tooltip-content="Resume"
+        >
+          <div className={styles.controlButtonInner}>
+            <img
+              src="/icons/si_record-fill.svg"
+              alt="Resume"
+              className={styles.controlIcon}
+            />
+          </div>
+        </button>
+
+        <button
+          onClick={onStop}
+          className={cn(styles.controlButton, styles.doneButton)}
+          data-tooltip-id="paused-tooltip"
+          data-tooltip-content="Done"
+        >
+          <div className={styles.controlButtonInner}>
+            <CheckIcon size={16} className={styles.checkIcon} />
+          </div>
+        </button>
+
+        <Tooltip
+          id="paused-tooltip"
+          place="top"
+          className={styles.reactTooltip}
+          openOnClick={false}
+          delayShow={20}
+          delayHide={0}
+        />
+      </>
+    );
+  }
+
+  if (showSuccess) {
+    return (
+      <div className={styles.successContainer}>
+        <span className={styles.controlIcon}>✓</span>
+        <span className={styles.doneText}>Note saved!</span>
+      </div>
+    );
+  }
+
+  return null;
+});
 
 export function RecorderWidget({ className }: RecorderWidgetProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -258,7 +404,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   };
 
   // Generate waveform visualization with scrolling effect
-  const generateWaveform = () => {
+  const waveformBars = useMemo(() => {
     const numVisibleBars = 50;
     const bars = [];
 
@@ -314,313 +460,175 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     }
 
     return bars;
-  };
+  }, [state, waveformHistory]);
 
   return (
-    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
-      <ClientOnly>
-        <div
-          className={cn(
-            styles.flipContainer,
-            { [styles.flipped]: isFlipped },
-            className,
-          )}
-        >
-          <div className={styles.flipper}>
-            {/* Front Side (Idle) */}
-            <div className={styles.front}>
-              <div className={styles.container}>
-                <div className={styles.content}>
-                  {/* Header */}
-                  <WidgetHeader
-                    title="Voice notes"
-                    className="!justify-start"
-                  />
+    <ClientOnly>
+      <div
+        className={cn(
+          styles.flipContainer,
+          { [styles.flipped]: isFlipped },
+          className,
+        )}
+      >
+        <div className={styles.flipper}>
+          {/* Front Side (Idle) */}
+          <div className={styles.front}>
+            <div className={styles.container}>
+              <div className={styles.content}>
+                {/* Header */}
+                <WidgetHeader title="Voice notes" className="!justify-start" />
 
-                  {/* Body */}
-                  <div className={styles.body}>
-                    {/* Button Container */}
-                    <div className={styles.buttonContainer}>
-                      <button
-                        onClick={handleStartRecording}
-                        onMouseEnter={() => setIsHovered(true)}
-                        onMouseLeave={() => setIsHovered(false)}
-                        className={cn(styles.button, "group")}
-                      >
-                        <div className={styles.buttonOuter}>
-                          {/* Main shading background */}
-                          <div className={styles.buttonBackground} />
+                {/* Body */}
+                <div className={styles.body}>
+                  {/* Button Container */}
+                  <div className={styles.buttonContainer}>
+                    <button
+                      onClick={handleStartRecording}
+                      onMouseEnter={() => setIsHovered(true)}
+                      onMouseLeave={() => setIsHovered(false)}
+                      className={cn(styles.button, "group")}
+                    >
+                      <div className={styles.buttonOuter}>
+                        {/* Main shading background */}
+                        <div className={styles.buttonBackground} />
 
-                          {/* Gradient border */}
-                          <div className={styles.buttonBorder} />
+                        {/* Gradient border */}
+                        <div className={styles.buttonBorder} />
 
-                          {/* Top highlight for lighter upper half */}
-                          <div className={styles.buttonTopHighlight} />
+                        {/* Top highlight for lighter upper half */}
+                        <div className={styles.buttonTopHighlight} />
 
-                          {/* Recording indicator dot (positioned top-right) */}
-                          <div
-                            className={cn(styles.recordingDot, {
-                              [styles.recordingDotHover]: isHovered,
-                            })}
-                          />
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* Text */}
-                    <p className={styles.bodyText}>Start a voice note</p>
+                        {/* Recording indicator dot (positioned top-right) */}
+                        <div
+                          className={cn(styles.recordingDot, {
+                            [styles.recordingDotHover]: isHovered,
+                          })}
+                        />
+                      </div>
+                    </button>
                   </div>
+
+                  {/* Text */}
+                  <p className={styles.bodyText}>Start a voice note</p>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Back Side (Recording) */}
-            <div className={styles.back}>
-              <div className={cn(styles.container, {
+          {/* Back Side (Recording) */}
+          <div className={styles.back}>
+            <div
+              className={cn(styles.container, {
                 [styles.containerInfoState]: state === "requesting-permission",
-                [styles.containerErrorState]: state === "permission-denied"
-              })}>
-                <div className={styles.content}>
-                  {/* Header */}
-                  <WidgetHeader
-                    title="Voice notes"
-                    className="!justify-start"
-                  />
+                [styles.containerErrorState]: state === "permission-denied",
+              })}
+            >
+              <div className={styles.content}>
+                {/* Header */}
+                <WidgetHeader title="Voice notes" className="!justify-start" />
 
-                  {/* Body */}
-                  <div className={styles.recordingBody}>
-                    {state === "requesting-permission" || state === "permission-denied" ? (
-                      <>
-                        <p className={styles.permissionTitle}>
-                          {state === "requesting-permission"
-                            ? "Requesting microphone permission"
-                            : "Microphone permissions blocked"}
-                        </p>
-                        <p className={styles.permissionText}>
-                          {state === "requesting-permission"
-                            ? (
-                              <>If you don't see the request, click the <img src="/icons/si_info-line.svg" alt="info icon" style={{ display: "inline", width: "14px", height: "14px", verticalAlign: "middle" }} /> icon next to the URL address bar.</>
-                            ) : (
-                              <>To enable, click the <img src="/icons/si_info-line.svg" alt="info icon" style={{ display: "inline", width: "14px", height: "14px", verticalAlign: "middle"}} /> icon next to the URL address bar.</>
-                            )}
-                        </p>
-                        {state === "permission-denied" && (
-                          <button
-                            onClick={() => {
-                              reset();
-                              handleStartRecording();
-                            }}
-                            className={styles.permissionRetry}
-                          >
-                            Click here to retry
-                          </button>
+                {/* Body */}
+                <div className={styles.recordingBody}>
+                  {state === "requesting-permission" ||
+                  state === "permission-denied" ? (
+                    <>
+                      <p className={styles.permissionTitle}>
+                        {state === "requesting-permission"
+                          ? "Requesting microphone permission"
+                          : "Microphone permissions blocked"}
+                      </p>
+                      <p className={styles.permissionText}>
+                        {state === "requesting-permission" ? (
+                          <>
+                            If you don't see the request, click the{" "}
+                            <img
+                              src="/icons/si_info-line.svg"
+                              alt="info icon"
+                              style={{
+                                display: "inline",
+                                width: "14px",
+                                height: "14px",
+                                verticalAlign: "middle",
+                              }}
+                            />{" "}
+                            icon next to the URL address bar.
+                          </>
+                        ) : (
+                          <>
+                            To enable, click the{" "}
+                            <img
+                              src="/icons/si_info-line.svg"
+                              alt="info icon"
+                              style={{
+                                display: "inline",
+                                width: "14px",
+                                height: "14px",
+                                verticalAlign: "middle",
+                              }}
+                            />{" "}
+                            icon next to the URL address bar.
+                          </>
                         )}
-                      </>
-                    ) : state === "processing" && !showSuccess ? (
-                      <div className={styles.transcribingWrapper}>
-                        <div className={styles.transcribingContent}>
-                          <div className={styles.gifPlaceholder}>
-                            <BrandedLoader size="small" />
-                          </div>
-                          <h2 className={styles.transcribingTitle}>
-                            Transcribing note...
-                          </h2>
-                          <p className={styles.transcribingSubtitle}>
-                            Transcriptions are saved as a<br />
-                            note once complete.
-                          </p>
-                        </div>
+                      </p>
+                      {state === "permission-denied" && (
                         <button
-                          onClick={handleReset}
-                          className={styles.okButton}
+                          onClick={() => {
+                            reset();
+                            handleStartRecording();
+                          }}
+                          className={styles.permissionRetry}
                         >
-                          OK
+                          Click here to retry
                         </button>
+                      )}
+                    </>
+                  ) : state === "processing" && !showSuccess ? (
+                    <div className={styles.transcribingWrapper}>
+                      <div className={styles.transcribingContent}>
+                        <div className={styles.gifPlaceholder}>
+                          <BrandedLoader size="small" />
+                        </div>
+                        <p className={styles.transcribingTitle}>
+                          Transcribing note...
+                        </p>
                       </div>
-                    ) : (
-                      <>
-                        {/* Waveform visualization */}
-                        <div className={styles.waveformContainer}>
-                          {generateWaveform()}
-                        </div>
+                      <button onClick={handleReset} className={styles.okButton}>
+                        OK
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Waveform visualization */}
+                      <div className={styles.waveformContainer}>
+                        {waveformBars}
+                      </div>
 
-                        {/* Timer */}
-                        <div className={styles.timerContainer}>
-                          <p className={styles.timer}>{formatTime(duration)}</p>
-                        </div>
+                      {/* Timer */}
+                      <div className={styles.timerContainer}>
+                        <p className={styles.timer}>{formatTime(duration)}</p>
+                      </div>
 
-                        {/* Controls */}
-                        <div className={styles.recordingControls}>
-                          {state === "recording" && (
-                            <>
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={toggleMute}
-                                    className={cn(styles.controlButton, {
-                                      [styles.muteButtonActive]: isMuted,
-                                    })}
-                                  >
-                                    <div
-                                      className={cn(styles.controlButtonInner, {
-                                        [styles.muteButtonInnerActive]: isMuted,
-                                      })}
-                                    >
-                                      <img
-                                        src={
-                                          isMuted
-                                            ? "/icons/pu.svg"
-                                            : "/icons/si_mic-fill.svg"
-                                        }
-                                        alt={isMuted ? "Unmute" : "Mute"}
-                                        className={styles.controlIcon}
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>{isMuted ? "Unmute" : "Mute"}</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={pauseRecording}
-                                    className={styles.controlButton}
-                                  >
-                                    <div className={styles.controlButtonInner}>
-                                      <img
-                                        src="/icons/si_pause-fill.svg"
-                                        alt="Pause"
-                                        className={styles.controlIcon}
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>Pause</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={handleStopRecording}
-                                    className={cn(
-                                      styles.controlButton,
-                                      styles.doneButton,
-                                    )}
-                                  >
-                                    <div className={styles.controlButtonInner}>
-                                      <CheckIcon
-                                        size={16}
-                                        className="text-white"
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>Done</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </>
-                          )}
-
-                          {state === "paused" && (
-                            <>
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={toggleMute}
-                                    className={cn(styles.controlButton, {
-                                      [styles.muteButtonActive]: isMuted,
-                                    })}
-                                  >
-                                    <div
-                                      className={cn(styles.controlButtonInner, {
-                                        [styles.muteButtonInnerActive]: isMuted,
-                                      })}
-                                    >
-                                      <img
-                                        src={
-                                          isMuted
-                                            ? "/icons/pu.svg"
-                                            : "/icons/si_mic-fill.svg"
-                                        }
-                                        alt={isMuted ? "Unmute" : "Mute"}
-                                        className={styles.controlIcon}
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>{isMuted ? "Unmute" : "Mute"}</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={resumeRecording}
-                                    className={styles.controlButton}
-                                  >
-                                    <div className={styles.controlButtonInner}>
-                                      <img
-                                        src="/icons/si_record-fill.svg"
-                                        alt="Resume"
-                                        className={styles.controlIcon}
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>Resume</p>
-                                </TooltipContent>
-                              </Tooltip>
-
-                              <Tooltip delayDuration={0} disableHoverableContent={true}>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={handleStopRecording}
-                                    className={cn(
-                                      styles.controlButton,
-                                      styles.doneButton,
-                                    )}
-                                  >
-                                    <div className={styles.controlButtonInner}>
-                                      <CheckIcon
-                                        size={16}
-                                        className="text-white"
-                                      />
-                                    </div>
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className={styles.tooltip}>
-                                  <p>Done</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </>
-                          )}
-
-                          {showSuccess && (
-                            <div className={styles.successContainer}>
-                              <span className={styles.controlIcon}>✓</span>
-                              <span className={styles.doneText}>
-                                Note saved!
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                      {/* Controls */}
+                      <div className={styles.recordingControls}>
+                        <RecordingControls
+                          state={state}
+                          isMuted={isMuted}
+                          showSuccess={showSuccess}
+                          onToggleMute={toggleMute}
+                          onPause={pauseRecording}
+                          onResume={resumeRecording}
+                          onStop={handleStopRecording}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </ClientOnly>
-    </TooltipProvider>
+      </div>
+    </ClientOnly>
   );
 }

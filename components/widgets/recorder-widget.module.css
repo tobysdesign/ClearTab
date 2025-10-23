@@ -286,7 +286,7 @@
     /* box model */
     width: 100%;
     height: 48px;
-    margin-top: 16px;
+    margin-top: 0spx;
 }
 
 .waveformBar {
@@ -335,20 +335,37 @@
 
 .controlButton {
     /* layout */
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
     /* box model */
+    width: 32px;
+    height: 32px;
     padding: 0;
-    border: none;
+    border-radius: 50%;
 
     /* visual */
-    background: transparent;
+    border: 1px solid #252525;
+    background-color: #2a2426;
     outline: none;
 
     /* state */
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.controlButton:hover {
+    background-color: #252525;
+}
+
+.controlButton:active {
+    transform: translateY(1px);
+}
+
+.controlButton:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 2px;
 }
 
 .controlButtonInner {
@@ -358,35 +375,8 @@
     justify-content: center;
 
     /* box model */
-    width: 32px;
-    height: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-
-    /* visual */
-    background-color: #2a2426;
-    box-shadow:
-        0px 2px 4px rgba(0, 0, 0, 0.2),
-        inset 0px 1px 1px rgba(255, 255, 255, 0.05);
-
-    /* state */
-    transition: all 0.2s ease;
-}
-
-.controlButton:hover .controlButtonInner {
-    background-color: #3a3436;
-    transform: translateY(-1px);
-    box-shadow:
-        0px 3px 6px rgba(0, 0, 0, 0.25),
-        inset 0px 1px 1px rgba(255, 255, 255, 0.1);
-}
-
-.controlButton:active .controlButtonInner {
-    background-color: #2a2426;
-    transform: translateY(1px);
-    box-shadow:
-        0px 1px 2px rgba(0, 0, 0, 0.3),
-        inset 0px 1px 1px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
 }
 
 .controlIcon {
@@ -396,6 +386,17 @@
 
     /* typography */
     color: #ccc;
+
+    /* visual */
+    filter: brightness(0) saturate(100%) invert(79%) sepia(0%) saturate(0%) hue-rotate(149deg) brightness(94%) contrast(84%);
+
+    /* state */
+    transition: opacity 0.15s ease-in-out;
+    opacity: 1;
+}
+
+.checkIcon {
+    color: #fff;
 }
 
 .doneButton {
@@ -542,7 +543,7 @@
     /* box model */
     width: 100%;
     height: 100%;
-    padding: 40px 24px;
+    padding: 24px 24px 20px;
 }
 
 .transcribingContent {
@@ -558,15 +559,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* box model */
-    width: 180px;
-    height: 180px;
-    margin-bottom: 32px;
-    border-radius: 8px;
-
-    /* visual */
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 
 .animatedDotsContainer {
@@ -621,53 +613,62 @@
 .transcribingTitle {
     /* typography */
     color: white;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 400;
     letter-spacing: -0.02em;
 
     /* box model */
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .transcribingSubtitle {
     /* typography */
     color: rgba(255, 255, 255, 0.5);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 300;
     font-style: italic;
-    line-height: 1.6;
+    line-height: 1.4;
 
     /* box model */
     margin-bottom: auto;
 }
 
 .okButton {
+    /* layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
     /* box model */
-    padding: 12px 48px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 32px;
+    border: 1px solid #252525;
     border-radius: 32px;
 
     /* typography */
-    color: white;
-    font-size: 16px;
+    color: #ccc;
+    font-size: 14px;
     font-weight: 500;
 
     /* visual */
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: #2a2426;
+    outline: none;
 
     /* state */
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
 .okButton:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
+    background-color: #252525;
 }
 
 .okButton:active {
-    transform: translateY(0);
+    transform: translateY(1px);
+}
+
+.okButton:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 2px;
 }
 
 /* Success state */
@@ -693,39 +694,59 @@
     color: rgb(74, 222, 128);
 }
 
-/* Mute button states */
-.muteButtonActive .controlButtonInner {
-    background: linear-gradient(180deg, #4a1a1a 0%, #2a1010 100%);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    box-shadow:
-        0px 2px 4px rgba(248, 113, 113, 0.2),
-        inset 0px 1px 1px rgba(248, 113, 113, 0.1);
-}
-
-.muteButtonInnerActive {
-    background: linear-gradient(180deg, #4a1a1a 0%, #2a1010 100%);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-}
-
-.muteButtonActive:hover .controlButtonInner {
-    background: linear-gradient(180deg, #5a2020 0%, #3a1515 100%);
-    box-shadow:
-        0px 3px 6px rgba(248, 113, 113, 0.25),
-        inset 0px 1px 1px rgba(248, 113, 113, 0.15);
-}
-
-.muteButtonActive .controlIcon {
-    color: rgb(248, 113, 113);
-}
-
-.muteTextActive {
-    color: rgb(248, 113, 113);
-}
 
 /* Utility class for backface visibility */
 .backface-visibility-hidden {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+}
+
+/* React-tooltip styles */
+.reactTooltip {
+    /* typography */
+    color: #ccc !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    text-align: center !important;
+
+    /* box model */
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+
+    /* visual */
+    background: rgba(38, 33, 35, 1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        0px 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0px 1px 1px rgba(255, 255, 255, 0.05) !important;
+    z-index: 9999 !important;
+    
+    /* Hide until positioned, start from below */
+    visibility: hidden !important;
+    opacity: 0 !important;
+    transform: translateY(6px) !important;
+    transition: opacity 150ms ease-out, transform 150ms ease-out !important;
+}
+
+/* Show when positioned (react-tooltip adds inline styles with position) */
+.reactTooltip[style*="top"][style*="left"] {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Tooltip arrow - only show when place is top */
+.reactTooltip[data-tooltip-place="top"]::after {
+    content: "" !important;
+    position: absolute !important;
+    bottom: -5px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 5px solid transparent !important;
+    border-right: 5px solid transparent !important;
+    border-top: 5px solid rgba(38, 33, 35, 1) !important;
 }
 
 /* Custom tooltip styles */
@@ -741,9 +762,15 @@
     border-radius: 6px;
 
     /* visual */
-    background-color: #2a2426;
+    background: linear-gradient(
+        180deg,
+        rgba(42, 36, 38, 1) 0%,
+        rgba(35, 30, 32, 1) 100%
+    );
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0px 2px 4px rgba(0, 0, 0, 0.2),
+        inset 0px 1px 1px rgba(255, 255, 255, 0.05);
 
     /* triangle dimension */
     --b: 10px; /* base */
@@ -762,10 +789,11 @@
         max(0%, var(--p) - var(--b) / 2) 100%
     );
     /* Note: border-image fills the tail with the same color as background */
-    border-image: conic-gradient(#2a2426 0 0) fill 0 /
+    border-image: conic-gradient(rgba(42, 36, 38, 1) 0 0) fill 0 /
         var(--r) calc(100% - var(--p) - var(--b) / 2) 0 calc(var(--p) - var(--b) / 2) /
         0 0 var(--h) 0;
     
     /* Force consistent appearance */
     z-index: 9999;
+    pointer-events: none;
 }
