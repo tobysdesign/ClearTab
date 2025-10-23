@@ -17,18 +17,18 @@ interface MobileCompactLayoutProps {
 function CollapsibleSection({
   title,
   children,
-  defaultExpanded = false,
+  isExpanded,
+  onToggle,
 }: {
   title: string
   children: ReactNode
-  defaultExpanded?: boolean
+  isExpanded: boolean
+  onToggle: () => void
 }) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
-
   return (
     <div className={styles.collapsibleSection}>
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={onToggle}
         className={styles.collapsibleHeader}
       >
         <span className={styles.collapsibleTitle}>{title}</span>
@@ -58,19 +58,34 @@ function CollapsibleSection({
 }
 
 export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) {
+  const [expandedSection, setExpandedSection] = useState<'notes' | 'tasks' | 'schedule'>('notes')
+
   return (
     <div className={styles.container}>
-      {/* Collapsible Lists */}
+      {/* Accordion Lists */}
       <div className={styles.listsSection}>
-        <CollapsibleSection title="Notes" defaultExpanded={true}>
+        <CollapsibleSection 
+          title="Notes" 
+          defaultExpanded={expandedSection === 'notes'}
+          isExpanded={expandedSection === 'notes'}
+          onToggle={() => setExpandedSection('notes')}
+        >
           <div className={styles.listWrapper}>{notes}</div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Tasks">
+        <CollapsibleSection 
+          title="Tasks"
+          isExpanded={expandedSection === 'tasks'}
+          onToggle={() => setExpandedSection('tasks')}
+        >
           <div className={styles.listWrapper}>{tasks}</div>
         </CollapsibleSection>
 
-        <CollapsibleSection title="Schedule">
+        <CollapsibleSection 
+          title="Schedule"
+          isExpanded={expandedSection === 'schedule'}
+          onToggle={() => setExpandedSection('schedule')}
+        >
           <div className={styles.listWrapper}>
             <ScheduleWidget />
           </div>
