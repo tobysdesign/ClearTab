@@ -5,6 +5,46 @@
     container-type: size;
 }
 
+/* Container query for small weather widget */
+@container (max-width: 200px) {
+  .card {
+    padding: 16px;
+  }
+
+  .bigTemp {
+    font-size: 36px;
+  }
+
+  .tempRange {
+    font-size: 12px;
+  }
+
+  .weatherIconContainer {
+    transform: scale(0.4);
+  }
+
+  .conditionText {
+    font-size: 10px;
+  }
+
+  .forecastDay {
+    padding: 4px 2px;
+  }
+
+  .forecastDayLabel {
+    font-size: 9px;
+  }
+
+  .forecastIcon {
+    transform: scale(0.5);
+    height: 24px;
+  }
+
+  .forecastTemp {
+    font-size: 10px;
+  }
+}
+
 .card {
     width: calc(100% - 20px);
     height: calc(100% - 0px);

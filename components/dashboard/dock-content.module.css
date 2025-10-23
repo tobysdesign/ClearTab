@@ -106,3 +106,10 @@
     width: 1rem;
     height: 1rem;
 }
+
+/* Hide layout toggle button on mobile */
+@media (max-width: 767px) {
+  .container > button:first-child {
+    display: none !important;
+  }
+}

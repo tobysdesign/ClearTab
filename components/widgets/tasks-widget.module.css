@@ -23,6 +23,7 @@
   /* box model */
   height: 100%;
   overflow-y: auto;
+  container-type: inline-size;
 }
 
 .tasksListContent {
@@ -173,4 +174,34 @@
   font-size: 1rem;
   font-weight: 500;
   color: #ec4899;
+}
+
+/* Container query for small tasks widget */
+@container (max-width: 200px) {
+  .tasksContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .tasksContentLeft {
+    width: 100%;
+  }
+
+  .tasksContentRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .taskTitle {
+    font-size: 12px;
+  }
+
+  .taskDueDate {
+    font-size: 0.625rem;
+  }
+
+  .taskPriorityIndicator {
+    font-size: 0.875rem;
+  }
 }

@@ -6,7 +6,7 @@ import {
   PanelResizeHandle,
 } from 'react-resizable-panels'
 import { motion } from 'framer-motion'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
@@ -220,9 +220,67 @@ export function ResizableBentoGrid({
     </PanelGroup>
   )
 
+  // Detect mobile with reactive window resize
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth <= 767
+  )
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 767)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  const renderMobileLayout = () => (
+    <PanelGroup key="mobile-layout" direction="vertical" className={styles.mobilePanelGroup}>
+      {/* Notes - Full width */}
+      <Panel defaultSize={40} minSize={20}>
+        <motion.div {...motionProps(0.1)} className="panel-motion">
+          {notes}
+        </motion.div>
+      </Panel>
+
+      {/* Tasks - Full width */}
+      <Panel defaultSize={40} minSize={20}>
+        <motion.div {...motionProps(0.25)} className="panel-motion">
+          {tasks}
+        </motion.div>
+      </Panel>
+
+      {/* Other widgets in a row */}
+      <Panel defaultSize={20} minSize={10}>
+        <PanelGroup direction="horizontal" className="panel-group">
+          <Panel defaultSize={25}>
+            <motion.div {...motionProps(0.5)} className="panel-motion">
+              <WeatherWidgetNew />
+            </motion.div>
+          </Panel>
+          <Panel defaultSize={25}>
+            <motion.div {...motionProps(0.6)} className="panel-motion">
+              <RecorderWidget />
+            </motion.div>
+          </Panel>
+          <Panel defaultSize={25}>
+            <motion.div {...motionProps(0.7)} className="panel-motion">
+              <CountdownWidget />
+            </motion.div>
+          </Panel>
+          <Panel defaultSize={25}>
+            <motion.div {...motionProps(0.8)} className="panel-motion">
+              <ScheduleWidget />
+            </motion.div>
+          </Panel>
+        </PanelGroup>
+      </Panel>
+    </PanelGroup>
+  )
+
   return (
     <motion.div
-      key={layout} // Force re-render when layout changes
+      key={isMobile ? 'mobile' : layout} // Force re-render when layout changes
       animate={{
         paddingTop: padding.paddingTop,
         paddingRight: padding.paddingRight,
@@ -237,7 +295,7 @@ export function ResizableBentoGrid({
       }}
       className="bento-container"
     >
-      {layout === 'two-row' ? renderTwoRowLayout() : renderSingleRowLayout()}
+      {isMobile ? renderMobileLayout() : (layout === 'two-row' ? renderTwoRowLayout() : renderSingleRowLayout())}
     </motion.div>
   )
 }

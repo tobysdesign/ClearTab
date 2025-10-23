@@ -76,6 +76,7 @@
 .container {
     display: flex;
     height: 100%;
+    container-type: inline-size;
 }
 
 .sidebar {
@@ -189,4 +190,48 @@
     height: 1.5rem;
     width: 1.5rem;
     color: rgba(255, 255, 255, 0.4);
+}
+
+/* Container query for small schedule widget */
+@container (max-width: 270px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebarHeader {
+    padding: 14px 12px;
+  }
+
+  .sidebarContent {
+    padding: 0 12px;
+  }
+
+  .dayText {
+    font-size: 12px;
+  }
+
+  .monthText {
+    font-size: 12px;
+  }
+
+  .scrollContainer {
+    padding: 0.5rem;
+  }
+
+  .eventCard {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .eventTitle {
+    font-size: 0.75rem;
+  }
+
+  .eventTime {
+    font-size: 0.625rem;
+  }
+
+  .dayHeader {
+    font-size: 0.625rem;
+  }
 }

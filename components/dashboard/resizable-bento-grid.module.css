@@ -81,3 +81,17 @@
 .resizeHandleInline:hover {
     background-color: #ff4f4f;
 }
+
+.mobilePanelGroup {
+    height: 100%;
+    width: 100%;
+}
+
+/* Mobile: Hide all resize handles */
+@media (max-width: 767px) {
+  .resizeHandleHorizontal,
+  .resizeHandleVertical,
+  .resizeHandleInline {
+    display: none !important;
+  }
+}

@@ -21,6 +21,8 @@
     /* box model */
     height: 100%;
     padding: 0;
+    container-type: inline-size;
+    min-width: 100px;
 }
 
 .leftColumn {
@@ -105,7 +107,7 @@
     text-align: left;
 
     /* layout */
-    overflow: hidden;
+    overflow: visible;
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
