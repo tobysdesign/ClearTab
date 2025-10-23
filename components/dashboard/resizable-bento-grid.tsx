@@ -121,13 +121,13 @@ export function ResizableBentoGrid({
         {/* Top Row */}
         <Panel defaultSize={50} minSize={30}>
           <PanelGroup direction="horizontal" className="panel-group">
-            <Panel defaultSize={50} minSize={8}>
+            <Panel defaultSize={70} minSize={8}>
               <motion.div {...motionProps(0.25)} className="panel-motion">
                 {notes}
               </motion.div>
             </Panel>
             <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-            <Panel defaultSize={50} minSize={8}>
+            <Panel defaultSize={30} minSize={8}>
               <motion.div {...motionProps(0.5)} className="panel-motion">
                 {tasks}
               </motion.div>
@@ -146,19 +146,19 @@ export function ResizableBentoGrid({
               </motion.div>
             </Panel>
             <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-            <Panel defaultSize={25}>
+            <Panel defaultSize={17}>
               <motion.div {...motionProps(0.85)} className="panel-motion">
                 <RecorderWidget />
               </motion.div>
             </Panel>
             <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-            <Panel defaultSize={25}>
+            <Panel defaultSize={17}>
               <motion.div {...motionProps(1)} className="panel-motion">
                 <CountdownWidget />
               </motion.div>
             </Panel>
             <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-            <Panel defaultSize={25}>
+            <Panel defaultSize={41}>
               <motion.div {...motionProps(1.25)} className="panel-motion">
                 <ScheduleWidget />
               </motion.div>
