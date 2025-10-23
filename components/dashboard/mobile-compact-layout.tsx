@@ -1,16 +1,24 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, createContext, useContext, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronUpIcon } from '@/components/icons'
 import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import { ScheduleWidget } from '@/components/widgets/schedule-widget'
+import { NotesListMobile } from '@/components/widgets/notes-list-mobile'
 import styles from './mobile-compact-layout.module.css'
 
+// Context to tell widgets they're in mobile compact mode
+const MobileCompactContext = createContext(false)
+
+export function useMobileCompact() {
+  return useContext(MobileCompactContext)
+}
+
 interface MobileCompactLayoutProps {
-  notes: ReactNode
+  notes?: ReactNode // Not used, we use NotesListMobile instead
   tasks: ReactNode
 }
 
@@ -61,7 +69,8 @@ export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) 
   const [expandedSection, setExpandedSection] = useState<'notes' | 'tasks' | 'schedule'>('notes')
 
   return (
-    <div className={styles.container}>
+    <MobileCompactContext.Provider value={true}>
+      <div className={styles.container}>
       {/* Accordion Lists */}
       <div className={styles.listsSection}>
         <CollapsibleSection 
@@ -70,7 +79,9 @@ export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) 
           isExpanded={expandedSection === 'notes'}
           onToggle={() => setExpandedSection('notes')}
         >
-          <div className={styles.listWrapper}>{notes}</div>
+          <div className={styles.listWrapper}>
+            <NotesListMobile />
+          </div>
         </CollapsibleSection>
 
         <CollapsibleSection 
@@ -104,6 +115,7 @@ export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) 
           <RecorderWidget />
         </div>
       </div>
-    </div>
+      </div>
+    </MobileCompactContext.Provider>
   )
 }
