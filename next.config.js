@@ -13,9 +13,23 @@ const nextConfig = {
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
   experimental: {
-    optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
+    optimizePackageImports: [
+      "@tanstack/react-query",
+      "framer-motion",
+      "react-resizable-panels",
+      "date-fns",
+      "sonner",
+      "@supabase/supabase-js"
+    ],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
   },
-  turbopack: {},
   typedRoutes: false,
   reactStrictMode: true,
   env: {
