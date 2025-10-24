@@ -12,6 +12,7 @@ const notesCache = new Map<string, { data: any[], timestamp: number }>();
 const CACHE_TTL = 30 * 1000; // 30 seconds
 
 export async function GET(_request: NextRequest) {
+  const startTime = Date.now();
   try {
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
@@ -42,18 +43,24 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ success: true, data: allNotes || [] });
     } else {
       // Production mode: full auth check
+      const authStart = Date.now();
       const supabase = await createClient();
       const { data: { user } } = await supabase.auth.getUser();
+      console.log(`⏱️ Auth check took: ${Date.now() - authStart}ms`);
+      
       if (!user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
 
       // Fetch notes from database using Drizzle
+      const dbStart = Date.now();
       const allNotes = await dbMinimal
         .select()
         .from(notes)
         .where(eq(notes.userId, user.id))
         .orderBy(desc(notes.updatedAt));
+      console.log(`⏱️ DB query took: ${Date.now() - dbStart}ms`);
+      console.log(`⏱️ Total request took: ${Date.now() - startTime}ms`);
 
       return NextResponse.json({ success: true, data: allNotes || [] });
     }
