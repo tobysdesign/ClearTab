@@ -45,12 +45,15 @@ export async function GET(_request: NextRequest) {
       // Production mode: full auth check
       const authStart = Date.now();
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      // Use getSession() instead of getUser() - much faster, reads from cookies
+      const { data: { session } } = await supabase.auth.getSession();
       console.log(`⏱️ Auth check took: ${Date.now() - authStart}ms`);
       
-      if (!user) {
+      if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
+      
+      const user = session.user;
 
       // Fetch notes from database using Drizzle
       const dbStart = Date.now();
@@ -89,11 +92,11 @@ export async function POST(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for notes POST');
     } else {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     const body = await request.json();
@@ -140,11 +143,11 @@ export async function PUT(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for notes PUT');
     } else {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     const body = await request.json();
@@ -196,11 +199,11 @@ export async function DELETE(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for notes DELETE');
     } else {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     const { searchParams } = new URL(request.url);
