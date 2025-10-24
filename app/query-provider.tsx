@@ -12,6 +12,9 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
         refetchOnWindowFocus: false, // Don't refetch on window focus
         refetchOnMount: false, // Don't refetch on mount if data exists
         retry: 1, // Only retry once on failure
+        // Enable request deduplication
+        networkMode: 'online',
+        refetchInterval: false,
       },
     },
   }))

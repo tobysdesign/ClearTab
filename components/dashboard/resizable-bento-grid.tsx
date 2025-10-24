@@ -244,7 +244,7 @@ export function ResizableBentoGrid({
 
   return (
     <motion.div
-      key={isMobile ? 'mobile' : layout} // Force re-render when layout changes
+      key={isMobile ? 'mobile' : 'desktop'} // Only remount when switching mobile/desktop
       animate={{
         paddingTop: padding.paddingTop,
         paddingRight: padding.paddingRight,
