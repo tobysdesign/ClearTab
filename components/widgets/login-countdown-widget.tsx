@@ -4,11 +4,8 @@ import {
   motion,
   AnimatePresence,
 } from "framer-motion";
-import {
-  WidgetContainer,
-  WidgetContent,
-} from "@/components/ui/widget-container";
-import { WidgetHeader } from "@/components/ui/widget-header";
+import { WidgetContainer, WidgetContent, WidgetHeader } from "@cleartab/ui";
+
 import { useLayoutEffect, useRef, useState } from "react";
 import countdownStyles from "./countdown-widget-main.module.css";
 import { ClientOnly } from "@/components/ui/safe-motion";

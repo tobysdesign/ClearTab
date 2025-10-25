@@ -6,11 +6,10 @@ import { CheckIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
 import { ClientOnly } from "@/components/ui/safe-motion";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import { useAudioRecorder } from "@/hooks/use-audio-recorder";
+import { WidgetHeader, BrandedLoader } from "@cleartab/ui";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
-import { BrandedLoader } from "@/components/ui/branded-loader";
+import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   getSupabaseClient,
   isExtensionEnvironment,

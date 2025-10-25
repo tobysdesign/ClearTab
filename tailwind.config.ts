@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
+import tailwindcssAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 const config: Config = {
   content: [
@@ -71,16 +74,16 @@ const config: Config = {
     },
   },
   plugins: [
-    require("tailwindcss-animate"),
-    require("@tailwindcss/typography"),
-    function({ addUtilities }: any) {
+    tailwindcssAnimate,
+    typography,
+    plugin(({ addUtilities }) => {
       addUtilities({
-        '.fade-in-0': {
-          animation: 'fade-in 0s ease-out',
-          opacity: '1',
+        ".fade-in-0": {
+          animation: "fade-in 0s ease-out",
+          opacity: "1",
         },
-      })
-    },
+      });
+    }),
   ],
 };
 

@@ -3,17 +3,12 @@
 import { useState, useCallback, useEffect } from "react";
 import { AddButton } from "@/components/ui/add-button";
 import type { Task } from "@/shared/schema";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import {
-  WidgetContainer,
-  WidgetContent,
-} from "@/components/ui/widget-container";
-import { Checkbox } from "@/components/ui/checkbox";
-import { motion, AnimatePresence } from "framer-motion";
-import { WidgetLoader } from "./widget-loader";
+import { WidgetHeader, WidgetContainer, WidgetContent, WidgetLoader } from "@cleartab/ui";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "@/app/client-providers";
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
+import { Checkbox } from "@/components/ui/checkbox";
+import { motion, AnimatePresence } from "framer-motion";
 import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@/components/ui/safe-motion";
@@ -296,7 +291,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   // Removed activeTask calculation from here, it's now handled by the context
 
   if (isLoading) {
-    return <WidgetLoader minHeight="h-[280px]" />;
+    return <WidgetLoader minHeight="280px" />;
   }
 
   if (isError) {

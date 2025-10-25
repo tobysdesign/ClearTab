@@ -3,14 +3,7 @@
 import { useState, useCallback } from "react";
 import { AddButton } from "@/components/ui/add-button";
 import type { Task } from "@/shared/schema";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import {
-  WidgetContainer,
-  WidgetContent,
-} from "@/components/ui/widget-container";
-import { Checkbox } from "@/components/ui/checkbox";
-import { motion, AnimatePresence } from "framer-motion";
-import { WidgetLoader } from "@/components/widgets/widget-loader";
+import { WidgetHeader, WidgetContainer, WidgetContent, WidgetLoader } from "@cleartab/ui";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useTaskModal } from "../providers/ExtensionProvidersWrapper";
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
@@ -109,7 +102,7 @@ export function ExtensionTasksWidget({ searchQuery: _searchQuery }: TasksWidgetP
   }
 
   if (isLoading) {
-    return <WidgetLoader minHeight="h-[280px]" />;
+    return <WidgetLoader minHeight="280px" />;
   }
 
   if (isError) {

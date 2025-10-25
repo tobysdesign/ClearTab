@@ -2,9 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { AddButton } from "@/components/ui/add-button";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import { WidgetContainer } from "@/components/ui/widget-container";
-import { WidgetLoader } from "@/components/widgets/widget-loader";
+import { WidgetHeader, WidgetContainer, WidgetLoader } from "@cleartab/ui";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useExtensionStorage } from "../hooks/use-extension-storage";
 import { cn } from "@/lib/utils";

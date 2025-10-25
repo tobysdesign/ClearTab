@@ -211,7 +211,10 @@ export function CharcoalWave() {
       gl.shaderSource(s, src);
       gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        console.error(gl.getShaderInfoLog(s));
+        const log = gl.getShaderInfoLog(s);
+        if (log) {
+          console.error(log);
+        }
       }
       return s;
     }
@@ -223,7 +226,10 @@ export function CharcoalWave() {
     gl.attachShader(program, fs);
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(program));
+      const programLog = gl.getProgramInfoLog(program);
+      if (programLog) {
+        console.error(programLog);
+      }
       return;
     }
 
@@ -287,7 +293,7 @@ export function CharcoalWave() {
     mouse.x = bufW / 2;
     mouse.y = bufH / 2;
 
-    const startTime = performance.now();
+    let startTime = performance.now();
 
     function applyMouse() {
       if (!lastMouseEvt) return;
@@ -399,6 +405,8 @@ export function CharcoalWave() {
       rafId = requestAnimationFrame(render);
     }
 
+    startTime = performance.now();
+    lastRenderTime = startTime;
     rafId = requestAnimationFrame(render);
 
     return () => {

@@ -12,7 +12,7 @@ import { Toaster as DefaultToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
 import Script from "next/script";
-import { BrandedLoader } from "@/components/ui/branded-loader";
+import { BrandedLoader } from "@cleartab/ui";
 import { SettingsDrawer } from "@/components/settings/settings-drawer";
 import styles from "./layout.module.css";
 

@@ -117,8 +117,15 @@ const nextConfig = {
       // Let dynamic imports handle the optimization instead
     }
 
+    const path = require("path");
+
     config.resolve.alias = {
       ...config.resolve.alias,
+      "@cleartab/ui": path.resolve(__dirname, "packages/ui/src"),
+      "@/components/ui": path.resolve(
+        __dirname,
+        "packages/ui/src/components/ui",
+      ),
     };
 
     // Note: Removed optimization.usedExports as it conflicts with Next.js 15's cacheUnaffected

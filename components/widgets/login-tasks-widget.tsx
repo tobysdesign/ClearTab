@@ -2,8 +2,8 @@
 
 import React from 'react'
 import type { Task } from '@/shared/schema'
-import { WidgetHeader } from '@/components/ui/widget-header'
-import { WidgetContainer, WidgetContent } from '@/components/ui/widget-container'
+import { WidgetHeader, WidgetContainer, WidgetContent } from "@cleartab/ui";
+
 import { Checkbox } from '@/components/ui/checkbox'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatDateSmart } from '@/lib/date-utils'
@@ -15,66 +15,72 @@ import tasksStyles from './tasks-widget.module.css'
 // Mock tasks data
 const mockTasks: Task[] = [
   {
-    id: '1',
-    title: 'Review dashboard design',
+    id: "1",
+    title: "Review dashboard design",
     content: {
       ops: [
-        { insert: 'Go through the latest design mockups and provide feedback\n' }
-      ]
-    },
+        { insert: "Go through the latest design mockups and provide feedback\n" },
+      ],
+    } as Task["content"],
     isCompleted: false,
     isHighPriority: true,
-    dueDate: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: 'demo'
+    dueDate: new Date(Date.now() + 86_400_000),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    userId: "demo",
+    order: 1,
   },
   {
-    id: '2',
-    title: 'Team standup preparation',
+    id: "2",
+    title: "Team standup preparation",
     content: {
       ops: [
-        { insert: 'Prepare talking points for tomorrow\'s standup meeting\n' }
-      ]
-    },
+        { insert: "Prepare talking points for tomorrow's standup meeting\n" },
+      ],
+    } as Task["content"],
     isCompleted: false,
     isHighPriority: false,
-    dueDate: new Date(Date.now() + 43200000).toISOString(), // 12 hours
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000).toISOString(),
-    userId: 'demo'
+    dueDate: new Date(Date.now() + 43_200_000),
+    createdAt: new Date(Date.now() - 3_600_000),
+    updatedAt: new Date(Date.now() - 3_600_000),
+    userId: "demo",
+    order: 2,
   },
   {
-    id: '3',
-    title: 'Update project documentation',
+    id: "3",
+    title: "Update project documentation",
     content: {
       ops: [
-        { insert: 'Review and update the project README and API documentation\n' }
-      ]
-    },
+        { insert: "Review and update the project README and API documentation\n" },
+      ],
+    } as Task["content"],
     isCompleted: true,
     isHighPriority: false,
     dueDate: null,
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 3600000).toISOString(),
-    userId: 'demo'
+    createdAt: new Date(Date.now() - 86_400_000),
+    updatedAt: new Date(Date.now() - 3_600_000),
+    userId: "demo",
+    order: 3,
   },
   {
-    id: '4',
-    title: 'Plan Q4 objectives',
+    id: "4",
+    title: "Plan Q4 objectives",
     content: {
       ops: [
-        { insert: 'Define key objectives and key results for Q4\n' }
-      ]
-    },
+        { insert: "Define key objectives and key results for Q4\n" },
+      ],
+    } as Task["content"],
     isCompleted: false,
     isHighPriority: false,
-    dueDate: new Date(Date.now() + 604800000).toISOString(), // 1 week
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    updatedAt: new Date(Date.now() - 172800000).toISOString(),
-    userId: 'demo'
-  }
+    dueDate: new Date(Date.now() + 604_800_000),
+    createdAt: new Date(Date.now() - 172_800_000),
+    updatedAt: new Date(Date.now() - 172_800_000),
+    userId: "demo",
+    order: 4,
+  },
 ]
+
+
 
 export function LoginTasksWidget() {
   return (

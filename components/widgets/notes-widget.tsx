@@ -10,27 +10,20 @@ import React, {
 // import { Input } from "@/components/ui/input";
 
 import { AddButton } from "@/components/ui/add-button";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import {
-  WidgetContainer,
-  // WidgetContent,
-} from "@/components/ui/widget-container";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
+import type { Note } from "@/shared/schema";
+import { useNotes } from "@/hooks/use-notes";
+import { EMPTY_QUILL_CONTENT } from "@/lib/quill-utils";
+import { WidgetHeader, WidgetContainer, WidgetLoader } from "@cleartab/ui";
+import { AnimatePresence } from "framer-motion";
 
 const DynamicQuillEditor = dynamic(
-  () => import("@/components/ui/quill-editor").then(mod => mod.QuillEditor),
+  () => import("@/components/ui/quill-editor").then((mod) => mod.QuillEditor),
   {
     ssr: false,
-    loading: () => null
-  }
+    loading: () => null,
+  },
 );
-import { type Note } from "@/shared/schema";
-
-// Empty Quill content
-const EMPTY_QUILL_CONTENT = { ops: [{ insert: "\n" }] };
-import { useNotes } from "@/hooks/use-notes";
-import { AnimatePresence } from "framer-motion";
-import { WidgetLoader } from "./widget-loader";
 import { EmptyState } from "@/components/ui/empty-state";
 // import styles from "./widget.module.css";
 import notesStyles from "./notes-widget.module.css";
@@ -151,6 +144,48 @@ function _isEqual(a: any, b: any): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+function normalizeNoteContent(content: Note["content"] | string | null | undefined) {
+  if (!content) return EMPTY_QUILL_CONTENT;
+  if (typeof content === "string") {
+    try {
+      return JSON.parse(content);
+    } catch (error) {
+      console.error("Failed to parse note content:", error);
+      return EMPTY_QUILL_CONTENT;
+    }
+  }
+  return content;
+}
+
+function createSaveSnapshot(note: Partial<Note> | null | undefined): (Partial<Note> & { content: Note["content"] }) | null {
+  if (!note) return null;
+  const normalizedContent = normalizeNoteContent(note.content);
+  let clonedContent = normalizedContent;
+
+  try {
+    clonedContent = JSON.parse(JSON.stringify(normalizedContent));
+  } catch (error) {
+    console.error("Failed to clone note content for saving:", error);
+  }
+
+  return {
+    ...note,
+    content: clonedContent ?? EMPTY_QUILL_CONTENT,
+  };
+}
+
+type SavedNoteSnapshot = {
+  note: Note;
+  index: number;
+  wasActive: boolean;
+};
+
+type PendingDeleteOperation = {
+  snapshot: SavedNoteSnapshot;
+  toastId: string | number;
+  timeout: ReturnType<typeof setTimeout>;
+};
+
 export function NotesWidget() {
   const {
     notes,
@@ -160,6 +195,8 @@ export function NotesWidget() {
     isLoadingNotes,
     loadNotes,
     updateNoteOptimistic,
+    removeNoteOptimistic,
+    insertNoteAtIndex,
   } = useNotes();
   const { toast } = useToast();
   const [activeNote, setActiveNote] = useState<Partial<Note> | null>(null);
@@ -172,6 +209,7 @@ export function NotesWidget() {
     "idle" | "saving" | "saved" | "error"
   >("idle");
   const [showSaveStatus, setShowSaveStatus] = useState(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedContent = useRef<string>("");
   const lastSavedTitle = useRef<string>("");
@@ -254,8 +292,10 @@ export function NotesWidget() {
   }, [activeNote?.id]); // Only depend on ID, not content to prevent refresh loops
 
   const activeNoteRef = useRef<Partial<Note> | null>(null);
-  const isSavingRef = useRef(false); // Prevent multiple simultaneous saves
+  const ongoingSaveRef = useRef<Promise<void> | null>(null);
   const isUserTypingRef = useRef(false); // Prevent reloads while user is typing
+  const pendingDeletesRef = useRef<Map<string, PendingDeleteOperation>>(new Map());
+  const backgroundSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Protected setDisplayTitle that respects typing state
   const setDisplayTitleSafe = useCallback((title: string) => {
@@ -269,92 +309,164 @@ export function NotesWidget() {
     activeNoteRef.current = activeNote;
   }, [activeNote]);
 
-  // Unified save function
-  const saveCurrentNote = useCallback(async () => {
-    if (!activeNoteRef.current || isSavingRef.current) return;
+  const restoreActiveNoteState = useCallback((note: Note) => {
+    const normalizedContent = normalizeNoteContent(note.content);
+    const normalizedNote = { ...note, content: normalizedContent };
+    isUserTypingRef.current = false;
+    activeNoteIdRef.current = normalizedNote.id || null;
+    activeNoteRef.current = normalizedNote;
+    setActiveNote(normalizedNote);
+    setDisplayTitle(normalizedNote.title || "");
+    lastSavedContent.current = JSON.stringify(normalizedContent);
+    lastSavedTitle.current = normalizedNote.title || "";
+    setIsEditing(false);
+    setShowSaveStatus(false);
+    setSaveStatus("idle");
+  }, [setActiveNote]);
 
-    const currentNote = activeNoteRef.current;
+  const cancelPendingDelete = useCallback((noteId: string) => {
+    const pending = pendingDeletesRef.current.get(noteId);
+    if (!pending) return;
 
-    // If it's a new note (draft) and both title and content are empty, don't save.
-    const isContentEmpty = _isEqual(currentNote.content, EMPTY_QUILL_CONTENT);
-    const isTitleEmpty = !currentNote.title || currentNote.title.trim() === "";
-    if (
-      currentNote.id?.startsWith("draft-") &&
-      isTitleEmpty &&
-      isContentEmpty
-    ) {
-      return; // Abort save for empty draft note
+    clearTimeout(pending.timeout);
+    sonnerToast.dismiss(pending.toastId);
+    pendingDeletesRef.current.delete(noteId);
+
+    insertNoteAtIndex(pending.snapshot.note, pending.snapshot.index);
+    if (pending.snapshot.wasActive) {
+      restoreActiveNoteState(pending.snapshot.note);
     }
-    const isDraft = currentNote.id?.startsWith("draft-");
+    setDeletingNoteId(null);
+    sonnerToast.info("Deletion cancelled", { duration: 2000 });
+  }, [insertNoteAtIndex, restoreActiveNoteState]);
 
-    try {
-      isSavingRef.current = true;
+  // Unified save function
+  const saveCurrentNote = useCallback(
+    async (noteOverride?: Partial<Note>) => {
+      const snapshot = createSaveSnapshot(noteOverride ?? activeNoteRef.current);
+      if (!snapshot) return;
 
-      if (isDraft) {
-        // Create new note for draft
-        const savedNoteRaw = await createNote.mutate({
-          title: currentNote.title?.trim() || "Untitled Note",
-          content: currentNote.content,
-          temporaryId: currentNote.id,
-        });
+      const normalizedContent = snapshot.content ?? EMPTY_QUILL_CONTENT;
+      const isContentEmpty = _isEqual(normalizedContent, EMPTY_QUILL_CONTENT);
+      const isTitleEmpty = !snapshot.title || snapshot.title.trim() === "";
 
-        let parsedContent = savedNoteRaw.content;
-        if (typeof savedNoteRaw.content === "string") {
-          try {
-            parsedContent = JSON.parse(savedNoteRaw.content);
-          } catch (e) {
-            console.error("Could not parse content", e);
-          }
-        }
-
-        const savedNote = { ...savedNoteRaw, content: parsedContent };
-
-        // Update the active note state with the saved note
-        setActiveNote(savedNote);
-
-        // Update refs to point to the new saved note
-        activeNoteIdRef.current = savedNote.id;
-        activeNoteRef.current = savedNote;
-        lastSavedContent.current = JSON.stringify(savedNote.content);
-        lastSavedTitle.current = savedNote.title || "";
-
-        console.log("Note saved (was draft):", savedNote.id);
-      } else {
-        // Update existing note
-        const savedNoteRaw = await updateNote.mutate({
-          id: currentNote.id,
-          title: currentNote.title,
-          content: currentNote.content,
-        });
-
-        if (savedNoteRaw) {
-          let parsedContent = savedNoteRaw.content;
-          if (typeof savedNoteRaw.content === "string") {
-            try {
-              parsedContent = JSON.parse(savedNoteRaw.content);
-            } catch (e) {
-              console.error("Could not parse content", e);
-            }
-          }
-          const savedNote = { ...savedNoteRaw, content: parsedContent };
-          setActiveNote(savedNote);
-        }
-
-        lastSavedContent.current = JSON.stringify(currentNote.content);
-        lastSavedTitle.current = currentNote.title || "";
-        console.log("Note saved (existing):", currentNote.id);
+      // If it's a new note (draft) and both title and content are empty, don't save.
+      if (snapshot.id?.startsWith("draft-") && isTitleEmpty && isContentEmpty) {
+        return;
       }
 
-      // Note: Don't clear editing state here as it causes focus loss
-    } catch (error) {
-      console.error("Failed to save note:", error);
-    } finally {
-      isSavingRef.current = false;
+      const runSave = async () => {
+        const isDraft = snapshot.id?.startsWith("draft-");
+        const currentTitle = snapshot.title?.trim() || "Untitled Note";
+
+        try {
+          if (isDraft) {
+            const savedNoteRaw = await createNote.mutate({
+              title: currentTitle,
+              content: normalizedContent,
+              temporaryId: snapshot.id,
+            });
+
+            const parsedContent = normalizeNoteContent(savedNoteRaw.content);
+            const savedNote = { ...savedNoteRaw, content: parsedContent };
+            const isStillActive = activeNoteIdRef.current === snapshot.id;
+
+            if (isStillActive) {
+              activeNoteIdRef.current = savedNote.id;
+              activeNoteRef.current = savedNote;
+              setActiveNote(savedNote);
+              setDisplayTitleSafe(savedNote.title || "");
+              lastSavedContent.current = JSON.stringify(parsedContent);
+              lastSavedTitle.current = savedNote.title || "";
+            }
+
+            console.log("Note saved (was draft):", savedNote.id);
+          } else {
+            const savedNoteRaw = await updateNote.mutate({
+              id: snapshot.id as string,
+              title: snapshot.title,
+              content: normalizedContent,
+            });
+
+            if (savedNoteRaw) {
+              const parsedContent = normalizeNoteContent(savedNoteRaw.content);
+              const savedNote = { ...savedNoteRaw, content: parsedContent };
+              const isStillActive = activeNoteIdRef.current === savedNote.id;
+
+              if (isStillActive) {
+                setActiveNote(savedNote);
+                activeNoteRef.current = savedNote;
+                setDisplayTitleSafe(savedNote.title || "");
+                lastSavedContent.current = JSON.stringify(parsedContent);
+                lastSavedTitle.current = savedNote.title || "";
+              }
+
+              console.log("Note saved (existing):", savedNote.id);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to save note:", error);
+          toast({
+            title: snapshot.id?.startsWith("draft-")
+              ? "Failed to create note"
+              : "Failed to save note",
+            description: (error as Error).message || "Please try again.",
+            variant: "destructive",
+          });
+          throw error;
+        }
+      };
+
+      const previous = ongoingSaveRef.current ?? Promise.resolve();
+      const chainedSave = previous
+        .catch(() => undefined) // ensure chain continues after rejection
+        .then(() => runSave());
+
+      ongoingSaveRef.current = chainedSave.finally(() => {
+        if (ongoingSaveRef.current === chainedSave) {
+          ongoingSaveRef.current = null;
+        }
+      });
+
+      await chainedSave;
+    },
+    [createNote, updateNote, setActiveNote, setDisplayTitleSafe, toast],
+  );
+
+  const handleUndoDelete = useCallback((snapshot: SavedNoteSnapshot) => {
+    const normalizedContent = normalizeNoteContent(snapshot.note.content);
+    const restoredDraft = {
+      ...snapshot.note,
+      id: generateDraftId(),
+      content: normalizedContent,
+    };
+
+    activeNoteIdRef.current = restoredDraft.id;
+    activeNoteRef.current = restoredDraft;
+    setActiveNote(restoredDraft);
+    isUserTypingRef.current = false;
+    setDisplayTitle(restoredDraft.title || "");
+    lastSavedContent.current = JSON.stringify(normalizedContent);
+    lastSavedTitle.current = restoredDraft.title || "";
+    setIsEditing(false);
+    setShowSaveStatus(false);
+    setSaveStatus("idle");
+
+    if (backgroundSaveTimeoutRef.current) {
+      clearTimeout(backgroundSaveTimeoutRef.current);
     }
-  }, [createNote, updateNote, setActiveNote]);
+
+    saveCurrentNote(restoredDraft).then(() => {
+      sonnerToast.success("Note restored", { duration: 2000 });
+    }).catch((error) => {
+      console.error("Failed to restore note after undo:", error);
+      sonnerToast.error("Failed to restore note", {
+        description: (error as Error).message || "Please try again.",
+      });
+    });
+  }, [generateDraftId, saveCurrentNote]);
 
   // Background save system - completely decoupled from user input
-  const backgroundSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const scheduleBackgroundSave = useCallback(() => {
     // Clear any existing timeout
@@ -363,10 +475,15 @@ export function NotesWidget() {
     }
 
     // Schedule save for 3 seconds from now
+    const snapshot = createSaveSnapshot(activeNoteRef.current);
+    if (!snapshot) return;
+
     backgroundSaveTimeoutRef.current = setTimeout(() => {
       // Only save if there are actual changes and user isn't actively typing
-      if (activeNoteRef.current && !isUserTypingRef.current) {
-        saveCurrentNote();
+      if (!isUserTypingRef.current) {
+        saveCurrentNote(snapshot).catch((error) => {
+          console.error("Background save failed:", error);
+        });
       }
     }, 3000);
   }, [saveCurrentNote]);
@@ -476,32 +593,27 @@ export function NotesWidget() {
     if (backgroundSaveTimeoutRef.current) {
       clearTimeout(backgroundSaveTimeoutRef.current);
     }
-    saveCurrentNote();
+    saveCurrentNote().catch((error) => {
+      console.error("Failed to save note on title blur:", error);
+    });
   }, [saveCurrentNote]);
 
   const handleSelectNote = useCallback(
-    async (note: Note) => {
+    (note: Note) => {
       // First, save the current note if there is one and it has changes
-      if (activeNoteRef.current && activeNoteRef.current.id !== note.id) {
-        try {
-          await saveCurrentNote();
-        } catch (error) {
+      const currentSnapshot =
+        activeNoteRef.current && activeNoteRef.current.id !== note.id
+          ? createSaveSnapshot(activeNoteRef.current)
+          : null;
+
+      if (currentSnapshot) {
+        saveCurrentNote(currentSnapshot).catch((error) => {
           console.error("Failed to save current note before switching:", error);
-          // Continue with switch even if save failed
-        }
+        });
       }
 
       // Parse content if it's a string (from API), otherwise use as-is
-      let parsedContent = note.content;
-      if (typeof note.content === "string") {
-        try {
-          parsedContent = JSON.parse(note.content);
-        } catch (error) {
-          console.error("Failed to parse note content:", error);
-          parsedContent = EMPTY_QUILL_CONTENT;
-        }
-      }
-
+      const parsedContent = normalizeNoteContent(note.content);
       const noteWithParsedContent = { ...note, content: parsedContent };
 
       // Update all references first
@@ -545,7 +657,9 @@ export function NotesWidget() {
         if (backgroundSaveTimeoutRef.current) {
           clearTimeout(backgroundSaveTimeoutRef.current);
         }
-        saveCurrentNote();
+        saveCurrentNote().catch((error) => {
+          console.error("Failed to save note on beforeunload:", error);
+        });
       }
     };
 
@@ -576,77 +690,93 @@ export function NotesWidget() {
   }, [generateDraftId]);
 
   const handleDeleteNote = useCallback(
-    async (noteId: string) => {
-      // Check if this is a draft note (only exists in memory)
-      if (noteId.startsWith("draft-")) {
-        // For draft notes, just clear the active note and create a new one
-        const newNote = {
-          id: generateDraftId(),
-          title: "",
-          content: EMPTY_QUILL_CONTENT,
-        };
-        setActiveNote(newNote);
-        setDisplayTitleSafe("");
-        activeNoteIdRef.current = newNote.id;
-        activeNoteRef.current = newNote;
-        lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
-        lastSavedTitle.current = "";
-
-        // Note: Editor content will be updated via the value prop in QuillEditor
-
-        return; // Don't try to delete from database
+    (noteId: string) => {
+      if (pendingDeletesRef.current.has(noteId)) {
+        return;
       }
 
-      // Find the note to delete
-      const noteToDelete = notes.find((note) => note.id === noteId);
-      if (!noteToDelete) return;
+      // Draft notes live only in memory – treat delete as discard
+      if (noteId.startsWith("draft-")) {
+        handleCreateNew();
+        sonnerToast.info("Draft discarded", { duration: 2000 });
+        return;
+      }
 
-      try {
-        // Optimistically remove from UI first
-        const wasActive = activeNoteIdRef.current === noteId;
+      const noteIndex = notes.findIndex((note) => note.id === noteId);
+      if (noteIndex === -1) return;
 
-        // If this was the active note, create a new one
-        if (wasActive) {
-          const newNote = {
-            id: generateDraftId(),
-            title: "",
-            content: EMPTY_QUILL_CONTENT,
-          };
-          setActiveNote(newNote);
-          setDisplayTitleSafe("");
-          activeNoteIdRef.current = newNote.id;
-          activeNoteRef.current = newNote;
-          lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
-          lastSavedTitle.current = "";
+      const noteToDelete = notes[noteIndex];
+      const normalizedNote: Note = {
+        ...noteToDelete,
+        content: normalizeNoteContent(noteToDelete.content),
+      };
+      const wasActive = activeNoteIdRef.current === noteId;
 
-          // Note: Editor content will be updated via the value prop in QuillEditor
-        }
+      removeNoteOptimistic(noteId);
+      setDeletingNoteId(noteId);
 
-        // Delete from database
-        await deleteNote.mutate(noteId);
+      if (wasActive) {
+        handleCreateNew();
+      }
 
-        // Show simple success toast
-        sonnerToast.success("Note deleted", {
-          duration: 3000,
-        });
-      } catch (error) {
-        const errorMessage = (error as Error).message || "Please try again.";
+      const snapshot: SavedNoteSnapshot = {
+        note: normalizedNote,
+        index: noteIndex,
+        wasActive,
+      };
 
-        // If note was not found (404), treat it as already deleted
-        if (
-          errorMessage.includes("Note not found") ||
-          errorMessage.includes("404")
-        ) {
-          sonnerToast.info("Note was already deleted");
-          loadNotes(); // Refresh to sync
-        } else {
-          sonnerToast.error("Failed to delete note", {
-            description: errorMessage,
+      const toastId = sonnerToast("Deleting note...", {
+        action: {
+          label: "Cancel",
+          onClick: () => cancelPendingDelete(noteId),
+        },
+        duration: Infinity,
+      });
+
+      const timeout = setTimeout(async () => {
+        try {
+          await deleteNote.mutate(noteId);
+          pendingDeletesRef.current.delete(noteId);
+          sonnerToast.dismiss(toastId);
+          setDeletingNoteId(null);
+          sonnerToast.success("Note deleted!", {
+            action: {
+              label: "Undo",
+              onClick: () => handleUndoDelete(snapshot),
+            },
+            duration: 4000,
+          });
+        } catch (error) {
+          console.error("Failed to delete note:", error);
+          pendingDeletesRef.current.delete(noteId);
+          sonnerToast.dismiss(toastId);
+          insertNoteAtIndex(snapshot.note, snapshot.index);
+          if (snapshot.wasActive) {
+            restoreActiveNoteState(snapshot.note);
+          }
+          setDeletingNoteId(null);
+          sonnerToast.error("Note deletion failed.", {
+            action: {
+              label: "Retry",
+              onClick: () => handleDeleteNote(noteId),
+            },
+            duration: 4000,
           });
         }
-      }
+      }, 1200);
+
+      pendingDeletesRef.current.set(noteId, { snapshot, toastId, timeout });
     },
-    [deleteNote, notes, generateDraftId, setDisplayTitleSafe, loadNotes],
+    [
+      notes,
+      deleteNote,
+      removeNoteOptimistic,
+      insertNoteAtIndex,
+      restoreActiveNoteState,
+      handleCreateNew,
+      cancelPendingDelete,
+      handleUndoDelete,
+    ],
   );
 
   const handleDeleteActiveNote = useCallback(() => {
@@ -674,6 +804,13 @@ export function NotesWidget() {
       // setSidebarNote(prev => prev && prev.id === activeNote.id ? prev : null) // Removed sidebar state
     }
   }, [activeNote?.id]);
+
+  useEffect(() => {
+    return () => {
+      pendingDeletesRef.current.forEach(({ timeout }) => clearTimeout(timeout));
+      pendingDeletesRef.current.clear();
+    };
+  }, []);
 
   return (
     <WidgetContainer data-widget="notes">
@@ -716,6 +853,7 @@ export function NotesWidget() {
                         }
                         collapsed={panelWidth < 100}
                         isEditing={isEditing}
+                        isDeleting={deletingNoteId === activeNote.id}
                       />
                     </>
                   )}
@@ -735,8 +873,8 @@ export function NotesWidget() {
                         onClick={() => handleSelectNote(note)}
                         onDelete={() => handleDeleteNote(note.id as string)}
                         collapsed={panelWidth < 100}
-
                         isEditing={isActive && isEditing}
+                        isDeleting={deletingNoteId === note.id}
                       />
                     );
                   })}
@@ -890,7 +1028,9 @@ export function NotesWidget() {
                     if (backgroundSaveTimeoutRef.current) {
                       clearTimeout(backgroundSaveTimeoutRef.current);
                     }
-                    saveCurrentNote();
+                    saveCurrentNote().catch((error) => {
+                      console.error("Failed to save note on editor blur:", error);
+                    });
                   }}
                   editable={true}
                   className={notesStyles.notesEditorContainer}

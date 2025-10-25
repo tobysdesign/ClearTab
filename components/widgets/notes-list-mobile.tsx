@@ -3,10 +3,9 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { AddButton } from '@/components/ui/add-button'
-import { WidgetHeader } from '@/components/ui/widget-header'
-import { type Note } from '@/shared/schema'
-import { useNotes } from '@/hooks/use-notes'
-import { WidgetLoader } from './widget-loader'
+import { WidgetHeader, WidgetLoader } from "@cleartab/ui";
+import { useNotes } from "@/hooks/use-notes";
+import type { Note } from "@/shared/schema";
 import { EmptyState } from '@/components/ui/empty-state'
 import { NoteListItem } from './note-list-item'
 import notesStyles from './notes-widget.module.css'

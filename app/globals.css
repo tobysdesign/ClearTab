@@ -358,31 +358,6 @@ html {
    WIDGET STRUCTURE SYSTEM
    =========================================== */
 
-/* Widget base background */
-.widget-background {
-    background: linear-gradient(
-        180deg,
-        rgb(19, 19, 19) 4%,
-        rgb(23, 21, 21) 100%
-    );
-    border: 1px solid #323235;
-    box-shadow:
-        0px 8px 12px 6px rgba(0, 0, 0, 0.15),
-        0px 4px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Widget header with gradient overlay */
-.widget-header {
-    min-height: 60px;
-    padding: 14px 24px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 0.5rem;
-    border-radius: 22px 22px 0 0;
-}
-
 /* Notes widget - ensure proper border-radius on container */
 [data-widget="notes"] .widget-background {
     border-radius: 22px !important;
@@ -539,105 +514,6 @@ html {
     flex: 1;
 }
 
-/* Widget content areas */
-.widget-list-content {
-    padding: 2px 16px 24px 16px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.widget-tasks-content {
-    padding: 0;
-}
-
-.widget-notes-content {
-    padding: 52px 0 25px 36px;
-    margin-right: 24px;
-}
-
-/* Positioning utility */
-.widget-relative {
-    position: relative;
-}
-
-/* ===========================================
-   SEMANTIC LAYOUT UTILITIES
-   =========================================== */
-
-/* Flex layouts - semantic replacements for Tailwind */
-.widget-flex {
-    display: flex;
-}
-
-.widget-flex-column {
-    display: flex;
-    flex-direction: column;
-}
-
-.widget-flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.widget-flex-between {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.widget-flex-start {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-/* Spacing utilities */
-.widget-gap-2 {
-    gap: 8px;
-}
-
-.widget-gap-3 {
-    gap: 8px;
-}
-
-.widget-gap-4 {
-    gap: 16px;
-}
-
-/* Sizing utilities */
-.widget-full {
-    width: 100%;
-    height: 100%;
-}
-
-.widget-full-width {
-    width: 100%;
-}
-
-.widget-full-height {
-    height: 100%;
-}
-
-.widget-flex-1 {
-    flex: 1;
-}
-
-.widget-min-w-0 {
-    min-width: 0;
-}
-
-/* Text utilities */
-.widget-text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.widget-text-center {
-    text-align: center;
-}
-
 /* Override Tailwind text-sm to be 14px with medium weight */
 .text-sm {
     font-size: 14px !important;
@@ -646,23 +522,6 @@ html {
 .text-xs {
     font-size: 12px !important;
     font-weight: 400 !important;
-}
-/* Positioning utilities */
-.widget-absolute {
-    position: absolute;
-}
-
-.widget-relative {
-    position: relative;
-}
-
-/* Overflow utilities */
-.widget-overflow-hidden {
-    overflow: hidden;
-}
-
-.widget-overflow-auto {
-    overflow: auto;
 }
 
 /* ===========================================
@@ -1076,28 +935,6 @@ html {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
-/* Scrollbar styling */
-.custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 3px;
-}
-
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    background: #c57b93;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--color-border));
-}
 
 /* Animation utilities */
 @keyframes fadeIn {
@@ -2314,18 +2151,6 @@ textarea::placeholder {
    WIDGET TYPOGRAPHY SYSTEM
    =========================================== */
 
-/* Widget titles - used in headers */
-.widget-title {
-    font-family: "Inter Display", sans-serif;
-    font-size: 12px;
-    line-height: 12px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    color: #bbbbbb;
-    white-space: nowrap;
-    overflow: visible;
-    text-align: left;
-}
 .bigNumber {
     font-family: "Inter Display", sans-serif;
     font-size: 48px;

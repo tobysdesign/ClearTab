@@ -56,7 +56,7 @@ async function updateNote(
 }
 
 async function deleteNote(id: string): Promise<{ id: string }> {
-  const res = await api.delete(`/api/notes/${id}`)
+  const res = await api.delete(`/api/notes?id=${encodeURIComponent(id)}`)
   if (!res.ok) {
     const errorText = await res.text()
     console.error(`Failed to delete note: ${res.status} ${res.statusText}`, errorText)
@@ -128,6 +128,19 @@ export function useNotes() {
     }
   }
 
+  const removeNoteOptimistic = useCallback((noteId: string) => {
+    setNotes(prev => prev.filter(note => note.id !== noteId))
+  }, [])
+
+  const insertNoteAtIndex = useCallback((note: Note, index: number) => {
+    setNotes(prev => {
+      const next = [...prev]
+      const safeIndex = Math.max(0, Math.min(index, next.length))
+      next.splice(safeIndex, 0, note)
+      return next
+    })
+  }, [])
+
   // Optimistic update - immediately update UI without API call
   const updateNoteOptimistic = useCallback((noteId: string, updates: Partial<Note>) => {
     setNotes(prev => prev.map(note => 
@@ -144,5 +157,7 @@ export function useNotes() {
     updateNote: updateNoteMutation,
     deleteNote: deleteNoteMutation,
     updateNoteOptimistic,
+    removeNoteOptimistic,
+    insertNoteAtIndex,
   }
-} 
+}

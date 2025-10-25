@@ -19,8 +19,12 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/components/ui/*": ["packages/ui/src/components/ui/*"],
+      "@/*": ["./*"],
+      "@cleartab/ui": ["packages/ui/src/index.ts"],
+      "@cleartab/ui/*": ["packages/ui/src/*"]
     },
     "target": "ES2017"
   },

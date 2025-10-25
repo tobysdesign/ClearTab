@@ -6,7 +6,7 @@ import { CloseIcon } from '@/components/icons'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatPanel } from './chat-panel'
-import { ShinyAiButton } from '../ui/shiny-ai-button'
+import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { Button } from '@/components/ui/button'
 import styles from './chat-overlay.module.css'
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useRef } from 'react'
 import { AddButton } from '@/components/ui/add-button'
-import { WidgetContainer } from '@/components/ui/widget-container'
+import { WidgetContainer, WidgetHeader } from "@cleartab/ui";
+
 import type { Note } from '@/shared/schema'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -13,49 +14,50 @@ import { NoteListItem } from './note-list-item'
 // Mock notes data
 const mockNotes: Note[] = [
   {
-    id: '1',
-    title: 'Welcome to ClearTab',
+    id: "1",
+    title: "Welcome to ClearTab",
     content: {
       ops: [
-        { insert: 'Welcome to your new productivity dashboard! This is where you can capture thoughts, ideas, and important information.\n\n' },
-        { insert: 'Try creating your first note after signing in.\n' }
+        { insert: "Welcome to your new productivity dashboard! This is where you can capture thoughts, ideas, and important information.\n\n" },
+        { insert: "Try creating your first note after signing in.\n" }
       ]
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    userId: 'demo'
+    } as Note["content"],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    userId: "demo",
   },
   {
-    id: '2',
-    title: 'Meeting Notes',
+    id: "2",
+    title: "Meeting Notes",
     content: {
       ops: [
-        { insert: 'Project kickoff meeting\n\n' },
-        { insert: '• Review project timeline\n' },
-        { insert: '• Assign team responsibilities\n' },
-        { insert: '• Set up weekly check-ins\n' }
+        { insert: "Project kickoff meeting\n\n" },
+        { insert: "• Review project timeline\n" },
+        { insert: "• Assign team responsibilities\n" },
+        { insert: "• Set up weekly check-ins\n" }
       ]
-    },
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    userId: 'demo'
+    } as Note["content"],
+    createdAt: new Date(Date.now() - 86400000),
+    updatedAt: new Date(Date.now() - 86400000),
+    userId: "demo",
   },
   {
-    id: '3',
-    title: 'Ideas & Inspiration',
+    id: "3",
+    title: "Ideas & Inspiration",
     content: {
       ops: [
-        { insert: 'Random thoughts and creative ideas:\n\n' },
-        { insert: '• Dashboard customization features\n' },
-        { insert: '• Integration with other tools\n' },
-        { insert: '• Mobile app development\n' }
+        { insert: "Random thoughts and creative ideas:\n\n" },
+        { insert: "• Dashboard customization features\n" },
+        { insert: "• Integration with other tools\n" },
+        { insert: "• Mobile app development\n" }
       ]
-    },
-    createdAt: new Date(Date.now() - 172800000).toISOString(),
-    updatedAt: new Date(Date.now() - 172800000).toISOString(),
-    userId: 'demo'
-  }
+    } as Note["content"],
+    createdAt: new Date(Date.now() - 172800000),
+    updatedAt: new Date(Date.now() - 172800000),
+    userId: "demo",
+  },
 ]
+
 
 interface ResizablePanelsProps {
   children: [React.ReactNode, React.ReactNode];
@@ -180,10 +182,9 @@ export function LoginNotesWidget() {
       >
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
-          <div className="widget-header widget-flex-between">
-            <h2 className="widget-title">Notes</h2>
+          <WidgetHeader title="Notes">
             <AddButton onClick={() => {}} />
-          </div>
+          </WidgetHeader>
           <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
             <div className={notesStyles.notesListContent}>
               <ClientOnly>
@@ -202,7 +203,7 @@ export function LoginNotesWidget() {
                     {mockNotes.map((note, index) => (
                       <NoteListItem
                         key={note.id}
-                        note={note as any}
+                        note={note}
                         isSelected={index === 0}
                         onClick={() => {}}
                         onDelete={() => {}}
@@ -240,11 +241,16 @@ export function LoginNotesWidget() {
                 color: 'var(--foreground)',
                 cursor: 'default'
               }}>
-                {mockNotes[0].content.ops.map((op, i) => (
-                  <div key={i} style={{ whiteSpace: 'pre-wrap' }}>
-                    {op.insert}
-                  </div>
-                ))}
+                {mockNotes[0].content.ops.map((op, i) => {
+                  if ("insert" in op && typeof op.insert === "string") {
+                    return (
+                      <div key={i} style={{ whiteSpace: "pre-wrap" }}>
+                        {op.insert}
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
               </div>
             </div>
           </div>

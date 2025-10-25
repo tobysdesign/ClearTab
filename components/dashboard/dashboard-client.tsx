@@ -10,7 +10,7 @@ import { DockContent } from "../dashboard/dock-content";
 import { ResizableBentoGrid } from "./resizable-bento-grid";
 import { PieGuide } from "./pie-guide";
 import { type ReactNode } from "react";
-import { BrandedLoader } from "@/components/ui/branded-loader";
+import { BrandedLoader } from "@cleartab/ui";
 import styles from "./dashboard-client.module.css";
 
 interface DashboardClientProps {

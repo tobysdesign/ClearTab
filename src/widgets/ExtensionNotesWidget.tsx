@@ -10,16 +10,7 @@ import React, {
 // import { Input } from "@/components/ui/input";
 
 import { AddButton } from "@/components/ui/add-button";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import {
-  WidgetContainer,
-  // WidgetContent,
-} from "@/components/ui/widget-container";
-import { QuillEditor } from "@/components/ui/quill-editor";
-import { EMPTY_QUILL_CONTENT, type Note, type QuillDelta } from "@/shared/schema";
-import { useNotes } from "../hooks/use-extension-notes";
-import { AnimatePresence } from "framer-motion";
-import { WidgetLoader } from "@/components/widgets/widget-loader";
+import { WidgetHeader, WidgetContainer, WidgetLoader } from "@cleartab/ui";
 import { EmptyState } from "@/components/ui/empty-state";
 // import styles from "./widget.module.css";
 import notesStyles from "@/components/widgets/notes-widget.module.css";

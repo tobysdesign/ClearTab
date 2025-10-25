@@ -3,9 +3,7 @@ import { format, parseISO, isToday, isAfter, isBefore } from "date-fns";
 import styles from "./schedule-widget.module.css";
 import { cn } from "../lib/utils";
 import { EmptyState } from "../components/ui/empty-state";
-import { WidgetContainer } from "../components/ui/widget-container";
-import { WidgetHeader } from "../components/ui/widget-header";
-import { WidgetLoader } from "../components/ui/widget-loader";
+import { WidgetContainer, WidgetHeader, WidgetLoader } from "@cleartab/ui";
 
 // --- Mock Data ---
 

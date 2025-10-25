@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import styles from './recorder-widget.module.css'
 import { ClientOnly } from '@/components/ui/safe-motion'
-import { WidgetHeader } from '@/components/ui/widget-header'
+import { WidgetHeader } from "@cleartab/ui";
+
 
 export function LoginRecorderWidget() {
   const [isHovered, setIsHovered] = useState(false)

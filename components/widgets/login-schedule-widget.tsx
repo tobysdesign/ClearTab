@@ -2,7 +2,8 @@
 
 import React, { useMemo, useRef } from 'react'
 import { format, parseISO, isToday } from '@/lib/date-utils'
-import { WidgetContainer } from '@/components/ui/widget-container'
+import { WidgetContainer } from "@cleartab/ui";
+
 import { cn } from '@/lib/utils'
 import styles from './schedule-widget.module.css'
 

@@ -11,13 +11,14 @@ export default defineConfig({
   // Environment and feature flags
   define: {
     'process.env.IS_EXTENSION': '"true"',
-    'process.env.NODE_ENV': '"production'
+    'process.env.NODE_ENV': '"production"'
   },
 
   // Path resolution
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '../'),
+      '@cleartab/ui': path.resolve(__dirname, '../packages/ui/src'),
     }
   },
 

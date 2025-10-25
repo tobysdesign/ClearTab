@@ -7,7 +7,7 @@ import { SkipOnboardingHandler } from '@/components/skip-onboarding-handler'
 import { useAuth } from '@/components/auth/supabase-auth-provider'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { BrandedLoader } from '@/components/ui/branded-loader'
+import { BrandedLoader } from '@cleartab/ui'
 
 function AuthenticatedDashboard() {
   return (

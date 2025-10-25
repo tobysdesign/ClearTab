@@ -11,7 +11,7 @@ import { CharcoalWave } from "@/components/ui/charcoal-wave";
 import { Toaster as DefaultToaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
-import { BrandedLoader } from "@/components/ui/branded-loader";
+import { BrandedLoader } from "@cleartab/ui";
 import styles from "./layout.module.css";
 
 const inter = Inter({

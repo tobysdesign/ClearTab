@@ -8,9 +8,7 @@ import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
-import { WidgetLoader } from './widget-loader'
-import { WidgetContainer } from '@/components/ui/widget-container'
-import { WidgetHeader } from '@/components/ui/widget-header'
+import { WidgetLoader, WidgetContainer, WidgetHeader } from "@cleartab/ui";
 import { useAuth } from '@/components/auth/supabase-auth-provider'
 import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
@@ -205,7 +203,6 @@ export function ScheduleWidget() {
         throw error // Re-throw to let React Query handle the error
       }
     },
-    retry: false,
   })
 
   const [now, setNow] = useState(new Date())

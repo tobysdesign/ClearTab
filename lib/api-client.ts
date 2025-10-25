@@ -17,11 +17,21 @@ export async function apiRequest(url: string, options: RequestInit = {}): Promis
     headers['Authorization'] = `Bearer ${sessionId}`
   }
   
+  const start = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+
   const response = await fetch(fullUrl, {
     ...options,
     headers,
     credentials: 'include' // Still include cookies as fallback
   })
+
+  const end = typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+  const duration = Math.round(end - start);
+
+  if (typeof console !== "undefined") {
+    const method = (options.method || 'GET').toUpperCase();
+    console.info(`[api] ${method} ${fullUrl} → ${response.status} in ${duration}ms`);
+  }
   
   // If we get a 401, redirect to login
   if (response.status === 401 && typeof window !== 'undefined') {

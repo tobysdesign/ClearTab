@@ -1,6 +1,6 @@
 "use client";
 
-import { BrandedLoader } from "@/components/ui/branded-loader";
+import { BrandedLoader } from "@cleartab/ui";
 
 export default function Loading() {
   return (

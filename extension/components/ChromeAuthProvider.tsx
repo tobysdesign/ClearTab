@@ -6,7 +6,7 @@
 import React from 'react'
 import { useAuth } from '../utils/chrome-auth'
 import { ExtensionAuthPage } from './ExtensionAuthPage'
-import { BrandedLoader } from '@/components/ui/branded-loader'
+import { BrandedLoader } from '@cleartab/ui'
 
 interface ChromeAuthProviderProps {
   children: React.ReactNode

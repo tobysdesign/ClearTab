@@ -18,7 +18,7 @@ import { Inter, Tinos } from "next/font/google"
 import { cn } from "@/lib/utils"
 import React, { Suspense, useEffect } from 'react'
 import Loading from "./loading"
-import { BrandedLoader } from "@/components/ui/branded-loader"
+import { BrandedLoader } from "@cleartab/ui"
 import styles from "./layout.module.css"
 import "@/app/globals.css"
 import "@/styles/material-3.css"

@@ -22,6 +22,7 @@ interface NoteListItemProps {
   collapsed?: boolean;
   isRecentlyUpdated?: boolean;
   isEditing?: boolean;
+  isDeleting?: boolean;
 }
 
 export const NoteListItem = React.memo(function NoteListItem({
@@ -32,6 +33,7 @@ export const NoteListItem = React.memo(function NoteListItem({
   collapsed = false,
   isRecentlyUpdated = false,
   isEditing = false,
+  isDeleting = false,
 }: NoteListItemProps) {
   // Memoized function to get a preview from Block[] content
   const preview = useMemo(() => {
@@ -115,18 +117,22 @@ export const NoteListItem = React.memo(function NoteListItem({
   // Memoized event handlers to prevent re-creation on every render
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      // Prevent clicks while deleting
+      if (isDeleting) return;
       e.stopPropagation();
       onClick();
     },
-    [onClick],
+    [onClick, isDeleting],
   );
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
+      // Prevent double delete
+      if (isDeleting) return;
       e.stopPropagation();
       onDelete();
     },
-    [onDelete],
+    [onDelete, isDeleting],
   );
 
   const handleKeyDown = useCallback(
@@ -163,13 +169,18 @@ export const NoteListItem = React.memo(function NoteListItem({
               ? styles.collapsedItemSelected
               : styles.collapsedItemDefault,
             isRecentlyUpdated && "animate-promote",
+            isDeleting && styles.itemDeleting,
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           tabIndex={0}
           title={displayText}
         >
-          <span className={styles.collapsedInitials}>{initials}</span>
+          {isDeleting ? (
+            <span className={styles.deletingSpinner}>×</span>
+          ) : (
+            <span className={styles.collapsedInitials}>{initials}</span>
+          )}
         </motion.div>
       </ClientOnly>
     );
@@ -188,11 +199,20 @@ export const NoteListItem = React.memo(function NoteListItem({
           styles.expandedItem,
           isSelected && "widget-list-item--active",
           isRecentlyUpdated && "animate-highlight",
+          isDeleting && styles.itemDeleting,
         )}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
+        {isDeleting && (
+          <div className={styles.deletingOverlay}>
+            <div className={styles.deletingMessage}>
+              <span className={styles.deletingSpinner}>×</span>
+              Saying goodbye...
+            </div>
+          </div>
+        )}
         <div className={styles.itemHeader}>
           <div className={styles.itemContent}>
             <div
@@ -207,7 +227,7 @@ export const NoteListItem = React.memo(function NoteListItem({
             >
               {displayText}
             </div>
-            {isEditing && (
+            {isEditing && !isDeleting && (
               <div className={styles.editingIndicator}>
                 <div className={styles.editingDot} />
               </div>

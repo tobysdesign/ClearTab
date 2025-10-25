@@ -1,0 +1,127 @@
+.ghostIcon {
+    border: 1px solid #252525;
+    background-color: #2a2426;
+    color: #ccc;
+    transition: all 0.2s ease;
+}
+
+.ghostIcon:hover {
+    color: #eee;
+    background-color: #252525;
+}
+
+.iconSize {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+}
+
+.baseButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    border: none;
+}
+
+.baseButton:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+}
+
+.baseButton:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.baseButton svg {
+    pointer-events: none;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #aaa;
+    transition: color 0.2s ease;
+}
+
+.baseButton:hover svg {
+    color: #fff;
+}
+
+.default {
+    background: linear-gradient(180deg, #2f2f2f 0%, #242424 100%);
+    color: #f4f4f4;
+    border-radius: 999px;
+    padding: 0 1rem;
+    min-height: 36px;
+}
+
+.default:hover {
+    background: linear-gradient(180deg, #383838 0%, #2a2a2a 100%);
+}
+
+.destructive {
+    background: linear-gradient(180deg, #612323 0%, #501818 100%);
+    color: #ffecec;
+    border-radius: 999px;
+    padding: 0 1rem;
+    min-height: 36px;
+}
+
+.outline {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #f4f4f4;
+    border-radius: 999px;
+    padding: 0 1rem;
+    min-height: 36px;
+}
+
+.outline:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f4f4f4;
+    border-radius: 999px;
+    padding: 0 1rem;
+    min-height: 36px;
+}
+
+.ghost {
+    background: transparent;
+    color: #f4f4f4;
+    border-radius: 999px;
+    padding: 0 1rem;
+    min-height: 36px;
+}
+
+.link {
+    background: transparent;
+    color: #7ab8ff;
+    padding: 0;
+    min-height: 36px;
+    border-radius: 0;
+}
+
+.sizeDefault {
+    min-height: 36px;
+    padding: 0 1rem;
+}
+
+.sizeSm {
+    min-height: 32px;
+    padding: 0 0.75rem;
+    font-size: 13px;
+}
+
+.sizeLg {
+    min-height: 44px;
+    padding: 0 1.25rem;
+    font-size: 15px;
+}

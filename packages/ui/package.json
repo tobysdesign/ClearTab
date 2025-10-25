@@ -1,0 +1,7 @@
+{
+  "name": "@cleartab/ui",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false
+}

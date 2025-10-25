@@ -18,12 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 // Payday settings deprecated - using local storage instead
 // import { WidgetActions } from "@/components/dashboard/widget-actions";
-import {
-  WidgetContainer,
-  WidgetContent,
-} from "@/components/ui/widget-container";
-import { WidgetHeader } from "@/components/ui/widget-header";
-import { WidgetLoader } from "./widget-loader";
+import { WidgetContainer, WidgetContent, WidgetHeader, WidgetLoader } from "@cleartab/ui";
 import { useEffect, useState, useLayoutEffect, useRef } from "react";
 // import styles from "./widget.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
@@ -250,7 +245,7 @@ export function CountdownWidget({
   const formattedDaysLeft = displayNumber.toString();
 
   if (isLoading) {
-    return <WidgetLoader className="Countdown" minHeight="h-[280px]" />;
+    return <WidgetLoader className="Countdown" minHeight="280px" />;
   }
 
   // For start/end mode, calculate event duration

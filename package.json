@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "lint": "eslint .",
     "dev:prewarm": "npm run dev & sleep 10 && node scripts/prewarm-simple.js",
     "prewarm": "node scripts/prewarm-simple.js",
     "dev:3001": "next dev -p 3001",

@@ -7,7 +7,7 @@ import React, { useState, useRef } from 'react'
 import { BackgroundCanvas } from './BackgroundCanvas'
 import { ExtensionDock } from './ExtensionDock'
 import { EmptyBentoGrid } from './EmptyBentoGrid'
-import { BrandedLoader } from '@/components/ui/branded-loader'
+import { BrandedLoader } from '@cleartab/ui'
 
 export function ExtensionDashboard() {
   const [isLoading, setIsLoading] = useState(false)

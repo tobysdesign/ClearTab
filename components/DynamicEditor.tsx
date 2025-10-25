@@ -18,7 +18,7 @@ interface EditorProps {
 
 // Dynamically import the Editor component with no SSR to avoid hydration issues
 export const Editor = dynamic<EditorProps>(
-  () => import("./ui/editor").then((mod) => ({ default: mod.Editor })),
+  () => import("@/components/ui/editor").then((mod) => ({ default: mod.Editor })),
   {
     ssr: false,
     loading: () => (
