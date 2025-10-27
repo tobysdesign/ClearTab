@@ -1,45 +1,61 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
-*storybook.log
-storybook-static
-# Build files
+# Packages & locks
+node_modules/
+**/package-lock.json
+**/yarn.lock
+pnpm-debug.log*
+
+# Builds
 .next/
-.vercel/
-.turbo/
-.env.local
 out/
-extension.zip
-.env.ext
-# Cache
-.next/cache/
+dist/
+.vercel/
+server/public/        # keep ignored if it's build output
+
+# Tool caches
+.turbo/
+.cache/
+parcel-cache/
 node_modules/.cache/
+.storybook-out/
+storybook-static/
+.eslintcache
+tsconfig.tsbuildinfo
+coverage/
+.nyc_output/
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Playwright / test artefacts
+/playwright/
+.playwright/
+.playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
 
-# Development notes and documentation
+# Env (keep .env.example tracked)
+.env*
+!.env.example
+.env.local
+.env.ext
+
+# Docs dumps / personal notes you listed
+docs-and-demos/
+docs/
 CLAUDE.md
 WARP.md
 Instructions.md
 DEPLOYMENT.md
 SUPABASE_SETUP.md
-docs-and-demos/
-docs/
 claude-mcp-config-backup.json
 project-transfer.json
 *.mcp.json
 auth.json
-tsconfig.tsbuildinfo
+
+# Archives
+*.tar.gz
+extension.zip
+*storybook.log
