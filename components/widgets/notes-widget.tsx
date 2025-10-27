@@ -9,7 +9,7 @@ import React, {
 } from "react";
 // import { Input } from "@/components/ui/input";
 
-import { AddButton } from "@/components/ui/add-button";
+import { AddButton } from "@cleartab/ui";
 import dynamic from "next/dynamic";
 import type { Note } from "@/shared/schema";
 import { useNotes } from "@/hooks/use-notes";
@@ -24,13 +24,13 @@ const DynamicQuillEditor = dynamic(
     loading: () => null,
   },
 );
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@cleartab/ui";
 // import styles from "./widget.module.css";
 import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
 import { cn } from "@/lib/utils";
-import { ActionsMenu } from "@/components/ui/actions-menu";
-import { useToast } from "@/components/ui/use-toast";
+import { ActionsMenu } from "@cleartab/ui";
+import { useToast } from "@cleartab/ui";
 import { toast as sonnerToast } from "sonner";
 // import { useDebounce } from "@/hooks/use-debounce";
 // import { api } from "@/lib/api-client";
@@ -65,7 +65,10 @@ function ResizablePanels({
       // Set proportional width: 1/3 of container width, but respect right panel minimum
       if (containerWidth > 0) {
         const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4);
-        const proportionalWidth = Math.max(minWidth, Math.min(containerWidth / 3, maxAllowedWidth));
+        const proportionalWidth = Math.max(
+          minWidth,
+          Math.min(containerWidth / 3, maxAllowedWidth),
+        );
         setCurrentWidth(proportionalWidth);
       } else {
         setCurrentWidth(defaultWidth);
@@ -76,23 +79,26 @@ function ResizablePanels({
   // Track container width changes for proportional resizing
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newContainerWidth = entry.contentRect.width;
         setContainerWidth(newContainerWidth);
-        
+
         // Update currentWidth proportionally if not currently resizing
         if (!isResizing.current && newContainerWidth > 0) {
           // Ensure right panel gets at least 60% by limiting left panel to max 40%
           const maxAllowedWidth = Math.min(maxWidth, newContainerWidth * 0.4);
-          const proportionalWidth = Math.max(minWidth, Math.min(newContainerWidth / 3, maxAllowedWidth));
+          const proportionalWidth = Math.max(
+            minWidth,
+            Math.min(newContainerWidth / 3, maxAllowedWidth),
+          );
           setCurrentWidth(proportionalWidth);
           onWidthChange?.(proportionalWidth);
         }
       }
     });
-    
+
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
   }, [minWidth, maxWidth, onWidthChange]);
@@ -113,8 +119,9 @@ function ResizablePanels({
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing.current || !containerRef.current) return;
-    let newWidth = e.clientX - containerRef.current.getBoundingClientRect().left;
-    
+    let newWidth =
+      e.clientX - containerRef.current.getBoundingClientRect().left;
+
     // Constrain to min/max width and container size (right panel gets at least 60%)
     const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4); // Max 40% of container (so right gets 60%)
     newWidth = Math.max(minWidth, Math.min(newWidth, maxAllowedWidth));
@@ -126,7 +133,7 @@ function ResizablePanels({
     <div className={notesStyles.resizablePanels} ref={containerRef}>
       <div
         style={{ width: currentWidth }}
-        className={`${notesStyles.resizableLeft} ${currentWidth < 100 ? 'collapsed' : ''}`}
+        className={`${notesStyles.resizableLeft} ${currentWidth < 100 ? "collapsed" : ""}`}
       >
         {children[0]}
       </div>
@@ -144,7 +151,9 @@ function _isEqual(a: any, b: any): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function normalizeNoteContent(content: Note["content"] | string | null | undefined) {
+function normalizeNoteContent(
+  content: Note["content"] | string | null | undefined,
+) {
   if (!content) return EMPTY_QUILL_CONTENT;
   if (typeof content === "string") {
     try {
@@ -157,7 +166,9 @@ function normalizeNoteContent(content: Note["content"] | string | null | undefin
   return content;
 }
 
-function createSaveSnapshot(note: Partial<Note> | null | undefined): (Partial<Note> & { content: Note["content"] }) | null {
+function createSaveSnapshot(
+  note: Partial<Note> | null | undefined,
+): (Partial<Note> & { content: Note["content"] }) | null {
   if (!note) return null;
   const normalizedContent = normalizeNoteContent(note.content);
   let clonedContent = normalizedContent;
@@ -294,7 +305,9 @@ export function NotesWidget() {
   const activeNoteRef = useRef<Partial<Note> | null>(null);
   const ongoingSaveRef = useRef<Promise<void> | null>(null);
   const isUserTypingRef = useRef(false); // Prevent reloads while user is typing
-  const pendingDeletesRef = useRef<Map<string, PendingDeleteOperation>>(new Map());
+  const pendingDeletesRef = useRef<Map<string, PendingDeleteOperation>>(
+    new Map(),
+  );
   const backgroundSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Protected setDisplayTitle that respects typing state
@@ -309,41 +322,49 @@ export function NotesWidget() {
     activeNoteRef.current = activeNote;
   }, [activeNote]);
 
-  const restoreActiveNoteState = useCallback((note: Note) => {
-    const normalizedContent = normalizeNoteContent(note.content);
-    const normalizedNote = { ...note, content: normalizedContent };
-    isUserTypingRef.current = false;
-    activeNoteIdRef.current = normalizedNote.id || null;
-    activeNoteRef.current = normalizedNote;
-    setActiveNote(normalizedNote);
-    setDisplayTitle(normalizedNote.title || "");
-    lastSavedContent.current = JSON.stringify(normalizedContent);
-    lastSavedTitle.current = normalizedNote.title || "";
-    setIsEditing(false);
-    setShowSaveStatus(false);
-    setSaveStatus("idle");
-  }, [setActiveNote]);
+  const restoreActiveNoteState = useCallback(
+    (note: Note) => {
+      const normalizedContent = normalizeNoteContent(note.content);
+      const normalizedNote = { ...note, content: normalizedContent };
+      isUserTypingRef.current = false;
+      activeNoteIdRef.current = normalizedNote.id || null;
+      activeNoteRef.current = normalizedNote;
+      setActiveNote(normalizedNote);
+      setDisplayTitle(normalizedNote.title || "");
+      lastSavedContent.current = JSON.stringify(normalizedContent);
+      lastSavedTitle.current = normalizedNote.title || "";
+      setIsEditing(false);
+      setShowSaveStatus(false);
+      setSaveStatus("idle");
+    },
+    [setActiveNote],
+  );
 
-  const cancelPendingDelete = useCallback((noteId: string) => {
-    const pending = pendingDeletesRef.current.get(noteId);
-    if (!pending) return;
+  const cancelPendingDelete = useCallback(
+    (noteId: string) => {
+      const pending = pendingDeletesRef.current.get(noteId);
+      if (!pending) return;
 
-    clearTimeout(pending.timeout);
-    sonnerToast.dismiss(pending.toastId);
-    pendingDeletesRef.current.delete(noteId);
+      clearTimeout(pending.timeout);
+      sonnerToast.dismiss(pending.toastId);
+      pendingDeletesRef.current.delete(noteId);
 
-    insertNoteAtIndex(pending.snapshot.note, pending.snapshot.index);
-    if (pending.snapshot.wasActive) {
-      restoreActiveNoteState(pending.snapshot.note);
-    }
-    setDeletingNoteId(null);
-    sonnerToast.info("Deletion cancelled", { duration: 2000 });
-  }, [insertNoteAtIndex, restoreActiveNoteState]);
+      insertNoteAtIndex(pending.snapshot.note, pending.snapshot.index);
+      if (pending.snapshot.wasActive) {
+        restoreActiveNoteState(pending.snapshot.note);
+      }
+      setDeletingNoteId(null);
+      sonnerToast.info("Deletion cancelled", { duration: 2000 });
+    },
+    [insertNoteAtIndex, restoreActiveNoteState],
+  );
 
   // Unified save function
   const saveCurrentNote = useCallback(
     async (noteOverride?: Partial<Note>) => {
-      const snapshot = createSaveSnapshot(noteOverride ?? activeNoteRef.current);
+      const snapshot = createSaveSnapshot(
+        noteOverride ?? activeNoteRef.current,
+      );
       if (!snapshot) return;
 
       const normalizedContent = snapshot.content ?? EMPTY_QUILL_CONTENT;
@@ -433,38 +454,43 @@ export function NotesWidget() {
     [createNote, updateNote, setActiveNote, setDisplayTitleSafe, toast],
   );
 
-  const handleUndoDelete = useCallback((snapshot: SavedNoteSnapshot) => {
-    const normalizedContent = normalizeNoteContent(snapshot.note.content);
-    const restoredDraft = {
-      ...snapshot.note,
-      id: generateDraftId(),
-      content: normalizedContent,
-    };
+  const handleUndoDelete = useCallback(
+    (snapshot: SavedNoteSnapshot) => {
+      const normalizedContent = normalizeNoteContent(snapshot.note.content);
+      const restoredDraft = {
+        ...snapshot.note,
+        id: generateDraftId(),
+        content: normalizedContent,
+      };
 
-    activeNoteIdRef.current = restoredDraft.id;
-    activeNoteRef.current = restoredDraft;
-    setActiveNote(restoredDraft);
-    isUserTypingRef.current = false;
-    setDisplayTitle(restoredDraft.title || "");
-    lastSavedContent.current = JSON.stringify(normalizedContent);
-    lastSavedTitle.current = restoredDraft.title || "";
-    setIsEditing(false);
-    setShowSaveStatus(false);
-    setSaveStatus("idle");
+      activeNoteIdRef.current = restoredDraft.id;
+      activeNoteRef.current = restoredDraft;
+      setActiveNote(restoredDraft);
+      isUserTypingRef.current = false;
+      setDisplayTitle(restoredDraft.title || "");
+      lastSavedContent.current = JSON.stringify(normalizedContent);
+      lastSavedTitle.current = restoredDraft.title || "";
+      setIsEditing(false);
+      setShowSaveStatus(false);
+      setSaveStatus("idle");
 
-    if (backgroundSaveTimeoutRef.current) {
-      clearTimeout(backgroundSaveTimeoutRef.current);
-    }
+      if (backgroundSaveTimeoutRef.current) {
+        clearTimeout(backgroundSaveTimeoutRef.current);
+      }
 
-    saveCurrentNote(restoredDraft).then(() => {
-      sonnerToast.success("Note restored", { duration: 2000 });
-    }).catch((error) => {
-      console.error("Failed to restore note after undo:", error);
-      sonnerToast.error("Failed to restore note", {
-        description: (error as Error).message || "Please try again.",
-      });
-    });
-  }, [generateDraftId, saveCurrentNote]);
+      saveCurrentNote(restoredDraft)
+        .then(() => {
+          sonnerToast.success("Note restored", { duration: 2000 });
+        })
+        .catch((error) => {
+          console.error("Failed to restore note after undo:", error);
+          sonnerToast.error("Failed to restore note", {
+            description: (error as Error).message || "Please try again.",
+          });
+        });
+    },
+    [generateDraftId, saveCurrentNote],
+  );
 
   // Background save system - completely decoupled from user input
 
@@ -567,9 +593,9 @@ export function NotesWidget() {
 
         // Update ref AND state to preserve content
         activeNoteRef.current = { ...activeNoteRef.current, title: newTitle };
-        
+
         // Update activeNote state to keep editor content in sync
-        setActiveNote(prev => prev ? { ...prev, title: newTitle } : prev);
+        setActiveNote((prev) => (prev ? { ...prev, title: newTitle } : prev));
 
         // Only update list for saved notes, not drafts (to prevent input focus issues)
         if (!activeNoteRef.current.id?.startsWith("draft-")) {
@@ -995,7 +1021,9 @@ export function NotesWidget() {
                 )}
                 onClick={() => {
                   // Focus the Quill editor when clicking anywhere in the content area
-                  const editorElement = document.querySelector('.ql-editor') as HTMLElement;
+                  const editorElement = document.querySelector(
+                    ".ql-editor",
+                  ) as HTMLElement;
                   if (editorElement) {
                     editorElement.focus();
                   }
@@ -1029,7 +1057,10 @@ export function NotesWidget() {
                       clearTimeout(backgroundSaveTimeoutRef.current);
                     }
                     saveCurrentNote().catch((error) => {
-                      console.error("Failed to save note on editor blur:", error);
+                      console.error(
+                        "Failed to save note on editor blur:",
+                        error,
+                      );
                     });
                   }}
                   editable={true}

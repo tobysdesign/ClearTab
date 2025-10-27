@@ -18,11 +18,16 @@ import {
 import { useQuery } from "@tanstack/react-query";
 // Payday settings deprecated - using local storage instead
 // import { WidgetActions } from "@/components/dashboard/widget-actions";
-import { WidgetContainer, WidgetContent, WidgetHeader, WidgetLoader } from "@cleartab/ui";
+import {
+  WidgetContainer,
+  WidgetContent,
+  WidgetHeader,
+  WidgetLoader,
+} from "@cleartab/ui";
 import { useEffect, useState, useLayoutEffect, useRef } from "react";
 // import styles from "./widget.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
-import { ClientOnly } from "@/components/ui/safe-motion";
+import { ClientOnly } from "@cleartab/ui";
 import { useRouter } from "next/navigation";
 // Icons replaced with ASCII placeholders
 
@@ -59,17 +64,20 @@ export function CountdownWidget({
     queryKey: ["preferences"],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/preferences');
+        const response = await fetch("/api/preferences");
         if (response.ok) {
           const { data } = await response.json();
-          return data || {
-            countdownTitle: "Countdown",
-            countdownMode: "date-range",
-            paydayFrequency: "none",
-          };
+          console.log("🎯 Widget received preferences:", data);
+          return (
+            data || {
+              countdownTitle: "Countdown",
+              countdownMode: "date-range",
+              paydayFrequency: "none",
+            }
+          );
         }
       } catch (error) {
-        console.error('Error loading preferences:', error);
+        console.error("Error loading preferences:", error);
       }
       // Fallback to defaults
       return {
@@ -89,6 +97,15 @@ export function CountdownWidget({
     const startDate = (paydayData as any).startDate;
     const paydayDate = (paydayData as any).paydayDate;
 
+    console.log("🧮 Calculating countdown with:", {
+      countdownMode,
+      paydayFrequency,
+      endDate,
+      startDate,
+      paydayDate,
+      manualCount,
+    });
+
     if (countdownMode === "manual-count") {
       // Manual count mode - just use the manual count
       setSettings({
@@ -102,9 +119,11 @@ export function CountdownWidget({
 
       if (paydayFrequency === "none") {
         // One-time countdown to end date
-        const targetDate = endDate
-          ? new Date(endDate)
-          : new Date(paydayDate);
+        const targetDateValue = endDate || paydayDate;
+        if (!targetDateValue) return; // No date set
+
+        // Parse date from ISO string timestamp
+        const targetDate = new Date(targetDateValue);
         const daysLeft = differenceInDays(startOfDay(targetDate), today);
 
         setSettings({
@@ -114,9 +133,10 @@ export function CountdownWidget({
         });
       } else if (paydayFrequency && (endDate || paydayDate)) {
         // Recurring countdown
-        const lastPayday = startDate
-          ? new Date(startDate)
-          : new Date(paydayDate);
+        const lastPaydayValue = startDate || paydayDate;
+        if (!lastPaydayValue) return; // No date set
+
+        const lastPayday = new Date(lastPaydayValue);
         const recurrenceInDays = RECURRENCE_DAYS[paydayFrequency];
 
         // Calculate next occurrence
@@ -148,9 +168,16 @@ export function CountdownWidget({
   }, [paydayData]);
 
   // Get the countdown title from settings
-  const countdownTitle = paydayData?.countdownTitle || "Swount";
+  const countdownTitle = paydayData?.countdownTitle || "Countdown";
 
   const { daysLeft, recurrenceInDays } = settings;
+
+  // Check if no countdown is configured
+  const hasCountdownConfigured =
+    paydayData &&
+    (paydayData.endDate ||
+      paydayData.paydayDate ||
+      (paydayData.startDate && paydayData.endDate));
 
   // Calculate total days for dot display
   const totalDays = Math.max(daysLeft, recurrenceInDays);
@@ -241,6 +268,11 @@ export function CountdownWidget({
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayNumber, setDisplayNumber] = useState(daysLeft ?? 0);
 
+  // Update display number when daysLeft changes
+  useEffect(() => {
+    setDisplayNumber(daysLeft ?? 0);
+  }, [daysLeft]);
+
   // Format the days left for display
   const formattedDaysLeft = displayNumber.toString();
 
@@ -249,13 +281,44 @@ export function CountdownWidget({
   }
 
   // For start/end mode, calculate event duration
-  const isStartEndMode = (paydayData as any)?.startDate && (paydayData as any)?.endDate;
+  const isStartEndMode =
+    (paydayData as any)?.startDate && (paydayData as any)?.endDate;
   const eventDurationDays = isStartEndMode
     ? differenceInDays(
         new Date((paydayData as any).endDate),
         new Date((paydayData as any).startDate),
       )
     : 0;
+
+  // Show empty state if no countdown is configured
+  if (!hasCountdownConfigured) {
+    return (
+      <WidgetContainer>
+        <WidgetHeader title="Countdown" />
+        <WidgetContent scrollable={false} className={countdownStyles.content}>
+          <div className={countdownStyles.emptyState}>
+            <div className={countdownStyles.emptyContent}>
+              <p className={countdownStyles.emptyTitle}>
+                Add a{" "}
+                <span className={countdownStyles.emptyHighlight}>single</span>,{" "}
+                <span className={countdownStyles.emptyHighlight}>
+                  recurring
+                </span>{" "}
+                or <span className={countdownStyles.emptyHighlight}>range</span>{" "}
+                of dates to get a visual countdown of progress.
+              </p>
+              <button
+                className={countdownStyles.addButton}
+                onClick={() => router.push("/settings")}
+              >
+                + Add date
+              </button>
+            </div>
+          </div>
+        </WidgetContent>
+      </WidgetContainer>
+    );
+  }
 
   return (
     <WidgetContainer>
@@ -276,7 +339,7 @@ export function CountdownWidget({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="countdown-number"
+                    className={countdownStyles.number}
                   >
                     {formattedDaysLeft}
                   </motion.div>

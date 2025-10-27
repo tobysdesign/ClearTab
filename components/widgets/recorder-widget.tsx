@@ -5,9 +5,9 @@ import { useState, useEffect, memo, useMemo } from "react";
 import { CheckIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
-import { ClientOnly } from "@/components/ui/safe-motion";
+import { ClientOnly } from "@cleartab/ui";
 import { WidgetHeader, BrandedLoader } from "@cleartab/ui";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@cleartab/ui";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {

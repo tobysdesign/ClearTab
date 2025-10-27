@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import type { GoogleAuth } from "@/lib/google-api-service";
 
+type SchemaTables = typeof import("@/shared/schema-tables");
+type UserRow = SchemaTables["user"]["$inferSelect"];
+type ConnectedAccountRow = SchemaTables["connectedAccounts"]["$inferSelect"];
+type UserInsert = SchemaTables["user"]["$inferInsert"];
+type ConnectedAccountInsert = SchemaTables["connectedAccounts"]["$inferInsert"];
+
+const isAuthError = (error: unknown): error is { message: string } => {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error ? String((error as { message?: unknown }).message ?? "") : "";
+  if (!message) return false;
+  return message.includes("invalid authentication") || message.includes("401");
+};
+
 export async function GET(_request: NextRequest) {
   try {
     // Lazy load dependencies to reduce initial bundle size
@@ -15,13 +29,13 @@ export async function GET(_request: NextRequest) {
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
-    let user;
-    let dbUser;
+    let userId: string | null = null;
+    let dbUser: UserRow | null = null;
 
     if (devBypass) {
       console.log('🔧 Development mode: Bypassing auth for calendar API');
       // Use default development user ID
-      const userId = '00000000-0000-4000-8000-000000000000';
+      userId = '00000000-0000-4000-8000-000000000000';
 
       // Get or create development user
       try {
@@ -77,23 +91,23 @@ export async function GET(_request: NextRequest) {
         return NextResponse.json({ data: sampleEvents });
       }
     } else {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
+        const supabase = await createClient();
+        const {
+          data: { user: authUser },
+        } = await supabase.auth.getUser();
 
-      if (!authUser) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+        if (!authUser) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
-      user = authUser;
+        userId = authUser.id;
 
-      // Get user from database
-      [dbUser] = await dbMinimal
-        .select()
-        .from(userTable)
-        .where(eq(userTable.id, user.id))
-        .limit(1);
+        // Get user from database
+        [dbUser] = await dbMinimal
+          .select()
+          .from(userTable)
+          .where(eq(userTable.id, authUser.id))
+          .limit(1);
 
       if (!dbUser) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -103,70 +117,59 @@ export async function GET(_request: NextRequest) {
     let events: any[] = [];
 
     // Fetch events from primary account if connected
-    if (dbUser.googleCalendarConnected && dbUser.accessToken) {
-      try {
-        const auth: GoogleAuth = {
-          accessToken: dbUser.accessToken,
-          refreshToken: dbUser.refreshToken || undefined,
-        };
+    if (dbUser?.googleCalendarConnected && dbUser.accessToken) {
+      const primaryAuth: GoogleAuth = {
+        accessToken: dbUser.accessToken,
+        refreshToken: dbUser.refreshToken || undefined,
+      };
 
-        try {
-          events = await googleApiService.getCalendarEvents(auth, dbUser.email);
-        } catch (error: any) {
-          // If authentication failed and we have a refresh token, try to refresh
-          if (error.message.includes('invalid authentication') || error.message.includes('401')) {
-            if (auth.refreshToken) {
-              console.log('Access token expired, attempting to refresh...');
-              try {
-                const refreshedTokens = await googleApiService.refreshAccessToken(auth.refreshToken);
-                
-                // Update the auth object with new access token
-                auth.accessToken = refreshedTokens.access_token;
-                
-                // Update the database with new access token
-                await dbMinimal
-                  .update(userTable)
-                  .set({ accessToken: refreshedTokens.access_token })
-                  .where(eq(userTable.id, dbUser.id));
-                
-                // Retry the calendar request with new token
-                events = await googleApiService.getCalendarEvents(auth, dbUser.email);
-                console.log('Successfully refreshed token and fetched calendar events');
-              } catch (refreshError) {
-                console.error('Failed to refresh access token:', refreshError);
-                throw error; // Re-throw original error
-              }
-            } else {
-              console.error('No refresh token available to refresh expired access token');
+      try {
+        events = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
+      } catch (error) {
+        if (isAuthError(error)) {
+          if (primaryAuth.refreshToken) {
+            console.log('Access token expired, attempting to refresh...');
+            try {
+              const refreshedTokens = await googleApiService.refreshAccessToken(primaryAuth.refreshToken);
+
+              primaryAuth.accessToken = refreshedTokens.access_token;
+
+              await dbMinimal
+                .update(userTable)
+                .set({ accessToken: refreshedTokens.access_token } as Partial<UserInsert>)
+                .where(eq(userTable.id, dbUser.id));
+
+              events = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
+              console.log('Successfully refreshed token and fetched calendar events');
+            } catch (refreshError) {
+              console.error('Failed to refresh access token:', refreshError);
               throw error;
             }
           } else {
-            throw error; // Re-throw non-auth errors
+            console.error('No refresh token available to refresh expired access token');
+            return NextResponse.json({
+              error: "Calendar authentication expired",
+              errorType: "AUTH_EXPIRED",
+              message: `Calendar access for ${dbUser.email || 'your account'} has expired. Please reconnect to view your events.`,
+              userEmail: dbUser.email,
+            }, { status: 401 });
           }
-        }
-        } catch (error: any) {
+        } else {
           console.error("Error fetching primary calendar:", error);
-          // Store error for later response
-          if (error.message.includes('invalid authentication') || error.message.includes('401')) {
-            // If this is an auth error and we have no refresh token, mark as auth error
-            if (!auth.refreshToken) {
-              return NextResponse.json({ 
-                error: "Calendar authentication expired", 
-                errorType: "AUTH_EXPIRED",
-                message: `Calendar access for ${dbUser.email || 'your account'} has expired. Please reconnect to view your events.`,
-                userEmail: dbUser.email
-              }, { status: 401 });
-            }
-          }
+          throw error;
         }
+      }
     }
 
     // Fetch events from secondary accounts
-    const userId = devBypass ? '00000000-0000-4000-8000-000000000000' : user.id;
+    const calendarOwnerId = devBypass ? '00000000-0000-4000-8000-000000000000' : userId;
+    if (!calendarOwnerId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const secondaryAccounts = await dbMinimal
       .select()
       .from(connectedAccounts)
-      .where(eq(connectedAccounts.userId, userId));
+      .where(eq(connectedAccounts.userId, calendarOwnerId));
 
     for (const account of secondaryAccounts) {
       if (!account.accessToken) continue;
@@ -182,7 +185,7 @@ export async function GET(_request: NextRequest) {
         try {
           accountEmail = await googleApiService.getUserInfo(auth);
         } catch (error: any) {
-          if ((error.message.includes('invalid authentication') || error.message.includes('401')) && auth.refreshToken) {
+          if (isAuthError(error) && auth.refreshToken) {
             try {
               console.log(`Refreshing token for secondary account ${account.id}...`);
               const refreshedTokens = await googleApiService.refreshAccessToken(auth.refreshToken);
@@ -191,7 +194,7 @@ export async function GET(_request: NextRequest) {
               // Update database with new token
               await dbMinimal
                 .update(connectedAccounts)
-                .set({ accessToken: refreshedTokens.access_token })
+                .set({ accessToken: refreshedTokens.access_token } as Partial<ConnectedAccountInsert>)
                 .where(eq(connectedAccounts.id, account.id));
               
               // Retry getting user info
@@ -221,7 +224,7 @@ export async function GET(_request: NextRequest) {
 
           events.push(...secondaryEvents);
         } catch (error: any) {
-          if ((error.message.includes('invalid authentication') || error.message.includes('401')) && auth.refreshToken) {
+          if (isAuthError(error) && auth.refreshToken) {
             try {
               console.log(`Refreshing token for calendar events for account ${account.id}...`);
               const refreshedTokens = await googleApiService.refreshAccessToken(auth.refreshToken);
@@ -230,7 +233,7 @@ export async function GET(_request: NextRequest) {
               // Update database with new token
               await dbMinimal
                 .update(connectedAccounts)
-                .set({ accessToken: refreshedTokens.access_token })
+                .set({ accessToken: refreshedTokens.access_token } as Partial<ConnectedAccountInsert>)
                 .where(eq(connectedAccounts.id, account.id));
               
               // Retry getting calendar events

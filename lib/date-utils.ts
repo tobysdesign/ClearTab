@@ -82,8 +82,11 @@ export function format(date: Date | string | null | undefined, formatStr: string
 }
 
 export function differenceInDays(laterDate: Date, earlierDate: Date): number {
-  const timeDiff = laterDate.getTime() - earlierDate.getTime();
-  return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+  // Use startOfDay to ensure we're comparing dates only, not times
+  const laterStart = startOfDay(laterDate);
+  const earlierStart = startOfDay(earlierDate);
+  const timeDiff = laterStart.getTime() - earlierStart.getTime();
+  return Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 }
 
 export function startOfDay(date: Date): Date {

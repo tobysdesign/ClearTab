@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { cn } from "../../utils/cn";
-import "./widget-classes.module.css";
 
 export interface WidgetContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useCallback } from "react";
-import { ClientOnly } from "@/components/ui/safe-motion";
+import { ClientOnly } from "@cleartab/ui";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import styles from './note-list-item.module.css';

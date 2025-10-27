@@ -12,6 +12,7 @@ const nextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
+  transpilePackages: ["@cleartab/ui"],
   experimental: {
     optimizePackageImports: [
       "@tanstack/react-query",
@@ -21,12 +22,12 @@ const nextConfig = {
       "sonner",
       "@supabase/supabase-js"
     ],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

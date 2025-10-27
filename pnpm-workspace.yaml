@@ -1,0 +1,8 @@
+ignoredBuiltDependencies:
+  - '@swc/core'
+  - bufferutil
+  - esbuild
+  - msw
+  - sharp
+  - supabase
+  - unrs-resolver

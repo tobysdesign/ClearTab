@@ -2,21 +2,8 @@
 
 import React, { useState, useMemo, createContext, useContext, useEffect, useCallback } from 'react'
 import { Drawer, DrawerContent, DrawerClose, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import dynamic from 'next/dynamic'
 import type { Task } from '@/shared/schema'
-
-const EditTaskForm = dynamic(
-  () => import('@/components/widgets/edit-task-form').then(mod => ({ default: mod.EditTaskForm })),
-  {
-    ssr: false,
-    loading: () => (
-      <div style={{ padding: '2rem', color: 'white' }}>
-        Loading form...
-      </div>
-    )
-  }
-)
-import { useQueryClient } from '@tanstack/react-query'
+import { EditTaskForm } from '@/components/widgets/edit-task-form'
 import { CloseIcon } from '@/components/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
@@ -44,8 +31,8 @@ export function useTaskModal() {
   return context
 }
 
+// Main ClientProviders component
 export default function ClientProviders({ children }: ClientProvidersProps) {
-  const queryClient = useQueryClient();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
   const [newTaskText, setNewTaskText] = useState<string | null>(null)
   const [isCreatingNew, setIsCreatingNew] = useState(false)
@@ -53,9 +40,11 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
 
   // Fetch individual task data when activeTaskId changes
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [isLoadingTask, setIsLoadingTask] = useState(false)
 
   useEffect(() => {
     const fetchTask = async (taskId: string) => {
+      setIsLoadingTask(true)
       try {
         console.log('Fetching task with ID:', taskId)
         // Fetch single task instead of all tasks for better performance
@@ -71,6 +60,8 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
       } catch (error) {
         console.error('Error fetching task:', error)
         setActiveTask(null)
+      } finally {
+        setIsLoadingTask(false)
       }
     }
 
@@ -79,19 +70,19 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     } else if (newTaskText !== null) {
       // For new tasks, set activeTask to null immediately to open drawer
       setActiveTask(null)
+      setIsCreatingNew(true)
+    } else {
+      setActiveTask(null)
+      setIsCreatingNew(false)
     }
   }, [activeTaskId, newTaskText])
 
-  const handleModalClose = () => {
-    setActiveTaskId(null);
-    setNewTaskText(null);
-    setIsCreatingNew(false);
-    // Clear task data immediately to prevent stale data flash
-    setActiveTask(null);
-  };
-
   const registerTaskUpdateCallback = useCallback((callback: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void) => {
-    setTaskUpdateCallbacks(prev => new Set(prev).add(callback));
+    setTaskUpdateCallbacks(prev => {
+      const next = new Set(prev);
+      next.add(callback);
+      return next;
+    });
   }, []);
 
   const unregisterTaskUpdateCallback = useCallback((callback: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void) => {
@@ -103,10 +94,6 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
   }, []);
 
   const handleModalSave = useCallback((updatedTask: Task, operation: 'update' | 'create' | 'delete') => {
-    // Don't close the modal on save - let user close it manually
-    // Just invalidate queries to refresh the task list
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
-
     // Call all registered task update callbacks with specific task data
     taskUpdateCallbacks.forEach(callback => {
       try {
@@ -120,7 +107,7 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
     if (operation === 'delete') {
       handleModalClose();
     }
-  }, [queryClient, taskUpdateCallbacks]);
+  }, [taskUpdateCallbacks]);
 
   const handleDeleteTask = async () => {
     if (!activeTask?.id) return;
@@ -136,14 +123,10 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
       });
 
       if (!res.ok) {
-        // If delete fails, refresh the task list
         console.error('Failed to delete task');
-        queryClient.invalidateQueries({ queryKey: ['tasks'] });
       }
     } catch (error) {
       console.error('Error deleting task:', error);
-      // Refresh task list on error
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
   };
 
@@ -162,23 +145,31 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         console.error('Error deleting draft task:', error);
       }
     }
-    // Close the modal
+
     handleModalClose();
   };
+
+  const handleModalClose = () => {
+    setActiveTaskId(null)
+    setNewTaskText(null)
+    setActiveTask(null)
+    setIsCreatingNew(false)
+    setIsLoadingTask(false)
+  }
 
   const contextValue = useMemo(() => ({
     setActiveTaskId,
     setNewTaskText,
-    activeTask,
+    activeTask: isCreatingNew ? null : activeTask,
     registerTaskUpdateCallback,
-    unregisterTaskUpdateCallback,
-  }), [activeTask, registerTaskUpdateCallback, unregisterTaskUpdateCallback]);
-
+    unregisterTaskUpdateCallback
+  }), [activeTask, isCreatingNew, registerTaskUpdateCallback, unregisterTaskUpdateCallback])
 
   return (
     <TaskModalContext.Provider value={contextValue}>
       {children}
-      <div className={styles.modalContainer}>
+
+      <div className={styles.drawerContainer}>
         <Drawer
           open={!!(activeTaskId || newTaskText !== null || isCreatingNew)}
           onOpenChange={(open) => {
@@ -186,9 +177,8 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
               handleModalClose();
             }
           }}
-          direction="right"
         >
-        <DrawerContent direction="right" overlayVariant="settings" className="overflow-hidden">
+        <DrawerContent direction="right" overlayVariant="settings">
           <div className={styles.header}>
             <DrawerTitle className={styles.title}>
               {(activeTask?.id && !activeTask.id.startsWith('draft-')) || (activeTaskId && !activeTaskId.startsWith('draft-')) ? 'EDIT TASK' : 'CREATE TASK'}
@@ -234,11 +224,13 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
             onClose={handleModalClose}
             onSave={handleModalSave}
             onCancel={handleCancelTask}
-            initialDescription={newTaskText || undefined}
+            initialText={newTaskText || undefined}
+            isCreating={isCreatingNew}
+            isLoadingTask={isLoadingTask}
           />
         </DrawerContent>
         </Drawer>
       </div>
     </TaskModalContext.Provider>
   )
-} 
+}

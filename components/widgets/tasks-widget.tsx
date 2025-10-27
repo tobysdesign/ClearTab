@@ -1,19 +1,24 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { AddButton } from "@/components/ui/add-button";
+import { AddButton } from "@cleartab/ui";
 import type { Task } from "@/shared/schema";
-import { WidgetHeader, WidgetContainer, WidgetContent, WidgetLoader } from "@cleartab/ui";
-import { EmptyState } from "@/components/ui/empty-state";
+import {
+  WidgetHeader,
+  WidgetContainer,
+  WidgetContent,
+  WidgetLoader,
+} from "@cleartab/ui";
+import { EmptyState } from "@cleartab/ui";
 import { useTaskModal } from "@/app/client-providers";
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@cleartab/ui";
 import { motion, AnimatePresence } from "framer-motion";
 import tasksStyles from "./tasks-widget.module.css";
 
-import { ClientOnly } from "@/components/ui/safe-motion";
+import { ClientOnly } from "@cleartab/ui";
 import { CloseIcon } from "@/components/icons";
-// Icons replaced with ASCII placeholders
+
 import { formatDateSmart } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
@@ -32,16 +37,16 @@ async function fetchTasks(): Promise<Task[]> {
 }
 
 async function updateTask(task: Partial<Task> & { id: string }): Promise<Task> {
-  console.log('updateTask called with:', task);
+  console.log("updateTask called with:", task);
   const res = await api.put(`/api/tasks`, task);
-  console.log('updateTask response status:', res.status);
+  console.log("updateTask response status:", res.status);
   if (!res.ok) {
     const errorBody = await res.json();
-    console.error('updateTask error:', errorBody);
+    console.error("updateTask error:", errorBody);
     throw new Error("Failed to update task");
   }
   const response = await res.json();
-  console.log('updateTask success:', response);
+  console.log("updateTask success:", response);
   return response.data;
 }
 
@@ -104,7 +109,13 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
 }
 
 export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
-  const { setActiveTaskId, setNewTaskText, activeTask, registerTaskUpdateCallback, unregisterTaskUpdateCallback } = useTaskModal();
+  const {
+    setActiveTaskId,
+    setNewTaskText,
+    activeTask,
+    registerTaskUpdateCallback,
+    unregisterTaskUpdateCallback,
+  } = useTaskModal();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -129,25 +140,31 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   }, [loadTasks]);
 
   // Handle granular task updates from modal
-  const handleTaskUpdate = useCallback((updatedTask: Task, operation: 'update' | 'create' | 'delete') => {
-    console.log('TasksWidget: handling task update', { updatedTask, operation });
+  const handleTaskUpdate = useCallback(
+    (updatedTask: Task, operation: "update" | "create" | "delete") => {
+      console.log("TasksWidget: handling task update", {
+        updatedTask,
+        operation,
+      });
 
-    setTasks(prev => {
-      switch (operation) {
-        case 'update':
-          return prev.map(task =>
-            task.id === updatedTask.id ? updatedTask : task
-          );
-        case 'create':
-          // Add new task to the beginning of the list
-          return [updatedTask, ...prev];
-        case 'delete':
-          return prev.filter(task => task.id !== updatedTask.id);
-        default:
-          return prev;
-      }
-    });
-  }, []);
+      setTasks((prev) => {
+        switch (operation) {
+          case "update":
+            return prev.map((task) =>
+              task.id === updatedTask.id ? updatedTask : task,
+            );
+          case "create":
+            // Add new task to the beginning of the list
+            return [updatedTask, ...prev];
+          case "delete":
+            return prev.filter((task) => task.id !== updatedTask.id);
+          default:
+            return prev;
+        }
+      });
+    },
+    [],
+  );
 
   // Register task update callback with modal
   useEffect(() => {
@@ -155,11 +172,15 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     return () => {
       unregisterTaskUpdateCallback(handleTaskUpdate);
     };
-  }, [handleTaskUpdate, registerTaskUpdateCallback, unregisterTaskUpdateCallback]);
+  }, [
+    handleTaskUpdate,
+    registerTaskUpdateCallback,
+    unregisterTaskUpdateCallback,
+  ]);
 
   const updateTaskLocal = useCallback(
     async (updatedTask: Partial<Task> & { id: string }) => {
-      console.log('updateTaskLocal called with:', updatedTask);
+      console.log("updateTaskLocal called with:", updatedTask);
 
       // Store original state for rollback
       const originalTasks = [...tasks];
@@ -171,19 +192,21 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
             task.id === updatedTask.id ? { ...task, ...updatedTask } : task,
           ),
         );
-        console.log('UI updated optimistically');
+        console.log("UI updated optimistically");
 
         // Update on server
         await updateTask(updatedTask);
-        console.log('Server update successful');
+        console.log("Server update successful");
       } catch (error) {
-        console.error('updateTaskLocal error:', error);
+        console.error("updateTaskLocal error:", error);
         // Rollback to original state immediately
         setTasks(originalTasks);
-        console.log('Rolled back to original state due to error');
+        console.log("Rolled back to original state due to error");
 
         // Show user-friendly error
-        alert(`Failed to update task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        alert(
+          `Failed to update task: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     },
     [tasks],
@@ -193,10 +216,10 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     try {
       // Delete from server first (pessimistic delete)
       await deleteTask(taskId);
-      
+
       // Only remove from UI if server deletion succeeded
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
-      
+
       // Show simple success toast
       sonnerToast.success("Task deleted", {
         duration: 3000,
@@ -205,12 +228,13 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
       // Reload on error to sync with server
       const data = await fetchTasks();
       setTasks(data);
-      
+
       // Show error toast
       sonnerToast.error("Failed to delete task", {
-        description: error instanceof Error ? error.message : "Please try again.",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
       });
-      
+
       throw error;
     }
   }, []);
@@ -262,12 +286,12 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   }
 
   function handleAddTask() {
-    console.log('[PERF] handleAddTask clicked at:', Date.now());
+    console.log("[PERF] handleAddTask clicked at:", Date.now());
     // Open modal immediately without creating task server-side
     // Task will be created on first save in the form
     // Use a space character instead of empty string to trigger drawer opening
-    setNewTaskText(' ');
-    console.log('[PERF] setNewTaskText called at:', Date.now());
+    setNewTaskText(" ");
+    console.log("[PERF] setNewTaskText called at:", Date.now());
   }
 
   // Function to handle creating a task from editor text
@@ -280,10 +304,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
       isCompleted: false,
       isHighPriority: false,
       content: {
-        ops: [
-          { insert: _text || "" },
-          { insert: "\n" }
-        ]
+        ops: [{ insert: _text || "" }, { insert: "\n" }],
       },
     });
   }
@@ -348,8 +369,8 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ x: -50, opacity: 0 }}
                             onClick={() => {
-                              console.log('Setting active task ID:', task.id);
-                              console.log('Full task object:', task);
+                              console.log("Setting active task ID:", task.id);
+                              console.log("Full task object:", task);
                               setActiveTaskId(task.id);
                             }}
                             className={cn(
@@ -393,7 +414,8 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                   <span
                                     className={cn(
                                       tasksStyles.taskDueDate,
-                                      new Date(task.dueDate) < new Date() && tasksStyles.taskDueDateOverdue
+                                      new Date(task.dueDate) < new Date() &&
+                                        tasksStyles.taskDueDateOverdue,
                                     )}
                                   >
                                     {formatDateSmart(task.dueDate)}

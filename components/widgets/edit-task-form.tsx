@@ -80,7 +80,9 @@ interface EditTaskFormProps {
   onClose?: () => void
   onSave?: (updatedTask: Task, operation: 'update' | 'create' | 'delete') => void
   onCancel?: () => void // Add cancel handler for deleting draft tasks
-  initialDescription?: string; // Add prop for initial description from editor selection
+  initialText?: string; // Add prop for initial description from editor selection
+  isCreating?: boolean;
+  isLoadingTask?: boolean; // Add loading state prop
 }
 
 const taskSchema = z.object({
@@ -98,8 +100,11 @@ export function EditTaskForm({
   onClose,
   onSave,
   onCancel,
-  initialDescription = ''
+  initialText = '',
+  isCreating = false,
+  isLoadingTask = false
 }: EditTaskFormProps) {
+  const initialDescription = initialText;
   const [isPending, startTransition] = useTransition();
   const [lastSaveResult, setLastSaveResult] = useState<any>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -248,8 +253,24 @@ export function EditTaskForm({
   return (
     <div className={styles.formContainer}>
       <div className={styles.formContent}>
-        <form className={styles.formFields}>
-          <FormField label="TITLE">
+        {isLoadingTask ? (
+          <div className={styles.formFields}>
+            <FormField label="TITLE">
+              <div className={styles.skeletonField}></div>
+            </FormField>
+            <div className={styles.skeletonDateRow}>
+              <FormField label="DUE BY">
+                <div className={styles.skeletonDateField}></div>
+              </FormField>
+              <div className={styles.skeletonPriorityField}></div>
+            </div>
+            <FormField label="DESCRIPTION">
+              <div className={styles.skeletonEditor}></div>
+            </FormField>
+          </div>
+        ) : (
+          <form className={styles.formFields}>
+            <FormField label="TITLE">
             <TextInput
               value={form.watch('title')}
               onChange={(value) => {
@@ -263,20 +284,24 @@ export function EditTaskForm({
           <FormRow>
             <FormField label="DUE BY">
               <div className="relative">
+                {/* Debug indicator */}
+                {datePickerOpen && <div style={{position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', padding: '4px', zIndex: 10000}}>Popover Open</div>}
                 <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <DateInput
                       value={form.watch('dueDate') ? formatDateSmart(form.watch('dueDate') as Date) : ''}
-                      onClick={() => setDatePickerOpen(true)}
+                      onClick={() => {
+                        console.log('DateInput clicked, setting datePickerOpen to true');
+                        setDatePickerOpen(true);
+                      }}
                       placeholder="28/07/25"
                     />
                   </PopoverTrigger>
                   <PopoverContent
-                    className={cn(styles.datePickerPopover, "md3-elevation-3")}
-                    style={{
-                      backgroundColor: 'var(--md-sys-color-surface-container-high)',
-                      border: '1px solid var(--md-sys-color-outline)'
-                    }}
+                    className={cn(styles.datePickerPopover)}
+                    sideOffset={8}
+                    align="start"
+                    style={{ zIndex: 9999 }}
                     onOpenAutoFocus={(e) => e.preventDefault()}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -342,13 +367,21 @@ export function EditTaskForm({
             }}
             label="Mark complete"
           />
-        </form>
+          </form>
+        )}
       </div>
-      <FormButtons
-        mode={task ? 'edit' : 'create'}
-        onPrimary={onClose}
-        onSecondary={onCancel || onClose}
-      />
+      {isLoadingTask ? (
+        <div className={styles.buttonSkeleton}>
+          <div className={styles.skeletonButton}></div>
+          <div className={styles.skeletonButton}></div>
+        </div>
+      ) : (
+        <FormButtons
+          mode={task ? 'edit' : 'create'}
+          onPrimary={onClose}
+          onSecondary={onCancel || onClose}
+        />
+      )}
     </div>
   );
 } 

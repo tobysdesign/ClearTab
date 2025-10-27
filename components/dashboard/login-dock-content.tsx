@@ -34,6 +34,7 @@ export function LoginDockContent({
             <div className="opacity-50">
                 <ShinyAiButton
                     className="cursor-not-allowed pointer-events-none"
+                    onClick={() => {}}
                 />
             </div>
 

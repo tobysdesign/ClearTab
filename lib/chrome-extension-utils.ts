@@ -3,41 +3,11 @@
  * Safely handle Chrome extension APIs with fallbacks for web environment
  */
 
-// Chrome extension API types
-interface ChromeRuntime {
-  id: string;
-  getURL: (path: string) => string;
-  sendMessage: (message: unknown, callback: (response: unknown) => void) => void;
-  lastError?: { message: string };
-  openOptionsPage: () => void;
-}
+type ChromeApi = typeof chrome;
 
-interface ChromeStorage {
-  local: {
-    get: (keys: string[], callback: (result: Record<string, unknown>) => void) => void;
-    set: (items: Record<string, unknown>, callback?: () => void) => void;
-  };
-  sync: {
-    get: (keys: string[], callback: (result: Record<string, unknown>) => void) => void;
-    set: (items: Record<string, unknown>, callback?: () => void) => void;
-  };
-}
-
-interface ChromeApi {
-  runtime: ChromeRuntime;
-  storage: ChromeStorage;
-}
-
-declare global {
-  interface Window {
-    chrome?: ChromeApi;
-  }
-}
-
-// Helper to safely access chrome API
 const getChromeApi = (): ChromeApi | null => {
   if (typeof globalThis !== 'undefined' && 'chrome' in globalThis) {
-    return (globalThis as { chrome: ChromeApi }).chrome;
+    return (globalThis as typeof globalThis & { chrome?: ChromeApi }).chrome ?? null;
   }
   return null;
 };
@@ -169,18 +139,19 @@ export const saveAudioToExtensionStorage = async (audioBlob: Blob, filename: str
   }
 };
 
+type StoredAudioPayload = { data?: string; filename?: string; timestamp?: number; type?: string } | null;
+
 export const getAudioFromExtensionStorage = async (key: string): Promise<Blob | null> => {
   if (!isExtension()) {
     return null;
   }
 
   try {
-    const audioData = await getStorage(key);
-    if (!audioData || !audioData.data) {
+    const audioData = (await getStorage(key)) as StoredAudioPayload;
+    if (!audioData?.data) {
       return null;
     }
 
-    // Convert base64 back to blob
     const response = await fetch(audioData.data);
     return await response.blob();
   } catch (error) {

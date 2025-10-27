@@ -34,11 +34,27 @@ export function TaskEditor({
   className,
   readOnly = false
 }: TaskEditorProps) {
+  // Use a ref to avoid re-renders on every keystroke
+  const contentRef = React.useRef(initialContent || EMPTY_QUILL_CONTENT)
+
+  // Update ref when initialContent changes
+  React.useEffect(() => {
+    if (initialContent) {
+      contentRef.current = initialContent
+    }
+  }, [initialContent])
+
+  const handleChange = React.useCallback((content: any) => {
+    contentRef.current = content
+    onChange?.(content)
+  }, [onChange])
+
   return (
     <div className={`${styles.taskEditorWrapper} ${className || ''}`}>
       <QuillEditor
-        value={initialContent || EMPTY_QUILL_CONTENT}
-        onChange={onChange}
+        key="stable-task-editor"
+        value={contentRef.current}
+        onChange={handleChange}
         onBlur={onBlur}
         placeholder={placeholder}
         readOnly={readOnly}

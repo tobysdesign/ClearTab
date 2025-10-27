@@ -1,13 +1,13 @@
 'use client'
 
-import { Button, type ButtonProps } from '@/components/ui/button'
+import { Button, type ButtonProps } from './button'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { AddIcon } from '@/components/icons'
+} from './tooltip'
+import { AddIcon } from '../../../../../components/icons/add'
 
 interface AddButtonProps extends ButtonProps {
   tooltip?: string

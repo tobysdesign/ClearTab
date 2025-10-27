@@ -1,5 +1,8 @@
 .container {
-  @apply relative rounded-[22px] h-full w-full;
+  position: relative;
+  border-radius: 22px;
+  height: 100%;
+  width: 100%;
   overflow: visible;
   background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
   border: 1px solid #323235;

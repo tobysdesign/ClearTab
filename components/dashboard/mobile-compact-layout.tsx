@@ -75,7 +75,6 @@ export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) 
       <div className={styles.listsSection}>
         <CollapsibleSection 
           title="Notes" 
-          defaultExpanded={expandedSection === 'notes'}
           isExpanded={expandedSection === 'notes'}
           onToggle={() => setExpandedSection('notes')}
         >

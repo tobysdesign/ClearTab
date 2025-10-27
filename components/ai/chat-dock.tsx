@@ -2,8 +2,8 @@
 
 // Icons replaced with ASCII placeholders
 import { useChatContext } from "@/hooks/use-chat-context"
-import { Dock } from "@/components/ui/dock"
-import { Button } from "@/components/ui/button"
+import { Dock } from "@cleartab/ui"
+import { Button } from "@cleartab/ui"
 import styles from "./chat-dock.module.css"
 
 export function ChatDock() {

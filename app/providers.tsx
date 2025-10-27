@@ -1,6 +1,6 @@
 "use client";
 
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@cleartab/ui";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import React from "react";
 import ChatOverlay from "@/components/ai/chat-overlay";
@@ -27,17 +27,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryProvider>
       <SupabaseAuthProvider>
-        <ClientProviders>
-          <LayoutProvider>
-            <TooltipProvider>
-              <ChatProvider>
+        <LayoutProvider>
+          <TooltipProvider>
+            <ChatProvider>
+              <ClientProviders>
                 <ChatOverlayWrapper>
                   {children}
                 </ChatOverlayWrapper>
-              </ChatProvider>
-            </TooltipProvider>
-          </LayoutProvider>
-        </ClientProviders>
+              </ClientProviders>
+            </ChatProvider>
+          </TooltipProvider>
+        </LayoutProvider>
       </SupabaseAuthProvider>
     </QueryProvider>
   );

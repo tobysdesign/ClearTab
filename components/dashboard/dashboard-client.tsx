@@ -251,15 +251,6 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
         </Suspense>
       </div>
 
-      {/* <DockContent
-        isVertical={isVertical}
-        showSearch={showSearch}
-        setShowSearch={setShowSearch}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-      /> */}
 
       {isDragging &&
         dropZones.map((zone) => {

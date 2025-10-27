@@ -1,31 +1,64 @@
 /* Settings Drawer Component Styles */
 
 .drawerContent {
-    @apply max-w-4xl mx-auto rounded-tl-lg rounded-tr-lg rounded-bl-none rounded-br-none border-0;
+    max-width: 56rem;
+    margin: 0 auto;
+    border-radius: 0.5rem 0.5rem 0 0;
+    border: 0;
 }
 
 .container {
-    @apply flex flex-col h-[85vh];
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
 }
 
 .grabHandle {
-    @apply flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing flex-shrink-0;
+    display: flex;
+    justify-content: center;
+    padding-top: 0.5rem;
+    padding-bottom: 0.25rem;
+    cursor: grab;
+    flex-shrink: 0;
+}
+
+.grabHandle:active {
+    cursor: grabbing;
 }
 
 .grabBar {
-    @apply w-12 h-1.5 rounded-full bg-[#242424];
+    width: 3rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: #242424;
 }
 
 .header {
-    @apply flex-shrink-0 flex items-center justify-between px-6 py-3;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
 }
 
 .title {
-    @apply text-lg font-medium text-white/80;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .closeButton {
-    @apply rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/10 transition-colors;
+    border-radius: 9999px;
+    height: 2rem;
+    width: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .closeIcon {
@@ -34,52 +67,82 @@
 }
 
 .scrollableContent {
-    @apply flex flex-1 overflow-hidden;
+    display: flex;
+    flex: 1;
+    overflow: hidden;
 }
 
 .sidebar {
-    @apply w-64 overflow-y-auto;
+    width: 16rem;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav {
-    @apply p-4;
+    padding: 1rem;
 }
 
 .navList {
-    @apply space-y-2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .navButton {
-    @apply w-full text-left p-3 transition-colors rounded;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
 .navButtonActive {
-    @apply bg-black/30 text-white;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navButtonInactive {
-    @apply text-[#bbbbbb] hover:text-white hover:bg-black/20;
+    color: #bbbbbb;
+}
+
+.navButtonInactive:hover {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .navButtonContent {
-    @apply flex flex-col;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .navButtonTitle {
-    @apply font-medium text-sm;
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
 }
 
 .navButtonDescription {
-    @apply text-xs text-[#5A5A5A] mt-1;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: #8d8d8d;
 }
 
 .mainContent {
-    @apply flex-1 overflow-y-auto;
+    flex: 1;
+    overflow-y: auto;
+    background-color: #1a1a1a;
 }
 
 .contentPanel {
     padding: 1.5rem;
     border-radius: 0.5rem 0.5rem 0 0;
     margin-right: 12px;
-    background-color: #2a2a2a;
+    background-color: #1a1a1a;
+    min-height: 100%;
 }

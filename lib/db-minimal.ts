@@ -3,6 +3,7 @@
 
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
+import * as schema from '@/shared/schema-tables'
 
 // Use connection string from environment variable
 const connectionString = process.env.DATABASE_URL
@@ -23,7 +24,7 @@ const client = postgres(connectionString, {
 })
 
 // Create drizzle database instance without full schema
-export const dbMinimal = drizzle(client)
+export const dbMinimal = drizzle(client, { schema })
 
 // Export postgres client for direct queries if needed
 export const pgClient = client

@@ -188,6 +188,7 @@ html {
     position: relative;
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
 }
 
 .dashboard-content {
@@ -196,6 +197,7 @@ html {
     right: 0;
     bottom: 0;
     left: 0;
+    overflow: hidden;
 }
 
 .drop-zone {
@@ -731,6 +733,7 @@ html {
     body {
         background-color: hsl(var(--color-background));
         color: hsl(var(--color-foreground));
+        overflow: hidden;
     }
 }
 
@@ -2199,4 +2202,153 @@ textarea::placeholder {
     font-size: 10px;
     font-weight: 300;
     color: #8d8d8d;
+}
+
+/* ===========================================
+   WIDGET CONTAINER CORE STYLES
+   These define the beautiful dark styling for all widgets
+   =========================================== */
+
+.widget-relative {
+    position: relative;
+}
+
+.widget-full-height {
+    height: 100%;
+}
+
+.widget-full-width {
+    width: 100%;
+}
+
+.widget-absolute {
+    position: absolute;
+}
+
+.widget-full {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.widget-background {
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgb(19, 19, 19) 4%, rgb(23, 21, 21) 100%);
+    border: 1px solid #323235;
+    box-shadow:
+        0px 8px 12px 6px rgba(0, 0, 0, 0.15),
+        0px 4px 4px rgba(0, 0, 0, 0.3);
+}
+
+.widget-flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-flex-1 {
+    flex: 1;
+}
+
+.widget-overflow-auto {
+    overflow: auto;
+}
+
+/* ===========================================
+   WIDGET HELPER CLASSES
+   Layout, flexbox, spacing, and utility classes
+   =========================================== */
+
+.widget-list-content {
+    padding: 2px 16px 24px 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.widget-tasks-content {
+    padding: 0;
+}
+
+.widget-notes-content {
+    padding: 52px 0 25px 36px;
+    margin-right: 24px;
+}
+
+.widget-flex {
+    display: flex;
+}
+
+.widget-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.widget-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.widget-flex-start {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.widget-gap-2 {
+    gap: 8px;
+}
+
+.widget-gap-3 {
+    gap: 8px;
+}
+
+.widget-gap-4 {
+    gap: 16px;
+}
+
+.widget-min-w-0 {
+    min-width: 0;
+}
+
+.widget-text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.widget-text-center {
+    text-align: center;
+}
+
+.widget-overflow-hidden {
+    overflow: hidden;
+}
+
+/* ===========================================
+   WIDGET HEADER & TITLE STYLES
+   =========================================== */
+
+.widget-header {
+    min-height: 40px;
+    padding: 8px 24px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    border-radius: 22px 22px 0 0;
+}
+
+.widget-title {
+    font-family: "Inter Display", sans-serif;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #bbbbbb;
+    white-space: nowrap;
+    overflow: visible;
+    text-align: left;
 }
