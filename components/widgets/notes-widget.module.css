@@ -103,7 +103,7 @@
         display: none !important;
     }
 
-    .notesListContent {
+    .ListContent {
         padding: 0 0.5rem !important;
         display: flex !important;
         flex-direction: column !important;
@@ -125,7 +125,7 @@
     justify-content: center;
 }
 
-.resizablePanels .resizableLeft:global(.collapsed) .notesListContent {
+.resizablePanels .resizableLeft:global(.collapsed) .ListContent {
     padding: 0 0.5rem;
     display: flex;
     flex-direction: column;
@@ -141,13 +141,7 @@
     overflow-y: auto;
 }
 
-.notesListContent {
-    /* box model */
-    padding: 0 0.75rem;
-
-    /* state */
-    transition: padding 150ms ease-out;
-}
+/* ListContent styles moved to widget-globals.css */
 
 /* Notes Widget: Editor Panel */
 .notesEditorPanel {
@@ -210,8 +204,8 @@
 
     /* typography */
     font-family: "Inter Display", sans-serif;
-    font-weight: 500;
-    font-size: 18px;
+    font-weight: 700;
+    font-size: 14px;
     line-height: 22px;
     color: #d2d2d2;
     word-break: break-words;
@@ -384,4 +378,6 @@
     padding: 3px 0px;
     width: 20px;
 }
-.ql-editor {padding-left: 0 !important}
+.ql-editor {
+    padding-left: 0 !important;
+}

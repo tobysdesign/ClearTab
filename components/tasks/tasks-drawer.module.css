@@ -10,7 +10,7 @@
   font-weight: 400;
 }
 
-.modalContainer :global([data-vaul-drawer][data-vaul-drawer-direction="right"]) {
+.drawerContainer :global([data-vaul-drawer][data-vaul-drawer-direction="right"]) {
   margin-top: 80px !important; /* Space at top of screen */
   margin-bottom: 0 !important;
   height: auto !important; /* Remove fixed height */

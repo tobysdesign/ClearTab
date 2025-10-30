@@ -242,3 +242,295 @@
     font-size: 14px;
     text-align: center;
 }
+
+/* Countdown Card View */
+.countdownCard {
+    background: #1a1a1a;
+    border-radius: 24px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+}
+
+.countdownCardTitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.menuContainer {
+    position: relative;
+    display: inline-block;
+}
+
+.countdownCardMenu {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.countdownCardMenu:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.menuDropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 4px 0;
+    min-width: 100px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menuItem {
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-align: left;
+}
+
+.menuItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.deleteItem {
+    color: #ef4444;
+}
+
+.deleteItem:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.countdownName {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    margin-top: 16px;
+}
+
+.countdownEventName {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.countdownDetails {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.countdownDateInfo {
+    display: flex;
+    gap: 24px;
+}
+
+.countdownField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.countdownFieldLabel {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.countdownFieldValue {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.countdownDaysField {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.countdownDaysLabel {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.countdownDaysValue {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.buttonRow {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.buttonRow .button {
+    flex: 1;
+}
+
+/* Skeleton loading states */
+.skeleton {
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeletonContainer {
+    padding: 20px 24px 24px 24px;
+    background: #1a1a1a;
+    border-radius: 0 0 24px 24px;
+    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.skeletonTab {
+    height: 40px;
+    flex: 1;
+    border-radius: 24px 24px 0 0;
+}
+
+.skeletonLabel {
+    height: 12px;
+    width: 100px;
+}
+
+.skeletonInput {
+    height: 40px;
+    width: 100%;
+}
+
+.skeletonHalfInput {
+    height: 32px;
+    width: 120px;
+}
+
+.skeletonRow {
+    display: flex;
+    gap: 16px;
+}
+
+.skeletonButton {
+    height: 40px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.skeletonCard {
+    background: #1a1a1a;
+    border-radius: 24px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+}
+
+.skeletonCardTitle {
+    height: 12px;
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.skeletonCardMenu {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    height: 20px;
+    width: 20px;
+    border-radius: 4px;
+}
+
+.skeletonEventTitle {
+    height: 18px;
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.skeletonCardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.skeletonCardLeft {
+    display: flex;
+    gap: 24px;
+}
+
+.skeletonCardField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.skeletonFieldLabel {
+    height: 10px;
+    width: 30px;
+}
+
+.skeletonFieldValue {
+    height: 14px;
+    width: 60px;
+}
+
+.skeletonDaysRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.skeletonDaysLabel {
+    height: 10px;
+    width: 60px;
+}
+
+.skeletonDaysValue {
+    height: 24px;
+    width: 80px;
+}

@@ -24,10 +24,20 @@ export const ActionsMenu = React.memo(function ActionsMenu({ onDelete, isNewNote
     onDelete()
   }
 
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setOpen(!open)
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost-icon" size="icon">
+        <Button
+          variant="ghost-icon"
+          size="icon"
+          onClick={handleTriggerClick}
+        >
           <span className={styles.srOnly}>Open menu</span>
           <MoreActionsIcon size={16} />
         </Button>

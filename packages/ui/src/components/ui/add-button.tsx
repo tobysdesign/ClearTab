@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './tooltip'
-import { AddIcon } from '../../../../../components/icons/add'
+import { AddIcon } from '@/components/icons'
 
 interface AddButtonProps extends ButtonProps {
   tooltip?: string

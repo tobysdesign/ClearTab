@@ -4,7 +4,7 @@ import { ComponentPropsWithoutRef, ReactNode } from 'react';
 import styles from './bento-grid.module.css'
 
 import { Button } from "./button";
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 
 interface BentoGridProps extends ComponentPropsWithoutRef<"div"> {
   children: ReactNode;

@@ -20,7 +20,7 @@
       }
     ],
     "baseUrl": ".",
-    "types": ["@types/chrome", "node"],
+    "types": ["node"],
     "paths": {
       "@/components/ui/*": ["packages/ui/src/components/ui/*"],
       "@/*": ["./*"],

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 
 export interface WidgetHeaderProps
   extends React.HTMLAttributes<HTMLDivElement> {

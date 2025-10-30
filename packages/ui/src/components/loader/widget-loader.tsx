@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 import { BrandedLoader, type BrandedLoaderSize } from "./branded-loader";
 import styles from "./widget-loader.module.css";
 

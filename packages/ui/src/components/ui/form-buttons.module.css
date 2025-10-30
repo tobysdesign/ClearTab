@@ -1,6 +1,7 @@
 .buttonContainer {
   padding: 1rem;
   margin-top: 2rem;
+  background: transparent;
 }
 
 .buttonRow {
@@ -44,21 +45,20 @@
 }
 
 .doneButton {
-  background: #454545 !important;
-  color: #D2D2D2 !important;
-  border: 1px solid #3E3E3E;
+  background: white !important;
+  color: #1a1a1a !important;
+  border: none;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 12px 24px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .doneButton:hover {
-  background: #414141 !important;
-  border-color: #4D4D4D;
+  background: #f0f0f0 !important;
 }
 
 .checkboxField {

@@ -2,6 +2,18 @@
   /* Required class for motion div */
 }
 
+.combinedContainer {
+  display: flex;
+  height: 100%;
+  position: relative;
+}
+
+.rightColumn {
+  flex: 1;
+  min-width: 200px;
+}
+
+
 .resizeHandleHorizontal {
   /* box model */
   width: 1px;

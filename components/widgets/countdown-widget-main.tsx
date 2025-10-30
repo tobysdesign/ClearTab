@@ -27,7 +27,7 @@ import {
 import { useEffect, useState, useLayoutEffect, useRef } from "react";
 // import styles from "./widget.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
-import { ClientOnly } from "@cleartab/ui";
+import { ClientOnly } from "@/components/ui/safe-motion";
 import { useRouter } from "next/navigation";
 // Icons replaced with ASCII placeholders
 

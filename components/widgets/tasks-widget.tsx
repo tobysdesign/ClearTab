@@ -10,7 +10,7 @@ import {
   WidgetLoader,
 } from "@cleartab/ui";
 import { EmptyState } from "@cleartab/ui";
-import { useTaskModal } from "@/app/client-providers";
+import { useTaskModal } from "@/hooks/use-task-modal";
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
 import { Checkbox } from "@cleartab/ui";
 import { motion, AnimatePresence } from "framer-motion";
@@ -324,13 +324,13 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   }
 
   return (
-    <WidgetContainer>
+    <WidgetContainer className="tasks-widget">
       <WidgetHeader title="Tasks">
         <AddButton onClick={handleAddTask} />
       </WidgetHeader>
       <WidgetContent>
         <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>
-          <div className={tasksStyles.tasksListContent}>
+          <div className="ListContent">
             <div className={tasksStyles.tasksEmpty}>
               {tasks.length === 0 ? (
                 <EmptyState

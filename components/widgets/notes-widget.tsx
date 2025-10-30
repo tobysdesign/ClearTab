@@ -839,7 +839,7 @@ export function NotesWidget() {
   }, []);
 
   return (
-    <WidgetContainer data-widget="notes">
+    <WidgetContainer className="notes-widget" data-widget="notes">
       <link rel="stylesheet" href="/styles/quill-custom.css" />
       <ResizablePanels
         defaultWidth={300}
@@ -856,7 +856,7 @@ export function NotesWidget() {
             {isLoadingNotes ? (
               <WidgetLoader />
             ) : notes.length > 0 || activeNote ? (
-              <div className={notesStyles.notesListContent}>
+              <div className="ListContent">
                 <AnimatePresence>
                   {/* Show the active draft note (should be only one) */}
                   {activeNote && activeNote.id?.startsWith("draft-") && (

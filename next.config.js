@@ -12,25 +12,10 @@ const nextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
-  transpilePackages: ["@cleartab/ui"],
   experimental: {
-    optimizePackageImports: [
-      "@tanstack/react-query",
-      "framer-motion",
-      "react-resizable-panels",
-      "date-fns",
-      "sonner",
-      "@supabase/supabase-js"
-    ],
+    optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
   },
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
+  turbopack: {},
   typedRoutes: false,
   reactStrictMode: true,
   env: {
@@ -118,15 +103,8 @@ const nextConfig = {
       // Let dynamic imports handle the optimization instead
     }
 
-    const path = require("path");
-
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@cleartab/ui": path.resolve(__dirname, "packages/ui/src"),
-      "@/components/ui": path.resolve(
-        __dirname,
-        "packages/ui/src/components/ui",
-      ),
     };
 
     // Note: Removed optimization.usedExports as it conflicts with Next.js 15's cacheUnaffected

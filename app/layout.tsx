@@ -1,46 +1,18 @@
 import "@/app/globals.css";
+import "@/packages/ui/src/styles/index.css";
 
 import type { Metadata } from "next";
-import { Inter, Tinos } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { interDisplay } from "./fonts";
 import Providers from "./providers";
 import React, { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
-import { CharcoalWave } from "@cleartab/ui";
-import { Toaster as DefaultToaster } from "@cleartab/ui";
+import { CharcoalWave } from "@/components/ui/charcoal-wave";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
-import Script from "next/script";
-import { BrandedLoader } from "@cleartab/ui";
 import { SettingsDrawer } from "@/components/settings/settings-drawer";
+import { TasksDrawer } from "@/components/tasks/tasks-drawer";
+import { TaskModalProvider } from "@/hooks/use-task-modal";
 import styles from "./layout.module.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter-display",
-  display: "swap",
-});
-
-const tinos = Tinos({
-  subsets: ["latin"],
-  variable: "--font-tinos",
-  weight: ["400", "700"],
-  display: "swap",
-});
-
-// For extension builds, we'll conditionally disable metadata
-const isExtension = process.env.IS_EXTENSION === "true";
-
-// Only export metadata for non-extension builds
-export const metadata: Metadata = isExtension
-  ? ({} as Metadata)
-  : {
-      title: "ClearTab",
-      description: "Productivity at your finger tips.",
-      icons: {
-        icon: "/dibs.svg",
-      },
-    };
 
 export default function RootLayout({
   children,
@@ -48,96 +20,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Preload critical icons */}
-        <link
-          rel="preload"
-          href="/icons/si_info-line.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-        <link
-          rel="preload"
-          href="/icons/si_mic-fill.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-        <link
-          rel="preload"
-          href="/icons/si_pause-fill.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-        <link
-          rel="preload"
-          href="/icons/si_record-fill.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-        <link
-          rel="preload"
-          href="/icons/pu.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-      </head>
-      <body className={cn(inter.variable, tinos.variable)}>
+    <html lang="en" className={interDisplay.variable} suppressHydrationWarning>
+      <body className={interDisplay.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
           storageKey="theme"
+          disableTransitionOnChange
         >
-          <Providers>
-            <div className={styles.container}>
-              <CharcoalWave />
-              <main className={styles.mainContent}>
-                <Suspense fallback={<Loading />}>{children}</Suspense>
-              </main>
-            </div>
-            <SettingsDrawer />
-            <DefaultToaster />
-            <SonnerToaster />
-          </Providers>
+          <TaskModalProvider>
+            <Providers>
+              <div className={styles.container}>
+                <CharcoalWave />
+                <main className={styles.mainContent}>
+                  <Suspense fallback={<Loading />}>{children}</Suspense>
+                </main>
+              </div>
+              <SettingsDrawer />
+              <TasksDrawer />
+              <SonnerToaster />
+            </Providers>
+          </TaskModalProvider>
         </ThemeProvider>
-        {/* Filter out noisy preload warnings in development */}
-        {process.env.NODE_ENV === "development" && (
-          <Script id="filter-preload-warnings" strategy="beforeInteractive">
-            {`
-              (function() {
-                const originalWarn = console.warn;
-                const originalLog = console.log;
-                const filterPattern = /preload|woff2|was preloaded using link/i;
-
-                console.warn = function(...args) {
-                  const message = String(args[0] || '');
-                  if (filterPattern.test(message)) return;
-                  originalWarn.apply(console, args);
-                };
-
-                console.log = function(...args) {
-                  const message = String(args[0] || '');
-                  if (filterPattern.test(message)) return;
-                  originalLog.apply(console, args);
-                };
-              })();
-            `}
-          </Script>
-        )}
-        {/* Only include Hotjar for non-extension builds */}
-        {!isExtension && (
-          <Script id="hotjar-script">
-            {`
-              (function(h,o,t,j,a,r){ h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-              h._hjSettings={hjid:3890201,hjsv:6};
-              a=o.getElementsByTagName('head')[0];
-              r=o.createElement('script');r.async=1;
-              r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-              a.appendChild(r); })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-            `}
-          </Script>
-        )}
       </body>
     </html>
   );
