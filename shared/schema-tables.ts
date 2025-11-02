@@ -390,3 +390,30 @@ export const memories = pgTable(
     }),
   }),
 ).enableRLS();
+
+export const appSettings = pgTable(
+  "app_settings",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateUUID()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" })
+      .unique(),
+    config: jsonb("config").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    rls: pgPolicy("app_settings RLS policy", {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: "all",
+    }),
+  }),
+).enableRLS();

@@ -36,6 +36,13 @@
       "when": 1760908833116,
       "tag": "0004_wakeful_captain_britain",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1762112289525,
+      "tag": "0005_skinny_radioactive_man",
+      "breakpoints": true
     }
   ]
 }

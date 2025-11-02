@@ -401,6 +401,33 @@ export const memories = pgTable(
   }),
 ).enableRLS();
 
+export const appSettings = pgTable(
+  "app_settings",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateUUID()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" })
+      .unique(),
+    config: jsonb("config").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    rls: pgPolicy("app_settings RLS policy", {
+      using: sql`auth.uid() = ${table.userId}`,
+      withCheck: sql`auth.uid() = ${table.userId}`,
+      to: authenticatedRole,
+      for: "all",
+    }),
+  }),
+).enableRLS();
+
 export type User = typeof user.$inferSelect;
 
 export interface Note {
@@ -418,6 +445,7 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type EmotionalMetadata = typeof emotionalMetadata.$inferSelect;
 export type MemoryUsage = typeof memoryUsage.$inferSelect;
 export type Memory = typeof memories.$inferSelect;
+export type AppSettings = typeof appSettings.$inferSelect;
 export type Account = typeof account.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type ConnectedAccount = typeof connectedAccounts.$inferSelect;
