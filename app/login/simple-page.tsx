@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
-import { CharcoalWave } from "@/components/ui/charcoal-wave";
+
 import styles from "./page.module.css";
 
 // Simple Login Widget Component
@@ -64,9 +64,6 @@ function SimpleLoginWidget() {
 export default function SimpleLoginPage() {
   return (
     <div className={styles.container}>
-      {/* Background shader */}
-      <CharcoalWave />
-
       {/* Simple centered login */}
       <div style={{
         display: 'flex',

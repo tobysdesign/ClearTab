@@ -849,3 +849,7 @@ body.dragging *:not(input):not(textarea):not([contenteditable="true"]) {
   transition: all 0.2s ease-in-out;
   box-shadow: inset 0 0 0 2px hsl(var(--primary));
 }
+
+[data-vaul-drawer][data-vaul-drawer-direction="bottom"]::after {
+  display: none !important;
+}

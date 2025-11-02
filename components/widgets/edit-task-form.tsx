@@ -7,17 +7,11 @@ import type { Task } from '@/shared/schema'
 import dynamic from 'next/dynamic'
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from '@/shared/schema'
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-// Removed CalendarIcon as it's not used directly in JSX
-import { formatDateSmart } from '@/lib/date-utils'
-import { Calendar } from '@/components/ui/calendar'
-import { cn } from '@/lib/utils'
+// Removed Popover components and formatDateSmart as they're no longer needed
+import { DatePicker } from '@/components/ui/date-picker'
 import { TaskEditor } from '@/components/ui/task-editor'
-import { FormField, FormRow, TextInput, DateInput, PriorityToggle } from '@/components/ui/form-field'
+import { FormField, FormRow, PriorityToggle } from '@/components/ui/form-field'
+import { PopoverInput } from '@/components/ui/popover-input'
 import { FormButtons, CheckboxField } from '@/components/ui/form-buttons'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -107,7 +101,7 @@ export function EditTaskForm({
   const initialDescription = initialText;
   const [isPending, startTransition] = useTransition();
   const [lastSaveResult, setLastSaveResult] = useState<any>(null);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
+
 
   // Initialize content with either the task content or the selected text from editor
   // Use useMemo to prevent recreating on every render
@@ -271,69 +265,28 @@ export function EditTaskForm({
         ) : (
           <form className={styles.formFields}>
             <FormField label="TITLE">
-            <TextInput
-              value={form.watch('title')}
-              onChange={(value) => {
-                form.setValue('title', value, { shouldDirty: true });
-                handleFormChange();
-              }}
-              placeholder="Enter task title"
-            />
-          </FormField>
+              <PopoverInput
+                value={form.watch('title')}
+                onChange={(value) => {
+                  form.setValue('title', value, { shouldDirty: true });
+                  handleFormChange();
+                }}
+                placeholder="Enter task title"
+                icon="📝"
+              />
+            </FormField>
 
           <FormRow>
             <FormField label="DUE BY">
-              <div className="relative">
-                {/* Debug indicator */}
-                {datePickerOpen && <div style={{position: 'fixed', top: 0, left: 0, background: 'red', color: 'white', padding: '4px', zIndex: 10000}}>Popover Open</div>}
-                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <DateInput
-                      value={form.watch('dueDate') ? formatDateSmart(form.watch('dueDate') as Date) : ''}
-                      onClick={() => {
-                        console.log('DateInput clicked, setting datePickerOpen to true');
-                        setDatePickerOpen(true);
-                      }}
-                      placeholder="28/07/25"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className={cn(styles.datePickerPopover)}
-                    sideOffset={8}
-                    align="start"
-                    style={{ zIndex: 9999 }}
-                    onOpenAutoFocus={(e) => e.preventDefault()}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={form.watch('dueDate') || undefined}
-                      onSelect={(date) => {
-                        form.setValue('dueDate', date || null, { shouldDirty: true });
-                        handleFormChange(true);
-                        setDatePickerOpen(false);
-                      }}
-                      className="rounded-md"
-                      initialFocus
-                    />
-                    {form.watch('dueDate') && (
-                      <div className={styles.datePickerClearButton}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            form.setValue('dueDate', null, { shouldDirty: true });
-                            handleFormChange(true);
-                            setDatePickerOpen(false);
-                          }}
-                          className="w-full text-sm text-red-400 hover:text-red-300 py-1"
-                        >
-                          Remove date
-                        </button>
-                      </div>
-                    )}
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <DatePicker
+                date={form.watch('dueDate') || undefined}
+                onSelect={(date) => {
+                  form.setValue('dueDate', date || null, { shouldDirty: true });
+                  handleFormChange(true);
+                }}
+                placeholder="28/07/25"
+                className={styles.datePicker}
+              />
             </FormField>
 
             <PriorityToggle

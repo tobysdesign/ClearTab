@@ -29,9 +29,10 @@ import { EmptyState } from "@cleartab/ui";
 import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
 import { cn } from "@/lib/utils";
-import { ActionsMenu } from "@cleartab/ui";
+import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { useToast } from "@cleartab/ui";
 import { toast as sonnerToast } from "sonner";
+import { MoreActionsIcon } from "@/components/icons";
 // import { useDebounce } from "@/hooks/use-debounce";
 // import { api } from "@/lib/api-client";
 
@@ -159,7 +160,7 @@ function normalizeNoteContent(
     try {
       return JSON.parse(content);
     } catch (error) {
-      console.error("Failed to parse note content:", error);
+      // console.error("Failed to parse            :", error);
       return EMPTY_QUILL_CONTENT;
     }
   }
@@ -947,10 +948,20 @@ export function NotesWidget() {
                   </div>
                   {/* Actions Menu - Tab Index 3 */}
                   <div tabIndex={2} className={notesStyles.notesActions}>
-                    <ActionsMenu
-                      onDelete={handleDeleteActiveNote}
-                      isNewNote={isNewNote}
-                    />
+                    <SimpleDropdown
+                      trigger={
+                        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+                          <MoreActionsIcon size={16} />
+                        </button>
+                      }
+                    >
+                      <SimpleDropdownItem
+                        onClick={handleDeleteActiveNote}
+                        disabled={isNewNote}
+                      >
+                        Delete
+                      </SimpleDropdownItem>
+                    </SimpleDropdown>
                   </div>
                 </div>
               </div>

@@ -1,49 +1,48 @@
 .panelMotion {
-  /* Required class for motion div */
+    font-weight: normal; /* Required class for motion div */
 }
 
 .combinedContainer {
-  display: flex;
-  height: 100%;
-  position: relative;
+    display: flex;
+    height: 100%;
+    position: relative;
 }
 
 .rightColumn {
-  flex: 1;
-  min-width: 200px;
+    flex: 1;
+    min-width: 200px;
 }
 
-
 .resizeHandleHorizontal {
-  /* box model */
-  width: 1px;
-  margin-left: 8px;
-  margin-right: 8px;
+    /* box model */
+    width: 1px;
+    margin-left: 8px;
+    margin-right: 8px;
 
-  /* visual */
-  background-color: hsl(var(--border));
+    /* visual */
+    background-color: hsl(var(--border));
 
-  /* state */
-  transition: colors 0.3s ease-out;
+    /* state */
+    transition: colors 0.3s ease-out;
 }
 
 .resizeHandleHorizontal:hover {
-  background-color: #FF4F4F;
+    background-color: #ff4f4f;
 }
 
 .resizeHandleVertical {
-  /* box model */
-  height: 1px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+    /* box model */
+    height: 1px;
+    margin-top: 8px;
+    margin-bottom: 8px;
 
-  /* visual */
-  background-color: hsl(var(--border));
+    /* visual */
+    background-color: hsl(var(--border));
 
-  /* state */
-  transition: colors 0.3s ease-out;
+    /* state */
+    transition: colors 0.3s ease-out;
 }
 
 .resizeHandleVertical:hover {
-  background-color: #FF4F4F;
+    background-color: #ff4f4f;
 }

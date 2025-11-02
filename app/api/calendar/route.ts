@@ -128,7 +128,7 @@ export async function GET(_request: NextRequest) {
       } catch (error) {
         if (isAuthError(error)) {
           if (primaryAuth.refreshToken) {
-            console.log('Access token expired, attempting to refresh...');
+            console.log('Primary account: Access token expired, attempting to refresh...');
             try {
               const refreshedTokens = await googleApiService.refreshAccessToken(primaryAuth.refreshToken);
 
@@ -140,23 +140,19 @@ export async function GET(_request: NextRequest) {
                 .where(eq(userTable.id, dbUser.id));
 
               events = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
-              console.log('Successfully refreshed token and fetched calendar events');
+              console.log('Successfully refreshed primary token and fetched calendar events');
             } catch (refreshError) {
-              console.error('Failed to refresh access token:', refreshError);
-              throw error;
+              console.error('Failed to refresh primary access token:', refreshError);
+              // Don't throw error here - fall through to try connected accounts instead
+              console.log('Primary account refresh failed, will try connected accounts instead');
             }
           } else {
-            console.error('No refresh token available to refresh expired access token');
-            return NextResponse.json({
-              error: "Calendar authentication expired",
-              errorType: "AUTH_EXPIRED",
-              message: `Calendar access for ${dbUser.email || 'your account'} has expired. Please reconnect to view your events.`,
-              userEmail: dbUser.email,
-            }, { status: 401 });
+            console.log('Primary account: No refresh token available, will try connected accounts instead');
           }
         } else {
           console.error("Error fetching primary calendar:", error);
-          throw error;
+          // Don't throw error here - fall through to try connected accounts instead
+          console.log('Primary account error, will try connected accounts instead');
         }
       }
     }

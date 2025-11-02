@@ -9,9 +9,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { CharcoalWave } from "@/components/ui/charcoal-wave";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
-import { SettingsDrawer } from "@/components/settings/settings-drawer";
-import { TasksDrawer } from "@/components/tasks/tasks-drawer";
+import dynamic from "next/dynamic";
 import { TaskModalProvider } from "@/hooks/use-task-modal";
+
+const SettingsDrawer = dynamic(
+  () => import("@/components/settings/settings-drawer").then((mod) => ({ default: mod.SettingsDrawer })),
+  { loading: () => null }
+);
+
+const TasksDrawer = dynamic(
+  () => import("@/components/tasks/tasks-drawer").then((mod) => ({ default: mod.TasksDrawer })),
+  { loading: () => null }
+);
 import styles from "./layout.module.css";
 
 export default function RootLayout({

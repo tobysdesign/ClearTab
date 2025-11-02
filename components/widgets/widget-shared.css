@@ -14,7 +14,7 @@
 [class*="Widget"],
 [id*="widget"],
 [id*="Widget"] {
-  overflow: hidden !important;
+  overflow: hidden;
   border-radius: var(--widget-border-radius);
 }
 
@@ -43,7 +43,7 @@
   background: linear-gradient(180deg, #1F1F1F 0%, #161515 100%);
   border: 1px solid rgba(50, 50, 53, 0.6);
   /* Critical: both border-radius and overflow on the same container */
-  overflow: hidden !important; /* Force overflow hidden with !important */
+  overflow: hidden;
   /* Shadow on this container with border-radius */
   box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.25);
 }
@@ -68,11 +68,11 @@
 }
 
 /* Apply to all widgets to ensure consistency */
-[class*="widget"], 
+[class*="widget"],
 [class*="Widget"],
 [class*="-widget"],
 [class*="-Widget"] {
-  overflow: hidden !important;
+  overflow: hidden;
 }
 
 /* Special fix for weather widget */
@@ -80,8 +80,10 @@
 .calendar-widget,
 .date-widget,
 .events-widget {
-  overflow: hidden !important;
+  overflow: hidden;
 }
+
+
 
 .listItem {
   display: flex;

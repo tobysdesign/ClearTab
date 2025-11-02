@@ -1,0 +1,401 @@
+/* Shared settings surface styles */
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 28px;
+    border-radius: 20px;
+    background: #191919;
+}
+
+.cardToolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.cardNote {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    max-width: 420px;
+    line-height: 1.45;
+}
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fieldGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.inlineFieldRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.fieldGrow {
+    flex: 1 1 220px;
+    min-width: 220px;
+    width: auto;
+}
+
+.fieldAuto {
+    flex: 0 0 auto;
+    justify-self: start;
+    width: auto;
+}
+
+.fieldAuto .input,
+.fieldAuto .inputSelect,
+.fieldAuto .inputGroup {
+    width: auto;
+}
+
+.inlineActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.innerCard {
+    padding: 18px 20px;
+    border-radius: 16px;
+    background: #222;
+}
+
+.fieldNote {
+    grid-column: 1 / -1;
+}
+
+.label {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5a5a5a;
+    margin-bottom: 4px;
+}
+
+.fieldDescription {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.45;
+}
+
+.controlSurface {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 18, 18, 0.88);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.inputSelect {
+    width: 100%;
+    height: 42px;
+    padding: 0 40px 0 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 18, 18, 0.88);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.4) 50%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.4) 50%, transparent 50%);
+    background-position:
+        calc(100% - 22px) 50%,
+        calc(100% - 16px) 50%;
+    background-size:
+        6px 6px,
+        6px 6px;
+    background-repeat: no-repeat;
+}
+
+.selectAuto {
+    width: auto;
+    min-width: 140px;
+}
+
+.fieldAuto .inputSelect {
+    width: auto;
+}
+
+.input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 18, 18, 0.92);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+}
+
+.input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.inputAuto {
+    width: auto;
+    min-width: 140px;
+}
+
+.fieldAuto .input {
+    width: auto;
+}
+
+.inputGroup {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 18, 18, 0.92);
+    overflow: hidden;
+}
+
+.inputGroup:focus-within {
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.inputGroupIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.inputGroupField {
+    flex: 1;
+    border: none;
+    background: transparent;
+    height: 100%;
+    padding: 0 14px 0 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+}
+
+.inputGroupField:focus {
+    outline: none;
+}
+
+.rowList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rowListHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) auto auto;
+    gap: 2px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 16px;
+    background: #222;
+}
+
+.rowMeta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.rowTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #c4c4c4;
+}
+
+.rowDescription {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 2px;
+}
+
+.rowActions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(125, 125, 125, 0.3);
+    color: #c4c4c4;
+    font-size: 8npx;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rowLabelLine {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.rowLabelLine .label {
+    margin-bottom: 0;
+    height: 16px;
+}
+
+.primaryBadge {
+    border-radius: 3px;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 40px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 999px;
+    background: #2b2b2b !important;
+    border: 1px solid #2e2e2e !important;
+    color: rgba(255, 255, 255, 0.68) !important;
+    padding: 0 18px;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.button:hover {
+    background: #333333 !important;
+    border-color: #3a3a3a !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
+.button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.32);
+    outline-offset: 2px;
+}
+
+.buttonIcon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.buttonPill {
+    padding: 0 20px;
+}
+
+.buttonSubtle {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: rgba(255, 255, 255, 0.68) !important;
+}
+
+.buttonSubtle:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+.buttonSubtle:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.32);
+    outline-offset: 2px;
+}
+
+.linkRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.toggleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.compactNotice {
+    font-size: 14px;
+    color: #c4c4c4;
+}
+
+.formActions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
+.menuDanger {
+    color: #f87171;
+}
+
+.menuDanger[data-highlighted] {
+    background: rgba(248, 113, 113, 0.14);
+    color: #fca5a5;
+}
+.cardTitle {
+    display: none;
+}
+
+.cardSubtitle {
+    display: none;
+}

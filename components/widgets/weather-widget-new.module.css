@@ -5,6 +5,78 @@
     container-type: size;
 }
 
+/* Container query for medium sizes */
+@container (min-width: 250px) {
+  .bigTemp {
+    font-size: 52px;
+  }
+
+  .tempRange {
+    font-size: 16px;
+  }
+
+  .weatherIconContainer {
+    transform: scale(0.6);
+  }
+
+  .conditionText {
+    font-size: 14px;
+  }
+
+  .forecastDay {
+    padding: 10px 6px;
+  }
+
+  .forecastDayLabel {
+    font-size: 12px;
+  }
+
+  .forecastIcon {
+    transform: scale(0.7);
+    height: 36px;
+  }
+
+  .forecastTemp {
+    font-size: 14px;
+  }
+}
+
+/* Container query for large sizes */
+@container (min-width: 350px) {
+  .bigTemp {
+    font-size: 56px;
+  }
+
+  .tempRange {
+    font-size: 18px;
+  }
+
+  .weatherIconContainer {
+    transform: scale(0.7);
+  }
+
+  .conditionText {
+    font-size: 16px;
+  }
+
+  .forecastDay {
+    padding: 12px 8px;
+  }
+
+  .forecastDayLabel {
+    font-size: 14px;
+  }
+
+  .forecastIcon {
+    transform: scale(0.8);
+    height: 40px;
+  }
+
+  .forecastTemp {
+    font-size: 16px;
+  }
+}
+
 /* Container query for small weather widget */
 @container (max-width: 200px) {
   .card {
@@ -42,6 +114,31 @@
 
   .forecastTemp {
     font-size: 10px;
+  }
+
+  .forecastGrid {
+    gap: 2px;
+  }
+}
+
+/* Container query for very small weather widget */
+@container (max-width: 150px) {
+  .forecastGrid {
+    justify-content: space-around;
+    gap: 1px;
+  }
+
+  .forecastDay {
+    padding: 2px 1px;
+    min-width: 20px;
+  }
+
+  .forecastDayLabel {
+    font-size: 8px;
+  }
+
+  .forecastTemp {
+    font-size: 9px;
   }
 }
 
@@ -208,6 +305,7 @@ text-align:left;
     align-items: center;
     gap: 4px;
     flex: 1;
+    min-width: 0;
     padding: 8px 4px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.02);

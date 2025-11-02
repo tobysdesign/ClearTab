@@ -1,339 +1,218 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import styles from "./notes-voice-tasks-settings.module.css";
+import { DownloadIcon, MoreActionsIcon } from "@/components/icons";
+import sharedStyles from "./settings-shared.module.css";
+import drawerStyles from "./settings-drawer.module.css";
 
-export function NotesVoiceTasksSettings() {
+type DataDomain = "notes" | "tasks" | "voice";
+
+interface ConfirmState {
+  domain: DataDomain | null;
+}
+
+interface NotesVoiceTasksSettingsProps {
+  sectionId: string;
+  heading: string;
+  description?: string;
+}
+
+export const NotesVoiceTasksSettings = React.forwardRef<
+  HTMLElement,
+  NotesVoiceTasksSettingsProps
+>(function NotesVoiceTasksSettings({ sectionId, heading, description }, ref) {
   const { toast } = useToast();
-  const [showNotesWipeDialog, setShowNotesWipeDialog] = useState(false);
-  const [showTasksWipeDialog, setShowTasksWipeDialog] = useState(false);
-  const [showVoiceWipeDialog, setShowVoiceWipeDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeletingNotes, setIsDeletingNotes] = useState(false);
+  const [confirmState, setConfirmState] = React.useState<ConfirmState>({
+    domain: null,
+  });
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const handleExportNotes = async () => {
-    // TODO: Implement notes export functionality
-    console.log("Exporting notes...");
+  const handleExport = (domain: DataDomain) => {
+    console.log(`Exporting ${domain}…`);
+    // TODO: replace with actual export implementation.
   };
 
-  const handleExportTasks = async () => {
-    // TODO: Implement tasks export functionality
-    console.log("Exporting tasks...");
-  };
-
-  const handleExportVoice = async () => {
-    // TODO: Implement voice export functionality
-    console.log("Exporting voice notes...");
-  };
-
-  const handleWipeNotes = async () => {
-    setIsDeletingNotes(true);
-
-    // Show progress toast
-    const progressToast = toast({
-      title: "Deleting Notes",
-      description: "Please wait while we delete all your notes...",
-      duration: Infinity, // Don't auto-dismiss
-    });
-
-    try {
-      const res = await fetch('/api/notes/delete-all', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to delete all notes');
-      }
-
-      const result = await res.json();
-
-      // Dismiss progress toast
-      progressToast.dismiss();
-
-      // Show success toast that user can dismiss
-      toast({
-        title: "Notes Deleted Successfully",
-        description: `Successfully deleted ${result.deletedCount} note${result.deletedCount === 1 ? '' : 's'}`,
-        duration: Infinity, // User must dismiss manually
-      });
-
-      console.log("All notes deleted successfully");
-    } catch (error) {
-      console.error('Error wiping notes:', error);
-
-      // Dismiss progress toast
-      progressToast.dismiss();
-
-      // Show error toast
-      toast({
-        title: "Error Deleting Notes",
-        description: `Failed to delete all notes: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        variant: "destructive",
-        duration: Infinity, // User must dismiss manually
-      });
-    } finally {
-      setIsDeletingNotes(false);
-      setShowNotesWipeDialog(false);
-    }
-  };
-
-  const handleWipeTasks = async () => {
+  const handleDelete = async (domain: DataDomain) => {
     setIsDeleting(true);
 
-    // Show progress toast
+    const endpointMap: Record<DataDomain, string> = {
+      notes: "/api/notes/delete-all",
+      tasks: "/api/tasks/delete-all",
+      voice: "/api/voice/delete-all",
+    };
+
     const progressToast = toast({
-      title: "Deleting Tasks",
-      description: "Please wait while we delete all your tasks...",
-      duration: Infinity, // Don't auto-dismiss
+      title: `Deleting ${domain}`,
+      description: "This may take a moment…",
+      duration: Infinity,
     });
 
     try {
-      const res = await fetch('/api/tasks/delete-all', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(endpointMap[domain], {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to delete all tasks');
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to delete ${domain}`);
       }
 
-      const result = await res.json();
-
-      // Dismiss progress toast
+      const result = await res.json().catch(() => ({}));
       progressToast.dismiss();
 
-      // Show success toast that user can dismiss
       toast({
-        title: "Tasks Deleted Successfully",
-        description: `Successfully deleted ${result.deletedCount} task${result.deletedCount === 1 ? '' : 's'}`,
-        duration: Infinity, // User must dismiss manually
+        title: "Delete complete",
+        description: result.deletedCount
+          ? `Removed ${result.deletedCount} ${domain}`
+          : "All data cleared successfully.",
+        duration: 6000,
       });
-
-      console.log("All tasks deleted successfully");
     } catch (error) {
-      console.error('Error wiping tasks:', error);
-
-      // Dismiss progress toast
       progressToast.dismiss();
-
-      // Show error toast
       toast({
-        title: "Error Deleting Tasks",
-        description: `Failed to delete all tasks: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        title: "Delete failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "We couldn’t complete the delete request. Please try again.",
         variant: "destructive",
-        duration: Infinity, // User must dismiss manually
+        duration: Infinity,
       });
     } finally {
       setIsDeleting(false);
-      setShowTasksWipeDialog(false);
+      setConfirmState({ domain: null });
     }
   };
 
-  const handleWipeVoice = async () => {
-    // TODO: Implement voice wipe functionality
-    console.log("Wiping voice notes...");
-    setShowVoiceWipeDialog(false);
-  };
+  const dataSets: Array<{
+    key: DataDomain;
+    title: string;
+    description: string;
+  }> = [
+    {
+      key: "notes",
+      title: "Notes",
+      description: "Download or reset your written notes.",
+    },
+    {
+      key: "voice",
+      title: "Voice notes",
+      description: "Manage recordings captured from the voice widget.",
+    },
+    {
+      key: "tasks",
+      title: "Tasks",
+      description: "Export or clear completed and scheduled tasks.",
+    },
+  ];
+
+  const activeDomain = confirmState.domain;
 
   return (
-    <div className={styles.container}>
-      {/* Notes Section */}
-      <div className={styles.compactSection}>
-        <div className={styles.compactRow}>
-          <div className={styles.compactInfo}>
-            <div className={styles.compactTitle}>Notes</div>
-            <div className={styles.compactDescription}>Manage your written notes data</div>
+    <section
+      ref={ref}
+      className={sharedStyles.card}
+      data-section-id={sectionId}
+    >
+      <div className={sharedStyles.rowList}>
+        <div className={sharedStyles.rowListHeader}>
+          <div className={drawerStyles.sectionHeading}>
+            <h2 className={drawerStyles.sectionTitle}>{heading}</h2>
+            {description ? (
+              <p className={drawerStyles.sectionDescription}>{description}</p>
+            ) : null}
           </div>
-          <div className={styles.compactActions}>
+        </div>
+
+        {dataSets.map((item) => (
+          <div key={item.key} className={sharedStyles.row}>
+            <div className={sharedStyles.rowMeta}>
+              <div>
+                <div className={sharedStyles.rowTitle}>{item.title}</div>
+                <div className={sharedStyles.rowDescription}>{item.description}</div>
+              </div>
+            </div>
+            <span />
             <Button
-              variant="outline"
-              onClick={handleExportNotes}
-              className={styles.compactButton}
+              className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
+              onClick={() => handleExport(item.key)}
             >
-              Export
+              <DownloadIcon size={16} aria-hidden />
+              Download
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className={styles.menuButton}
-                  disabled={showNotesWipeDialog}
+                  className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
+                  aria-label={`More actions for ${item.title}`}
                 >
-                  ⋮
+                  <MoreActionsIcon size={16} aria-hidden />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => setShowNotesWipeDialog(true)}
                   className="text-red-400 focus:text-red-300"
+                  onClick={() => setConfirmState({ domain: item.key })}
                 >
-                  Delete all
+                  Delete all data
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Tasks Section */}
-      <div className={styles.compactSection}>
-        <div className={styles.compactRow}>
-          <div className={styles.compactInfo}>
-            <div className={styles.compactTitle}>Tasks</div>
-            <div className={styles.compactDescription}>Manage your tasks and to-do items</div>
-          </div>
-          <div className={styles.compactActions}>
-            <Button
-              variant="outline"
-              onClick={handleExportTasks}
-              className={styles.compactButton}
-            >
-              Export
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={styles.menuButton}
-                  disabled={showTasksWipeDialog}
-                >
-                  ⋮
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => setShowTasksWipeDialog(true)}
-                  className="text-red-400 focus:text-red-300"
-                >
-                  Delete all
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      {/* Voice Section */}
-      <div className={styles.compactSection}>
-        <div className={styles.compactRow}>
-          <div className={styles.compactInfo}>
-            <div className={styles.compactTitle}>Voice</div>
-            <div className={styles.compactDescription}>Manage your voice notes and recordings</div>
-          </div>
-          <div className={styles.compactActions}>
-            <Button
-              variant="outline"
-              onClick={handleExportVoice}
-              className={styles.compactButton}
-            >
-              Export
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={styles.menuButton}
-                  disabled={showVoiceWipeDialog}
-                >
-                  ⋮
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => setShowVoiceWipeDialog(true)}
-                  className="text-red-400 focus:text-red-300"
-                >
-                  Delete all
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
-      {/* Confirmation Dialogs */}
-      <Dialog open={showNotesWipeDialog} onOpenChange={setShowNotesWipeDialog}>
+      <Dialog
+        open={Boolean(activeDomain)}
+        onOpenChange={(open) => !open && setConfirmState({ domain: null })}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Wipe All Notes</DialogTitle>
+            <DialogTitle>
+              {activeDomain ? `Delete all ${activeDomain}` : "Confirm delete"}
+            </DialogTitle>
             <DialogDescription>
-              This action is permanent, are you sure? All your notes will be permanently deleted and cannot be recovered.
+              This cannot be undone. The selected dataset will be permanently
+              removed from ClearTab.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setShowNotesWipeDialog(false)}
-              disabled={isDeletingNotes}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleWipeNotes}
-              disabled={isDeletingNotes}
-            >
-              {isDeletingNotes ? "Deleting..." : "Yes, Wipe Notes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showTasksWipeDialog} onOpenChange={setShowTasksWipeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Wipe All Tasks</DialogTitle>
-            <DialogDescription>
-              This action is permanent, are you sure? All your tasks will be permanently deleted and cannot be recovered.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowTasksWipeDialog(false)}
+              onClick={() => setConfirmState({ domain: null })}
               disabled={isDeleting}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              onClick={handleWipeTasks}
+              onClick={() => activeDomain && handleDelete(activeDomain)}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Yes, Wipe Tasks"}
+              {isDeleting ? "Deleting…" : "Delete data"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={showVoiceWipeDialog} onOpenChange={setShowVoiceWipeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Wipe All Voice Notes</DialogTitle>
-            <DialogDescription>
-              This action is permanent, are you sure? All your voice recordings will be permanently deleted and cannot be recovered.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowVoiceWipeDialog(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleWipeVoice}>
-              Yes, Wipe Voice
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </section>
   );
-}
+});
+
+NotesVoiceTasksSettings.displayName = "NotesVoiceTasksSettings";

@@ -61,59 +61,85 @@ const mockNotes: Note[] = [
   },
 ];
 
-// Typewriter component for animating note content
-function TypewriterText({ texts, className }: { texts: string[]; className?: string }) {
-  const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [currentText, setCurrentText] = useState("");
+// Typewriter component for animating note title and content in sequence
+function TypewriterText({ title, content, className }: { title: string; content: string; className?: string }) {
+  const [phase, setPhase] = useState<'typing_title' | 'typing_content' | 'pause' | 'erasing_content' | 'erasing_title'>('typing_title');
+  const [currentTitle, setCurrentTitle] = useState("");
+  const [currentContent, setCurrentContent] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
-    if (texts.length === 0) return;
+    const typeSpeed = 30 + Math.random() * 50; // Variable typing speed
+    const eraseSpeed = 20; // Faster erasing
 
-    const fullText = texts[currentTextIndex];
-
-    if (isTyping) {
-      if (currentText.length < fullText.length) {
+    if (phase === 'typing_title') {
+      if (currentTitle.length < title.length) {
         const timer = setTimeout(() => {
-          setCurrentText(fullText.slice(0, currentText.length + 1));
-        }, 30 + Math.random() * 50); // Variable typing speed for more natural feel
+          setCurrentTitle(title.slice(0, currentTitle.length + 1));
+        }, typeSpeed);
         return () => clearTimeout(timer);
       } else {
-        // Finished typing, pause then start erasing
+        setPhase('typing_content');
+      }
+    } else if (phase === 'typing_content') {
+      if (currentContent.length < content.length) {
         const timer = setTimeout(() => {
-          setIsTyping(false);
-        }, 2000); // Pause for 2 seconds
+          setCurrentContent(content.slice(0, currentContent.length + 1));
+        }, typeSpeed);
+        return () => clearTimeout(timer);
+      } else {
+        setPhase('pause');
+        const timer = setTimeout(() => {
+          setPhase('erasing_content');
+        }, 5000); // Pause for 5 seconds
         return () => clearTimeout(timer);
       }
-    } else {
-      if (currentText.length > 0) {
+    } else if (phase === 'erasing_content') {
+      if (currentContent.length > 0) {
         const timer = setTimeout(() => {
-          setCurrentText(currentText.slice(0, -1));
-        }, 20); // Faster erasing
+          setCurrentContent(currentContent.slice(0, -1));
+        }, eraseSpeed);
         return () => clearTimeout(timer);
       } else {
-        // Finished erasing, move to next text
-        setCurrentTextIndex((prev) => (prev + 1) % texts.length);
-        setIsTyping(true);
+        setPhase('erasing_title');
+      }
+    } else if (phase === 'erasing_title') {
+      if (currentTitle.length > 0) {
+        const timer = setTimeout(() => {
+          setCurrentTitle(currentTitle.slice(0, -1));
+        }, eraseSpeed);
+        return () => clearTimeout(timer);
+      } else {
+        setPhase('typing_title');
       }
     }
-  }, [currentText, currentTextIndex, isTyping, texts]);
+  }, [currentTitle, currentContent, phase, title, content]);
 
-  return (
-    <div className={className} style={{ whiteSpace: "pre-wrap" }}>
-      {currentText}
-      <span style={{
-        opacity: isTyping ? 1 : 0.3,
-        animation: 'blink 1s infinite'
-      }}>|</span>
-      <style jsx>{`
-        @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 0; }
-        }
-      `}</style>
-    </div>
-  );
+  // Update isTyping based on phase
+  useEffect(() => {
+    setIsTyping(phase === 'typing_title' || phase === 'typing_content');
+  }, [phase]);
+
+  return {
+    currentTitle,
+    currentContent,
+    isTyping,
+    renderContent: () => (
+      <div className={className} style={{ whiteSpace: "pre-wrap" }}>
+        {currentContent}
+        <span style={{
+          opacity: isTyping ? 1 : 0.3,
+          animation: 'blink 1s infinite'
+        }}>|</span>
+        <style jsx>{`
+          @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+          }
+        `}</style>
+      </div>
+    )
+  };
 }
 
 interface ResizablePanelsProps {
@@ -236,6 +262,15 @@ export function LoginNotesWidget() {
     setIsCollapsed((prev) => !prev);
   };
 
+  const note = mockNotes[0];
+  const title = note.title;
+  const content = note.content.ops
+    .filter((op: any) => "insert" in op && typeof op.insert === "string")
+    .map((op: any) => op.insert)
+    .join("");
+
+  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent });
+
   return (
     <WidgetContainer>
       <ResizablePanels
@@ -287,30 +322,21 @@ export function LoginNotesWidget() {
           <div className={notesStyles.notesContentPanel}>
             <div className={notesStyles.notesEditorHeader}>
               <div className={notesStyles.notesHeaderContent}>
-                <div className={notesStyles.notesTitleContainer}>
-                  <textarea
-                    value={mockNotes[0].title}
-                    readOnly
-                    className={notesStyles.notesTitleInput}
-                    style={{ cursor: "default" }}
-                    rows={1}
-                  />
-                </div>
+                 <div className={notesStyles.notesTitleContainer}>
+                   <textarea
+                     value={currentTitle}
+                     readOnly
+                     className={notesStyles.notesTitleInput}
+                     rows={1}
+                   />
+                 </div>
               </div>
             </div>
-            <div className={notesStyles.notesEditorScroll}>
-              <div className={notesStyles.notesEditorContainer}>
-                <TypewriterText
-                  texts={mockNotes.map(note =>
-                    note.content.ops
-                      .filter(op => "insert" in op && typeof op.insert === "string")
-                      .map(op => op.insert)
-                      .join("")
-                  )}
-                  className={notesStyles.typewriterContent}
-                />
-              </div>
-            </div>
+             <div className={notesStyles.notesEditorScroll}>
+               <div className={notesStyles.notesEditorContainer}>
+                 {renderContent()}
+               </div>
+             </div>
           </div>
         </div>
       </ResizablePanels>

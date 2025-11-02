@@ -34,6 +34,8 @@ function LoadingState() {
   );
 }
 
+type DockPosition = "top" | "left" | "right" | "bottom";
+
 export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const controls = useAnimationControls();
@@ -48,22 +50,38 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
     null,
   );
 
-  const [position, setPosition] = useState<"top" | "left" | "right" | "bottom">(
-    "bottom",
-  );
+  const [position, setPosition] = useState<DockPosition>(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("dock-position");
+      if (stored === "top" || stored === "left" || stored === "right" || stored === "bottom") {
+        return stored;
+      }
+    }
+    return "bottom";
+  });
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
 
-  const initialPosition = "bottom" as DropZone["id"];
+  const initialPosition = position;
 
   // Calculate initial currentZoneState based on a default position
   const initialCurrentZoneState =
     typeof window !== "undefined"
       ? {
           id: initialPosition,
-          x: (window.innerWidth - 150) / 2, // Center horizontally with correct width
-          y: window.innerHeight - 52 - 10, // Bottom edge closer to border
-          width: 150, // DOCK_WIDTH_HORIZONTAL
-          height: 52, // DOCK_HEIGHT
+          x:
+            initialPosition === "left"
+              ? 10
+              : initialPosition === "right"
+                ? window.innerWidth - 52 - 10
+                : (window.innerWidth - 150) / 2,
+          y:
+            initialPosition === "top"
+              ? 10
+              : initialPosition === "bottom"
+                ? window.innerHeight - 52 - 10
+                : (window.innerHeight - 150) / 2,
+          width: initialPosition === "left" || initialPosition === "right" ? 52 : 150,
+          height: initialPosition === "left" || initialPosition === "right" ? 150 : 52,
         }
       : null;
 
@@ -135,6 +153,31 @@ export function DashboardClient({ notes, tasks }: DashboardClientProps) {
   }, []);
 
   const currentZone = dropZones.find((zone) => zone.id === position);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const stored = window.localStorage.getItem("dock-position");
+    if (stored === "top" || stored === "left" || stored === "right" || stored === "bottom") {
+      setPosition(stored);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("dock-position", position);
+  }, [position]);
+
+  useEffect(() => {
+    const handleDockPositionChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ position: DockPosition }>).detail;
+      if (!detail?.position) return;
+      setPosition(detail.position);
+    };
+
+    window.addEventListener("dock-position-change", handleDockPositionChange as EventListener);
+    return () => window.removeEventListener("dock-position-change", handleDockPositionChange as EventListener);
+  }, []);
 
   useEffect(() => {
     calculateDropZones();

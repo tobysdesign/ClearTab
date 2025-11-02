@@ -14,14 +14,13 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
   const handleClick = () => {
     // Dispatch custom event to open settings
     const event = new CustomEvent('openSettings', {
-      detail: { tab: 'Display options' }
+      detail: { tab: 'schedule' }
     })
     window.dispatchEvent(event)
   }
 
   return (
     <Button
-      variant="ghost"
       size="icon"
       onClick={handleClick}
       className={cn(

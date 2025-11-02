@@ -1,4 +1,46 @@
 
 
-.root{ @apply inline-flex h-[12px] w-[22px] shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input; }
-.thumb{ @apply pointer-events-none block h-2.5 w-2.5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-2.5 data-[state=unchecked]:translate-x-0; }
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 48px;
+  height: 24px;
+  border-radius: 999px;
+  background-color: #1f1f21;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.root[data-state="checked"] {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+.root:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.32);
+  outline-offset: 2px;
+}
+
+.root:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.thumb {
+  pointer-events: none;
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #8f8f8f;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
+  transform: translateX(2px);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.root[data-state="checked"] .thumb {
+  transform: translateX(24px);
+  background-color: #0f0f0f;
+}

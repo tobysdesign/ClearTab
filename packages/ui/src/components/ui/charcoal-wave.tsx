@@ -20,7 +20,6 @@ export function CharcoalWave() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Cheaper context
     const gl = canvas.getContext("webgl", {
       alpha: false,
       antialias: false,
@@ -35,7 +34,7 @@ export function CharcoalWave() {
     // Tunables
     const reduceMotion =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    let targetFps = reduceMotion ? 12 : 20; // ~50–83 ms
+    let targetFps = reduceMotion ? 12 : 20;
     const MAX_CIRCLES = reduceMotion ? 4 : 6;
     const DPR_CLAMP = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 
@@ -44,9 +43,12 @@ export function CharcoalWave() {
     let cssH = 0;
     let bufW = 0;
     let bufH = 0;
-    let scale = 0.5; // dynamic resolution scale
+    let scale = 0.5;
     let rafId = 0;
-    let lastRenderTime = 0;
+
+    // Timing set up-front
+    let startTime = performance.now();
+    let lastRenderTime = startTime;
     let frameInterval = 1000 / targetFps;
     let movingAvg = 50;
     let isVisible = true;
@@ -118,31 +120,6 @@ export function CharcoalWave() {
       });
     }
 
-    // Events
-    const onMouseMove = (e: MouseEvent) => {
-      lastUserMove = performance.now();
-      lastMouseEvt = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-
-    const onResize = debounce(() => {
-      sizeCanvas();
-      initCircles();
-    }, 120);
-    window.addEventListener("resize", onResize, { passive: true });
-
-    const onVis = () => {
-      isVisible = !document.hidden;
-      if (isVisible && isIntersecting) rafId = requestAnimationFrame(render);
-    };
-    document.addEventListener("visibilitychange", onVis, { passive: true });
-
-    const io = new IntersectionObserver(([entry]) => {
-      isIntersecting = !!entry?.isIntersecting;
-      if (isIntersecting && isVisible) rafId = requestAnimationFrame(render);
-    });
-    io.observe(canvas);
-
     // Shaders
     const vertSrc = `
       attribute vec2 a_position;
@@ -185,8 +162,6 @@ export function CharcoalWave() {
 
           float s = r * u_sigmaScale;
           float invDen = 2.0 * s * s;
-
-          // exp2 is often cheaper
           float v = exp2(- (d * d) / invDen * 1.442695) * 1.4;
 
           fieldSum += v;
@@ -198,7 +173,6 @@ export function CharcoalWave() {
         float intensity = smoothstep(0.12, 0.9, x * x);
         vec3 col = mix(bg, circ, intensity);
 
-        // Texture noise
         float n = texture2D(u_noise, (st / u_resolution) * u_noiseScale).r;
         col += (n - 0.5) * 0.02;
 
@@ -212,9 +186,7 @@ export function CharcoalWave() {
       gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
         const log = gl.getShaderInfoLog(s);
-        if (log) {
-          console.error(log);
-        }
+        if (log) console.error(log);
       }
       return s;
     }
@@ -227,11 +199,10 @@ export function CharcoalWave() {
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       const programLog = gl.getProgramInfoLog(program);
-      if (programLog) {
-        console.error(programLog);
-      }
+      if (programLog) console.error(programLog);
       return;
     }
+    gl.useProgram(program);
 
     // Geometry
     const quad = gl.createBuffer()!;
@@ -245,16 +216,27 @@ export function CharcoalWave() {
     gl.enableVertexAttribArray(a_position);
     gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
 
-    // Uniforms
-    const u_resolution = gl.getUniformLocation(program, "u_resolution");
-    const u_circleCount = gl.getUniformLocation(program, "u_circleCount");
-    const u_circlesColor = gl.getUniformLocation(program, "u_circlesColor");
-    const u_circlesPosRad = gl.getUniformLocation(program, "u_circlesPosRad");
-    const u_mouse = gl.getUniformLocation(program, "u_mouse");
-    const u_time = gl.getUniformLocation(program, "u_time");
-    const u_sigmaScale = gl.getUniformLocation(program, "u_sigmaScale");
-    const u_noise = gl.getUniformLocation(program, "u_noise");
-    const u_noiseScale = gl.getUniformLocation(program, "u_noiseScale");
+    // Uniform handles declared early to avoid TDZ
+    let u_resolution: WebGLUniformLocation | null = null;
+    let u_circleCount: WebGLUniformLocation | null = null;
+    let u_circlesColor: WebGLUniformLocation | null = null;
+    let u_circlesPosRad: WebGLUniformLocation | null = null;
+    let u_mouse: WebGLUniformLocation | null = null;
+    let u_time: WebGLUniformLocation | null = null;
+    let u_sigmaScale: WebGLUniformLocation | null = null;
+    let u_noise: WebGLUniformLocation | null = null;
+    let u_noiseScale: WebGLUniformLocation | null = null;
+
+    // Lookup uniforms
+    u_resolution = gl.getUniformLocation(program, "u_resolution");
+    u_circleCount = gl.getUniformLocation(program, "u_circleCount");
+    u_circlesColor = gl.getUniformLocation(program, "u_circlesColor");
+    u_circlesPosRad = gl.getUniformLocation(program, "u_circlesPosRad");
+    u_mouse = gl.getUniformLocation(program, "u_mouse");
+    u_time = gl.getUniformLocation(program, "u_time");
+    u_sigmaScale = gl.getUniformLocation(program, "u_sigmaScale");
+    u_noise = gl.getUniformLocation(program, "u_noise");
+    u_noiseScale = gl.getUniformLocation(program, "u_noiseScale");
 
     // Noise texture
     function makeNoiseTex() {
@@ -287,14 +269,7 @@ export function CharcoalWave() {
     gl.disable(gl.BLEND);
     gl.disable(gl.STENCIL_TEST);
 
-    // Init size and circles
-    sizeCanvas();
-    initCircles();
-    mouse.x = bufW / 2;
-    mouse.y = bufH / 2;
-
-    let startTime = performance.now();
-
+    // Helpers
     function applyMouse() {
       if (!lastMouseEvt) return;
       const sx = bufW / cssW;
@@ -324,7 +299,6 @@ export function CharcoalWave() {
 
     function adaptQuality(dt: number) {
       movingAvg = movingAvg * 0.9 + dt * 0.1;
-      // idle drop
       const idle = performance.now() - lastUserMove > 3000;
       targetFps = idle ? (reduceMotion ? 8 : 10) : reduceMotion ? 12 : 20;
       frameInterval = 1000 / targetFps;
@@ -340,8 +314,31 @@ export function CharcoalWave() {
       }
     }
 
+    // Event handlers defined now, attached later
+    const onMouseMove = (e: MouseEvent) => {
+      lastUserMove = performance.now();
+      lastMouseEvt = { x: e.clientX, y: e.clientY };
+    };
+
+    const onResize = debounce(() => {
+      sizeCanvas();
+      initCircles();
+    }, 120);
+
+    const onVis = () => {
+      isVisible = !document.hidden;
+      if (isVisible && isIntersecting) rafId = requestAnimationFrame(render);
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      isIntersecting = !!entry?.isIntersecting;
+      if (isIntersecting && isVisible) rafId = requestAnimationFrame(render);
+    });
+
+    // Render defined after uniforms exist
     function render(now: number) {
       if (!(isVisible && isIntersecting)) return;
+      if (!u_circleCount || !u_resolution) return; // uniforms not ready
 
       if (now - lastRenderTime < frameInterval) {
         rafId = requestAnimationFrame(render);
@@ -366,11 +363,9 @@ export function CharcoalWave() {
       gl.uniform2f(u_mouse, mouse.x, mouse.y);
       gl.uniform1f(u_time, elapsed);
 
-      // One sin per frame
       const sigmaScale = 0.45 * (0.9 + 0.1 * Math.sin(elapsed * 0.5));
       gl.uniform1f(u_sigmaScale, sigmaScale);
 
-      // Pack arrays
       for (let i = 0; i < MAX_CIRCLES; i++) {
         const c = circles[i];
         const b = i * 3;
@@ -382,20 +377,17 @@ export function CharcoalWave() {
           circlesPosRadArray[b + 1] = c.y;
           circlesPosRadArray[b + 2] = c.radius;
         } else {
-          circlesColorArray[b] =
-            circlesColorArray[b + 1] =
-            circlesColorArray[b + 2] =
-              0;
-          circlesPosRadArray[b] =
-            circlesPosRadArray[b + 1] =
-            circlesPosRadArray[b + 2] =
-              0;
+          circlesColorArray[b] = 0;
+          circlesColorArray[b + 1] = 0;
+          circlesColorArray[b + 2] = 0;
+          circlesPosRadArray[b] = 0;
+          circlesPosRadArray[b + 1] = 0;
+          circlesPosRadArray[b + 2] = 0;
         }
       }
       gl.uniform3fv(u_circlesColor, circlesColorArray);
       gl.uniform3fv(u_circlesPosRad, circlesPosRadArray);
 
-      // Bind noise
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, noiseTex);
       gl.uniform1i(u_noise, 0);
@@ -405,15 +397,31 @@ export function CharcoalWave() {
       rafId = requestAnimationFrame(render);
     }
 
-    startTime = performance.now();
-    lastRenderTime = startTime;
-    rafId = requestAnimationFrame(render);
+    // Init sequence. Nothing can call render before this.
+    function init() {
+      sizeCanvas();
+      initCircles();
+      mouse.x = bufW / 2;
+      mouse.y = bufH / 2;
 
+      // Kick off first frame
+      rafId = requestAnimationFrame(render);
+
+      // Attach observers and listeners after everything is ready
+      io.observe(canvas);
+      document.addEventListener("visibilitychange", onVis, { passive: true });
+      window.addEventListener("resize", onResize, { passive: true });
+      window.addEventListener("mousemove", onMouseMove, { passive: true });
+    }
+
+    init();
+
+    // Cleanup
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener("mousemove", onMouseMove as any);
-      window.removeEventListener("resize", onResize as any);
       document.removeEventListener("visibilitychange", onVis as any);
+      window.removeEventListener("resize", onResize as any);
+      window.removeEventListener("mousemove", onMouseMove as any);
       io.disconnect();
       gl.deleteBuffer(quad);
       gl.deleteProgram(program);

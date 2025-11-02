@@ -113,6 +113,8 @@ export const session = pgTable(
   }),
 ).enableRLS();
 
+// Verification tokens table - kept private for security
+// NextAuth.js manages this table directly, no client access needed
 export const verificationTokens = pgTable(
   "verification_tokens",
   {
@@ -122,6 +124,7 @@ export const verificationTokens = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+    // Note: No RLS enabled - this table should remain private to the application
   }),
 );
 

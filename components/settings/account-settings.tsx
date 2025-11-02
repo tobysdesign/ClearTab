@@ -1,102 +1,112 @@
 "use client";
 
-// Icons replaced with ASCII placeholders
+import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedAccountWithEmail } from "@/shared/types";
-import { useEffect } from "react";
-import Image from "next/image";
-import styles from "./account-settings.module.css";
+import { AddIcon, MoreActionsIcon } from "@/components/icons";
+import { useToast } from "@/hooks/use-toast";
+import sharedStyles from "./settings-shared.module.css";
+import drawerStyles from "./settings-drawer.module.css";
 
-export function AccountSettings() {
+type VisibilityState = Record<string, boolean>;
+
+interface AccountSettingsProps {
+  sectionId: string;
+  heading: string;
+  description?: string;
+}
+
+export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProps>(
+  function AccountSettings({ sectionId, heading, description }, ref) {
   const { user, loading } = useAuth();
   const queryClient = useQueryClient();
+  const [visibility, setVisibility] = React.useState<VisibilityState>({});
+  const { toast } = useToast();
 
-  // Debug logging
-  useEffect(() => {
-    console.log("AccountSettings mounted:", {
-      user: user?.email,
-      id: user?.id,
-      loading,
-      metadata: user?.user_metadata,
-    });
-  }, [user, loading]);
-
-  const { data: isCalendarConnected, isLoading: calendarLoading } = useQuery({
-    queryKey: ["googleCalendarConnected"],
+  const { data: connectedAccounts = [], isLoading: accountsLoading } = useQuery({
+    queryKey: ["connectedAccounts"],
+    enabled: !!user?.id,
+    staleTime: 30_000,
+    retry: false,
     queryFn: async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       try {
-        const res = await fetch("/api/calendar/status", {
+        const res = await fetch("/api/settings/accounts", {
           credentials: "include",
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
-        if (!res.ok) return false;
-        const data = await res.json();
-        return data.connected;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        console.warn('Calendar status check failed:', error);
-        return false;
-      }
-    },
-    enabled: !!user?.id,
-    retry: false, // Don't retry on failure
-    staleTime: 30000, // Cache for 30 seconds
-  });
 
-  const { data: connectedAccounts = [], isLoading: accountsLoading } = useQuery(
-    {
-      queryKey: ["connectedAccounts"],
-      queryFn: async () => {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-        try {
-          const res = await fetch("/api/settings/accounts", {
-            credentials: "include",
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-          if (!res.ok) {
-            console.error("Failed to fetch connected accounts:", res.status);
-            return [];
-          }
-          const data = await res.json();
-          console.log("Connected accounts:", data);
-          // Filter out the primary account if it appears in the connected accounts list
-          // Note: providerAccountId field not in type yet, so for now return all accounts
-          return data as ConnectedAccountWithEmail[];
-        } catch (error) {
-          clearTimeout(timeoutId);
-          console.warn('Connected accounts check failed:', error);
+        if (!res.ok) {
+          console.error("Failed to fetch connected accounts:", res.status);
           return [];
         }
-      },
-      enabled: !!user?.id,
-      retry: false, // Don't retry on failure
-      staleTime: 30000, // Cache for 30 seconds
+
+        return (await res.json()) as ConnectedAccountWithEmail[];
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.warn("Connected accounts check failed:", error);
+        return [];
+      }
     },
-  );
+  });
 
   const addAccountMutation = useMutation({
     mutationFn: async () => {
-      // Fetch the custom auth URL from our new endpoint
-      const response = await fetch("/api/auth/google-link-url?next=/settings");
-      if (!response.ok) {
-        throw new Error("Failed to get authorization URL.");
+      const response = await fetch("/api/auth/google-link-url?next=/settings", {
+        credentials: "include",
+      });
+
+      let payload: { authUrl?: unknown; message?: string } = {};
+      try {
+        payload = await response.json();
+      } catch (error) {
+        console.warn("Failed to parse google-link-url response", error);
       }
-      const { authUrl } = await response.json();
-      // Redirect the user to Google
-      window.location.href = authUrl;
+
+      if (!response.ok) {
+        const reason =
+          typeof payload.message === "string" && payload.message.length > 0
+            ? payload.message
+            : "Failed to get authorization URL.";
+        throw new Error(reason);
+      }
+
+      const candidateUrls = [
+        payload.authUrl,
+        // handle possible backend variations
+        (payload as Record<string, unknown>)?.url,
+        (payload as Record<string, unknown>)?.authorizationUrl,
+        (payload as Record<string, unknown>)?.authorization_url,
+        (payload as Record<string, unknown>)?.redirectUrl,
+      ] as Array<unknown>;
+
+      const resolvedUrl = candidateUrls.find(
+        (value): value is string => typeof value === "string" && value.length > 0,
+      );
+
+      if (!resolvedUrl) {
+        console.error("Authorization URL missing from response", payload);
+        throw new Error("Missing authorization URL.");
+      }
+
+      window.location.href = resolvedUrl;
     },
     onError: (error) => {
-      console.error("Failed to initiate add account flow:", error);
-      // You might want to show a toast notification here
+      console.error("Failed to start account linking", error);
+      toast({
+        title: "Unable to add account",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while starting the Google connection.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -115,248 +125,165 @@ export function AccountSettings() {
     },
   });
 
-  const disconnectCalendarMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/settings/disconnect-calendar`, {
-        method: "POST",
-        credentials: "include",
-      });
+  React.useEffect(() => {
+    setVisibility((prev) => {
+      let changed = false;
+      const next: VisibilityState = { ...prev };
 
-      if (!res.ok) throw new Error("Failed to disconnect calendar");
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["googleCalendarConnected"] });
-    },
-  });
-
-  async function handleConnectCalendar() {
-    try {
-      const response = await fetch("/api/auth/connect-calendar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        queryClient.invalidateQueries({
-          queryKey: ["googleCalendarConnected"],
-        });
-      } else {
-        const { createClient } = await import("@/lib/supabase/client");
-        const supabase = createClient();
-
-        await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
-            scopes:
-              "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-            queryParams: {
-              access_type: "offline",
-              prompt: "consent",
-            },
-          },
-        });
+      if (user?.id) {
+        const primaryKey = `primary-${user.id}`;
+        if (next[primaryKey] === undefined) {
+          next[primaryKey] = true;
+          changed = true;
+        }
       }
-    } catch (error) {
-      console.error("Error connecting calendar:", error);
-    }
-  }
+
+      for (const account of connectedAccounts) {
+        if (next[account.id] === undefined) {
+          next[account.id] = true;
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [connectedAccounts, user?.id]);
+
+  const handleVisibilityToggle = (key: string, value: boolean) => {
+    setVisibility((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const renderHeading = (actions?: React.ReactNode) => (
+    <div className={sharedStyles.rowListHeader}>
+      <div className={drawerStyles.sectionHeading}>
+        <h2 className={drawerStyles.sectionTitle}>{heading}</h2>
+        {description ? (
+          <p className={drawerStyles.sectionDescription}>{description}</p>
+        ) : null}
+      </div>
+      {actions ? <div className={sharedStyles.cardActions}>{actions}</div> : null}
+    </div>
+  );
 
   if (loading) {
     return (
-      <div className={styles.spaceY4}>
-        <div className={styles.card}>
-          <div className={styles.textWhite60}>
-            Loading account information...
-          </div>
+      <section ref={ref} className={sharedStyles.card} data-section-id={sectionId}>
+        <div className={sharedStyles.rowList}>
+          {renderHeading()}
+          <p className={sharedStyles.compactNotice}>Loading connected calendars…</p>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (!user) {
     return (
-      <div className={styles.spaceY4}>
-        <div className={styles.card}>
-          <div className={`${styles.flexItemsGap2} ${styles.textYellow400} ${styles.mb3}`}>
-            <span className={styles.iconSmall}>•</span>
-            <span className={styles.textSmMedium}>Not signed in</span>
-          </div>
-          <p className={`${styles.textXsWhite60} ${styles.mb3}`}>
-            You need to sign in to manage your account settings.
+      <section ref={ref} className={sharedStyles.card} data-section-id={sectionId}>
+        <div className={sharedStyles.rowList}>
+          {renderHeading(
+            <Button
+              className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
+              onClick={() => (window.location.href = "/login")}
+            >
+              Sign in
+            </Button>,
+          )}
+          <p className={sharedStyles.compactNotice}>
+            Sign in to connect calendars for the schedule widget.
           </p>
-          <Button onClick={() => (window.location.href = "/login")} size="sm">
-            Sign In
-          </Button>
         </div>
-      </div>
+      </section>
     );
   }
 
+  const primaryKey = `primary-${user.id}`;
+
   return (
-    <div className={styles.spaceY4}>
-      {/* Schedule Section */}
-      <div className={styles.card}>
-        <div className={styles.mb3}>
-          <h3 className={styles.sectionTitle}>Schedule</h3>
-          <p className={styles.sectionDescription}>
-            Accounts list here are shown in the schedule widget
-          </p>
-        </div>
+    <section ref={ref} className={sharedStyles.card} data-section-id={sectionId}>
+      <div className={sharedStyles.rowList}>
+        {renderHeading(
+          <Button
+            className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
+            onClick={() => addAccountMutation.mutate()}
+            disabled={addAccountMutation.isPending}
+          >
+            <AddIcon size={14} aria-hidden />
+            Add account
+          </Button>,
+        )}
 
-        {/* Column Headers */}
-        <div className={styles.columnHeaders}>
-          <div className={styles.accountColumn}>Account</div>
-          <div className={styles.visibilityColumn}>Visibility</div>
-          <div className={styles.actionsColumn}>Actions</div>
-        </div>
-
-        {/* Primary Account */}
-        <div className={styles.accountRow}>
-          <div className={styles.accountColumn}>
-            <div className={styles.accountItemContent}>
-              <div className={styles.avatar}>
-                {user.user_metadata?.avatar_url ? (
-                  <Image
-                    src={user.user_metadata.avatar_url}
-                    alt=""
-                    fill
-                    className={styles.avatarImage}
-                  />
-                ) : (
-                  <span className={styles.userIcon}>👤</span>
-                )}
-              </div>
-              <div className={styles.accountDetails}>
-                <div className={styles.accountNameRow}>
-                  <div className={styles.accountName}>
-                    {user.user_metadata?.full_name ||
-                      user.email?.split("@")[0] ||
-                      "User"}
-                  </div>
-                  <span className={styles.primaryBadge}>Primary</span>
-                </div>
-                <div className={styles.accountEmail}>
-                  {user.email || "No email"}
-                </div>
-              </div>
+        <div className={sharedStyles.row}>
+          <div>
+            <div className={sharedStyles.rowLabelLine}>
+              <div className={sharedStyles.label}>Name</div>
+              <span className={`${sharedStyles.badge} ${sharedStyles.primaryBadge}`}>
+                Primary
+              </span>
+            </div>
+            <div className={sharedStyles.rowTitle}>
+              {user.user_metadata?.full_name ||
+                user.email?.split("@")[0] ||
+                "Primary account"}
             </div>
           </div>
-          <div className={styles.visibilityColumn}>
-            <label className={styles.toggleSwitch}>
-              <input
-                type="checkbox"
-                defaultChecked={true}
-              />
-              <span className={styles.toggleSlider}></span>
-            </label>
+          <div>
+            <div className={sharedStyles.label}>Address</div>
+            <div className={sharedStyles.rowDescription}>{user.email ?? "No email"}</div>
           </div>
-          <div className={styles.actionsColumn}>
-            {/* Empty for primary account */}
+          <div className={sharedStyles.toggleGroup}>
+            <span className={sharedStyles.label}>Visible</span>
+            <Switch
+              checked={visibility[primaryKey]}
+              onCheckedChange={(value) => handleVisibilityToggle(primaryKey, value)}
+              aria-label="Toggle primary calendar visibility"
+            />
           </div>
+          <div className={sharedStyles.rowActions} />
         </div>
 
-        {/* Additional Accounts */}
         {connectedAccounts.map((account) => (
-          <div key={account.id} className={styles.accountRow}>
-            <div className={styles.accountColumn}>
-              <div className={styles.accountItemContent}>
-                <div className={styles.avatar}>
-                  <span className={styles.userIcon}>👤</span>
-                </div>
-                <div className={styles.accountDetails}>
-                  <div className={styles.accountName}>
-                    {account.email.split("@")[0]}
-                  </div>
-                  <div className={styles.accountEmail}>
-                    {account.email}
-                  </div>
-                </div>
-              </div>
+          <div key={account.id} className={sharedStyles.row}>
+            <div>
+              <div className={sharedStyles.label}>Account</div>
+              <div className={sharedStyles.rowTitle}>{account.email.split("@")[0]}</div>
             </div>
-            <div className={styles.visibilityColumn}>
-              <label className={styles.toggleSwitch}>
-                <input type="checkbox" defaultChecked />
-                <span className={styles.toggleSlider}></span>
-              </label>
+            <div>
+              <div className={sharedStyles.label}>Email</div>
+              <div className={sharedStyles.rowTitle}>{account.email}</div>
             </div>
-            <div className={styles.actionsColumn}>
+            <div className={sharedStyles.toggleGroup}>
+              <span className={sharedStyles.label}>Visible</span>
+              <Switch
+                checked={visibility[account.id]}
+                onCheckedChange={(value) => handleVisibilityToggle(account.id, value)}
+                aria-label={`Toggle visibility for ${account.email}`}
+              />
+            </div>
+            <div className={sharedStyles.rowActions}>
               <Button
-                variant="ghost"
-                size="sm"
+                className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
                 onClick={() => removeAccountMutation.mutate(account.id)}
                 disabled={removeAccountMutation.isPending}
-                className={styles.menuButton}
+                aria-label={`Disconnect ${account.email}`}
               >
-                ⋮
+                <MoreActionsIcon size={16} aria-hidden />
               </Button>
             </div>
           </div>
         ))}
 
-        {/* Link additional Google Calendar */}
-        <div className={styles.linkAccountItem}>
-          <Button
-            variant="ghost"
-            onClick={() => addAccountMutation.mutate()}
-            disabled={addAccountMutation.isPending}
-            className={styles.linkAccountButton}
-          >
-            <span className={styles.iconPlus}>+</span>
-            Link additional Google Calendar
-          </Button>
-        </div>
-      </div>
+        {accountsLoading && (
+          <p className={sharedStyles.compactNotice}>Checking for additional calendars…</p>
+        )}
 
-      {/* Account Section */}
-      <div className={styles.card}>
-        <div className={styles.mb3}>
-          <h3 className={styles.sectionTitle}>Account</h3>
-          <p className={styles.sectionDescription}>
-            The account you sign into Cleartab with
+        {!accountsLoading && connectedAccounts.length === 0 && (
+          <p className={sharedStyles.compactNotice}>
+            No additional calendars connected. Link another account to surface shared events.
           </p>
-        </div>
-
-        <div className={styles.accountItem}>
-          <div className={styles.accountItemContent}>
-            <div className={styles.avatar}>
-              {user.user_metadata?.avatar_url ? (
-                <Image
-                  src={user.user_metadata.avatar_url}
-                  alt=""
-                  fill
-                  className={styles.avatarImage}
-                />
-              ) : (
-                <span className={styles.userIcon}>👤</span>
-              )}
-            </div>
-            <div className={styles.accountDetails}>
-              <div className={styles.accountName}>
-                {user.user_metadata?.full_name ||
-                  user.email?.split("@")[0] ||
-                  "User"}
-              </div>
-              <div className={styles.accountEmail}>
-                {user.email || "No email"}
-              </div>
-            </div>
-          </div>
-          <div className={styles.accountActions}>
-            <Button
-              variant="outline"
-              onClick={() => (window.location.href = "/logout")}
-              className={styles.signOutButton}
-            >
-              Sign out
-            </Button>
-          </div>
-        </div>
+        )}
       </div>
-    </div>
+    </section>
   );
-}
+});
+
+AccountSettings.displayName = "AccountSettings";

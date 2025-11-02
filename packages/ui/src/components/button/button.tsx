@@ -15,6 +15,7 @@ const buttonVariants = cva(styles.baseButton, {
       ghost: styles.ghost,
       "ghost-icon": styles.ghostIcon,
       link: styles.link,
+      white: styles.white,
     },
     size: {
       default: styles.sizeDefault,

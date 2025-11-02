@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { motion } from 'framer-motion'
 import styles from './shiny-ai-button.module.css'
 
@@ -29,20 +28,35 @@ export function ShinyAiButton({
     >
       <button className="shiny-cta absolute inset-0" />
       <div className={styles.iconContainer}>
-        <DotLottieReact
-          src="https://lottie.host/5368e488-cb9d-4667-b407-8b42472d4c6e/0QAbp6DRx3.lottie"
-          loop
-          autoplay
-          speed={0.5}
-          style={{
-            width: '100%',
-            height: '100%',
-            lineHeight: 0,
-            aspectRatio: '421 / 233',
-            left: '0',
-            position: 'relative',
-          }}
-        />
+        <div className={styles.simpleAiIcon}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2L13.09 8.26L22 9L13.09 9.74L12 16L10.91 9.74L2 9L10.91 8.26L12 2Z"
+              fill="currentColor"
+              className={styles.sparkle}
+            />
+            <circle
+              cx="8"
+              cy="8"
+              r="1.5"
+              fill="currentColor"
+              className={styles.dot}
+            />
+            <circle
+              cx="16"
+              cy="6"
+              r="1"
+              fill="currentColor"
+              className={styles.dot}
+            />
+          </svg>
+        </div>
       </div>
     </motion.div>
   )

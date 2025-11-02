@@ -1,46 +1,45 @@
-"use client";
+'use client'
 
-import { useState, useRef, useEffect } from "react";
-import styles from "./simple-tooltip.module.css";
+import React, { useState, useRef, useEffect } from 'react'
 
 interface SimpleTooltipProps {
-  content: string;
-  children: React.ReactElement;
+  content: string
+  children: React.ReactElement
 }
 
 export function SimpleTooltip({ content, children }: SimpleTooltipProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const triggerRef = useRef<HTMLElement | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isVisible, setIsVisible] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const triggerRef = useRef<HTMLElement | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleMouseEnter = () => {
     timeoutRef.current = setTimeout(() => {
       if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
+        const rect = triggerRef.current.getBoundingClientRect()
         setPosition({
           top: rect.top - 8,
           left: rect.left + rect.width / 2,
-        });
-        setIsVisible(true);
+        })
+        setIsVisible(true)
       }
-    }, 200);
-  };
+    }, 200)
+  }
 
   const handleMouseLeave = () => {
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      clearTimeout(timeoutRef.current)
     }
-    setIsVisible(false);
-  };
+    setIsVisible(false)
+  }
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   return (
     <>
@@ -60,17 +59,15 @@ export function SimpleTooltip({ content, children }: SimpleTooltipProps) {
 
       {isVisible && (
         <div
-          className={styles.tooltip}
+          className="fixed z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap pointer-events-none transform -translate-x-1/2 -translate-y-full"
           style={{
-            position: "fixed",
             top: `${position.top}px`,
             left: `${position.left}px`,
-            transform: "translate(-50%, -100%)",
           }}
         >
           {content}
         </div>
       )}
     </>
-  );
+  )
 }

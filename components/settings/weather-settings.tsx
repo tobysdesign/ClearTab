@@ -1,66 +1,79 @@
-"use client"
+"use client";
 
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { ReactNode } from 'react'
-import styles from './weather-settings.module.css'
+import * as React from "react";
+import sharedStyles from "./settings-shared.module.css";
+import drawerStyles from "./settings-drawer.module.css";
+import { SearchIcon } from "@/components/icons";
 
-export function WeatherSettings(): ReactNode {
+type TemperatureUnit = "celsius" | "fahrenheit";
+
+interface WeatherSettingsProps {
+  sectionId: string;
+  heading: string;
+  description?: string;
+}
+
+export const WeatherSettings = React.forwardRef<
+  HTMLElement,
+  WeatherSettingsProps
+>(function WeatherSettings({ sectionId, heading, description }, ref) {
+  const [query, setQuery] = React.useState("");
+  const [unit, setUnit] = React.useState<TemperatureUnit>("celsius");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("Searching for location:", query);
+    // TODO: hook into real location search once the data service is ready.
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.formSection}>
-        <div className={styles.sectionTitle}>Weather Preferences</div>
-        <div className={styles.sectionDescription}>Configure your weather display settings</div>
-
-        <div className={styles.formRow}>
-          <label htmlFor="location" className={styles.formLabel}>Default Location</label>
-          <Input id="location" placeholder="Enter city or coordinates" className={styles.formInput} />
-        </div>
-
-        <div className={styles.formRow}>
-          <label htmlFor="units" className={styles.formLabel}>Temperature Units</label>
-          <Select defaultValue="celsius">
-            <SelectTrigger id="units" className={styles.formSelect}>
-              <SelectValue placeholder="Select units" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="celsius">Celsius (°C)</SelectItem>
-              <SelectItem value="fahrenheit">Fahrenheit (°F)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className={styles.formRow}>
-          <div className={styles.formLabel}>Notifications</div>
-          <div className={styles.toggleRow}>
-            <label htmlFor="severe-weather" className={styles.toggleLabel}>
-              Severe Weather Alerts
-            </label>
-            <Switch id="severe-weather" />
-          </div>
-          <div className={styles.toggleRow}>
-            <label htmlFor="daily-forecast" className={styles.toggleLabel}>
-              Daily Forecast Updates
-            </label>
-            <Switch id="daily-forecast" />
-          </div>
-        </div>
-
-        <div className={styles.formRow}>
-          <label htmlFor="refresh" className={styles.formLabel}>Refresh Interval</label>
-          <Select defaultValue="30">
-            <SelectTrigger id="refresh" className={styles.formSelect}>
-              <SelectValue placeholder="Select interval" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="15">15 minutes</SelectItem>
-              <SelectItem value="30">30 minutes</SelectItem>
-              <SelectItem value="60">1 hour</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <section
+      ref={ref}
+      className={sharedStyles.card}
+      data-section-id={sectionId}
+    >
+      <div className={drawerStyles.sectionHeading}>
+        <h2 className={drawerStyles.sectionTitle}>{heading}</h2>
+        {description ? (
+          <p className={drawerStyles.sectionDescription}>{description}</p>
+        ) : null}
       </div>
-    </div>
-  )
-} 
+      <form
+        className={`${sharedStyles.innerCard} ${sharedStyles.fieldGrid}`}
+        onSubmit={handleSubmit}
+      >
+        <div className={`${sharedStyles.field} ${sharedStyles.fieldGrow}`}>
+          <span className={sharedStyles.label}>Set location</span>
+
+          <div className={sharedStyles.inputGroup}>
+            <span className={sharedStyles.inputGroupIcon}>
+              <SearchIcon size={16} aria-hidden />
+            </span>
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Type to search"
+              className={sharedStyles.inputGroupField}
+            />
+          </div>
+        </div>
+
+        <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
+          <span className={sharedStyles.label}>Display unit</span>
+
+          <select
+            id="weather-units"
+            value={unit}
+            onChange={(event) => setUnit(event.target.value as TemperatureUnit)}
+            className={`${sharedStyles.input} ${sharedStyles.inputSelect} ${sharedStyles.selectAuto}`}
+          >
+            <option value="celsius">Celsius</option>
+            <option value="fahrenheit">Fahrenheit</option>
+          </select>
+        </div>
+      </form>
+    </section>
+  );
+});
+
+WeatherSettings.displayName = "WeatherSettings";

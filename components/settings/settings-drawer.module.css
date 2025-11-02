@@ -1,148 +1,269 @@
-/* Settings Drawer Component Styles */
+/* Settings Drawer – MuddyTab refresh */
 
 .drawerContent {
-    max-width: 56rem;
+    max-width: 960px;
     margin: 0 auto;
-    border-radius: 0.5rem 0.5rem 0 0;
-    border: 0;
+    border-radius: 24px 24px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(
+        135deg,
+        rgba(18, 18, 18, 0.95),
+        rgba(8, 8, 8, 0.9)
+    );
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0px;
+    margin-top: 0 !important;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.drawerContent::after {
+    display: none !important;
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 85vh;
-}
-
-.grabHandle {
-    display: flex;
-    justify-content: center;
-    padding-top: 0.5rem;
-    padding-bottom: 0.25rem;
-    cursor: grab;
-    flex-shrink: 0;
-}
-
-.grabHandle:active {
-    cursor: grabbing;
-}
-
-.grabBar {
-    width: 3rem;
-    height: 0.375rem;
-    border-radius: 9999px;
-    background-color: #242424;
-}
-
-.header {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1.5rem;
-}
-
-.title {
-    font-size: 1.125rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.closeButton {
-    border-radius: 9999px;
-    height: 2rem;
-    width: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-}
-
-.closeButton:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.closeIcon {
-    width: 1rem;
-    height: 1rem;
-}
-
-.scrollableContent {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
 }
 
 .sidebar {
-    width: 16rem;
-    overflow-y: auto;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    background: linear-gradient(
+        180deg,
+        rgba(12, 12, 12, 0.92) 0%,
+        rgba(10, 10, 10, 0.7) 100%
+    );
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    min-height: 0;
+    height: 100%;
+}
+
+.sidebarHeader {
+    margin-bottom: 20px;
+}
+
+.sidebarLabel {
+    display: block;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
 }
 
 .nav {
-    padding: 1rem;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+    min-height: 0;
 }
 
 .navList {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 .navButton {
     width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
     text-align: left;
-    padding: 0.75rem;
-    transition: all 0.2s ease;
-    border-radius: 0.5rem;
-    border: none;
-    background: none;
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
     cursor: pointer;
 }
 
+.navButton:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
 .navButtonActive {
-    background-color: rgba(0, 0, 0, 0.3);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.navButtonInactive {
-    color: #bbbbbb;
-}
-
-.navButtonInactive:hover {
-    color: white;
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-.navButtonContent {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .navButtonTitle {
-    font-weight: 500;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.1;
 }
 
 .navButtonDescription {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    color: #8d8d8d;
+    font-size: 10px;
+
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.45);
 }
 
-.mainContent {
+.sidebarFooter {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.avatarImage {
+    object-fit: cover;
+}
+
+.avatarFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.profileMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.profileName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profileEmail {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logoutButton {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(28, 28, 28, 0.7);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+    height: 40px;
+}
+
+.logoutButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    background: rgba(20, 20, 20, 0.92);
+    overflow: hidden;
+    min-height: 0;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 12px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: #1a1a1a;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #d2d2d2;
+}
+
+.closeButton {
+    border-radius: 999px;
+    height: 36px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeIcon {
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+}
+
+.sections {
     flex: 1;
     overflow-y: auto;
-    background-color: #1a1a1a;
+    padding: 24px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 0;
+    scroll-behavior: smooth;
 }
 
-.contentPanel {
-    padding: 1.5rem;
-    border-radius: 0.5rem 0.5rem 0 0;
-    margin-right: 12px;
-    background-color: #1a1a1a;
-    min-height: 100%;
+.sectionHeading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sectionTitle {
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sectionDescription {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
 }

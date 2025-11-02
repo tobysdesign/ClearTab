@@ -3,13 +3,74 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-// Import the actual login widgets
-import { LoginNotesWidget } from "@/components/widgets/login-notes-widget";
-import { LoginTasksWidget } from "@/components/widgets/login-tasks-widget";
-import { LoginScheduleWidget } from "@/components/widgets/login-schedule-widget";
-import { LoginWeatherWidget } from "@/components/widgets/login-weather-widget";
-import { LoginRecorderWidget } from "@/components/widgets/login-recorder-widget";
-import { LoginCountdownWidget } from "@/components/widgets/login-countdown-widget";
+import dynamic from "next/dynamic";
+
+// Lazy-load the login widgets to reduce initial bundle size
+const LoginNotesWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-notes-widget").then((mod) => ({
+      default: mod.LoginNotesWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
+
+const LoginTasksWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-tasks-widget").then((mod) => ({
+      default: mod.LoginTasksWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
+
+const LoginScheduleWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-schedule-widget").then((mod) => ({
+      default: mod.LoginScheduleWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
+
+const LoginWeatherWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-weather-widget").then((mod) => ({
+      default: mod.LoginWeatherWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
+
+const LoginRecorderWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-recorder-widget").then((mod) => ({
+      default: mod.LoginRecorderWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
+
+const LoginCountdownWidget = dynamic(
+  () =>
+    import("@/components/widgets/login-countdown-widget").then((mod) => ({
+      default: mod.LoginCountdownWidget,
+    })),
+  {
+    ssr: false,
+    loading: () => <div className="widget-loading">Loading...</div>,
+  },
+);
 
 import { useDockPadding } from "@/hooks/use-dock-padding";
 import styles from "./login-bento-grid.module.css";
@@ -57,7 +118,7 @@ export function LoginBentoGrid({
           className="panel-group"
         >
           {/* Column 1: Notes and widgets */}
-          <Panel defaultSize={35} minSize={20}>
+          <Panel defaultSize={45} minSize={20}>
             <PanelGroup direction="vertical" className="panel-group">
               {/* Top row: Notes */}
               <Panel defaultSize={60}>
@@ -76,13 +137,17 @@ export function LoginBentoGrid({
                       <LoginWeatherWidget />
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle
+                    className={styles.resizeHandleHorizontal}
+                  />
                   <Panel defaultSize={33}>
                     <motion.div {...motionProps(0.5)} className="panel-motion">
                       <LoginRecorderWidget />
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle
+                    className={styles.resizeHandleHorizontal}
+                  />
                   <Panel defaultSize={34}>
                     <motion.div {...motionProps(0.6)} className="panel-motion">
                       <LoginCountdownWidget />
@@ -105,7 +170,7 @@ export function LoginBentoGrid({
           <PanelResizeHandle className={styles.resizeHandleHorizontal} />
 
           {/* Column 3: Tasks and Schedule */}
-          <Panel defaultSize={35} minSize={10}>
+          <Panel defaultSize={23} minSize={10}>
             <PanelGroup direction="vertical" className="panel-group">
               {/* Tasks */}
               <Panel defaultSize={50}>

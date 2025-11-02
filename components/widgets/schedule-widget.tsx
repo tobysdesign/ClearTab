@@ -299,8 +299,8 @@ export function ScheduleWidget() {
 
   if (error) {
     const errorWithMeta = error as Error & { errorType?: string; userMessage?: string; status?: number; userEmail?: string };
-    const isAuthError = error.message.includes('Google Calendar not connected') || errorWithMeta.errorType === 'AUTH_EXPIRED';
-    const isAuthExpired = errorWithMeta.errorType === 'AUTH_EXPIRED';
+    const isAuthError = error.message.includes('Google Calendar not connected') || errorWithMeta.errorType === 'AUTH_EXPIRED' || error.message.includes('invalid authentication');
+    const isAuthExpired = errorWithMeta.errorType === 'AUTH_EXPIRED' || error.message.includes('invalid authentication');
     const displayEmail = errorWithMeta.userEmail || user?.email || 'your account';
     
     return (
