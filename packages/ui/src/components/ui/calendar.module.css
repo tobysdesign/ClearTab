@@ -1,11 +1,171 @@
-/* Calendar Component Styles */
+/* Calendar Component Styles - Dark Theme */
+
+.root {
+  width: max-content;
+  margin: 0;
+  color: white;
+  background: #1a1a1a;
+  border: 1px solid #252525;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  position: relative;
+}
+
+.month {
+  width: 100%;
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  position: relative;
+}
+
+.captionLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.navButton {
+  color: white;
+  background: transparent;
+  border: 1px solid #252525;
+  border-radius: 0.375rem;
+  padding: 0.25rem;
+  width: max-content;
+  height: max-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.navButtonPrev {
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+}
+
+.navButtonNext {
+  position: absolute;
+  right: 0;
+  top: 0.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  padding-top: 0.5rem;
+}
+
+.headRow {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.headCell {
+  color: #8c8c8c;
+  font-size: 0.75rem;
+  font-weight: 400;
+  width: 2.5rem;
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.cell {
+  position: relative;
+  text-align: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+}
+
+.day {
+  background: transparent;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.daySelected {
+  background: white !important;
+  color: #1a1a1a !important;
+  font-weight: 500;
+}
+
+.dayToday {
+  background: #2d2d2d;
+  border: 1px solid rgba(140, 140, 140, 0.3);
+}
+
+.dayOutside {
+  color: rgba(140, 140, 140, 0.5);
+}
+
+.dayDisabled {
+  color: rgba(140, 140, 140, 0.3);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dayDisabled:hover {
+  background: transparent;
+}
+
+.dayRangeMiddle {
+  background: #252525;
+  border-radius: 0;
+}
+
+.dayHidden {
+  visibility: hidden;
+}
 
 .weekNumber {
   display: flex;
-  width: var(--cell-size);
-  height: var(--cell-size);
+  width: 2.5rem;
+  height: 2.5rem;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #8c8c8c;
+  font-size: 0.75rem;
 }
