@@ -152,6 +152,8 @@ export async function GET(_request: NextRequest) {
     });
 
     // Fetch events from primary account if connected
+    let primaryAccountFailed = false;
+    let primaryAccountError = '';
     if (dbUser?.googleCalendarConnected && dbUser.accessToken) {
       const primaryAuth: GoogleAuth = {
         accessToken: dbUser.accessToken,
@@ -159,11 +161,13 @@ export async function GET(_request: NextRequest) {
       };
 
       try {
-        events = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
+        const primaryEvents = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
+        events = primaryEvents;
+        console.log(`✅ Successfully fetched ${primaryEvents.length} events from primary account (${dbUser.email})`);
       } catch (error) {
         if (isAuthError(error)) {
           if (primaryAuth.refreshToken) {
-            console.log('Primary account: Access token expired, attempting to refresh...');
+            console.log(`⚠️ Primary account (${dbUser.email}): Access token expired, attempting to refresh...`);
             try {
               const refreshedTokens = await googleApiService.refreshAccessToken(primaryAuth.refreshToken);
 
@@ -174,22 +178,31 @@ export async function GET(_request: NextRequest) {
                 .set({ accessToken: refreshedTokens.access_token } as Partial<UserInsert>)
                 .where(eq(userTable.id, dbUser.id));
 
-              events = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
-              console.log('Successfully refreshed primary token and fetched calendar events');
+              const primaryEvents = await googleApiService.getCalendarEvents(primaryAuth, dbUser.email);
+              events = primaryEvents;
+              console.log(`✅ Successfully refreshed primary token and fetched ${primaryEvents.length} events from ${dbUser.email}`);
             } catch (refreshError) {
-              console.error('Failed to refresh primary access token:', refreshError);
-              // Don't throw error here - fall through to try connected accounts instead
-              console.log('Primary account refresh failed, will try connected accounts instead');
+              primaryAccountFailed = true;
+              primaryAccountError = refreshError instanceof Error ? refreshError.message : 'Token refresh failed';
+              console.error(`❌ Failed to refresh primary access token for ${dbUser.email}:`, refreshError);
+              console.log('⚠️ Primary account refresh failed, will try connected accounts instead');
             }
           } else {
-            console.log('Primary account: No refresh token available, will try connected accounts instead');
+            primaryAccountFailed = true;
+            primaryAccountError = 'No refresh token available';
+            console.log(`⚠️ Primary account (${dbUser.email}): No refresh token available, will try connected accounts instead`);
           }
         } else {
-          console.error("Error fetching primary calendar:", error);
-          // Don't throw error here - fall through to try connected accounts instead
-          console.log('Primary account error, will try connected accounts instead');
+          primaryAccountFailed = true;
+          primaryAccountError = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`❌ Error fetching primary calendar for ${dbUser.email}:`, error);
+          console.log('⚠️ Primary account error, will try connected accounts instead');
         }
       }
+    } else if (dbUser?.googleCalendarConnected && !dbUser.accessToken) {
+      primaryAccountFailed = true;
+      primaryAccountError = 'No access token stored';
+      console.log(`⚠️ Primary account (${dbUser?.email}): googleCalendarConnected=true but no access token`);
     }
 
     // Fetch events from secondary accounts
@@ -224,6 +237,9 @@ export async function GET(_request: NextRequest) {
         hasRefreshToken: !!acc.refreshToken
       }))
     });
+
+    let secondaryAccountsSuccess = 0;
+    let secondaryAccountsFailed = 0;
 
     for (const account of secondaryAccounts) {
       if (!account.accessToken) continue;
@@ -277,19 +293,21 @@ export async function GET(_request: NextRequest) {
           }));
 
           events.push(...secondaryEvents);
+          secondaryAccountsSuccess++;
+          console.log(`✅ Successfully fetched ${secondaryEventsList.length} events from secondary account (${accountEmail})`);
         } catch (error: any) {
           if (isAuthError(error) && auth.refreshToken) {
             try {
-              console.log(`Refreshing token for calendar events for account ${account.id}...`);
+              console.log(`⚠️ Refreshing token for calendar events for account ${accountEmail}...`);
               const refreshedTokens = await googleApiService.refreshAccessToken(auth.refreshToken);
               auth.accessToken = refreshedTokens.access_token;
-              
+
               // Update database with new token
               await dbMinimal
                 .update(connectedAccounts)
                 .set({ accessToken: refreshedTokens.access_token } as Partial<ConnectedAccountInsert>)
                 .where(eq(connectedAccounts.id, account.id));
-              
+
               // Retry getting calendar events
               const secondaryEventsList = await googleApiService.getCalendarEvents(auth, accountEmail);
               const secondaryEvents = secondaryEventsList.map((event) => ({
@@ -299,11 +317,15 @@ export async function GET(_request: NextRequest) {
                 calendarName: `${accountEmail} (view-only)`,
               }));
               events.push(...secondaryEvents);
+              secondaryAccountsSuccess++;
+              console.log(`✅ Successfully refreshed token and fetched ${secondaryEventsList.length} events from ${accountEmail}`);
             } catch (refreshError) {
-              console.error(`Failed to refresh token for calendar events for account ${account.id}:`, refreshError);
+              secondaryAccountsFailed++;
+              console.error(`❌ Failed to refresh token for calendar events for ${accountEmail}:`, refreshError);
               throw error; // Let the outer catch handle this
             }
           } else {
+            secondaryAccountsFailed++;
             throw error;
           }
         }
@@ -376,10 +398,34 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ data: sampleEvents });
     }
 
+    // Log summary of calendar sync
+    console.log('📅 Calendar API Summary:', {
+      primaryAccount: dbUser?.googleCalendarConnected ?
+        (primaryAccountFailed ? `❌ Failed (${primaryAccountError})` : `✅ Success`) :
+        '➖ Not connected',
+      primaryAccountEmail: dbUser?.email,
+      secondaryAccountsTotal: secondaryAccounts.length,
+      secondaryAccountsSuccess,
+      secondaryAccountsFailed,
+      totalEvents: events.length,
+      timestamp: new Date().toISOString()
+    });
+
+    // If primary account failed and we have no events at all, inform the user
+    if (primaryAccountFailed && events.length === 0) {
+      console.warn(`⚠️ WARNING: Primary account (${dbUser?.email}) failed and no secondary accounts provided events. User may need to reconnect.`);
+    }
+
     return NextResponse.json(
       {
         success: true,
-        data: events
+        data: events,
+        debug: process.env.NODE_ENV === 'development' ? {
+          primaryAccountStatus: primaryAccountFailed ? 'failed' : 'success',
+          primaryAccountError: primaryAccountFailed ? primaryAccountError : null,
+          secondaryAccountsSuccess,
+          secondaryAccountsFailed
+        } : undefined
       },
       {
         headers: {
