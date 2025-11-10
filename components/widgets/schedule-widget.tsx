@@ -341,8 +341,18 @@ export function ScheduleWidget() {
                       console.error('Error connecting calendar:', error);
                       // Try alternative approach if Supabase fails
                       console.log('Trying direct Google OAuth...');
+
+                      // Get the correct client ID from environment
+                      const response = await fetch('/api/config');
+                      const config = await response.json();
+                      const clientId = config.googleClientId;
+
+                      if (!clientId) {
+                        throw new Error('Google Client ID not configured');
+                      }
+
                       const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-                        `client_id=${encodeURIComponent('301293553612-42c89kj4s39tckdevgv5o6dttsfulnml.apps.googleusercontent.com')}&` +
+                        `client_id=${encodeURIComponent(clientId)}&` +
                         `redirect_uri=${encodeURIComponent(window.location.origin + '/auth/callback')}&` +
                         `response_type=code&` +
                         `scope=${encodeURIComponent('openid email profile https://www.googleapis.com/auth/calendar.readonly')}&` +

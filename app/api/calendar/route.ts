@@ -97,7 +97,19 @@ export async function GET(_request: NextRequest) {
         } = await supabase.auth.getUser();
 
         if (!authUser) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+          return NextResponse.json(
+            {
+              error: "Unauthorized",
+              success: false,
+              data: []
+            },
+            {
+              status: 401,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
         }
 
         userId = authUser.id;
@@ -110,11 +122,34 @@ export async function GET(_request: NextRequest) {
           .limit(1);
 
       if (!dbUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+        return NextResponse.json(
+          {
+            error: "User not found",
+            success: false,
+            data: []
+          },
+          {
+            status: 404,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
       }
     }
 
     let events: any[] = [];
+
+    // Debug primary account status
+    console.log('Calendar API - Primary account debug:', {
+      userId,
+      userExists: !!dbUser,
+      googleCalendarConnected: dbUser?.googleCalendarConnected,
+      hasAccessToken: !!dbUser?.accessToken,
+      accessTokenLength: dbUser?.accessToken?.length,
+      hasRefreshToken: !!dbUser?.refreshToken,
+      email: dbUser?.email
+    });
 
     // Fetch events from primary account if connected
     if (dbUser?.googleCalendarConnected && dbUser.accessToken) {
@@ -160,12 +195,35 @@ export async function GET(_request: NextRequest) {
     // Fetch events from secondary accounts
     const calendarOwnerId = devBypass ? '00000000-0000-4000-8000-000000000000' : userId;
     if (!calendarOwnerId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+          success: false,
+          data: []
+        },
+        {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
     }
     const secondaryAccounts = await dbMinimal
       .select()
       .from(connectedAccounts)
       .where(eq(connectedAccounts.userId, calendarOwnerId));
+
+    console.log('Calendar API - Secondary accounts debug:', {
+      calendarOwnerId,
+      secondaryAccountsCount: secondaryAccounts.length,
+      accounts: secondaryAccounts.map(acc => ({
+        id: acc.id,
+        hasAccessToken: !!acc.accessToken,
+        accessTokenLength: acc.accessToken?.length,
+        hasRefreshToken: !!acc.refreshToken
+      }))
+    });
 
     for (const account of secondaryAccounts) {
       if (!account.accessToken) continue;
@@ -318,12 +376,35 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ data: sampleEvents });
     }
 
-    return NextResponse.json({ data: events });
+    return NextResponse.json(
+      {
+        success: true,
+        data: events
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
   } catch (error) {
     console.error("Calendar API error:", error);
+
+    // Ensure we always return valid JSON, even for unexpected errors
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch calendar events";
+
     return NextResponse.json(
-      { error: "Failed to fetch calendar events" },
-      { status: 500 },
+      {
+        error: errorMessage,
+        success: false,
+        data: [] // Always include data field for consistency
+      },
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      },
     );
   }
 }

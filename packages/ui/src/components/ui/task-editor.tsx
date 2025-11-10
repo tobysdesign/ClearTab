@@ -52,7 +52,7 @@ export function TaskEditor({
   return (
     <div className={`${styles.taskEditorWrapper} ${className || ''}`}>
       <QuillEditor
-        key="stable-task-editor"
+        key={`task-editor-${readOnly ? 'readonly' : 'editable'}`}
         value={contentRef.current}
         onChange={handleChange}
         onBlur={onBlur}

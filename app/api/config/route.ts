@@ -200,6 +200,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({
       config,
+      googleClientId: process.env.GOOGLE_CLIENT_ID,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

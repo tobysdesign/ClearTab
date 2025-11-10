@@ -30,6 +30,17 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.user) {
+      // Debug what tokens we receive from Supabase
+      console.log('Auth callback - Supabase token debug:', {
+        userId: data.user.id,
+        email: data.user.email,
+        hasProviderToken: !!data.session.provider_token,
+        providerTokenLength: data.session.provider_token?.length,
+        hasProviderRefreshToken: !!data.session.provider_refresh_token,
+        providerRefreshTokenLength: data.session.provider_refresh_token?.length,
+        scopes: data.session.provider_token ? 'token-present' : 'no-token'
+      });
+
       const userInsertValues = {
         email: data.user.email!,
         name:

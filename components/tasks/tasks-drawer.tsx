@@ -87,7 +87,7 @@ export function TasksDrawer() {
             )}
           </div>
           <EditTaskForm
-            key={activeTask?.id || newTaskText || "new-task"}
+            key="stable-task-form"
             task={activeTask}
             onClose={handleModalClose}
             onSave={handleModalSave}

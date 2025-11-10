@@ -35,13 +35,20 @@ export function DatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-between text-left font-normal bg-transparent border-none text-white rounded-lg hover:bg-white/10",
-            !date && "text-muted-foreground",
-            className
+            "w-full justify-between text-left font-normal h-auto px-3 py-2 text-sm transition-all duration-200",
+            "bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.2)] text-white",
+            "hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.4)]",
+            "focus:bg-[rgba(255,255,255,0.08)] focus:border-[rgba(255,255,255,0.4)] focus:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]",
+            "data-[state=open]:bg-[rgba(255,255,255,0.08)] data-[state=open]:border-[rgba(255,255,255,0.4)]",
+            !date && "text-[rgba(255,255,255,0.5)]",
+            className,
           )}
+          style={{ borderRadius: '0.375rem' }}
         >
-          {!hideIcon && <span className="mr-2 h-4 w-4">◊</span>}
-          {date ? format(date, "dd/MM/yy") : <span>{placeholder}</span>}
+          <span>
+            {date ? format(date, "dd/MM/yy") : <span>{placeholder}</span>}
+          </span>
+          <span className="text-white/60 ml-2">⌄</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

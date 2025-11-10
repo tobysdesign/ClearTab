@@ -38,6 +38,19 @@ export function QuillEditor({
   const [hasSelection, setHasSelection] = useState(false);
   const [isCreatingTask, setIsCreatingTask] = useState(false);
 
+  // Store callbacks in refs to avoid reinitializing Quill on every callback change
+  const onChangeRef = useRef(onChange);
+  const onBlurRef = useRef(onBlur);
+
+  // Keep refs up to date
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    onBlurRef.current = onBlur;
+  }, [onBlur]);
+
   useEffect(() => {
     if (!editorRef.current || quillRef.current) return;
 
@@ -83,11 +96,11 @@ export function QuillEditor({
       }
     }
 
-    // Handle changes
+    // Handle changes - use ref to avoid reinitializing on callback change
     quill.on("text-change", () => {
       const content = quill.getContents();
-      if (onChange) {
-        onChange(content);
+      if (onChangeRef.current) {
+        onChangeRef.current(content);
       }
     });
 
@@ -103,10 +116,10 @@ export function QuillEditor({
       }
     });
 
-    // Handle blur event
+    // Handle blur event - use ref to avoid reinitializing on callback change
     quill.on("blur", () => {
-      if (onBlur) {
-        onBlur();
+      if (onBlurRef.current) {
+        onBlurRef.current();
       }
     });
 
@@ -115,7 +128,7 @@ export function QuillEditor({
         quillRef.current = null;
       }
     };
-  }, [placeholder, readOnly, editable, onChange, onBlur]);
+  }, [placeholder, readOnly, editable]); // ✅ Removed onChange and onBlur from dependencies
 
   // Update content when value changes externally
   useEffect(() => {
@@ -142,8 +155,15 @@ export function QuillEditor({
 
       if (contentToSet) {
         const currentContent = quillRef.current.getContents();
-        // Only update if content is actually different to prevent cursor jumping
-        if (JSON.stringify(currentContent) !== JSON.stringify(contentToSet)) {
+        // More robust content comparison to prevent unnecessary updates
+        const currentOps = currentContent.ops || [];
+        const newOps = contentToSet.ops || [];
+
+        // Simple comparison that avoids cursor jumping
+        const isDifferent = currentOps.length !== newOps.length ||
+          JSON.stringify(currentOps) !== JSON.stringify(newOps);
+
+        if (isDifferent && !quillRef.current.hasFocus()) {
           quillRef.current.setContents(contentToSet);
         }
       }
