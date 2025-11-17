@@ -9,7 +9,7 @@ import React, {
 } from "react";
 // import { Input } from "@/components/ui/input";
 
-import { AddButton } from "@cleartab/ui";
+import { AddButton, Button } from "@cleartab/ui";
 import dynamic from "next/dynamic";
 import type { Note } from "@/shared/schema";
 import { useNotes } from "@/hooks/use-notes";
@@ -950,9 +950,9 @@ export function NotesWidget() {
                   <div tabIndex={2} className={notesStyles.notesActions}>
                     <SimpleDropdown
                       trigger={
-                        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <Button variant="ghost-icon" size="icon">
                           <MoreActionsIcon size={16} />
-                        </button>
+                        </Button>
                       }
                     >
                       <SimpleDropdownItem

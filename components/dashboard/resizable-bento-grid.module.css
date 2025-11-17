@@ -29,8 +29,8 @@
 .resizeHandleHorizontal {
     /* box model */
     width: 1px;
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 4px;
+    margin-right: 4px;
 
     /* visual */
     background-color: hsl(var(--border));
@@ -46,8 +46,8 @@
 .resizeHandleVertical {
     /* box model */
     height: 1px;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
 
     /* visual */
     background-color: hsl(var(--border));
@@ -68,8 +68,8 @@
 .resizeHandleInline {
     /* box model */
     width: 1px;
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 4px;
+    margin-right: 4px;
 
     /* visual */
     background-color: hsl(var(--border));

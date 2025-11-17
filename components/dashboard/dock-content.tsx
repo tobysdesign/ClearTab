@@ -4,6 +4,7 @@
 import { CloseIcon } from '@/components/icons'
 import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
+import { DockIconButton } from '@/components/ui/dock-icon-button'
 import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
@@ -46,17 +47,15 @@ export function DockContent({
             styles.container,
             isVertical ? styles.containerVertical : styles.containerHorizontal
         )}>
-            <button
+            <DockIconButton
                 onClick={toggleLayout}
-                className={styles.iconButton}
                 title={`Switch to ${layout === 'two-row' ? 'single' : 'two'} row layout`}
             >
-                <LayoutToggleIcon 
+                <LayoutToggleIcon
                     isToggled={layout === 'single-row'}
                     size={16}
-                    className="text-white/60"
                 />
-            </button>
+            </DockIconButton>
 
             <ShinyAiButton
                 onClick={handleToggleChat}
@@ -78,12 +77,11 @@ export function DockContent({
                         className={styles.searchInput}
                     />
                     {searchQuery && (
-                        <button
+                        <DockIconButton
                             onClick={() => setSearchQuery("")}
-                            className={styles.iconButton}
                         >
-                            <CloseIcon size={16} className="text-white/60" />
-                        </button>
+                            <CloseIcon size={16} />
+                        </DockIconButton>
                     )}
                 </div>
             )}

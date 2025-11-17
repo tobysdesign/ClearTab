@@ -193,7 +193,8 @@ export const NoteListItem = React.memo(function NoteListItem({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -20, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        whileHover={{ x: 2 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
         className={cn(
           "widget-list-item widget-list-item--notes",
           styles.expandedItem,

@@ -104,11 +104,11 @@
     }
 
     .ListContent {
-        padding: 0 0.5rem !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 0.5rem !important;
+        padding: 0 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
     }
 }
 
@@ -175,7 +175,7 @@
     flex-shrink: 0;
 
     /* box model */
-    padding: 1.5rem 1.5rem 0;
+    padding: 14px 18px;
 }
 
 .notesHeaderContent {
@@ -316,7 +316,6 @@
 .notesEditorScroll {
     /* layout */
     flex: 1;
-
     /* box model */
     overflow-y: visible;
     overflow-x: visible;

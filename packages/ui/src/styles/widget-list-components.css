@@ -4,193 +4,187 @@
 
 /* List item entrance animation */
 @keyframes listItemFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* List item exit animation */
 @keyframes listItemFadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.95);
-  }
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
 }
 
 /* Base list item - clean, semantic styling */
 .widget-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  margin-bottom: 4px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background-color: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(4px);
-  transition: all 0.15s ease;
-  cursor: pointer;
-  animation: listItemFadeIn 0.2s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background-color: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(4px);
+    transition: all 0.15s ease;
+    cursor: pointer;
+    animation: listItemFadeIn 0.2s ease-out;
 }
 
 .widget-list-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: translateX(2px);
+    background-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
 }
 
 .widget-list-item.active,
 .widget-list-item[data-state="active"],
 .widget-list-item[aria-selected="true"] {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Task-specific list items */
 .widget-list-item--tasks {
-  position: relative;
-  padding: 12px;
-  gap: 12px;
+    position: relative;
+    padding: 12px 12px 12px 6px;
+    gap: 12px;
+    background: #222222;
+    border: 1px solid #222222;
+    transition:
+        background 0.2s ease-out,
+        border-color 0.2s ease-out;
 }
 
 .widget-list-item--tasks:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+    background: #454545;
+    border: 1px solid #454545;
 }
 
 .widget-list-item--tasks.active {
-  background-color: rgba(255, 255, 255, 0.08);
+    background: #272727;
+    border: 1px solid #454545;
 }
 
 /* Notes-specific list items */
 .widget-list-item--notes {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 12px;
-  gap: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px;
+    gap: 6px;
+    background: #222222;
+    border: 1px solid #222222;
+    transition:
+        background 0.15s ease-out,
+        border-color 0.15s ease-out;
 }
 
 /* Force flex display even with framer motion */
 [data-widget="notes"] .widget-list-item--notes,
 [data-widget="notes"] .widget-list-item--notes[style] {
-  display: flex !important;
-  flex-direction: column;
+    display: flex !important;
+    flex-direction: column;
 }
 
 .widget-list-item--notes:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.widget-list-item--notes.active {
-  background: #272727;
-  border: 1px solid #454545;
-}
-
-/* Schedule-specific list items (event cards) */
-.widget-list-item--schedule {
-  padding: 12px;
-  margin-bottom: 4px;
-}
-
-.widget-list-item--schedule:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.widget-list-item--schedule.current {
-  background-color: rgba(96, 165, 250, 0.15);
-  border: 1px solid rgba(96, 165, 250, 0.3);
-}
-
-.widget-list-item--schedule.current:hover {
-  background-color: rgba(96, 165, 250, 0.2);
+    background: #454545;
+    border: 1px solid #454545;
 }
 
 .widget-list-item--notes.active,
 .widget-list-item--notes.widget-list-item--active {
-  background: #272727;
-  border: 1px solid #454545;
+    background: #272727;
+    border: 1px solid #454545;
 }
 
-/* Schedule-specific list items (same as tasks) */
+/* Schedule-specific list items */
 .widget-list-item--schedule {
-  background-color: rgba(34, 34, 34, 0.5);
-  border-color: transparent;
-  backdrop-filter: blur(8px);
-  /* Override base widget-list-item flex layout */
-  display: block;
-  align-items: unset;
-  justify-content: unset;
+    padding: 12px;
+    background: #222222;
+    border: 1px solid #222222;
+    display: block;
+    align-items: unset;
+    justify-content: unset;
+    transition:
+        background 0.2s ease-out,
+        border-color 0.2s ease-out;
 }
+
 .widget-list-item--schedule:hover {
-  background-color: rgba(61, 61, 61, 0.5);
-  border-color: rgba(37, 35, 35, 0.3);
+    background: #454545;
+    border: 1px solid #454545;
 }
-.widget-list-item--schedule.active {
-  background-color: rgba(41, 41, 41, 0.6);
-  border-color: rgba(67, 67, 67, 0.5);
+
+.widget-list-item--schedule.active,
+.widget-list-item--schedule.current {
+    background: #272727;
+    border: 1px solid #454545;
 }
 
 /* Legacy class for backward compatibility */
 .listItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  margin-bottom: 4px;
-  border-radius: 8px;
-  border: 1px solid #222222;
-  background-color: #222222;
-  transition: all 0.2s ease;
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid #222222;
+    background-color: #222222;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .listItem:hover {
-  background-color: #3d3d3d;
-  border-color: #252323;
+    background-color: #3d3d3d;
+    border-color: #252323;
 }
 
 .listItem.active,
 .listItem[data-state="active"],
 .listItem[aria-selected="true"] {
-  background-color: #292929;
-  border-color: #434343;
+    background-color: #292929;
+    border-color: #434343;
 }
 
 /* Widget list item content styling */
 .widget-list-item-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  gap: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 4px;
 }
 
 .widget-list-item-title {
-  font-size: 14px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.8);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .widget-list-item-subtitle {
-  font-size: 12px;
-  font-weight: 400;
-  color: #8d8d8d;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
+    font-size: 12px;
+    font-weight: 400;
+    color: #8d8d8d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 /* ===========================================
@@ -198,53 +192,53 @@
    =========================================== */
 
 .bigNumber {
-  font-family: "Inter Display", sans-serif;
-  font-size: 48px;
-  line-height: 1em;
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  margin-bottom: 4px;
-  color: #d2d2d2;
+    font-family: "Inter Display", sans-serif;
+    font-size: 48px;
+    line-height: 1em;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    color: #d2d2d2;
 }
 /* List item primary text */
 .item-title {
-  font-family: "Inter", system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.87);
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.87);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* List item secondary text */
 .item-subtitle {
-  font-family: "Inter Display", sans-serif;
-  font-size: 14px;
-  line-height: 17px;
-  font-weight: 400;
-  color: #8d8d8d;
-  margin-top: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+    font-family: "Inter Display", sans-serif;
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 400;
+    color: #8d8d8d;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
 /* Note preview text with line clamp */
 .note-preview {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
 }
 
 /* Small metadata text */
 .widget-meta {
-  font-size: 10px;
-  font-weight: 300;
-  color: #8d8d8d;
+    font-size: 10px;
+    font-weight: 300;
+    color: #8d8d8d;
 }
 
 /* ===========================================
@@ -253,48 +247,52 @@
    =========================================== */
 
 .widget-relative {
-  position: relative;
+    position: relative;
 }
 
 .widget-full-height {
-  height: 100%;
+    height: 100%;
 }
 
 .widget-full-width {
-  width: 100%;
+    width: 100%;
 }
 
 .widget-absolute {
-  position: absolute;
+    position: absolute;
 }
 
 .widget-full {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .widget-background {
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgb(19, 19, 19) 4%, rgb(23, 21, 21) 100%);
-  border: 1px solid #323235;
-  box-shadow:
-    0px 8px 12px 6px rgba(0, 0, 0, 0.15),
-    0px 4px 4px rgba(0, 0, 0, 0.3);
+    border-radius: 22px;
+    background: linear-gradient(
+        180deg,
+        rgb(19, 19, 19) 4%,
+        rgb(23, 21, 21) 100%
+    );
+    border: 1px solid #323235;
+    box-shadow:
+        0px 8px 12px 6px rgba(0, 0, 0, 0.15),
+        0px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
 .widget-flex-column {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .widget-flex-1 {
-  flex: 1;
+    flex: 1;
 }
 
 .widget-overflow-auto {
-  overflow: auto;
+    overflow: auto;
 }
 
 /* ===========================================
@@ -303,70 +301,70 @@
    =========================================== */
 
 .widget-list-content {
-  padding: 2px 16px 24px 16px;
-  width: 100%;
-  box-sizing: border-box;
+    padding: 2px 16px 24px 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .widget-tasks-content {
-  padding: 0;
+    padding: 0;
 }
 
 .widget-notes-content {
-  padding: 52px 0 25px 36px;
-  margin-right: 24px;
+    padding: 52px 0 25px 36px;
+    margin-right: 24px;
 }
 
 .widget-flex {
-  display: flex;
+    display: flex;
 }
 
 .widget-flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .widget-flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .widget-flex-start {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .widget-gap-2 {
-  gap: 8px;
+    gap: 8px;
 }
 
 .widget-gap-3 {
-  gap: 8px;
+    gap: 8px;
 }
 
 .widget-gap-4 {
-  gap: 16px;
+    gap: 16px;
 }
 
 .widget-min-w-0 {
-  min-width: 0;
+    min-width: 0;
 }
 
 .widget-text-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .widget-text-center {
-  text-align: center;
+    text-align: center;
 }
 
 .widget-overflow-hidden {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 /* ===========================================
@@ -374,24 +372,24 @@
    =========================================== */
 
 .widget-header {
-  min-height: 40px;
-  padding: 8px 24px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-  border-radius: 22px 22px 0 0;
+    min-height: 60px;
+    padding: 14px 18px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border-radius: 22px 22px 0 0;
 }
 
 .widget-title {
-  font-family: "Inter Display", sans-serif;
-  font-size: 12px;
-  line-height: 12px;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  color: #bbbbbb;
-  white-space: nowrap;
-  overflow: visible;
-  text-align: left;
+    font-family: "Inter Display", sans-serif;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: #bbbbbb;
+    white-space: nowrap;
+    overflow: visible;
+    text-align: left;
 }

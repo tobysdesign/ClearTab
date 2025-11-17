@@ -80,10 +80,10 @@ export function WeatherWidgetNew() {
               layout
               style={{
                 position: 'absolute',
-                left: '50%',
-                width: 'calc(100% - 20px)',
+                left: index === 2 ? 0 : '50%',
+                width: index === 2 ? '100%' : 'calc(100% - 20px)',
                 height: 'calc(100% - 40px)',
-                transform: 'translateX(-50%)',
+                transform: index === 2 ? 'none' : 'translateX(-50%)',
                 zIndex: index === 0 ? 1 : index === 1 ? 2 : 3,
               }}
               animate={{

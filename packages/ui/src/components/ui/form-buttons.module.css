@@ -1,117 +1,117 @@
 .buttonContainer {
-  padding: 1rem;
-  margin-top: 2rem;
-  background: transparent;
+    padding: 1rem;
+    margin-top: 0rem;
+    background: transparent;
 }
 
 .buttonRow {
-  display: flex;
-  gap: 0.75rem;
+    display: flex;
+    gap: 0.75rem;
 }
 
 .createButton {
-  background: #C4C4C4 !important;
-  color: #1a1a1a !important;
-  border: 1px solid #E6E6E6;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 400;
-  flex: 1;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    background: #c4c4c4 !important;
+    color: #1a1a1a !important;
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .createButton:hover {
-  background: #ffffff !important;
-  border-color: #ffffff;
+    background: #ffffff !important;
+    border-color: #ffffff;
 }
 
 .cancelButton {
-  background: transparent !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .cancelButton:hover {
-  color: rgba(255, 255, 255, 0.8) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .doneButton {
-  background: white !important;
-  color: #1a1a1a !important;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  width: 100%;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    background: white !important;
+    color: #1a1a1a !important;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .doneButton:hover {
-  background: #f0f0f0 !important;
+    background: #f0f0f0 !important;
 }
 
 .checkboxField {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
 }
 
 .checkbox {
-  width: 16px;
-  height: 16px;
-  border: 1px solid white;
-  border-radius: 50%;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    width: 16px;
+    height: 16px;
+    border: 1px solid white;
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .checkbox:hover {
-  border-color: white;
+    border-color: white;
 }
 
 .checkboxChecked {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.4);
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .checkboxChecked:hover {
-  border-color: white;
+    border-color: white;
 }
 
 .checkmark {
-  width: 16px;
-  height: 16px;
-  stroke: rgba(255, 255, 255, 0.4);
+    width: 16px;
+    height: 16px;
+    stroke: rgba(255, 255, 255, 0.4);
 }
 
 .checkboxChecked:hover .checkmark {
-  stroke: white;
+    stroke: white;
 }
 
 .checkboxLabel {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-  font-weight: 400;
-  cursor: pointer;
-  user-select: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    user-select: none;
 }
 
 .checkboxField:hover .checkboxLabel {
-  color: white;
+    color: white;
 }

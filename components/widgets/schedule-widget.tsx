@@ -4,6 +4,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
+import { motion } from 'framer-motion'
 
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -38,15 +39,19 @@ function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: bool
   const endTime = parseEventTime(event.end);
 
   return (
-    <div className={cn('widget-list-item widget-list-item--schedule', styles.eventCard, {
-      [styles.eventCardCurrent]: isCurrent,
-      [styles.eventCardDefault]: !isCurrent
-    })}>
+    <motion.div
+      className={cn('widget-list-item widget-list-item--schedule', styles.eventCard, {
+        [styles.eventCardCurrent]: isCurrent,
+        [styles.eventCardDefault]: !isCurrent
+      })}
+      whileHover={{ x: 2 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+    >
       <div className={styles.eventTitle}>{event.title}</div>
       <div className={styles.eventTime}>
         {event.allDay ? 'All day' : `${format(startTime, 'p')} – ${format(endTime, 'p')}`}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -284,12 +289,17 @@ export function ScheduleWidget() {
     }
   }, [visibleDayKey])
 
-  // Scroll to today on initial load
+  // Scroll to today on initial load - scroll within container, not page
   useEffect(() => {
     if (!isLoading && todayRef.current) {
-      setTimeout(() => {
-        todayRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-      }, 100)
+      const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
+                             todayRef.current.closest('[class*="scrollContainer"]')
+      if (scrollContainer) {
+        setTimeout(() => {
+          const elementTop = todayRef.current!.offsetTop
+          scrollContainer.scrollTop = Math.max(0, elementTop - 50)
+        }, 100)
+      }
     }
   }, [isLoading])
 
@@ -405,9 +415,17 @@ export function ScheduleWidget() {
             <div
               className={styles.sidebarFooter}
               onClick={() => {
-                // Scroll to today
+                // Scroll to today within container
                 if (todayRef.current) {
-                  todayRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' })
+                  const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
+                                         todayRef.current.closest('[class*="scrollContainer"]')
+                  if (scrollContainer) {
+                    const elementTop = todayRef.current.offsetTop
+                    scrollContainer.scrollTo({
+                      top: Math.max(0, elementTop - 50),
+                      behavior: 'smooth'
+                    })
+                  }
                 }
               }}
               style={{ cursor: 'pointer' }}

@@ -368,6 +368,8 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ x: -50, opacity: 0 }}
+                            whileHover={{ x: 2 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                             onClick={() => {
                               console.log("Setting active task ID:", task.id);
                               console.log("Full task object:", task);

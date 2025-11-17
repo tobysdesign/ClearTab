@@ -1,4 +1,4 @@
-/* Shiny AI Button Component Styles */
+/* Dock Icon Button - Shared styling for all dock menu items */
 
 .dockIconButton {
   /* layout */
@@ -31,9 +31,4 @@
 
   /* typography */
   color: rgba(255, 255, 255, 1);
-}
-
-.brandedIcon {
-  width: 20px;
-  height: 11px;
 }

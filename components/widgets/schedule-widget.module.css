@@ -1,36 +1,15 @@
-.eventCard {
-    position: relative;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-}
-
-.eventCardCurrent {
-    background: #272727;
-    border: 1px solid #454545;
-}
-
-.eventCardDefault {
-    background: #222222;
-    border: 1px solid #222222;
-}
-
-.eventCardDefault:hover {
-    background: #454545;
-    border: 1px solid #454545;
-}
+/* Event card styles moved to widget-list-components.css */
+/* Only keep non-conflicting styles here */
 
 .eventTitle {
     color: white;
-    font-size: 0.875rem;
+    font-size: 14px;
     margin-bottom: 0.25rem;
 }
 
 .eventTime {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 0.75rem;
+    font-size: 12px;
 }
 
 .daySection {
@@ -91,10 +70,10 @@
 }
 
 .sidebarHeader {
-    min-height: 60px;
     display: flex;
     align-items: center;
-    padding: 14px 24px;
+    padding: 14px 18px;
+    min-height: 60px;
 }
 
 /* Removed - using global widget-title class directly */
@@ -104,7 +83,7 @@
     flex-direction: column;
     justify-content: space-between;
     flex: 1;
-    padding: 0 24px;
+    padding: 0 18px;
 }
 
 .sidebarFooter {
@@ -194,44 +173,44 @@
 
 /* Container query for small schedule widget */
 @container (max-width: 270px) {
-  .sidebar {
-    width: 80px;
-  }
+    .sidebar {
+        width: 80px;
+    }
 
-  .sidebarHeader {
-    padding: 14px 12px;
-  }
+    .sidebarHeader {
+        padding: 14px 12px;
+    }
 
-  .sidebarContent {
-    padding: 0 12px;
-  }
+    .sidebarContent {
+        padding: 0 12px;
+    }
 
-  .dayText {
-    font-size: 12px;
-  }
+    .dayText {
+        font-size: 12px;
+    }
 
-  .monthText {
-    font-size: 12px;
-  }
+    .monthText {
+        font-size: 12px;
+    }
 
-  .scrollContainer {
-    padding: 0.5rem;
-  }
+    .scrollContainer {
+        padding: 0.5rem;
+    }
 
-  .eventCard {
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
+    .eventCard {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
 
-  .eventTitle {
-    font-size: 0.75rem;
-  }
+    .eventTitle {
+        font-size: 0.75rem;
+    }
 
-  .eventTime {
-    font-size: 0.625rem;
-  }
+    .eventTime {
+        font-size: 0.625rem;
+    }
 
-  .dayHeader {
-    font-size: 0.625rem;
-  }
+    .dayHeader {
+        font-size: 0.625rem;
+    }
 }

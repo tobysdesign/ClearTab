@@ -18,37 +18,6 @@
     gap: 0.5rem;
 }
 
-/* Icon Button */
-.iconButton {
-    /* box model */
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-
-    /* typography */
-    color: rgba(255, 255, 255, 0.8);
-
-    /* state */
-    transition: all 200ms ease-out;
-}
-
-.iconButton:hover {
-    /* visual */
-    background-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-    /* typography */
-    color: rgba(255, 255, 255, 1);
-}
-
-.iconButtonActive {
-    /* visual */
-    background-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-    /* typography */
-    color: rgba(255, 255, 255, 1);
-}
-
 /* Search Container */
 .searchContainer {
     /* layout */

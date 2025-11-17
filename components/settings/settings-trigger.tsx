@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { SettingsIcon } from '@/components/icons'
-import { Button } from '@/components/ui/button'
+import { DockIconButton } from '@/components/ui/dock-icon-button'
 import { cn } from '@/lib/utils'
 import styles from './settings-trigger.module.css'
 
@@ -20,17 +20,13 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
   }
 
   return (
-    <Button
-      size="icon"
+    <DockIconButton
       onClick={handleClick}
-      className={cn(
-        styles.settingsTrigger,
-        className
-      )}
+      className={cn(styles.settingsTrigger, className)}
       data-testid="settings-trigger"
     >
       <SettingsIcon size={16} className={styles.settingsIcon} />
       <span className="sr-only">Open Settings</span>
-    </Button>
+    </DockIconButton>
   )
 }
