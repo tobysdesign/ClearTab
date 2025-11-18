@@ -4,6 +4,51 @@
    =========================================== */
 
 /* ===========================================
+   VIEWPORT-BASED RESPONSIVE SCALING
+   Uniform scaling for all widgets based on viewport width
+   Bottom-oriented layout: content wraps upward, not downward
+   =========================================== */
+
+/* Default scale */
+:root {
+    --widget-font-scale: 1;
+    --widget-padding-scale: 1;
+    --widget-gap-scale: 1;
+}
+
+/* Viewport width breakpoints for uniform widget scaling */
+@media (max-width: 1400px) {
+    :root {
+        --widget-font-scale: 0.95;
+        --widget-padding-scale: 0.95;
+    }
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --widget-font-scale: 0.9;
+        --widget-padding-scale: 0.9;
+        --widget-gap-scale: 0.9;
+    }
+}
+
+@media (max-width: 1000px) {
+    :root {
+        --widget-font-scale: 0.85;
+        --widget-padding-scale: 0.85;
+        --widget-gap-scale: 0.85;
+    }
+}
+
+@media (max-width: 800px) {
+    :root {
+        --widget-font-scale: 0.8;
+        --widget-padding-scale: 0.8;
+        --widget-gap-scale: 0.8;
+    }
+}
+
+/* ===========================================
    TYPOGRAPHY SYSTEM
    =========================================== */
 

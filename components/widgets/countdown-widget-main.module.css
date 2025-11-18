@@ -162,3 +162,5 @@
     background-color: #ebc8d3;
     box-shadow: inset 0 0 0 3px #ee4d82;
 }
+
+/* Responsive layout uses viewport-based scaling from widget-components.css */

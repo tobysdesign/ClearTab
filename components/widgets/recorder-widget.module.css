@@ -61,6 +61,7 @@
     height: 100%;
     border: 1px solid #323235;
     border-radius: 22px;
+    container-type: inline-size;
 
     /* visual */
     background: linear-gradient(
@@ -694,6 +695,8 @@
     color: rgb(74, 222, 128);
 }
 
+
+/* Responsive layout uses viewport-based scaling from widget-components.css */
 
 /* Utility class for backface visibility */
 .backface-visibility-hidden {

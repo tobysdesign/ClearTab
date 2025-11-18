@@ -10,11 +10,14 @@ interface LayoutToggleIconProps {
 
 export function LayoutToggleIcon({ isToggled, size = 16, className = '' }: LayoutToggleIconProps) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const prevToggledRef = useRef(isToggled)
+  const prevToggledRef = useRef<boolean | null>(null)
 
   useEffect(() => {
-    if (!svgRef.current || prevToggledRef.current === isToggled) return
-    
+    if (!svgRef.current) return
+
+    // Skip animation only if this is truly the same value as before (not initial render)
+    if (prevToggledRef.current !== null && prevToggledRef.current === isToggled) return
+
     prevToggledRef.current = isToggled
     
     const animates = svgRef.current.querySelectorAll('animate')

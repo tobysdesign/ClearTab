@@ -255,7 +255,8 @@ export function CountdownWidget({
         className={countdownStyles.dotsGrid}
         style={{
           display: "grid",
-          placeItems: "center",
+          justifyItems: "start",
+          alignItems: "start",
           width: "100%",
           height: "100%",
         }}
