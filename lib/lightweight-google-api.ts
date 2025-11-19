@@ -156,6 +156,13 @@ class LightweightGoogleApiService {
       grant_type: 'refresh_token',
     });
 
+    console.log('🔄 Refreshing access token...', {
+      hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+      hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+      hasRefreshToken: !!refreshToken,
+      refreshTokenLength: refreshToken?.length
+    });
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -166,16 +173,30 @@ class LightweightGoogleApiService {
 
     if (!response.ok) {
       let errorMessage = `Failed to refresh token: ${response.status}`;
+      let errorData: any;
       try {
-        const errorData = await response.json();
+        errorData = await response.json();
         errorMessage = errorData.error_description || errorData.error || errorMessage;
+        console.error('❌ Token refresh failed:', {
+          status: response.status,
+          error: errorData.error,
+          error_description: errorData.error_description,
+          hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+          hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET
+        });
       } catch {
         // Use the original error message if JSON parsing fails
+        console.error('❌ Token refresh failed (no JSON):', {
+          status: response.status,
+          statusText: response.statusText
+        });
       }
       throw new Error(errorMessage);
     }
 
-    return response.json();
+    const tokens = await response.json();
+    console.log('✅ Token refresh successful');
+    return tokens;
   }
 
   /**
