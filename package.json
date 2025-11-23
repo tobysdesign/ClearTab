@@ -11,7 +11,8 @@
     "build": "next build",
     "start": "next start",
     "generate-icons": "node scripts/generate-icons.js",
-    "analyze": "ANALYZE=true pnpm build"
+    "analyze": "ANALYZE=true pnpm build",
+    "create-user": "tsx -r dotenv/config scripts/create-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

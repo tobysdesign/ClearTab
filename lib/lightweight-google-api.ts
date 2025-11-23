@@ -100,28 +100,52 @@ class LightweightGoogleApiService {
       orderBy: 'startTime',
     });
 
-    const url = `${this.baseUrl}/calendar/v3/calendars/primary/events?${params}`;
-
     try {
-      const response = await this.makeAuthenticatedRequest<GoogleCalendarEventsResponse>(url, auth);
+      // 1. Get calendar list
+      const calendarListUrl = `${this.baseUrl}/calendar/v3/users/me/calendarList`;
+      const calendarListResponse = await this.makeAuthenticatedRequest<{ items: any[] }>(calendarListUrl, auth);
+      let calendars = calendarListResponse.items || [];
 
-      return (response.items || []).map((event): CalendarEvent => ({
-        id: event.id || "",
-        title: event.summary || "Untitled Event",
-        start: event.start?.dateTime || event.start?.date || "",
-        end: event.end?.dateTime || event.end?.date || "",
-        description: event.description || undefined,
-        location: event.location || undefined,
-        allDay: !event.start?.dateTime,
-        color: event.colorId
-          ? `var(--google-calendar-${event.colorId})`
-          : "rgba(59, 130, 246, 0.3)",
-        calendarId: "primary",
-        calendarName: accountEmail,
-        source: "google" as const,
-      }));
+      // 2. Ensure primary is included
+      const hasPrimary = calendars.some(cal => cal.primary);
+      if (!hasPrimary) {
+        calendars.push({ id: 'primary', summary: accountEmail, primary: true });
+      }
+
+      // 3. Fetch events for each calendar
+      let allEvents: CalendarEvent[] = [];
+      for (const calendar of calendars) {
+        const calendarId = calendar.id;
+        const url = `${this.baseUrl}/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params}`;
+        
+        try {
+          const response = await this.makeAuthenticatedRequest<GoogleCalendarEventsResponse>(url, auth);
+          const events = (response.items || []).map((event): CalendarEvent => ({
+            id: event.id || "",
+            title: event.summary || "Untitled Event",
+            start: event.start?.dateTime || event.start?.date || "",
+            end: event.end?.dateTime || event.end?.date || "",
+            description: event.description || undefined,
+            location: event.location || undefined,
+            allDay: !event.start?.dateTime,
+            color: calendar.primary 
+              ? 'var(--google-calendar-default)' 
+              : (event.colorId ? `var(--google-calendar-${event.colorId})` : "rgba(59, 130, 246, 0.3)"),
+            calendarId: calendar.id,
+            calendarName: calendar.summary || accountEmail,
+            source: "google" as const,
+          }));
+          allEvents = [...allEvents, ...events];
+        } catch (error) {
+          console.error(`Failed to fetch events for calendar ${calendarId}:`, error);
+          // Continue to next calendar
+        }
+      }
+
+      return allEvents;
+
     } catch (error) {
-      console.error('Failed to fetch calendar events:', error);
+      console.error('Failed to fetch calendar list:', error);
       throw error;
     }
   }

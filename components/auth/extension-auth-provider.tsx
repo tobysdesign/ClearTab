@@ -155,16 +155,13 @@ export function ExtensionAuthProvider({ children }: ExtensionAuthProviderProps) 
     }
 
     try {
+      // Use Supabase OAuth for authentication ONLY (no calendar scopes)
+      // Calendar permissions will be obtained via direct Google OAuth after successful auth
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          scopes:
-            "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
+          // Only basic authentication scopes - calendar handled separately
           skipBrowserRedirect: false,
         },
       });

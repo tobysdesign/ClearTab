@@ -13,7 +13,7 @@ type ConnectedAccountInsert = {
 export async function GET(request: NextRequest) {
   try {
     // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { connectedAccounts }, { googleApiService }] = await Promise.all([
+    const [{ createClient }, { dbMinimal }, { connectedAccounts, user: userTable }, { googleApiService }] = await Promise.all([
       import('@/lib/supabase/server'),
       import('@/lib/db-minimal'),
       import('@/shared/schema-tables'),
@@ -38,12 +38,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL(nextUrl, request.url));
     }
 
-    // Parse state to get redirect URL
+    // Parse state to get redirect URL and check if this is a primary account connection
     let nextUrl = '/settings';
+    let isPrimary = false;
+    let stateUserId: string | null = null;
     if (state) {
       try {
         const parsedState = JSON.parse(state);
         nextUrl = parsedState.nextUrl || '/settings';
+        isPrimary = parsedState.isPrimary === true;
+        stateUserId = parsedState.userId || null;
       } catch (e) {
         console.warn('Failed to parse OAuth state:', e);
       }
@@ -116,6 +120,35 @@ export async function GET(request: NextRequest) {
 
       const userInfo = await googleApiService.getUserInfo(auth);
 
+      // Handle PRIMARY account calendar connection (updates user table)
+      if (isPrimary) {
+        console.log('🔐 PRIMARY: Processing primary account calendar connection...');
+
+        // Update the user table with calendar tokens
+        await dbMinimal
+          .update(userTable)
+          .set({
+            accessToken: tokens.access_token,
+            refreshToken: tokens.refresh_token,
+            tokenExpiry: tokens.expires_in
+              ? new Date(Date.now() + tokens.expires_in * 1000)
+              : null,
+            googleCalendarConnected: true,
+            googleId: userInfo,
+          })
+          .where(eq(userTable.id, userId));
+
+        console.log(`✅ PRIMARY: Connected primary Google Calendar account: ${userInfo} for user: ${userId}`);
+
+        // Redirect to dashboard with success indicator
+        const cleanUrl = nextUrl.split('?')[0];
+        const finalUrl = cleanUrl === '/settings' || cleanUrl === '/'
+          ? '/?calendar=connected'
+          : `${cleanUrl}?success=primary_calendar_connected`;
+        return NextResponse.redirect(new URL(finalUrl, request.url));
+      }
+
+      // Handle SECONDARY account connection (uses connected_accounts table)
       // Check if this account is already connected
       const [existingAccount] = await dbMinimal
         .select()

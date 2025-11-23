@@ -140,8 +140,21 @@ function DaySection({
 export function ScheduleWidget() {
   // Use auth
   const { loading, user } = useAuth()
-  
-  
+
+  // Check if calendar was just connected (from URL param)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('calendar') === 'connected') {
+        console.log('✅ PRIMARY: Calendar connection successful! Reloading data...');
+        // Remove the param from URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+        // Refetch will happen automatically via React Query
+      }
+    }
+  }, []);
+
   // Check if we have session cookies as a workaround for auth loading issues
   const hasSessionCookies = typeof document !== 'undefined' && document.cookie.includes('sb-qclvzjiyglvxtctauyhb-auth-token')
   
@@ -182,6 +195,7 @@ export function ScheduleWidget() {
           throw error;
         }
         const json = await res.json()
+        console.log('API response:', json);
         
         // Check if calendar needs reconnection
         if (json.success && json.data && json.data.length === 0 && json.message && json.message.includes('Try reconnecting')) {
@@ -189,8 +203,9 @@ export function ScheduleWidget() {
         }
         
         const eventsFromServer = json.data || []
+        console.log('Events from server:', eventsFromServer);
         if (!Array.isArray(eventsFromServer)) return []
-        return eventsFromServer.map((event: { id: string; title: string; start?: string; startTime?: string; end?: string; endTime?: string; description?: string; location?: string; allDay?: boolean; color?: string; calendarId?: string; calendarName?: string; source?: string }): CalendarEvent => ({
+        const mappedEvents = eventsFromServer.map((event: { id: string; title: string; start?: string; startTime?: string; end?: string; endTime?: string; description?: string; location?: string; allDay?: boolean; color?: string; calendarId?: string; calendarName?: string; source?: string }): CalendarEvent => ({
           id: event.id,
           title: event.title,
           start: event.start || event.startTime || '',
@@ -202,7 +217,9 @@ export function ScheduleWidget() {
           calendarId: event.calendarId || '',
           calendarName: event.calendarName || '',
           source: (event.source as 'google' | 'local') || 'google',
-        }))
+        }));
+        console.log('Mapped events:', mappedEvents);
+        return mappedEvents;
       } catch (error) {
         console.error('Error fetching schedule:', error)
         throw error // Re-throw to let React Query handle the error
@@ -308,87 +325,15 @@ export function ScheduleWidget() {
   }
 
   if (error) {
-    const errorWithMeta = error as Error & { errorType?: string; userMessage?: string; status?: number; userEmail?: string };
-    const isAuthError = error.message.includes('Google Calendar not connected') || errorWithMeta.errorType === 'AUTH_EXPIRED' || error.message.includes('invalid authentication');
-    const isAuthExpired = errorWithMeta.errorType === 'AUTH_EXPIRED' || error.message.includes('invalid authentication');
-    const displayEmail = errorWithMeta.userEmail || user?.email || 'your account';
-    
+    // Calendar will be automatically set up via OAuth flow on login
+    // If there's an error, it's likely temporary - just show a simple message
+    console.log('Schedule widget error (will retry automatically):', error);
+
     return (
-      <WidgetContainer>
-        <WidgetHeader title="Schedule" />
-        <div className={styles.errorContainer}>
-          {isAuthError ? (
-             <EmptyState
-              renderIcon={() => <span className={styles.calendarIcon}>◊</span>}
-              title={isAuthExpired ? "Calendar connection expired" : "Connect your calendar"}
-              description={isAuthExpired 
-                ? `Calendar access for ${displayEmail} has expired. We're attempting to refresh it automatically, or you can reconnect manually.`
-                : "See your schedule at a glance by connecting your Google Calendar."
-              }
-              action={{
-                label: isAuthExpired ? "Reconnect Calendar" : "Connect Calendar",
-                onClick: async () => {
-                  try {
-                    console.log('Connecting calendar - starting OAuth flow...');
-                    
-                    const supabase = await getSupabaseClient();
-                    
-                    const { data, error } = await supabase.auth.signInWithOAuth({
-                      provider: 'google',
-                      options: {
-                        redirectTo: `${window.location.origin}/auth/callback`,
-                        scopes: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
-                        queryParams: {
-                          access_type: 'offline',
-                          prompt: 'consent'
-                        }
-                      },
-                    });
-                    
-                    console.log('OAuth response:', { data, error });
-                    
-                    if (error) {
-                      console.error('Error connecting calendar:', error);
-                      // Try alternative approach if Supabase fails
-                      console.log('Trying direct Google OAuth...');
-
-                      // Get the correct client ID from environment
-                      const response = await fetch('/api/config');
-                      const config = await response.json();
-                      const clientId = config.googleClientId;
-
-                      if (!clientId) {
-                        throw new Error('Google Client ID not configured');
-                      }
-
-                      const redirectUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-                        `client_id=${encodeURIComponent(clientId)}&` +
-                        `redirect_uri=${encodeURIComponent(window.location.origin + '/auth/callback')}&` +
-                        `response_type=code&` +
-                        `scope=${encodeURIComponent('openid email profile https://www.googleapis.com/auth/calendar.readonly')}&` +
-                        `access_type=offline&` +
-                        `prompt=consent`;
-                      
-                      console.log('Redirecting to:', redirectUrl);
-                      window.location.href = redirectUrl;
-                    } else {
-                      console.log('OAuth initiated successfully');
-                    }
-                    
-                  } catch (error) {
-                    console.error('Failed to connect calendar:', error);
-                  }
-                }
-              }}
-            />
-          ) : (
-            <>
-              <p className={styles.errorTitle}>Error loading schedule</p>
-              <p className={styles.errorMessage}>{errorWithMeta.userMessage || error.message}</p>
-            </>
-          )}
-        </div>
-      </WidgetContainer>
+      <div>
+        <p>Error loading schedule:</p>
+        <pre>{JSON.stringify(error, null, 2)}</pre>
+      </div>
     )
   }
 
@@ -455,7 +400,7 @@ export function ScheduleWidget() {
               <EmptyState
                 renderIcon={() => <span className={styles.calendarIcon}>◊</span>}
                 title="No events scheduled"
-                description="Your calendar is clear. Connect your Google Calendar to see upcoming events."
+                description="Your calendar is clear for the next 30 days."
                 className={styles.emptyStateContainer}
               />
             ) : (

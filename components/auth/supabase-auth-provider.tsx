@@ -151,17 +151,21 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
     // Check if there's a callbackUrl in the current URL params
     const urlParams = new URLSearchParams(window.location.search);
     const callbackUrl = urlParams.get('callbackUrl') || '/';
-    
+
+    // Always use localhost for development, production will use actual origin
+    const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : window.location.origin;
+
+    console.log('🔐 Sign in redirect URL:', `${baseUrl}/auth/callback`);
+
+    // Use Supabase OAuth for authentication ONLY (no calendar scopes)
+    // Calendar permissions will be obtained via direct Google OAuth after successful auth
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(callbackUrl)}`,
-        scopes:
-          "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events.readonly",
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
+        redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(callbackUrl)}`,
+        // Only basic authentication scopes - calendar handled separately
         skipBrowserRedirect: false,
       },
     });

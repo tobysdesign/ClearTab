@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     // Google OAuth configuration for primary account
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = `${process.env.NEXTAUTH_URL || request.nextUrl.origin}/api/auth/primary-calendar-callback`;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.NEXTAUTH_URL || request.nextUrl.origin}/api/auth/google-callback`;
 
     if (!googleClientId) {
       return NextResponse.json({
@@ -48,11 +48,8 @@ export async function GET(request: NextRequest) {
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 
-    return NextResponse.json({
-      success: true,
-      authUrl,
-      message: 'Primary account authorization URL generated successfully'
-    });
+    // Redirect directly to Google OAuth
+    return NextResponse.redirect(authUrl);
   } catch (error) {
     console.error('Error getting primary calendar connect URL:', error);
     return NextResponse.json({

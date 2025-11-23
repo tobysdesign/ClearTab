@@ -107,24 +107,31 @@ export async function GET(request: NextRequest) {
       const googleId = googleEmail; // Use email as Google ID for simplicity
 
       // Update user record with Google Calendar tokens
+      const updateData: Partial<UserInsert> = {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        tokenExpiry: tokens.expires_in
+          ? new Date(Date.now() + tokens.expires_in * 1000)
+          : null,
+        googleCalendarConnected: true,
+        googleId: googleId,
+      };
+
       await dbMinimal
         .update(userTable)
-        .set({
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token,
-          tokenExpiry: tokens.expires_in
-            ? new Date(Date.now() + tokens.expires_in * 1000)
-            : null,
-          googleCalendarConnected: true,
-          googleId: googleId,
-        } as Partial<UserInsert>)
+        .set(updateData as any)
         .where(eq(userTable.id, authUser.id));
 
-      console.log(`Connected primary Google Calendar account: ${googleEmail} for user: ${authUser.id}`);
+      console.log(`✅ PRIMARY: Connected primary Google Calendar account: ${googleEmail} for user: ${authUser.id}`);
 
-      // Redirect to success page
-      const successUrl = `${nextUrl}?success=primary_calendar_connected`;
-      return NextResponse.redirect(new URL(successUrl, request.url));
+      // Redirect back to dashboard/settings
+      // Strip any error params from nextUrl and redirect to clean dashboard
+      const cleanUrl = nextUrl.split('?')[0]; // Remove any existing query params
+      const finalUrl = cleanUrl === '/settings' || cleanUrl === '/'
+        ? '/?calendar=connected'
+        : `${cleanUrl}?success=primary_calendar_connected`;
+      console.log(`✅ PRIMARY: Redirecting to: ${finalUrl}`);
+      return NextResponse.redirect(new URL(finalUrl, request.url));
 
     } catch (error) {
       console.error('Error processing primary OAuth callback:', error);
