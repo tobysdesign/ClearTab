@@ -1,0 +1,110 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.container {
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.expandedContent {
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.closeButton,
+.collapseButton,
+.expandButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.closeButton:hover,
+.collapseButton:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.collapsedIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.expandButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.expandButton:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.messageCount {
+  font-size: 12px;
+}
+
+.hints {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hint {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  font-family: monospace;
+}
+
+.shortcut {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.25);
+  font-family: monospace;
+}

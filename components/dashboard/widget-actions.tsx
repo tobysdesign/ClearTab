@@ -1,12 +1,7 @@
 "use client"
 
 // Icons replaced with ASCII placeholders
-import { Button } from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Button, Popover, PopoverContent, PopoverTrigger } from '@cleartab/ui'
 import type { ReactNode } from 'react'
 import styles from './widget-actions.module.css'
 
@@ -22,6 +17,8 @@ export function WidgetActions({ children }: WidgetActionsProps) {
           variant="ghost-icon"
           size="icon"
           className={styles.trigger}
+          tooltipLabel="Widget actions"
+          shortcut="⌥W"
         >
           <span className={styles.screenReaderOnly}>Open menu</span>
           <span className={styles.icon}>•</span>

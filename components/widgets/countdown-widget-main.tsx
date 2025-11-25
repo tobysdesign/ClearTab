@@ -23,6 +23,7 @@ import {
   WidgetContent,
   WidgetHeader,
   WidgetLoader,
+  EmptyState,
 } from "@cleartab/ui";
 import { useEffect, useState, useLayoutEffect, useRef } from "react";
 // import styles from "./widget.module.css";
@@ -297,25 +298,13 @@ export function CountdownWidget({
       <WidgetContainer>
         <WidgetHeader title="Countdown" />
         <WidgetContent scrollable={false} className={countdownStyles.content}>
-          <div className={countdownStyles.emptyState}>
-            <div className={countdownStyles.emptyContent}>
-              <p className={countdownStyles.emptyTitle}>
-                Add a{" "}
-                <span className={countdownStyles.emptyHighlight}>single</span>,{" "}
-                <span className={countdownStyles.emptyHighlight}>
-                  recurring
-                </span>{" "}
-                or <span className={countdownStyles.emptyHighlight}>range</span>{" "}
-                of dates to get a visual countdown of progress.
-              </p>
-              <button
-                className={countdownStyles.addButton}
-                onClick={() => router.push("/settings")}
-              >
-                + Add date
-              </button>
-            </div>
-          </div>
+          <EmptyState
+            description="Counting the days?"
+            action={{
+              label: "Add Date",
+              onClick: () => router.push("/settings?section=countdown"),
+            }}
+          />
         </WidgetContent>
       </WidgetContainer>
     );

@@ -6,8 +6,7 @@ import { CloseIcon } from '@/components/icons'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatPanel } from './chat-panel'
-import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
-import { Button } from '@/components/ui/button'
+import { ShinyAiButton, Button } from '@cleartab/ui'
 import styles from './chat-overlay.module.css'
 
 function ChatOverlay() {
@@ -69,13 +68,15 @@ function ChatOverlay() {
                     size="sm" 
                     onClick={toggleStreamingMode}
                     className={styles.streamButton}
+                    tooltipLabel="Toggle streaming mode"
+                    shortcut="⌥S"
                   >
                     {isStreamingMode ? 'Stream: ON' : 'Stream: OFF'}
                   </Button>
-                  <Button variant="ghost" size="icon" className={styles.iconButton}>
+                  <Button variant="ghost" size="icon" className={styles.iconButton} tooltipLabel="More actions" shortcut="⌘/.">
                     <span className={styles.icon}>•</span>
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={closeChat} className={styles.iconButton}>
+                  <Button variant="ghost" size="icon" onClick={closeChat} className={styles.iconButton} tooltipLabel="Close chat" shortcut="Esc">
                     <CloseIcon size={16} className="text-white/60" />
                   </Button>
                 </div>

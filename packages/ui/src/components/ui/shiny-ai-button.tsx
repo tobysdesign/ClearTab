@@ -2,19 +2,24 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import styles from './shiny-ai-button.module.css'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 
 interface ShinyAiButtonProps {
   onClick: () => void
   className?: string
   layoutId?: string
+  tooltip?: string
+  shortcut?: string
 }
 
 export function ShinyAiButton({
   onClick,
   className,
-  layoutId
+  layoutId,
+  tooltip,
+  shortcut
 }: ShinyAiButtonProps) {
-  return (
+  const btn = (
     <motion.button
       layoutId={layoutId}
       onClick={onClick}
@@ -109,4 +114,18 @@ export function ShinyAiButton({
       </svg>
     </motion.button>
   )
-} 
+
+  if (!tooltip && !shortcut) return btn
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{btn}</TooltipTrigger>
+        <TooltipContent>
+          <span>{tooltip}</span>
+          {shortcut ? <span style={{ marginLeft: 8, opacity: 0.8 }}>{shortcut}</span> : null}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}

@@ -2,7 +2,9 @@
     border: 1px solid #2e2e2e;
     background-color: #2b2b2b;
     color: #8d8d8d;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
 .ghostIcon:hover {
@@ -69,16 +71,21 @@
 }
 
 .outline {
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid #282828;
     background: transparent;
-    color: #f4f4f4;
+    color: #7e7e7e;
     border-radius: 999px;
     padding: 0 1rem;
     min-height: 36px;
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
 
 .outline:hover {
-    background: rgba(255, 255, 255, 0.04);
+    border-color: #c4c4c4;
+    color: #c4c4c4;
+    background: transparent;
 }
 
 .secondary {
@@ -95,7 +102,9 @@
     border-radius: 999px;
     padding: 0 1rem;
     min-height: 36px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
 .ghost:hover {

@@ -1,16 +1,15 @@
 "use client";
 
-// Icons replaced with ASCII placeholders
 import * as React from "react";
 import { format } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import styles from './date-picker.module.css';
 
 interface DatePickerProps {
   date?: Date;
@@ -29,33 +28,59 @@ export function DatePicker({
   className,
   hideIcon = false,
 }: DatePickerProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onSelect?.(undefined);
+  };
+
+  const handleSelect = (selectedDate: Date | undefined) => {
+    onSelect?.(selectedDate);
+    // Close the popover after selection
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
+          type="button"
           className={cn(
-            "w-full justify-between text-left font-normal h-auto px-3 py-2 text-sm transition-all duration-200",
-            "bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.2)] text-white",
-            "hover:bg-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.4)]",
-            "focus:bg-[rgba(255,255,255,0.08)] focus:border-[rgba(255,255,255,0.4)] focus:shadow-[0_0_0_1px_rgba(255,255,255,0.1)]",
-            "data-[state=open]:bg-[rgba(255,255,255,0.08)] data-[state=open]:border-[rgba(255,255,255,0.4)]",
-            !date && "text-[rgba(255,255,255,0.5)]",
-            className,
+            styles.trigger,
+            open && styles.triggerOpen,
+            !date && styles.placeholder,
+            className
           )}
-          style={{ borderRadius: '0.375rem' }}
         >
           <span>
-            {date ? format(date, "dd/MM/yy") : <span>{placeholder}</span>}
+            {date ? format(date, "dd/MM/yy") : placeholder}
           </span>
-          <span className="text-white/60 ml-2">⌄</span>
-        </Button>
+          <span className={styles.iconContainer}>
+            {date ? (
+              <span
+                onClick={handleClear}
+                className={styles.clearButton}
+                title="Clear date"
+              >
+                ✕
+              </span>
+            ) : (
+              <span className={styles.dropdownIcon}>▼</span>
+            )}
+          </span>
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent
+        className={styles.calendarPopover}
+        align="start"
+        style={{ zIndex: 9999 }}
+      >
         <CalendarComponent
           mode="single"
           selected={date}
-          onSelect={onSelect}
+          onSelect={handleSelect}
           disabled={disabled}
           initialFocus
         />

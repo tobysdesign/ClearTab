@@ -10,6 +10,7 @@ export interface Message {
   content: string
   role: 'user' | 'assistant'
   isStreaming?: boolean
+  quickReplies?: string[]
 }
 
 interface ChatContextType {
@@ -119,8 +120,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Process hashtags before sending to AI - only for user messages
-      if (hasSeenOnboarding && userMessage.trim()) {
+      // Process hashtags before sending to AI
+      if (userMessage.trim()) {
         const taskMatch = userMessage.match(/#task\s+(.+)/)
         const noteMatch = userMessage.match(/#note\s+(.+)/)
 
@@ -191,8 +192,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Process hashtags before sending to AI - only for user messages
-      if (hasSeenOnboarding && userMessage.trim()) {
+      // Process hashtags before sending to AI
+      if (userMessage.trim()) {
         console.log('STREAMING: Checking message for hashtags:', userMessage)
         const taskMatch = userMessage.match(/#task\s+(.+)/)
         const noteMatch = userMessage.match(/#note\s+(.+)/)

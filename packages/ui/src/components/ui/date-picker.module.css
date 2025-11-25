@@ -1,0 +1,79 @@
+/* DatePicker Component Styles */
+
+.trigger {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    font-weight: 400;
+    height: auto;
+    padding: 0.5rem 0.75rem;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.375rem;
+    color: white;
+    cursor: pointer;
+}
+
+.trigger:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.trigger:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    outline: none;
+}
+
+.triggerOpen {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.iconContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.clearButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    transition: all 0.15s ease;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.clearButton:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dropdownIcon {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 8px;
+}
+
+/* Calendar Popover Content */
+.calendarPopover {
+    width: auto;
+    padding: 0;
+    z-index: 9999;
+}

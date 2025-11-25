@@ -1,0 +1,79 @@
+.container {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hashtagIndicator {
+  display: flex;
+  align-items: center;
+}
+
+.hashtagPill {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0 4px 0 12px;
+  transition: all 0.15s ease;
+}
+
+.inputWrapper:focus-within {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  height: 32px;
+  padding: 0;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.submitButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

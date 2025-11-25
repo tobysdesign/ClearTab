@@ -310,6 +310,7 @@ export function NotesWidget() {
     new Map(),
   );
   const backgroundSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const draftSaveInProgressRef = useRef<string | null>(null); // Track draft ID currently being saved
 
   // Protected setDisplayTitle that respects typing state
   const setDisplayTitleSafe = useCallback((title: string) => {
@@ -383,11 +384,23 @@ export function NotesWidget() {
 
         try {
           if (isDraft) {
+            // Check if this draft is already being saved (prevent duplicate creates)
+            if (draftSaveInProgressRef.current === snapshot.id) {
+              console.log("Draft save already in progress, skipping:", snapshot.id);
+              return;
+            }
+
+            // Mark this draft as being saved
+            draftSaveInProgressRef.current = snapshot.id;
+
             const savedNoteRaw = await createNote.mutate({
               title: currentTitle,
               content: normalizedContent,
               temporaryId: snapshot.id,
             });
+
+            // Clear the draft save in progress flag
+            draftSaveInProgressRef.current = null;
 
             const parsedContent = normalizeNoteContent(savedNoteRaw.content);
             const savedNote = { ...savedNoteRaw, content: parsedContent };
@@ -427,6 +440,10 @@ export function NotesWidget() {
             }
           }
         } catch (error) {
+          // Clear draft save in progress flag on error
+          if (snapshot.id?.startsWith("draft-")) {
+            draftSaveInProgressRef.current = null;
+          }
           console.error("Failed to save note:", error);
           toast({
             title: snapshot.id?.startsWith("draft-")
@@ -501,18 +518,17 @@ export function NotesWidget() {
       clearTimeout(backgroundSaveTimeoutRef.current);
     }
 
-    // Schedule save for 3 seconds from now
-    const snapshot = createSaveSnapshot(activeNoteRef.current);
-    if (!snapshot) return;
-
+    // Schedule save for 500ms from now (debounce rapid typing)
+    // Don't capture snapshot here - capture it when timeout fires to get latest content
     backgroundSaveTimeoutRef.current = setTimeout(() => {
-      // Only save if there are actual changes and user isn't actively typing
-      if (!isUserTypingRef.current) {
-        saveCurrentNote(snapshot).catch((error) => {
-          console.error("Background save failed:", error);
-        });
-      }
-    }, 3000);
+      // Create snapshot at save time to get the latest content
+      const snapshot = createSaveSnapshot(activeNoteRef.current);
+      if (!snapshot) return;
+
+      saveCurrentNote(snapshot).catch((error) => {
+        console.error("Background save failed:", error);
+      });
+    }, 500);
   }, [saveCurrentNote]);
 
   // Save note function (must be defined before debouncedSave)
@@ -1059,20 +1075,8 @@ export function NotesWidget() {
                       content,
                     };
 
-                    // Schedule background save (won't interrupt typing)
+                    // Save immediately on every change (debounced internally)
                     scheduleBackgroundSave();
-                  }}
-                  onBlur={() => {
-                    // Save immediately on blur - cancel any pending background save
-                    if (backgroundSaveTimeoutRef.current) {
-                      clearTimeout(backgroundSaveTimeoutRef.current);
-                    }
-                    saveCurrentNote().catch((error) => {
-                      console.error(
-                        "Failed to save note on editor blur:",
-                        error,
-                      );
-                    });
                   }}
                   editable={true}
                   className={notesStyles.notesEditorContainer}

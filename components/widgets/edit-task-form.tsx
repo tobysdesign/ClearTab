@@ -345,7 +345,7 @@ export function EditTaskForm({
                   form.setValue('dueDate', date || null, { shouldDirty: true });
                   handleFormChange(true);
                 }}
-                placeholder="28/07/25"
+                placeholder="Select"
                 className={styles.datePicker}
               />
             </FormField>

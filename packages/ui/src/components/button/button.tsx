@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 import styles from "./button.module.css";
 import { cn } from "@/lib/utils";
@@ -34,17 +35,39 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  tooltipLabel?: string;
+  shortcut?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, tooltipLabel, shortcut, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    return (
+    const contentLabel = tooltipLabel || (props["aria-label"] as string) || props.title || "";
+
+    const buttonEl = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
       />
+    );
+
+    if (!contentLabel && !shortcut) {
+      return buttonEl;
+    }
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>{buttonEl}</TooltipTrigger>
+          <TooltipContent>
+            <span>{contentLabel}</span>
+            {shortcut ? (
+              <span style={{ marginLeft: 8, opacity: 0.8 }}>{shortcut}</span>
+            ) : null}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   },
 );

@@ -16,17 +16,21 @@ import styles from './empty-state.module.css';
 }
 
 export function EmptyState({ renderIcon, icon, title, description, action, className = '' }: EmptyStateProps) {
+  const hasIcon = renderIcon || icon;
+
   return (
     <div className={cn(styles.container, className)}>
-      <div className={styles.iconContainer}>
-        {renderIcon ? renderIcon() : icon}
-      </div>
+      {hasIcon && (
+        <div className={styles.iconContainer}>
+          {renderIcon ? renderIcon() : icon}
+        </div>
+      )}
       <h3 className={styles.title}>{title}</h3>
       <p className={styles.description}>{description}</p>
-      
+
       {action && (
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={action.onClick}
           className={styles.actionButton}
         >

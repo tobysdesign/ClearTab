@@ -1,7 +1,7 @@
 "use client";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { motion } from "framer-motion";
+import React from "react";
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 
@@ -88,28 +88,24 @@ export function LoginBentoGrid({
 }: LoginBentoGridProps) {
   const padding = useDockPadding(dockPosition);
 
-  const motionProps = (delay: number) => ({
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, delay },
-    className: styles.panelMotion,
-  });
+  const fadeStyle = (delay: number) => ({
+    animationName: 'fadeIn',
+    animationDuration: '0.5s',
+    animationTimingFunction: 'ease-out',
+    animationFillMode: 'both',
+    animationDelay: `${delay}s`,
+  } as React.CSSProperties);
 
   return (
-    <motion.div
-      animate={{
+    <div
+      className="bento-container"
+      style={{
         paddingTop: padding.paddingTop,
         paddingRight: padding.paddingRight,
         paddingBottom: padding.paddingBottom,
         paddingLeft: padding.paddingLeft,
+        transition: 'padding 300ms ease-out',
       }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
-        duration: 0.6,
-      }}
-      className="bento-container"
     >
       <div className={styles.combinedContainer}>
         <PanelGroup
@@ -122,9 +118,9 @@ export function LoginBentoGrid({
             <PanelGroup direction="vertical" className="panel-group">
               {/* Top row: Notes */}
               <Panel defaultSize={60}>
-                <motion.div {...motionProps(0.1)} className="panel-motion">
-                  <LoginNotesWidget />
-                </motion.div>
+                  <div className="panel-motion" style={fadeStyle(0.1)}>
+                    <LoginNotesWidget />
+                  </div>
               </Panel>
 
               <PanelResizeHandle className={styles.resizeHandleVertical} />
@@ -133,25 +129,25 @@ export function LoginBentoGrid({
               <Panel defaultSize={40}>
                 <PanelGroup direction="horizontal" className="panel-group">
                   <Panel defaultSize={33}>
-                    <motion.div {...motionProps(0.3)} className="panel-motion">
+                    <div className="panel-motion" style={fadeStyle(0.3)}>
                       <LoginWeatherWidget />
-                    </motion.div>
+                    </div>
                   </Panel>
                   <PanelResizeHandle
                     className={styles.resizeHandleHorizontal}
                   />
                   <Panel defaultSize={33}>
-                    <motion.div {...motionProps(0.5)} className="panel-motion">
+                    <div className="panel-motion" style={fadeStyle(0.5)}>
                       <LoginRecorderWidget />
-                    </motion.div>
+                    </div>
                   </Panel>
                   <PanelResizeHandle
                     className={styles.resizeHandleHorizontal}
                   />
                   <Panel defaultSize={34}>
-                    <motion.div {...motionProps(0.6)} className="panel-motion">
+                    <div className="panel-motion" style={fadeStyle(0.6)}>
                       <LoginCountdownWidget />
-                    </motion.div>
+                    </div>
                   </Panel>
                 </PanelGroup>
               </Panel>
@@ -162,9 +158,9 @@ export function LoginBentoGrid({
 
           {/* Column 2: Login widget - roughly responsive */}
           <Panel defaultSize={22} minSize={22} maxSize={22}>
-            <motion.div {...motionProps(0.4)} className="panel-motion">
+            <div className="panel-motion" style={fadeStyle(0.4)}>
               {login}
-            </motion.div>
+            </div>
           </Panel>
 
           <PanelResizeHandle className={styles.resizeHandleHorizontal} />
@@ -174,21 +170,21 @@ export function LoginBentoGrid({
             <PanelGroup direction="vertical" className="panel-group">
               {/* Tasks */}
               <Panel defaultSize={50}>
-                <motion.div {...motionProps(0.2)} className="panel-motion">
+                <div className="panel-motion" style={fadeStyle(0.2)}>
                   <LoginTasksWidget />
-                </motion.div>
+                </div>
               </Panel>
               <PanelResizeHandle className={styles.resizeHandleVertical} />
               {/* Schedule */}
               <Panel defaultSize={50}>
-                <motion.div {...motionProps(0.7)} className="panel-motion">
+                <div className="panel-motion" style={fadeStyle(0.7)}>
                   <LoginScheduleWidget />
-                </motion.div>
+                </div>
               </Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>
       </div>
-    </motion.div>
+    </div>
   );
 }

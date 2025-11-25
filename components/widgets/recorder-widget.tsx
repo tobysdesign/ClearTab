@@ -14,7 +14,7 @@ import {
   getSupabaseClient,
   isExtensionEnvironment,
 } from "@/lib/extension-utils";
-import { Tooltip } from "react-tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@cleartab/ui";
 
 interface RecorderWidgetProps {
   className?: string;
@@ -41,121 +41,121 @@ const RecordingControls = memo(function RecordingControls({
 }: RecordingControlsProps) {
   if (state === "recording") {
     return (
-      <>
-        <button
-          onClick={onToggleMute}
-          className={styles.controlButton}
-          data-tooltip-id="recording-tooltip"
-          data-tooltip-content={isMuted ? "Unmute" : "Mute"}
-        >
-          <div className={styles.controlButtonInner}>
-            <img
-              src={
-                isMuted
-                  ? "/icons/si_micMute-fill.svg"
-                  : "/icons/si_mic-fill.svg"
-              }
-              alt={isMuted ? "Unmute" : "Mute"}
-              className={styles.controlIcon}
-            />
-          </div>
-        </button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onToggleMute}
+              className={styles.controlButton}
+            >
+              <div className={styles.controlButtonInner}>
+                <img
+                  src={
+                    isMuted
+                      ? "/icons/si_micMute-fill.svg"
+                      : "/icons/si_mic-fill.svg"
+                  }
+                  alt={isMuted ? "Unmute" : "Mute"}
+                  className={styles.controlIcon}
+                />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{isMuted ? "Unmute" : "Mute"}</TooltipContent>
+        </Tooltip>
 
-        <button
-          onClick={onPause}
-          className={styles.controlButton}
-          data-tooltip-id="recording-tooltip"
-          data-tooltip-content="Pause"
-        >
-          <div className={styles.controlButtonInner}>
-            <img
-              src="/icons/si_pause-fill.svg"
-              alt="Pause"
-              className={styles.controlIcon}
-            />
-          </div>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onPause}
+              className={styles.controlButton}
+            >
+              <div className={styles.controlButtonInner}>
+                <img
+                  src="/icons/si_pause-fill.svg"
+                  alt="Pause"
+                  className={styles.controlIcon}
+                />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Pause</TooltipContent>
+        </Tooltip>
 
-        <button
-          onClick={onStop}
-          className={cn(styles.controlButton, styles.doneButton)}
-          data-tooltip-id="recording-tooltip"
-          data-tooltip-content="Done"
-        >
-          <div className={styles.controlButtonInner}>
-            <CheckIcon size={16} className={styles.checkIcon} />
-          </div>
-        </button>
-
-        <Tooltip
-          id="recording-tooltip"
-          place="top"
-          className={styles.reactTooltip}
-          openOnClick={false}
-          delayShow={20}
-          delayHide={0}
-        />
-      </>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onStop}
+              className={cn(styles.controlButton, styles.doneButton)}
+            >
+              <div className={styles.controlButtonInner}>
+                <CheckIcon size={16} className={styles.checkIcon} />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Done</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
   if (state === "paused") {
     return (
-      <>
-        <button
-          onClick={onToggleMute}
-          className={styles.controlButton}
-          data-tooltip-id="paused-tooltip"
-          data-tooltip-content={isMuted ? "Unmute" : "Mute"}
-        >
-          <div className={styles.controlButtonInner}>
-            <img
-              src={
-                isMuted
-                  ? "/icons/si_micMute-fill.svg"
-                  : "/icons/si_mic-fill.svg"
-              }
-              alt={isMuted ? "Unmute" : "Mute"}
-              className={styles.controlIcon}
-            />
-          </div>
-        </button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onToggleMute}
+              className={styles.controlButton}
+            >
+              <div className={styles.controlButtonInner}>
+                <img
+                  src={
+                    isMuted
+                      ? "/icons/si_micMute-fill.svg"
+                      : "/icons/si_mic-fill.svg"
+                  }
+                  alt={isMuted ? "Unmute" : "Mute"}
+                  className={styles.controlIcon}
+                />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{isMuted ? "Unmute" : "Mute"}</TooltipContent>
+        </Tooltip>
 
-        <button
-          onClick={onResume}
-          className={styles.controlButton}
-          data-tooltip-id="paused-tooltip"
-          data-tooltip-content="Resume"
-        >
-          <div className={styles.controlButtonInner}>
-            <img
-              src="/icons/si_record-fill.svg"
-              alt="Resume"
-              className={styles.controlIcon}
-            />
-          </div>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onResume}
+              className={styles.controlButton}
+            >
+              <div className={styles.controlButtonInner}>
+                <img
+                  src="/icons/si_record-fill.svg"
+                  alt="Resume"
+                  className={styles.controlIcon}
+                />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Resume</TooltipContent>
+        </Tooltip>
 
-        <button
-          onClick={onStop}
-          className={cn(styles.controlButton, styles.doneButton)}
-          data-tooltip-id="paused-tooltip"
-          data-tooltip-content="Done"
-        >
-          <div className={styles.controlButtonInner}>
-            <CheckIcon size={16} className={styles.checkIcon} />
-          </div>
-        </button>
-
-        <Tooltip
-          id="paused-tooltip"
-          place="top"
-          className={styles.reactTooltip}
-          openOnClick={false}
-          delayShow={20}
-          delayHide={0}
-        />
-      </>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onStop}
+              className={cn(styles.controlButton, styles.doneButton)}
+            >
+              <div className={styles.controlButtonInner}>
+                <CheckIcon size={16} className={styles.checkIcon} />
+              </div>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Done</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
@@ -585,9 +585,6 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                   ) : state === "processing" && !showSuccess ? (
                     <div className={styles.transcribingWrapper}>
                       <div className={styles.transcribingContent}>
-                        <div className={styles.gifPlaceholder}>
-                          <BrandedLoader size="small" />
-                        </div>
                         <p className={styles.transcribingTitle}>
                           Transcribing note...
                         </p>

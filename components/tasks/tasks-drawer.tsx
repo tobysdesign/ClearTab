@@ -10,12 +10,7 @@ import {
 } from "@/components/ui/drawer";
 import { EditTaskForm } from "@/components/widgets/edit-task-form";
 import { CloseIcon } from "@/components/icons";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Button } from "@/components/ui/button";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
@@ -63,26 +58,23 @@ export function TasksDrawer() {
             {/* Show actions menu for edit mode, X button for create mode */}
             {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
             (activeTaskId && !activeTaskId.startsWith("draft-")) ? (
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
+              <SimpleDropdown
+                trigger={
                   <Button variant="ghost-icon" size="icon">
                     ⋮
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={handleDeleteTask}
-                    className="stop"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                }
+                align="right"
+              >
+                <SimpleDropdownItem onClick={handleDeleteTask}>
+                  Delete
+                </SimpleDropdownItem>
+              </SimpleDropdown>
             ) : (
               <DrawerClose asChild>
-                <button className="button" aria-label="Close dialog">
-                  <CloseIcon size={20} />
-                </button>
+                <Button variant="ghost-icon" size="icon" aria-label="Close dialog">
+                  <CloseIcon size={16} />
+                </Button>
               </DrawerClose>
             )}
           </div>

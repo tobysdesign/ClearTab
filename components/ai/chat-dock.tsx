@@ -11,7 +11,7 @@ export function ChatDock() {
     return (
         <div className={styles.dockContainer}>
             <div className={styles.dock}>
-                <Button variant="ghost-icon" size="icon" onClick={openChat}>
+                <Button variant="ghost-icon" size="icon" onClick={openChat} tooltipLabel="Open Chat" shortcut="⌘K">
                     <span className={styles.icon}>•</span>
                 </Button>
             </div>

@@ -334,11 +334,8 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
             <div className={tasksStyles.tasksEmpty}>
               {tasks.length === 0 ? (
                 <EmptyState
-                  renderIcon={() => (
-                    <CloseIcon size={20} className="text-gray-400" />
-                  )}
-                  title="Not a care"
-                  description="Could your first task be to add a task?"
+                  title="No tasks!"
+                  description="Create a task now?"
                   action={{
                     label: "Add Task",
                     onClick: handleAddTask,

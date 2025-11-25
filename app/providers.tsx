@@ -3,7 +3,7 @@
 import { TooltipProvider } from "@cleartab/ui";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import React from "react";
-import ChatOverlay from "@/components/ai/chat-overlay";
+import { AiChat } from "@/components/ai";
 import QueryProvider from "@/app/query-provider";
 import { LayoutProvider } from "@/hooks/use-layout";
 import { SupabaseAuthProvider } from "@/components/auth/supabase-auth-provider";
@@ -16,7 +16,7 @@ function ChatOverlayWrapper({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      {!isAuthPage && <ChatOverlay />}
+      {!isAuthPage && <AiChat />}
     </>
   );
 }

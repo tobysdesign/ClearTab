@@ -62,12 +62,13 @@ export function WeatherWidgetNew() {
 
 
   return (
-    <motion.div 
+    <motion.div
       ref={containerRef}
       className={styles.container}
       whileHover="hover"
       initial="rest"
       animate="rest"
+      style={{ pointerEvents: exitingCard ? 'none' : 'auto' }}
     >
       <AnimatePresence onExitComplete={handleExitComplete}>
         {cards.map((day, index) => {
@@ -77,13 +78,11 @@ export function WeatherWidgetNew() {
           return (
             <motion.div
               key={day.label}
-              layout
               style={{
                 position: 'absolute',
-                left: index === 2 ? 0 : '50%',
-                width: index === 2 ? '100%' : 'calc(100% - 20px)',
+                left: 0,
+                width: '100%',
                 height: 'calc(100% - 40px)',
-                transform: index === 2 ? 'none' : 'translateX(-50%)',
                 zIndex: index === 0 ? 1 : index === 1 ? 2 : 3,
               }}
               animate={{
@@ -96,11 +95,10 @@ export function WeatherWidgetNew() {
               }}
             >
               <motion.div
-                layout
                 style={{
                   width: '100%',
                   height: '100%',
-                  transformOrigin: index === 0 ? 'bottom right' : index === 1 ? 'bottom left' : 'center',
+                  transformOrigin: 'top center',
                 }}
                 variants={{
                   rest: { rotate: 0 },

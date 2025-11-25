@@ -1,8 +1,11 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react'
 import { cn } from '../../lib/utils'
 import styles from './simple-dropdown.module.css'
+
+// Context to allow items to close the dropdown
+const DropdownContext = createContext<{ close: () => void } | null>(null)
 
 interface SimpleDropdownProps {
   trigger: React.ReactNode
@@ -18,28 +21,36 @@ export function SimpleDropdown({
   align = 'right'
 }: SimpleDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const triggerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  const close = useCallback(() => setIsOpen(false), [])
+
+  // Handle click outside to close
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    // Small delay to avoid the opening click from triggering close
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside)
+    }, 0)
 
-  const handleTriggerClick = () => {
-    setIsOpen(!isOpen)
-  }
+    return () => {
+      clearTimeout(timeoutId)
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const handleTriggerClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen(prev => !prev)
+  }, [])
 
   const getAlignClass = () => {
     switch (align) {
@@ -55,28 +66,29 @@ export function SimpleDropdown({
   }
 
   return (
-    <div className={styles.container}>
-      <div
-        ref={triggerRef}
-        onClick={handleTriggerClick}
-        className={styles.trigger}
-      >
-        {trigger}
-      </div>
-
-      {isOpen && (
+    <DropdownContext.Provider value={{ close }}>
+      <div ref={containerRef} className={styles.container}>
         <div
-          ref={dropdownRef}
-          className={cn(
-            styles.dropdownContent,
-            getAlignClass(),
-            className
-          )}
+          onClick={handleTriggerClick}
+          className={styles.trigger}
         >
-          {children}
+          {trigger}
         </div>
-      )}
-    </div>
+
+        {isOpen && (
+          <div
+            className={cn(
+              styles.dropdownContent,
+              getAlignClass(),
+              className
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </div>
+        )}
+      </div>
+    </DropdownContext.Provider>
   )
 }
 
@@ -93,10 +105,15 @@ export function SimpleDropdownItem({
   className,
   disabled = false
 }: SimpleDropdownItemProps) {
-  const handleClick = () => {
+  const context = useContext(DropdownContext)
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (!disabled && onClick) {
       onClick()
     }
+    // Close the dropdown after clicking an item
+    context?.close()
   }
 
   return (

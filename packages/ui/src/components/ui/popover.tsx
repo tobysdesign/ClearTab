@@ -11,19 +11,30 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverAnchor = PopoverPrimitive.Anchor
 
+const popoverContentStyles: React.CSSProperties = {
+  zIndex: 99999,
+  width: 'auto',
+  borderRadius: '12px',
+  border: '1px solid #252525',
+  backgroundColor: '#1a1a1a',
+  padding: 0,
+  color: 'white',
+  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+  outline: 'none',
+  position: 'relative',
+}
+
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
+>(({ className, align = "center", sideOffset = 4, style, ...props }, ref) => (
   <PopoverPrimitive.Portal>
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
       sideOffset={sideOffset}
-      className={cn(
-        "z-[200] w-72 rounded-xl border border-[#252525] bg-[#1a1a1a] p-0 text-white shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-popover-content-transform-origin]",
-        className
-      )}
+      className={cn(className)}
+      style={{ ...popoverContentStyles, ...style }}
       {...props}
     />
   </PopoverPrimitive.Portal>

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { SettingsIcon } from '@/components/icons'
-import { DockIconButton } from '@/components/ui/dock-icon-button'
+import { DockIconButton } from '@cleartab/ui'
 import { cn } from '@/lib/utils'
 import styles from './settings-trigger.module.css'
 
@@ -24,6 +24,8 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
       onClick={handleClick}
       className={cn(styles.settingsTrigger, className)}
       data-testid="settings-trigger"
+      title="Open Settings"
+      shortcut="⌘," 
     >
       <SettingsIcon size={16} className={styles.settingsIcon} />
       <span className="sr-only">Open Settings</span>

@@ -2,9 +2,10 @@
 /* Only keep non-conflicting styles here */
 
 .eventTitle {
-    color: white;
+    ont-weight: 500;
     font-size: 14px;
-    margin-bottom: 0.25rem;
+    color: #c4c4c4;
+    margin-bottom: 4pxl;
 }
 
 .eventTime {
@@ -42,11 +43,11 @@
     height: 0.75rem;
     background-color: #fb7185;
     border-radius: 9999px;
-    margin-left: -0.25rem;
+    margin-left: -8px;
 }
 
 .dayHeader {
-    font-size: 0.75rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.4);
     margin-bottom: 1rem;
     padding: 0 0.25rem;

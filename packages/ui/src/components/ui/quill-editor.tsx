@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Quill from "quill";
 import "quill/dist/quill.bubble.css";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
-// Removed circular import - createTaskFromText functionality moved to context
 
 interface QuillEditorProps {
   value?: any;
@@ -35,12 +33,13 @@ export function QuillEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
   const [selectedText, setSelectedText] = useState<string>("");
-  const [hasSelection, setHasSelection] = useState(false);
-  const [isCreatingTask, setIsCreatingTask] = useState(false);
 
   // Store callbacks in refs to avoid reinitializing Quill on every callback change
   const onChangeRef = useRef(onChange);
   const onBlurRef = useRef(onBlur);
+  const onOpenAiChatRef = useRef(onOpenAiChat);
+  const onCreateTaskRef = useRef(onCreateTask);
+  const selectedTextRef = useRef(selectedText);
 
   // Keep refs up to date
   useEffect(() => {
@@ -52,6 +51,18 @@ export function QuillEditor({
   }, [onBlur]);
 
   useEffect(() => {
+    onOpenAiChatRef.current = onOpenAiChat;
+  }, [onOpenAiChat]);
+
+  useEffect(() => {
+    onCreateTaskRef.current = onCreateTask;
+  }, [onCreateTask]);
+
+  useEffect(() => {
+    selectedTextRef.current = selectedText;
+  }, [selectedText]);
+
+  useEffect(() => {
     if (!editorRef.current || quillRef.current) return;
 
     // Initialize Quill with bubble theme
@@ -60,17 +71,49 @@ export function QuillEditor({
       placeholder: placeholder,
       readOnly: readOnly || !editable,
       modules: {
-        toolbar: [
-          ["bold", "italic", "underline", "strike"],
-          ["blockquote", "code-block"],
-          [{ header: 1 }, { header: 2 }],
-          [{ list: "ordered" }, { list: "bullet" }],
-          ["clean"],
-        ],
+        toolbar: {
+          container: [
+            ["askAi"], // Custom Ask AI button at start
+            ["bold", "italic", "underline", "strike"],
+            ["blockquote", "code-block"],
+            [{ header: 1 }, { header: 2 }],
+            ["clean"],
+            ["createTask"], // Custom Create Task button at end
+          ],
+          handlers: {
+            askAi: function() {
+              if (onOpenAiChatRef.current && selectedTextRef.current) {
+                onOpenAiChatRef.current(selectedTextRef.current);
+              }
+            },
+            createTask: function() {
+              if (onCreateTaskRef.current && selectedTextRef.current) {
+                onCreateTaskRef.current(selectedTextRef.current);
+              }
+            },
+          },
+        },
       },
     });
 
     quillRef.current = quill;
+
+    // Add custom button labels to toolbar after initialization
+    const toolbar = editorRef.current.querySelector(".ql-toolbar");
+    if (toolbar) {
+      // Style Ask AI button
+      const askAiBtn = toolbar.querySelector(".ql-askAi");
+      if (askAiBtn) {
+        askAiBtn.innerHTML = "Ask AI";
+        (askAiBtn as HTMLElement).style.cssText = "width: auto; padding: 0 8px; font-size: 12px; color: #a78bfa;";
+      }
+      // Style Create Task button
+      const createTaskBtn = toolbar.querySelector(".ql-createTask");
+      if (createTaskBtn) {
+        createTaskBtn.innerHTML = "+ Task";
+        (createTaskBtn as HTMLElement).style.cssText = "width: auto; padding: 0 8px; font-size: 12px; color: #7dd3fc;";
+      }
+    }
 
     if (tabIndex !== undefined) {
       const editableArea = editorRef.current.querySelector(".ql-editor");
@@ -109,10 +152,8 @@ export function QuillEditor({
       if (range && range.length > 0) {
         const text = quill.getText(range.index, range.length).trim();
         setSelectedText(text);
-        setHasSelection(!!text);
       } else {
         setSelectedText("");
-        setHasSelection(false);
       }
     });
 
@@ -170,61 +211,9 @@ export function QuillEditor({
     }
   }, [value]);
 
-  // Handle AI chat button click
-  const handleAiChatClick = useCallback(() => {
-    if (selectedText && onOpenAiChat) {
-      onOpenAiChat(selectedText);
-    }
-  }, [selectedText, onOpenAiChat]);
-
-  // Handle task creation button click
-  const handleCreateTaskClick = useCallback(async () => {
-    if (!selectedText) return;
-
-    try {
-      setIsCreatingTask(true);
-
-      if (onCreateTask) {
-        // Use the callback if provided
-        onCreateTask(selectedText);
-      } else {
-        console.log("No onCreateTask callback provided");
-      }
-    } catch (error) {
-      console.error("Failed to create task:", error);
-    } finally {
-      setIsCreatingTask(false);
-    }
-  }, [selectedText, onCreateTask]);
-
   return (
     <div className={cn("relative", className)}>
       <div ref={editorRef} className="w-full" />
-
-      {/* AI action buttons that appear when text is selected */}
-      {hasSelection && !readOnly && (
-        <div className="absolute top-2 right-2 flex gap-2 z-10">
-          {onOpenAiChat && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleAiChatClick}
-              className="shadow-md"
-            >
-              Ask AI
-            </Button>
-          )}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleCreateTaskClick}
-            disabled={isCreatingTask}
-            className="shadow-md"
-          >
-            {isCreatingTask ? "Creating..." : "Create Task"}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

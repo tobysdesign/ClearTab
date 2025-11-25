@@ -35,6 +35,9 @@ export { SimpleDropdown, SimpleDropdownItem, SimpleDropdownSeparator } from "./c
 
 // Keep tooltip for now (used in multiple places)
 export { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./components/ui/tooltip";
+export { Popover, PopoverContent, PopoverTrigger } from "./components/ui/popover";
+export { DockIconButton } from "./components/ui/dock-icon-button";
+export { ShinyAiButton } from "./components/ui/shiny-ai-button";
 
 // Heavy components - import individually when needed
 // export { ActionsMenu } from "./components/ui/actions-menu";

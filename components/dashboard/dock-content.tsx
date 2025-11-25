@@ -4,8 +4,7 @@
 import { CloseIcon } from '@/components/icons'
 import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
-import { DockIconButton } from '@/components/ui/dock-icon-button'
-import { ShinyAiButton } from '@/components/ui/shiny-ai-button'
+import { DockIconButton, ShinyAiButton } from '@cleartab/ui'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -50,6 +49,7 @@ export function DockContent({
             <DockIconButton
                 onClick={toggleLayout}
                 title={`Switch to ${layout === 'two-row' ? 'single' : 'two'} row layout`}
+                shortcut="⌘L"
             >
                 <LayoutToggleIcon
                     isToggled={layout === 'single-row'}
@@ -59,6 +59,8 @@ export function DockContent({
 
             <ShinyAiButton
                 onClick={handleToggleChat}
+                tooltip={isChatOpen ? 'Close Chat' : 'Open Chat'}
+                shortcut="⌘K"
                 className={cn(
                     isChatOpen && styles.aiButtonActive
                 )}
@@ -79,6 +81,8 @@ export function DockContent({
                     {searchQuery && (
                         <DockIconButton
                             onClick={() => setSearchQuery("")}
+                            title="Clear Search"
+                            shortcut="Esc"
                         >
                             <CloseIcon size={16} />
                         </DockIconButton>
