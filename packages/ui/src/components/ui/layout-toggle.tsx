@@ -2,8 +2,8 @@
 
 // Icons replaced with ASCII placeholders
 import { useLayout } from '@/hooks/use-layout'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '../button/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
 import styles from './layout-toggle.module.css'
 
 interface LayoutToggleProps {

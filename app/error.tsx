@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@cleartab/ui'
 import styles from './error.module.css'
 
 export default function Error({
@@ -27,12 +27,15 @@ export default function Error({
           <Button
             onClick={() => reset()}
             variant="default"
+            tooltipLabel="Try again"
           >
             Try again
           </Button>
           <Button
             onClick={() => window.location.href = '/'}
             variant="outline"
+            tooltipLabel="Go home"
+            shortcut="⌘H"
           >
             Go home
           </Button>

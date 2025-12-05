@@ -121,7 +121,7 @@ export function LoginTasksWidget() {
   return (
     <WidgetContainer>
       <WidgetHeader title="Tasks">
-        <AddButton onClick={() => {}} />
+        <AddButton onClick={() => {}} tooltip="Add task" />
       </WidgetHeader>
       <WidgetContent>
         <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>

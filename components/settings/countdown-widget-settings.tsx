@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { format } from "@/lib/date-utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -274,6 +274,8 @@ export const CountdownWidgetSettings = React.forwardRef<
                 className={`${sharedStyles.button} ${sharedStyles.buttonPill} ${sharedStyles.buttonSubtle}`}
                 onClick={handleCancelEdit}
                 disabled={saving}
+                tooltipLabel="Cancel"
+                shortcut="Esc"
               >
                 Cancel
               </Button>
@@ -281,6 +283,8 @@ export const CountdownWidgetSettings = React.forwardRef<
                 type="submit"
                 disabled={saving}
                 className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
+                tooltipLabel="Save countdown"
+                shortcut="⌘S"
               >
                 {saving ? "Saving…" : "Save"}
               </Button>
@@ -319,6 +323,8 @@ export const CountdownWidgetSettings = React.forwardRef<
                   <Button
                     className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
                     aria-label="Countdown actions"
+                    tooltipLabel="Countdown actions"
+                    shortcut="⌘/."
                   >
                     <MoreActionsIcon size={16} aria-hidden />
                   </Button>

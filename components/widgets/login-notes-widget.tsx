@@ -282,7 +282,7 @@ export function LoginNotesWidget() {
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
           <WidgetHeader title="Notes">
-            <AddButton onClick={() => {}} />
+            <AddButton onClick={() => {}} tooltip="Add note" />
           </WidgetHeader>
           <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
             <div className="ListContent">

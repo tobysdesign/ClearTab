@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -184,6 +184,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             <Button
               className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
               onClick={() => (window.location.href = "/login")}
+              tooltipLabel="Sign in"
+              shortcut="⌘S"
             >
               Sign in
             </Button>,
@@ -206,6 +208,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
             onClick={() => addAccountMutation.mutate()}
             disabled={addAccountMutation.isPending}
+            tooltipLabel="Add Google account"
+            shortcut="⌘A"
           >
             <AddIcon size={14} aria-hidden />
             Add account
@@ -265,6 +269,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
                 onClick={() => removeAccountMutation.mutate(account.id)}
                 disabled={removeAccountMutation.isPending}
                 aria-label={`Disconnect ${account.email}`}
+                tooltipLabel={`Disconnect ${account.email}`}
+                shortcut="⌘⌫"
               >
                 <MoreActionsIcon size={16} aria-hidden />
               </Button>

@@ -3,8 +3,8 @@
 // Icons replaced with ASCII placeholders
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import { Input } from './input'
+import { Button } from '../button/button'
 import { cn } from '@/lib/utils'
 import styles from './mini-ai-chat.module.css'
 interface MiniMessage {
@@ -218,6 +218,8 @@ export function MiniAiChat({
                 onClick={handleSendToMainChat}
                 className={styles.sendButton}
                 disabled={messages.length <= 1}
+                tooltipLabel="Send to main chat"
+                shortcut="⌘↩"
               >
                 <span className={styles.sendIcon}>•</span>
                 Send to Main
@@ -227,6 +229,8 @@ export function MiniAiChat({
                 size="icon"
                 onClick={onClose}
                 className={styles.closeButton}
+                tooltipLabel="Close"
+                shortcut="Esc"
               >
                 <span className={styles.closeIcon}>×</span>
               </Button>
@@ -293,6 +297,8 @@ export function MiniAiChat({
                 size="sm"
                 className={styles.submitButton}
                 disabled={!inputValue.trim() || isThinking}
+                tooltipLabel="Send"
+                shortcut="↩"
               >
                 <span className={styles.submitIcon}>•</span>
               </Button>

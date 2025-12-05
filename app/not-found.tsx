@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@cleartab/ui'
 import styles from './not-found.module.css'
 
 export default function NotFound() {
@@ -11,7 +11,7 @@ export default function NotFound() {
           Could not find the requested resource
         </p>
         <div className={styles.buttonContainer}>
-          <Button asChild>
+          <Button asChild tooltipLabel="Go home" shortcut="⌘H">
             <Link href="/">
               Go home
             </Link>

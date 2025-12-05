@@ -11,7 +11,7 @@ import {
 import { EditTaskForm } from "@/components/widgets/edit-task-form";
 import { CloseIcon } from "@/components/icons";
 import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
 
@@ -58,9 +58,9 @@ export function TasksDrawer() {
             {/* Show actions menu for edit mode, X button for create mode */}
             {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
             (activeTaskId && !activeTaskId.startsWith("draft-")) ? (
-              <SimpleDropdown
+                <SimpleDropdown
                 trigger={
-                  <Button variant="ghost-icon" size="icon">
+                  <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
                     ⋮
                   </Button>
                 }
@@ -72,7 +72,7 @@ export function TasksDrawer() {
               </SimpleDropdown>
             ) : (
               <DrawerClose asChild>
-                <Button variant="ghost-icon" size="icon" aria-label="Close dialog">
+                <Button variant="ghost-icon" size="icon" aria-label="Close dialog" tooltipLabel="Close" shortcut="Esc">
                   <CloseIcon size={16} />
                 </Button>
               </DrawerClose>

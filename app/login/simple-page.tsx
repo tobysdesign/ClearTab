@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import { useState } from "react";
 import { useAuth } from "@/components/auth/supabase-auth-provider";
 
@@ -39,6 +39,7 @@ function SimpleLoginWidget() {
           onClick={handleGoogleLogin}
           disabled={isLoading}
           variant="outline"
+          tooltipLabel="Sign in with Google"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" className={styles.googleIcon}>
             <g fill="none" fillRule="evenodd">

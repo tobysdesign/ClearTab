@@ -9,7 +9,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import { DisplaySettings } from "./display-settings";
 import { CountdownWidgetSettings } from "./countdown-widget-settings";
 import { NotesVoiceTasksSettings } from "./notes-voice-tasks-settings";
@@ -320,6 +320,8 @@ export function SettingsDrawer({
                 variant="outline"
                 className={styles.logoutButton}
                 onClick={handleLogout}
+                tooltipLabel="Log out"
+                shortcut="⌘⇧L"
               >
                 Log out
               </Button>
@@ -334,6 +336,8 @@ export function SettingsDrawer({
                 size="icon"
                 onClick={() => setIsOpen(false)}
                 className={styles.closeButton}
+                tooltipLabel="Close settings"
+                shortcut="Esc"
               >
                 <span className="sr-only">Close</span>
                 <CloseIcon size={16} className={styles.closeIcon} />

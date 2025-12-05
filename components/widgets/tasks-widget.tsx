@@ -326,7 +326,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   return (
     <WidgetContainer className="tasks-widget">
       <WidgetHeader title="Tasks">
-        <AddButton onClick={handleAddTask} />
+        <AddButton onClick={handleAddTask} tooltip="Add task" />
       </WidgetHeader>
       <WidgetContent>
         <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@cleartab/ui";
 import {
   Dialog,
   DialogContent,
@@ -153,6 +153,8 @@ export const NotesVoiceTasksSettings = React.forwardRef<
             <Button
               className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
               onClick={() => handleExport(item.key)}
+              tooltipLabel={`Download ${item.title.toLowerCase()}`}
+              shortcut="⌘S"
             >
               <DownloadIcon size={16} aria-hidden />
               Download
@@ -162,6 +164,8 @@ export const NotesVoiceTasksSettings = React.forwardRef<
                 <Button
                   className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
                   aria-label={`More actions for ${item.title}`}
+                  tooltipLabel={`More actions for ${item.title}`}
+                  shortcut="⌘/."
                 >
                   <MoreActionsIcon size={16} aria-hidden />
                 </Button>

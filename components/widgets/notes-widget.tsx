@@ -867,7 +867,7 @@ export function NotesWidget() {
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
           <WidgetHeader title="Notes">
-            <AddButton onClick={handleCreateNew} />
+            <AddButton onClick={handleCreateNew} tooltip="Add note" />
           </WidgetHeader>
           <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
             {isLoadingNotes ? (
