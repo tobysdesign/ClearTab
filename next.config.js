@@ -28,7 +28,6 @@ const nextConfig = {
     optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
   },
   turbopack: {},
-  typedRoutes: false,
   reactStrictMode: true,
   env: {
     DATABASE_URL: process.env.DATABASE_URL || "",
