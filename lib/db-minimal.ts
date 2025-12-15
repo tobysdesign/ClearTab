@@ -18,7 +18,7 @@ const client = postgres(connectionString, {
   idle_timeout: 20,       // Keep connections longer
   connect_timeout: 10,    // Longer timeout for stability
   max_lifetime: 60 * 30,  // 30 minutes max connection lifetime
-  ssl: process.env.NODE_ENV === 'production',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   prepare: false,         // Disable prepared statements for better performance
   transform: postgres.camel, // Transform to camelCase automatically
 })

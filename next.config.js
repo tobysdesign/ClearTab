@@ -1,5 +1,12 @@
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
@@ -16,6 +23,7 @@ const nextConfig = {
   },
   productionBrowserSourceMaps: process.env.NODE_ENV === "development",
   serverExternalPackages: ["sharp"],
+  transpilePackages: ["@cleartab/ui"],
   experimental: {
     optimizePackageImports: ["@tanstack/react-query", "framer-motion"],
   },
@@ -75,7 +83,7 @@ const nextConfig = {
       },
     ];
   },
-    pageExtensions: isExtensionBuild
+  pageExtensions: isExtensionBuild
     ? ['tsx', 'ts', 'jsx', 'js']
     : ['tsx', 'ts', 'jsx', 'js'],
   webpack: (config, { dev, isServer }) => {
@@ -84,7 +92,7 @@ const nextConfig = {
     if (dev) {
       config.cache = {
         type: 'filesystem',
-        cacheDirectory: require('path').resolve(__dirname, '.next/cache/webpack'),
+        cacheDirectory: resolve(__dirname, '.next/cache/webpack'),
         buildDependencies: {
           config: [__filename],
         },
@@ -152,4 +160,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig);
