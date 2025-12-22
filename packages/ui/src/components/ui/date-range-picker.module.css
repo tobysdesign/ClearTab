@@ -1,0 +1,32 @@
+/* Date Range Picker */
+.container {
+  display: grid;
+  gap: 8px;
+}
+
+.triggerButton {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  font-weight: 400;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 8px;
+}
+
+.triggerButtonEmpty {
+  opacity: 0.8;
+}
+
+.popoverContent {
+  width: auto;
+  padding: 0;
+}
+
+.icon {
+  margin-right: 8px;
+  height: 16px;
+  width: 16px;
+  display: inline-block;
+}
