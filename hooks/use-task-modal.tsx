@@ -134,6 +134,7 @@ export function TaskModalProvider({ children }: TaskModalProviderProps) {
   const handleModalSave = useCallback(
     (updatedTask: Task, operation: "update" | "create" | "delete") => {
       // Call all registered task update callbacks with specific task data
+      console.log(`🔔 handleModalSave called with operation: ${operation}, callbacks registered: ${taskUpdateCallbacks.size}`);
       taskUpdateCallbacks.forEach((callback) => {
         try {
           callback(updatedTask, operation);
@@ -141,6 +142,11 @@ export function TaskModalProvider({ children }: TaskModalProviderProps) {
           console.error("Error calling task update callback:", error);
         }
       });
+
+      // Update local activeTask state so props remain fresh
+      if (operation !== "delete") {
+        setActiveTask(updatedTask);
+      }
 
       // Close modal after delete
       if (operation === "delete") {

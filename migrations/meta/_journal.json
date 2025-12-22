@@ -43,6 +43,13 @@
       "when": 1762112289525,
       "tag": "0005_skinny_radioactive_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1765923877758,
+      "tag": "0006_magical_nightmare",
+      "breakpoints": true
     }
   ]
 }

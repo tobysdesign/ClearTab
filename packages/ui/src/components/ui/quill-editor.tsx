@@ -81,12 +81,12 @@ export function QuillEditor({
             ["createTask"], // Custom Create Task button at end
           ],
           handlers: {
-            askAi: function() {
+            askAi: function () {
               if (onOpenAiChatRef.current && selectedTextRef.current) {
                 onOpenAiChatRef.current(selectedTextRef.current);
               }
             },
-            createTask: function() {
+            createTask: function () {
               if (onCreateTaskRef.current && selectedTextRef.current) {
                 onCreateTaskRef.current(selectedTextRef.current);
               }
@@ -147,22 +147,24 @@ export function QuillEditor({
       }
     });
 
-    // Handle selection changes for AI features
+    // Handle selection changes for AI features AND focus/blur
     quill.on("selection-change", (range) => {
-      if (range && range.length > 0) {
-        const text = quill.getText(range.index, range.length).trim();
-        setSelectedText(text);
+      if (range) {
+        if (range.length > 0) {
+          const text = quill.getText(range.index, range.length).trim();
+          setSelectedText(text);
+        } else {
+          setSelectedText("");
+        }
       } else {
-        setSelectedText("");
+        // Range is null, meaning blur
+        if (onBlurRef.current) {
+          onBlurRef.current();
+        }
       }
     });
 
-    // Handle blur event - use ref to avoid reinitializing on callback change
-    quill.on("blur", () => {
-      if (onBlurRef.current) {
-        onBlurRef.current();
-      }
-    });
+    // Handle blur event is not standard in Quill, removed invalid listener
 
     return () => {
       if (quillRef.current) {

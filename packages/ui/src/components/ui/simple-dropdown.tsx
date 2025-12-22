@@ -97,13 +97,15 @@ interface SimpleDropdownItemProps {
   onClick?: () => void
   className?: string
   disabled?: boolean
+  variant?: 'default' | 'danger'
 }
 
 export function SimpleDropdownItem({
   children,
   onClick,
   className,
-  disabled = false
+  disabled = false,
+  variant = 'default'
 }: SimpleDropdownItemProps) {
   const context = useContext(DropdownContext)
 
@@ -122,6 +124,7 @@ export function SimpleDropdownItem({
       className={cn(
         styles.item,
         disabled && styles.itemDisabled,
+        variant === 'danger' && styles.itemDanger,
         className
       )}
     >

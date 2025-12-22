@@ -241,6 +241,20 @@ export function NotesWidget() {
     loadNotes();
   }, []); // Remove loadNotes dependency to prevent refresh loops
 
+  // Listen for delete-all events from settings
+  useEffect(() => {
+    const handleDeleteAll = (event: Event) => {
+      const detail = (event as CustomEvent<{ domain: 'tasks' | 'notes' | 'voice' }>).detail;
+      if (detail?.domain === 'notes') {
+        console.log('📣 NotesWidget: Received delete-all event, refreshing...');
+        loadNotes();
+      }
+    };
+
+    window.addEventListener('data-deleted-all', handleDeleteAll as EventListener);
+    return () => window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
+  }, []); // Empty dependencies - loadNotes is stable from useNotes hook
+
   // Single effect to handle initialization and note deletion
   useEffect(() => {
     if (isLoadingNotes) return;

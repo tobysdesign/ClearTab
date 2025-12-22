@@ -75,6 +75,16 @@
     background-color: transparent;
 }
 
+/* SimpleDropdown: Item Danger variant */
+.itemDanger {
+    color: #f87171;
+}
+
+.itemDanger:hover {
+    color: #fca5a5;
+    background-color: rgba(248, 113, 113, 0.1);
+}
+
 /* SimpleDropdown: Separator */
 .separator {
     /* box model */

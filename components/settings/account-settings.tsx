@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@cleartab/ui";
 import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ConnectedAccountWithEmail } from "@/shared/types";
 import { AddIcon, MoreActionsIcon } from "@/components/icons";

@@ -3,9 +3,12 @@
 // Icons replaced with ASCII placeholders
 import React, { useEffect, useState, useTransition } from 'react'
 import type { Task } from '@/shared/schema'
-// Removed useDebouncedCallback as optimistic updates will trigger direct saves
+import { useDebounce } from '@/hooks/use-debounce'
 import dynamic from 'next/dynamic'
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from '@/shared/schema'
+
+// Module-level Set to track forms that are creating tasks (survives React StrictMode remounts)
+const creatingForms = new Set<string>();
 
 // Removed Popover components and formatDateSmart as they're no longer needed
 import { DatePicker } from '@/components/ui/date-picker'
@@ -24,9 +27,9 @@ async function updateTaskAPI(task: Partial<Task> & { id: string }): Promise<Task
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task),
   })
-  
+
   console.log('Update API response status:', res.status);
-  
+
   if (!res.ok) {
     const errorBody = await res.json();
     console.error('Update API error response:', errorBody);
@@ -44,9 +47,9 @@ async function createTaskAPI(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedA
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(taskData),
   })
-  
+
   console.log('API response status:', res.status);
-  
+
   if (!res.ok) {
     const errorBody = await res.json();
     console.error('API error response:', errorBody);
@@ -102,14 +105,19 @@ export function EditTaskForm({
   const [lastSaveResult, setLastSaveResult] = useState<any>(null);
   const [localTitle, setLocalTitle] = useState<string>('');
 
+  // Ref-based state for robust auto-saving like Notes
+  const isSavingRef = React.useRef<boolean>(false);
+  const ongoingSaveRef = React.useRef<Promise<void> | null>(null);
+  const createdTaskIdRef = React.useRef<string | null>(null);
+  const hasInitializedRef = React.useRef<boolean>(false);
+  const backgroundSaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Initialize content with either the task content or the selected text from editor
-  // Use useMemo to prevent recreating on every render
   const initialContent = React.useMemo(() => {
-    return task?.content || 
+    return task?.content ||
       (initialDescription ? { ops: [{ insert: initialDescription }, { insert: '\n' }] } : EMPTY_QUILL_CONTENT);
-  }, [task?.id, initialDescription]); // Only recreate if task ID or initialDescription changes
-  
+  }, [task?.id, initialDescription]);
+
   const [currentContent, setCurrentContent] = useState<QuillDelta>(
     JSON.parse(JSON.stringify(initialContent))
   );
@@ -124,15 +132,19 @@ export function EditTaskForm({
     return '';
   };
 
+  // The true source of truth for background saves
+  const taskDataRef = React.useRef({
+    title: task?.title || '',
+    content: JSON.parse(JSON.stringify(initialContent)),
+    isCompleted: task?.isCompleted || false,
+    isHighPriority: task?.isHighPriority || false,
+    dueDate: task?.dueDate ? (typeof task.dueDate === 'string' ? new Date(task.dueDate) : task.dueDate) : null,
+  });
+
+  // Keep form in sync for UI purposes
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: task?.title || '',
-      content: initialContent, // Use initialContent for default value
-      isCompleted: task?.isCompleted || false,
-      isHighPriority: task?.isHighPriority || false, // Default to false
-      dueDate: task?.dueDate ? (typeof task.dueDate === 'string' ? new Date(task.dueDate) : task.dueDate) : null,
-    },
+    defaultValues: taskDataRef.current,
   })
 
   // Use a ref to track if we've already initialized this task
@@ -140,24 +152,34 @@ export function EditTaskForm({
 
   useEffect(() => {
     // Only reset form if we haven't initialized this task yet
-    if (task && task.id !== initializedTaskId.current) {
-      console.log('EditTaskForm: Setting up form for NEW task:', task.id)
-      console.log('Task content:', task.content)
+    // AND it's not the task we just created (prevents reset after initial save)
+    if (task && task.id !== initializedTaskId.current && task.id !== createdTaskIdRef.current) {
+      console.log('EditTaskForm: Adopting truly NEW task:', task.id)
 
       initializedTaskId.current = task.id;
 
       // Convert string dates to Date objects if needed
       const taskDueDate = task.dueDate ? (typeof task.dueDate === 'string' ? new Date(task.dueDate) : task.dueDate) : null;
 
-      form.reset({
-        title: task.title,
+      const newData = {
+        title: task.title || '',
         content: task.content || EMPTY_QUILL_CONTENT,
-        isCompleted: task.isCompleted,
-        isHighPriority: task.isHighPriority, // Set from task
+        isCompleted: task.isCompleted || false,
+        isHighPriority: task.isHighPriority || false,
         dueDate: taskDueDate,
-      })
+      };
+
+      // CRITICAL: Flush any pending changes to the PREVIOUS task before switching
+      if (backgroundSaveTimeoutRef.current) {
+        console.log('🔧 EditTaskForm - Flushing pending save before task switch');
+        clearTimeout(backgroundSaveTimeoutRef.current);
+        onSubmit();
+      }
+
+      form.reset(newData)
       setLocalTitle(task.title || '')
       setCurrentContent(JSON.parse(JSON.stringify(task.content || EMPTY_QUILL_CONTENT)))
+      taskDataRef.current = JSON.parse(JSON.stringify(newData));
     } else if (initialDescription && initializedTaskId.current === null) {
       console.log('EditTaskForm: Setting up form for new task from description')
       initializedTaskId.current = 'new-task';
@@ -174,13 +196,72 @@ export function EditTaskForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task?.id, initialDescription]) // Only run when task ID or initialDescription changes
 
+  // Create task immediately when form opens for new task
+  useEffect(() => {
+    // Use a stable key for new task forms
+    const formKey = 'new-task-form';
+
+    // Only create if this is a new task (no task.id) and we haven't created one yet
+    if (!task?.id && !createdTaskIdRef.current && isCreating && !creatingForms.has(formKey)) {
+      console.log('🆕 Creating initial task immediately');
+
+      // Mark this form as creating (survives StrictMode remount)
+      creatingForms.add(formKey);
+      hasInitializedRef.current = true;
+      const tempId = 'creating-' + Date.now();
+      createdTaskIdRef.current = tempId;
+
+      const initialData = {
+        title: taskDataRef.current.title || 'Untitled Task',
+        content: taskDataRef.current.content,
+        isCompleted: taskDataRef.current.isCompleted,
+        isHighPriority: taskDataRef.current.isHighPriority,
+        dueDate: taskDataRef.current.dueDate,
+        order: null,
+      };
+
+      createTaskAPI(initialData)
+        .then((result) => {
+          createdTaskIdRef.current = result.id;
+          console.log('✅ Initial task created with ID:', result.id);
+
+          // Clean up the form key from the Set
+          creatingForms.delete(formKey);
+
+          // Notify parent
+          if (onSave) {
+            onSave(result, 'create');
+          }
+
+          // Execute any queued save
+          onSubmit();
+        })
+        .catch((error) => {
+          console.error('Failed to create initial task:', error);
+          // Reset on error so user can try again
+          createdTaskIdRef.current = null;
+          creatingForms.delete(formKey);
+        });
+    }
+  }, []); // Only run once on mount
+
   // Reset the initialized task ref when the component unmounts or task changes
   useEffect(() => {
+    // Reset created task ID when switching tasks
+    if (task?.id) {
+      createdTaskIdRef.current = null;
+    }
+
     return () => {
       initializedTaskId.current = null;
-      // Clean up background save timeout
+      createdTaskIdRef.current = null;
+      hasInitializedRef.current = false;
+
+      // CRITICAL: Flush any pending changes on unmount
       if (backgroundSaveTimeoutRef.current) {
+        console.log('🔧 EditTaskForm - Flushing pending save on unmount');
         clearTimeout(backgroundSaveTimeoutRef.current);
+        onSubmit();
       }
     };
   }, [task?.id]);
@@ -195,53 +276,87 @@ export function EditTaskForm({
   }, [lastSaveResult, onSave, task])
 
   // Background save system like notes widget
-  const backgroundSaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
 
-  const onSubmit = async (values: TaskFormValues) => {
-    console.log('🔧 EditTaskForm onSubmit - values:', values);
-    console.log('🔧 EditTaskForm onSubmit - currentContent:', currentContent);
-    console.log('🔧 EditTaskForm onSubmit - task:', task);
-    console.log('🔧 EditTaskForm onSubmit - isCreating:', !task?.id);
-    
-    const dataToSend = {
-      title: values.title || '', // Ensure title is always provided
-      content: currentContent, // Use currentContent for description
-      isCompleted: values.isCompleted || false,
-      isHighPriority: values.isHighPriority || false, // Ensure default
-      dueDate: values.dueDate || null,
-      order: task?.order || null, // Include order field, use existing or null for new tasks
-    }
-    
-    console.log('dataToSend:', dataToSend);
+  const onSubmit = async (values?: TaskFormValues) => {
+    // Capture the target ID for this snapshot immediately
+    const targetId = task?.id || createdTaskIdRef.current;
 
-    startTransition(async () => {
+    // Capture snapshot of the current state from Ref
+    const snapshot = {
+      id: targetId, // Include ID in snapshot to ensure we save to the correct task
+      title: taskDataRef.current.title || 'Untitled Task',
+      content: JSON.parse(JSON.stringify(taskDataRef.current.content)),
+      isCompleted: taskDataRef.current.isCompleted,
+      isHighPriority: taskDataRef.current.isHighPriority,
+      dueDate: taskDataRef.current.dueDate,
+      order: task?.order || null,
+    };
+
+    console.log('🔧 EditTaskForm chaining save for:', snapshot.title);
+
+    const runSave = async () => {
+      const idToUpdate = snapshot.id;
+
+      if (!idToUpdate) {
+        console.log('🔧 EditTaskForm - No target ID in snapshot, skipping save');
+        return;
+      }
+
+      // If we're still creating with a temp ID, we shouldn't really be here 
+      // but let's be safe and wait or skip if it's 'creating-'
+      if (typeof idToUpdate === 'string' && idToUpdate.startsWith('creating-')) {
+        console.log('🔧 EditTaskForm - Waiting for initial creation to finish...');
+        return;
+      }
+
+      isSavingRef.current = true;
       try {
         let result;
-        if (task?.id) {
-          console.log('Updating existing task:', task.id);
-          result = await updateTaskAPI({ id: task.id, ...dataToSend });
+        // Check if it's a "real" ID or if we're technically in create mode still 
+        // (though in this new system, tasks are created on mount usually)
+        if (idToUpdate && !idToUpdate.startsWith('creating-')) {
+          console.log('Updating task in snapshot:', idToUpdate);
+          result = await updateTaskAPI({ ...snapshot, id: idToUpdate });
         } else {
-          console.log('Creating new task');
-          result = await createTaskAPI(dataToSend);
+          console.log('Creating new task from snapshot');
+          result = await createTaskAPI(snapshot);
+          createdTaskIdRef.current = result.id;
+          initializedTaskId.current = result.id;
         }
-        console.log('Save result:', result);
-        setLastSaveResult({ data: { success: true, data: result } });
 
-        // Call onSave callback with specific task data and operation
+        console.log('Save successful:', result.id);
+
+        // Update tracking ref with the saved state to prevent unnecessary re-saves if needed
+        // (though we usually want to trust the server result)
+
         if (onSave) {
-          const operation = task?.id ? 'update' : 'create';
-          onSave(result, operation);
+          onSave(result, existingTaskId ? 'update' : 'create');
         }
+
+        setLastSaveResult({ data: { success: true, data: result } });
       } catch (error) {
         console.error('Failed to save task:', error);
         setLastSaveResult({ data: { success: false, error: (error as Error).message } });
+      } finally {
+        isSavingRef.current = false;
+      }
+    };
 
-        // Show user-friendly error message
-        alert(`Failed to save task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // Chain the save operation like NotesWidget
+    const previous = ongoingSaveRef.current ?? Promise.resolve();
+    const chainedSave = previous
+      .catch(() => undefined) // ensure chain continues
+      .then(() => runSave());
+
+    ongoingSaveRef.current = chainedSave.finally(() => {
+      if (ongoingSaveRef.current === chainedSave) {
+        ongoingSaveRef.current = null;
       }
     });
-  }
+
+    return chainedSave;
+  };
 
   // Define scheduleBackgroundSave AFTER onSubmit to avoid circular dependency
   const scheduleBackgroundSave = React.useCallback(() => {
@@ -250,12 +365,16 @@ export function EditTaskForm({
       clearTimeout(backgroundSaveTimeoutRef.current);
     }
 
-    // Schedule save for 1 second from now (faster than notes for better UX)
+    // Check if we have a real ID (not temp 'creating-...' ID)
+    const hasRealId = task?.id || (createdTaskIdRef.current && !createdTaskIdRef.current.startsWith('creating-'));
+    const delay = 500; // PARITY WITH NOTES: always use 500ms
+
+    // Schedule save for later (longer delay for new tasks)
     backgroundSaveTimeoutRef.current = setTimeout(() => {
       console.log('🔧 EditTaskForm - Background save triggered');
-      onSubmit(form.getValues());
-    }, 1000);
-  }, [form, onSubmit]);
+      onSubmit();
+    }, delay);
+  }, [onSubmit, task?.id]);
 
   // Define handleFormChange after all dependencies are available
   const handleFormChange = React.useCallback((forceSubmit = false) => {
@@ -267,21 +386,24 @@ export function EditTaskForm({
         clearTimeout(backgroundSaveTimeoutRef.current);
       }
       console.log('🔧 EditTaskForm - Force submit, saving immediately');
-      onSubmit(form.getValues());
+      onSubmit();
     } else {
-      // Schedule background save for text changes
+      // Schedule background save for all changes
       console.log('🔧 EditTaskForm - Scheduling background save');
       scheduleBackgroundSave();
     }
-  }, [form, onSubmit, scheduleBackgroundSave]);
+  }, [onSubmit, scheduleBackgroundSave]);
 
   // Use onChange for editor, with background save like notes widget
   const handleEditorChange = (content: QuillDelta) => {
-    console.log('🔧 EditTaskForm Editor content changed:', content);
+    console.log('🔧 EditTaskForm Editor content changed');
+
+    // Update ref first - this is our source of truth
+    taskDataRef.current.content = content;
+
+    // Update state for UI and schedule background save
     setCurrentContent(content);
-    // Update form value without marking as dirty to avoid triggering saves
-    form.setValue('content', content, { shouldDirty: false });
-    // Schedule background save (won't interrupt typing)
+    form.setValue('content', content, { shouldDirty: true });
     scheduleBackgroundSave();
   };
 
@@ -320,9 +442,11 @@ export function EditTaskForm({
                 type="text"
                 value={localTitle}
                 onChange={(e) => {
-                  setLocalTitle(e.target.value);
-                  form.setValue('title', e.target.value, { shouldDirty: false });
-                  handleFormChange(); // This will now schedule background save, not immediate
+                  const newTitle = e.target.value;
+                  setLocalTitle(newTitle);
+                  taskDataRef.current.title = newTitle;
+                  form.setValue('title', newTitle, { shouldDirty: false });
+                  handleFormChange(); // Schedule background save
                 }}
                 onBlur={() => {
                   // Save immediately on blur
@@ -330,61 +454,67 @@ export function EditTaskForm({
                     clearTimeout(backgroundSaveTimeoutRef.current);
                   }
                   form.setValue('title', localTitle, { shouldDirty: true });
-                  onSubmit(form.getValues());
+                  onSubmit();
                 }}
                 placeholder="Enter task title"
                 className={styles.textInput}
               />
             </FormField>
 
-          <FormRow>
-            <FormField label="DUE BY">
-              <DatePicker
-                date={form.watch('dueDate') || undefined}
-                onSelect={(date) => {
-                  form.setValue('dueDate', date || null, { shouldDirty: true });
+            <FormRow>
+              <FormField label="DUE BY">
+                <DatePicker
+                  date={form.watch('dueDate') || undefined}
+                  onSelect={(date) => {
+                    const newDate = date || null;
+                    taskDataRef.current.dueDate = newDate;
+                    form.setValue('dueDate', newDate, { shouldDirty: true });
+                    handleFormChange(true);
+                  }}
+                  placeholder="Select"
+                  className={styles.datePicker}
+                />
+              </FormField>
+
+              <PriorityToggle
+                checked={form.watch('isHighPriority')}
+                onChange={(checked) => {
+                  taskDataRef.current.isHighPriority = checked;
+                  form.setValue('isHighPriority', checked, { shouldDirty: true });
                   handleFormChange(true);
                 }}
-                placeholder="Select"
-                className={styles.datePicker}
+              />
+            </FormRow>
+
+            <FormField label="DESCRIPTION">
+              <TaskEditor
+                key={`task-editor-${task?.id || 'new'}`}
+                initialContent={currentContent}
+                onChange={handleEditorChange}
+                onBlur={() => {
+                  // Save immediately on blur only for existing tasks
+                  if (backgroundSaveTimeoutRef.current) {
+                    clearTimeout(backgroundSaveTimeoutRef.current);
+                  }
+                  // Only save on blur if task exists, otherwise let background save handle it
+                  if (task?.id || createdTaskIdRef.current) {
+                    onSubmit();
+                  }
+                }}
+                placeholder="Describe the task..."
+                className={styles.taskEditor}
               />
             </FormField>
 
-            <PriorityToggle
-              checked={form.watch('isHighPriority')}
+            <CheckboxField
+              checked={form.watch('isCompleted')}
               onChange={(checked) => {
-                form.setValue('isHighPriority', checked, { shouldDirty: true });
+                taskDataRef.current.isCompleted = checked;
+                form.setValue('isCompleted', checked, { shouldDirty: true });
                 handleFormChange(true);
               }}
+              label="Mark complete"
             />
-          </FormRow>
-
-          <FormField label="DESCRIPTION">
-            <TaskEditor
-              key={`task-editor-${task?.id || 'new'}`}
-              initialContent={currentContent}
-              onChange={handleEditorChange}
-              onBlur={() => {
-                // Save immediately on blur
-                if (backgroundSaveTimeoutRef.current) {
-                  clearTimeout(backgroundSaveTimeoutRef.current);
-                }
-                form.setValue('content', currentContent, { shouldDirty: true });
-                onSubmit(form.getValues());
-              }}
-              placeholder="Describe the task..."
-              className={styles.taskEditor}
-            />
-          </FormField>
-
-          <CheckboxField
-            checked={form.watch('isCompleted')}
-            onChange={(checked) => {
-              form.setValue('isCompleted', checked, { shouldDirty: true });
-              handleFormChange(true);
-            }}
-            label="Mark complete"
-          />
           </form>
         )}
       </div>

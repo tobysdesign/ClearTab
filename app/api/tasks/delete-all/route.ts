@@ -1,35 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@/auth';
 import { dbMinimal } from '@/lib/db-minimal';
 import { tasks } from '@/shared/schema-tables';
 import { eq } from 'drizzle-orm';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function DELETE(_request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Development bypass for testing
+    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
+    const defaultUserId = '00000000-0000-4000-8000-000000000000';
 
-    // Get the current user
-    const {
-      data: { user },
-      error: userError
-    } = await supabase.auth.getUser();
+    let userId = defaultUserId;
 
-    if (userError) {
-      console.error('Error getting user:', userError);
-      return NextResponse.json(
-        { success: false, error: 'Authentication error' },
-        { status: 401 }
-      );
+    if (!devBypass) {
+      const session = await auth();
+
+      if (!session?.user) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
+      userId = session.user.id;
     }
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = user.id;
 
     // Delete all tasks for the current user
     const deletedTasks = await dbMinimal

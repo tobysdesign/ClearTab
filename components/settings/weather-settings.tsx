@@ -4,6 +4,7 @@ import * as React from "react";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
 import { SearchIcon } from "@/components/icons";
+import { Select, SelectItem } from "@cleartab/ui";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 
@@ -61,15 +62,15 @@ export const WeatherSettings = React.forwardRef<
         <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
           <span className={sharedStyles.label}>Display unit</span>
 
-          <select
+          <Select
             id="weather-units"
             value={unit}
-            onChange={(event) => setUnit(event.target.value as TemperatureUnit)}
-            className={`${sharedStyles.input} ${sharedStyles.inputSelect} ${sharedStyles.selectAuto}`}
+            onValueChange={(val) => setUnit(val as TemperatureUnit)}
+            className={sharedStyles.selectAuto}
           >
-            <option value="celsius">Celsius</option>
-            <option value="fahrenheit">Fahrenheit</option>
-          </select>
+            <SelectItem value="celsius">Celsius</SelectItem>
+            <SelectItem value="fahrenheit">Fahrenheit</SelectItem>
+          </Select>
         </div>
       </form>
     </section>

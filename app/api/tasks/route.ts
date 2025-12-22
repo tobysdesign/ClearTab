@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/auth";
 import { dbMinimal } from "@/lib/db-minimal";
 import { tasks } from "@/shared/schema-tables";
 import { eq, desc, and } from "drizzle-orm";
@@ -16,15 +16,12 @@ export async function GET(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const session = await auth();
 
-      if (!user) {
+      if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     // Check if fetching a single task by ID
@@ -71,15 +68,12 @@ export async function POST(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const session = await auth();
 
-      if (!user) {
+      if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     const body = await request.json();
@@ -143,17 +137,14 @@ export async function PUT(request: NextRequest) {
     let userId = '00000000-0000-4000-8000-000000000000';
 
     if (!devBypass) {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const session = await auth();
 
-      if (!user) {
+      if (!session?.user) {
         console.log('PUT /api/tasks - No user found, unauthorized');
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      userId = user.id;
-      console.log('PUT /api/tasks - User found:', user.id);
+      userId = session.user.id;
+      console.log('PUT /api/tasks - User found:', session.user.id);
     } else {
       console.log('PUT /api/tasks - Using dev bypass with default user');
     }
@@ -184,6 +175,14 @@ export async function PUT(request: NextRequest) {
     }
     if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
 
+    console.log('PUT /api/tasks - Final update data prepared:', {
+      id,
+      title: updateData.title,
+      contentLength: updateData.content ? JSON.stringify(updateData.content).length : 'N/A',
+      isCompleted: updateData.isCompleted,
+      isHighPriority: updateData.isHighPriority
+    });
+    
     console.log('PUT /api/tasks - Update data:', updateData);
 
     const [updatedTask] = await dbMinimal
@@ -192,7 +191,7 @@ export async function PUT(request: NextRequest) {
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning();
 
-    console.log('PUT /api/tasks - Database result:', updatedTask);
+    console.log('PUT /api/tasks - Database result success:', !!updatedTask, updatedTask?.id);
 
     if (!updatedTask) {
       console.log('PUT /api/tasks - Task not found');
@@ -220,15 +219,12 @@ export async function DELETE(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const session = await auth();
 
-      if (!user) {
+      if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      userId = user.id;
+      userId = session.user.id;
     }
 
     const { searchParams } = new URL(request.url);

@@ -2,7 +2,7 @@
 
 import { Button } from "@cleartab/ui";
 import { useState } from "react";
-import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 
 import styles from "./page.module.css";
 

@@ -31,37 +31,28 @@ export const QuillContentSchema = QuillDeltaSchema;
 export { EMPTY_QUILL_CONTENT };
 export type { QuillDelta };
 
-export const user = pgTable(
-  "user",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .$defaultFn(() => generateUUID()),
-    name: text("name"),
-    email: text("email").notNull(),
-    emailVerified: timestamp("emailVerified", { mode: "date" }),
-    image: text("image"),
-    password: text("password"),
-    googleId: text("google_id").unique(),
-    accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    tokenExpiry: timestamp("token_expiry", { mode: "date" }),
-    googleCalendarConnected: boolean("google_calendar_connected").default(
-      false,
-    ),
-    lastCalendarSync: timestamp("last_calendar_sync", { mode: "date" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => ({
-    rls: pgPolicy("user RLS policy", {
-      using: sql`auth.uid() = ${table.id}`,
-      withCheck: sql`auth.uid() = ${table.id}`,
-      to: authenticatedRole,
-      for: "all",
-    }),
-  }),
-).enableRLS();
+export const user = pgTable("user", {
+  id: uuid("id")
+    .primaryKey()
+    .$defaultFn(() => generateUUID()),
+  name: text("name"),
+  email: text("email").notNull(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  image: text("image"),
+  password: text("password"),
+  googleId: text("google_id").unique(),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiry: timestamp("token_expiry", { mode: "date" }),
+  googleCalendarConnected: boolean("google_calendar_connected").default(
+    false,
+  ),
+  lastCalendarSync: timestamp("last_calendar_sync", { mode: "date" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+// Note: RLS removed - NextAuth doesn't use Supabase auth.uid()
+// Security is handled by NextAuth session validation in API routes
 
 export const account = pgTable(
   "account",
@@ -69,6 +60,7 @@ export const account = pgTable(
     userId: uuid("userId")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // Required by NextAuth
     provider: text("provider").notNull(),
     providerAccountId: text("providerAccountId").notNull(),
     refresh_token: text("refresh_token"),
@@ -83,33 +75,18 @@ export const account = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-    rls: pgPolicy("account RLS policy", {
-      using: sql`auth.uid() = ${account.userId}`,
-      withCheck: sql`auth.uid() = ${account.userId}`,
-      to: authenticatedRole,
-      for: "all",
-    }),
   }),
-).enableRLS();
+);
+// Note: RLS removed - security handled by NextAuth sessions
 
-export const session = pgTable(
-  "session",
-  {
-    sessionToken: text("sessionToken").notNull().primaryKey(),
-    userId: uuid("userId")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
-  },
-  (table) => ({
-    rls: pgPolicy("session RLS policy", {
-      using: sql`auth.uid() = ${table.userId}`,
-      withCheck: sql`auth.uid() = ${table.userId}`,
-      to: authenticatedRole,
-      for: "all",
-    }),
-  }),
-).enableRLS();
+export const session = pgTable("session", {
+  sessionToken: text("sessionToken").notNull().primaryKey(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+});
+// Note: RLS removed - security handled by NextAuth sessions
 
 export const verificationTokens = pgTable(
   "verification_tokens",

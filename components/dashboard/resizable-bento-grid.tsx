@@ -18,11 +18,11 @@ import { MobileCompactLayout } from './mobile-compact-layout'
 import styles from './resizable-bento-grid.module.css'
 
 interface ResizableBentoGridProps {
-    notes: ReactNode
-    tasks: ReactNode
-    searchQuery: string
-    dockPosition: 'top' | 'left' | 'right' | 'bottom'
-    login?: ReactNode
+  notes: ReactNode
+  tasks: ReactNode
+  searchQuery: string
+  dockPosition: 'top' | 'left' | 'right' | 'bottom'
+  login?: ReactNode
 }
 
 export function ResizableBentoGrid({
@@ -82,13 +82,13 @@ export function ResizableBentoGrid({
               <PanelResizeHandle className={styles.resizeHandleVertical} />
 
               {/* Bottom Row */}
-              <Panel defaultSize={50} minSize={30}>
+              <Panel defaultSize={50} minSize={8}>
                 <PanelGroup direction="horizontal" className="panel-group">
-                   <Panel defaultSize={25} style={{ overflow: 'visible' }}>
-                     <motion.div {...motionProps(0.75)} className="panel-motion">
-                       <WeatherWidgetNew />
-                     </motion.div>
-                   </Panel>
+                  <Panel defaultSize={25} style={{ overflow: 'visible' }}>
+                    <motion.div {...motionProps(0.75)} className="panel-motion">
+                      <WeatherWidgetNew />
+                    </motion.div>
+                  </Panel>
                   <PanelResizeHandle className={styles.resizeHandleHorizontal} />
                   <Panel defaultSize={25}>
                     <motion.div {...motionProps(0.85)} className="panel-motion">
@@ -138,7 +138,7 @@ export function ResizableBentoGrid({
         <PanelResizeHandle className={styles.resizeHandleVertical} />
 
         {/* Bottom Row */}
-        <Panel defaultSize={50} minSize={30}>
+        <Panel defaultSize={50} minSize={8}>
           <PanelGroup direction="horizontal" className="panel-group">
             <Panel defaultSize={25}>
               <motion.div {...motionProps(0.75)} className="panel-motion">
@@ -181,11 +181,11 @@ export function ResizableBentoGrid({
           <PanelResizeHandle className={styles.resizeHandleVertical} />
           <Panel defaultSize={40} minSize={25}>
             <PanelGroup direction="horizontal" className="panel-group">
-               <Panel defaultSize={33} style={{ overflow: 'visible' }}>
-                 <motion.div {...motionProps(0.75)} className="panel-motion">
-                   <WeatherWidgetNew />
-                 </motion.div>
-               </Panel>
+              <Panel defaultSize={33} style={{ overflow: 'visible' }}>
+                <motion.div {...motionProps(0.75)} className="panel-motion">
+                  <WeatherWidgetNew />
+                </motion.div>
+              </Panel>
               <PanelResizeHandle className={styles.resizeHandleHorizontal} />
               <Panel defaultSize={33}>
                 <motion.div {...motionProps(0.85)} className="panel-motion">
@@ -211,7 +211,7 @@ export function ResizableBentoGrid({
             </motion.div>
           </Panel>
           <PanelResizeHandle className={styles.resizeHandleVertical} />
-          <Panel defaultSize={50} minSize={25}>
+          <Panel defaultSize={50} minSize={8}>
             <motion.div {...motionProps(1.25)} className="panel-motion">
               <ScheduleWidget />
             </motion.div>

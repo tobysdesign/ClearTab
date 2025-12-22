@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    padding: 24px 28px;
+    padding: 24px 16px;
     border-radius: 20px;
     background: #191919;
 }
@@ -110,37 +110,6 @@
     color: rgba(255, 255, 255, 0.92);
 }
 
-.inputSelect {
-    width: 100%;
-    height: 42px;
-    padding: 0 40px 0 14px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(18, 18, 18, 0.88);
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.95rem;
-    appearance: none;
-    background-image:
-        linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.4) 50%),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.4) 50%, transparent 50%);
-    background-position:
-        calc(100% - 22px) 50%,
-        calc(100% - 16px) 50%;
-    background-size:
-        6px 6px,
-        6px 6px;
-    background-repeat: no-repeat;
-}
-
-.selectAuto {
-    width: auto;
-    min-width: 140px;
-}
-
-.fieldAuto .inputSelect {
-    width: auto;
-}
-
 .input {
     width: 100%;
     height: 42px;
@@ -157,12 +126,56 @@
     border-color: rgba(255, 255, 255, 0.28);
 }
 
+.inputSelect {
+    width: 100%;
+    height: 42px;
+    padding: 0 36px 0 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 18, 18, 0.88);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.45)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+    background-size: 12px;
+}
+
+.input[type="date"] {
+    cursor: pointer;
+    position: relative;
+    padding-right: 12px;
+}
+
+/* Ensure date icon is visible and clickable */
+.input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(1) brightness(100);
+    opacity: 0.6;
+    margin-left: 8px;
+}
+
+.input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
 .inputAuto {
     width: auto;
     min-width: 140px;
 }
 
 .fieldAuto .input {
+    width: auto;
+}
+
+.selectAuto {
+    width: auto;
+    min-width: 140px;
+}
+
+.fieldAuto .inputSelect {
     width: auto;
 }
 
@@ -356,6 +369,18 @@
     outline-offset: 2px;
 }
 
+.buttonGhost {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: rgba(255, 255, 255, 0.68) !important;
+}
+
+.buttonGhost:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+}
+
 .linkRow {
     display: flex;
     align-items: center;
@@ -392,6 +417,7 @@
     background: rgba(248, 113, 113, 0.14);
     color: #fca5a5;
 }
+
 .cardTitle {
     display: none;
 }

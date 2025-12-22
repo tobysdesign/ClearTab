@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@cleartab/ui";
+import { Button, SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { DownloadIcon, MoreActionsIcon } from "@/components/icons";
 import sharedStyles from "./settings-shared.module.css";
@@ -58,42 +52,58 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     };
 
     const progressToast = toast({
-      title: `Deleting ${domain}`,
-      description: "This may take a moment…",
+      title: `Deleting ${domain}…`,
+      description: "This may take a moment",
       duration: Infinity,
     });
 
     try {
+      console.log(`Attempting to delete ${domain} at ${endpointMap[domain]}`);
+
       const res = await fetch(endpointMap[domain], {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // Ensure cookies are sent
       });
+
+      console.log(`Delete response status: ${res.status}`);
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
+        console.error(`Delete failed:`, errorData);
         throw new Error(errorData.error || `Failed to delete ${domain}`);
       }
 
       const result = await res.json().catch(() => ({}));
+      console.log(`Delete result:`, result);
+
       progressToast.dismiss();
 
+      // Emit event to notify widgets to refresh
+      window.dispatchEvent(
+        new CustomEvent('data-deleted-all', {
+          detail: { domain }
+        })
+      );
+
       toast({
-        title: "Delete complete",
+        title: `All ${domain} deleted`,
         description: result.deletedCount
           ? `Removed ${result.deletedCount} ${domain}`
-          : "All data cleared successfully.",
-        duration: 6000,
+          : "All data cleared successfully",
+        duration: 3000,
       });
     } catch (error) {
+      console.error(`Delete error:`, error);
       progressToast.dismiss();
       toast({
-        title: "Delete failed",
+        title: `Failed to delete ${domain}`,
         description:
           error instanceof Error
             ? error.message
-            : "We couldn’t complete the delete request. Please try again.",
+            : "An error occurred. Please try again",
         variant: "destructive",
-        duration: Infinity,
+        duration: 4000,
       });
     } finally {
       setIsDeleting(false);
@@ -159,8 +169,9 @@ export const NotesVoiceTasksSettings = React.forwardRef<
               <DownloadIcon size={16} aria-hidden />
               Download
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <SimpleDropdown
+              key={`dropdown-${item.key}`}
+              trigger={
                 <Button
                   className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
                   aria-label={`More actions for ${item.title}`}
@@ -169,16 +180,15 @@ export const NotesVoiceTasksSettings = React.forwardRef<
                 >
                   <MoreActionsIcon size={16} aria-hidden />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-red-400 focus:text-red-300"
-                  onClick={() => setConfirmState({ domain: item.key })}
-                >
-                  Delete all data
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+            >
+              <SimpleDropdownItem
+                onClick={() => setConfirmState({ domain: item.key })}
+                variant="danger"
+              >
+                Delete all
+              </SimpleDropdownItem>
+            </SimpleDropdown>
           </div>
         ))}
       </div>
@@ -207,7 +217,12 @@ export const NotesVoiceTasksSettings = React.forwardRef<
             </Button>
             <Button
               variant="destructive"
-              onClick={() => activeDomain && handleDelete(activeDomain)}
+              onClick={() => {
+                console.log('Delete button clicked, activeDomain:', activeDomain);
+                if (activeDomain) {
+                  handleDelete(activeDomain);
+                }
+              }}
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting…" : "Delete data"}

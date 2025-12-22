@@ -6,21 +6,20 @@ import styles from './select.module.css'
 
 const Select = React.forwardRef<
   HTMLSelectElement,
-  React.HTMLAttributes<HTMLSelectElement> & {
+  React.SelectHTMLAttributes<HTMLSelectElement> & {
     onValueChange?: (value: string) => void;
-    value?: string; // Explicitly add value prop
   }
 >(({ className, children, onValueChange, value, ...props }, ref) => {
   return (
-    <div className="relative">
+    <div style={{ position: 'relative', width: '100%' }}>
       <select
         className={cn(
           styles.select,
           className
         )}
         ref={ref}
-        onChange={onValueChange ? (e) => onValueChange(e.target.value) : props.onChange} // Map onValueChange to onChange
-        value={value} // Use the explicitly destructured value
+        onChange={onValueChange ? (e) => onValueChange(e.target.value) : props.onChange}
+        value={value}
         {...props}
       >
         {children}
@@ -36,8 +35,7 @@ const Select = React.forwardRef<
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth="2"
-            d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+            d="m6 9 6 6 6-6"
           ></path>
         </svg>
       </div>
@@ -50,22 +48,22 @@ const SelectTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >(({ className: _className, children: _children, ..._props }, _ref) => {
-    // This component is a placeholder to maintain prop compatibility
-    // with the previous Radix-based component. It does not render anything itself.
-    // The native <select> handles the trigger.
-    return null;
+  // This component is a placeholder to maintain prop compatibility
+  // with the previous Radix-based component. It does not render anything itself.
+  // The native <select> handles the trigger.
+  return null;
 });
 SelectTrigger.displayName = 'SelectTrigger'
 
 
 const SelectValue = React.forwardRef<
-    HTMLSpanElement,
-    React.HTMLAttributes<HTMLSpanElement> & { placeholder?: string }
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement> & { placeholder?: string }
 >(({ placeholder: _placeholder, ..._props }, _ref) => {
-    // This component is a placeholder to maintain prop compatibility
-    // with the previous Radix-based component. The native <select> shows the value.
-    // The placeholder is handled by a disabled <option> in the Select component.
-    return null;
+  // This component is a placeholder to maintain prop compatibility
+  // with the previous Radix-based component. The native <select> shows the value.
+  // The placeholder is handled by a disabled <option> in the Select component.
+  return null;
 });
 SelectValue.displayName = 'SelectValue'
 
@@ -73,8 +71,8 @@ const SelectContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ children, ..._props }, _ref) => {
-    // This is not a direct wrapper anymore. The children (SelectItems) will be direct children of the native select.
-    // This component is being maintained for API compatibility.
+  // This is not a direct wrapper anymore. The children (SelectItems) will be direct children of the native select.
+  // This component is being maintained for API compatibility.
   return <>{children}</>
 })
 SelectContent.displayName = 'SelectContent'
@@ -83,7 +81,7 @@ const SelectGroup = React.forwardRef<
   HTMLOptGroupElement,
   React.HTMLAttributes<HTMLOptGroupElement> & { children: React.ReactNode, label?: string }
 >(({ children, label, ...props }, ref) => {
-    return <optgroup ref={ref} label={label} {...props}>{children}</optgroup>
+  return <optgroup ref={ref} label={label} {...props}>{children}</optgroup>
 });
 SelectGroup.displayName = 'SelectGroup'
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, PanInfo, useAnimationControls } from "framer-motion";
-import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import dynamic from "next/dynamic";
 import { LoginBentoGrid } from "@/components/dashboard/login-bento-grid";
 import { LoginDockContent } from "@/components/dashboard/login-dock-content";

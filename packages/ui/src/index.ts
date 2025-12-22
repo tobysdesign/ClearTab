@@ -42,7 +42,7 @@ export { ShinyAiButton } from "./components/ui/shiny-ai-button";
 // Heavy components - import individually when needed
 // export { ActionsMenu } from "./components/ui/actions-menu";
 // export { TooltipProvider, Tooltip } from "./components/ui/tooltip";
-// export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "./components/ui/select";
 // export { DatePicker } from "./components/ui/date-picker";
 // export { DateRangePicker } from "./components/ui/date-range-picker";
 // export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./components/ui/dialog";

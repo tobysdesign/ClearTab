@@ -11,6 +11,7 @@ interface SettingsState {
   onboardingStep: 'welcome' | 'agent-name' | 'user-name' | 'setup-complete' | null
   chatHistoryRetentionDays: number
   hasDataConsent: boolean
+  theme: 'light' | 'dark'
 }
 
 interface SettingsActions {
@@ -21,6 +22,7 @@ interface SettingsActions {
   completeOnboarding: (names: {userName: string, agentName: string}) => void
   setChatHistoryRetentionDays: (days: number) => void
   setDataConsent: (consent: boolean) => void
+  setTheme: (theme: SettingsState['theme']) => void
 }
 
 type Store = SettingsState & SettingsActions
@@ -35,6 +37,7 @@ export const useSettings = create<Store>()(
       onboardingStep: null,
       chatHistoryRetentionDays: 3,
       hasDataConsent: false,
+      theme: 'dark',
       setUserName: (name: string) => set({ userName: name }),
       setAgentName: (name: string) => set({ agentName: name }),
       finishInitialization: () => set({ isInitialized: true }),
@@ -46,7 +49,8 @@ export const useSettings = create<Store>()(
         agentName: names.agentName,
       }),
       setChatHistoryRetentionDays: (days) => set({ chatHistoryRetentionDays: days }),
-      setDataConsent: (consent) => set({ hasDataConsent: consent }),
+      setDataConsent: (consent = true) => set({ hasDataConsent: consent }),
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'agent-settings',
@@ -58,6 +62,7 @@ export const useSettings = create<Store>()(
         hasSeenOnboarding: state.hasSeenOnboarding,
         chatHistoryRetentionDays: state.chatHistoryRetentionDays,
         hasDataConsent: state.hasDataConsent,
+        theme: state.theme,
       }),
     }
   )

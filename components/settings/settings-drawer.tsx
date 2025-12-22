@@ -17,7 +17,7 @@ import { WeatherSettings } from "./weather-settings";
 import { AccountSettings } from "./account-settings";
 import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
-import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import styles from "./settings-drawer.module.css";
 
 type SectionId = "schedule" | "layout" | "data" | "weather" | "countdown";
@@ -256,7 +256,24 @@ export function SettingsDrawer({
         </VisuallyHidden>
 
         <div className={styles.container}>
+          <Button
+            variant="ghost-icon"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            className={styles.closeButtonFloating}
+            tooltipLabel="Close settings"
+            shortcut="Esc"
+          >
+            <span className="sr-only">Close</span>
+            <CloseIcon size={14} className={styles.closeIcon} />
+          </Button>
+
           <aside className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <h2 className={styles.sidebarLabel}>Settings</h2>
+              <div className={styles.sidebarDivider} />
+            </div>
+
             <nav className={styles.nav}>
               <ul className={styles.navList}>
                 {sections.map((section) => (
@@ -271,9 +288,6 @@ export function SettingsDrawer({
                     >
                       <span className={styles.navButtonTitle}>
                         {section.label}
-                      </span>
-                      <span className={styles.navButtonDescription}>
-                        {section.description}
                       </span>
                     </button>
                   </li>
@@ -307,8 +321,8 @@ export function SettingsDrawer({
                     {authLoading
                       ? "Loading…"
                       : user?.user_metadata?.full_name ||
-                        user?.email ||
-                        "Guest"}
+                      user?.email ||
+                      "Guest"}
                   </span>
                   <span className={styles.profileEmail}>
                     {authLoading ? "" : (user?.email ?? "")}
@@ -329,21 +343,6 @@ export function SettingsDrawer({
           </aside>
 
           <main className={styles.content}>
-            <header className={styles.header}>
-              <h1 className={styles.title}>Settings</h1>
-              <Button
-                variant="ghost-icon"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className={styles.closeButton}
-                tooltipLabel="Close settings"
-                shortcut="Esc"
-              >
-                <span className="sr-only">Close</span>
-                <CloseIcon size={16} className={styles.closeIcon} />
-              </Button>
-            </header>
-
             <div ref={contentScrollRef} className={styles.sections}>
               {sections.map(
                 ({ id, label, description, component: SectionComponent }) => (

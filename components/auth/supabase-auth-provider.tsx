@@ -74,7 +74,7 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
           // Generate or retrieve session ID
           let storedSessionId = localStorage.getItem("session_id");
           if (!storedSessionId) {
-            storedSessionId = crypto.randomUUID();
+            storedSessionId = self.crypto.randomUUID();
             localStorage.setItem("session_id", storedSessionId);
           }
 
@@ -123,7 +123,7 @@ export function SupabaseAuthProvider({ children }: SupabaseAuthProviderProps) {
       // Create user record on sign in if it doesn't exist
       if (event === "SIGNED_IN" && session?.user) {
         // Generate and store session ID
-        const sessionId = crypto.randomUUID();
+        const sessionId = self.crypto.randomUUID();
         localStorage.setItem("session_id", sessionId);
         storeSession(sessionId, session.user, session);
 

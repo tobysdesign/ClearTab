@@ -2,19 +2,29 @@
 
 // Icons replaced with ASCII placeholders
 import { useState, useEffect, memo, useMemo } from "react";
-import { CheckIcon } from "@/components/icons";
+import { CheckIcon, PauseIcon, PlayIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
-import { ClientOnly } from "@cleartab/ui";
-import { WidgetHeader, BrandedLoader } from "@cleartab/ui";
+import {
+  WidgetHeader,
+  BrandedLoader,
+  WidgetContainer,
+  ClientOnly,
+} from "@cleartab/ui";
 import { useToast } from "@cleartab/ui";
-import { useAuth } from "@/components/auth/supabase-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import {
   getSupabaseClient,
   isExtensionEnvironment,
 } from "@/lib/extension-utils";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@cleartab/ui";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@cleartab/ui";
+import { useWidgetHeight } from "@/hooks/use-widget-height";
 
 interface RecorderWidgetProps {
   className?: string;
@@ -44,10 +54,7 @@ const RecordingControls = memo(function RecordingControls({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={onToggleMute}
-              className={styles.controlButton}
-            >
+            <button onClick={onToggleMute} className={styles.controlButton}>
               <div className={styles.controlButtonInner}>
                 <img
                   src={
@@ -66,10 +73,7 @@ const RecordingControls = memo(function RecordingControls({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={onPause}
-              className={styles.controlButton}
-            >
+            <button onClick={onPause} className={styles.controlButton}>
               <div className={styles.controlButtonInner}>
                 <img
                   src="/icons/si_pause-fill.svg"
@@ -104,10 +108,7 @@ const RecordingControls = memo(function RecordingControls({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={onToggleMute}
-              className={styles.controlButton}
-            >
+            <button onClick={onToggleMute} className={styles.controlButton}>
               <div className={styles.controlButtonInner}>
                 <img
                   src={
@@ -126,10 +127,7 @@ const RecordingControls = memo(function RecordingControls({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
-              onClick={onResume}
-              className={styles.controlButton}
-            >
+            <button onClick={onResume} className={styles.controlButton}>
               <div className={styles.controlButtonInner}>
                 <img
                   src="/icons/si_record-fill.svg"
@@ -461,169 +459,451 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     return bars;
   }, [state, waveformHistory]);
 
+  const { ref, isMini } = useWidgetHeight();
+
+  // Waveform for mini mode (fewer bars)
+  const miniWaveformBars = useMemo(() => {
+    if (state !== "recording" && state !== "paused") return null;
+
+    const numVisibleBars = 10;
+    const bars = [];
+    const historyToShow = Math.min(waveformHistory.length, numVisibleBars);
+    const startIndex = Math.max(0, waveformHistory.length - numVisibleBars);
+
+    for (let i = 0; i < numVisibleBars; i++) {
+      let height = 3;
+      if (i < historyToShow) {
+        const frameData = waveformHistory[startIndex + i];
+        if (frameData) {
+          const avgValue =
+            frameData.reduce((sum, val) => sum + val, 0) / frameData.length;
+          const normalizedValue = Math.sqrt(avgValue / 255);
+          height = Math.max(3, normalizedValue * 24);
+        }
+      }
+
+      bars.push(
+        <div
+          key={`mini-bar-${i}`}
+          className={styles.waveformBar}
+          style={{
+            height: `${height}px`,
+            width: "3px",
+            backgroundColor: "var(--color-primary)",
+            transition: "height 0.1s ease-out",
+          }}
+        />,
+      );
+    }
+    return bars;
+  }, [state, waveformHistory]);
+
   return (
     <ClientOnly>
       <div
-        className={cn(
-          styles.flipContainer,
-          { [styles.flipped]: isFlipped },
-          className,
-        )}
+        ref={ref}
+        style={{ width: "100%", height: "100%" }}
+        className={className}
       >
-        <div className={styles.flipper}>
-          {/* Front Side (Idle) */}
-          <div className={styles.front}>
-            <div className={styles.container}>
-              <div className={styles.content}>
-                {/* Header */}
-                <WidgetHeader title="Voice notes" className="!justify-start" />
-
-                {/* Body */}
-                <div className={styles.body}>
-                  {/* Button Container */}
-                  <div className={styles.buttonContainer}>
-                    <button
-                      onClick={handleStartRecording}
-                      onMouseEnter={() => setIsHovered(true)}
-                      onMouseLeave={() => setIsHovered(false)}
-                      className={cn(styles.button, "group")}
+        {isMini ? (
+          <WidgetContainer>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                width: "100%",
+                height: "100%",
+                padding: "0 1rem",
+                gap: "0.75rem",
+                overflow: "hidden",
+              }}
+            >
+              {/* Left: Button or Status */}
+              {state === "idle" ? (
+                <button
+                  onClick={startRecording}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    width: "100%",
+                    height: "100%",
+                    textAlign: "left",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(248, 40, 10, 0.15)",
+                      border: "1px solid rgba(248, 40, 10, 0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        backgroundColor: isHovered
+                          ? "rgba(248, 40, 10, 0.9)"
+                          : "rgba(248, 40, 10, 0.6)",
+                        boxShadow: isHovered
+                          ? "0 0 8px rgba(248, 40, 10, 0.8)"
+                          : "none",
+                        transition: "all 0.2s ease",
+                      }}
+                    />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      color: isHovered ? "var(--color-foreground)" : "#5a5a5a",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontWeight: 400,
+                      transition: "color 0.2s ease",
+                    }}
+                  >
+                    Start a voice note...
+                  </span>
+                </button>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {state === "recording" ? (
+                      <div
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          borderRadius: "50%",
+                          backgroundColor: "#ef4444",
+                          animation:
+                            "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "10px",
+                          height: "10px",
+                          borderRadius: "50%",
+                          backgroundColor: "#eab308",
+                        }}
+                      />
+                    )}
+                    <span
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: "14px",
+                        color: "var(--color-foreground)",
+                      }}
                     >
-                      <div className={styles.buttonOuter}>
-                        {/* Main shading background */}
-                        <div className={styles.buttonBackground} />
-
-                        {/* Gradient border */}
-                        <div className={styles.buttonBorder} />
-
-                        {/* Top highlight for lighter upper half */}
-                        <div className={styles.buttonTopHighlight} />
-
-                        {/* Recording indicator dot (positioned top-right) */}
-                        <div
-                          className={cn(styles.recordingDot, {
-                            [styles.recordingDotHover]: isHovered,
-                          })}
-                        />
-                      </div>
-                    </button>
+                      {formatTime(duration)}
+                    </span>
                   </div>
 
-                  {/* Text */}
-                  <p className={styles.bodyText}>Start a voice note</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Back Side (Recording) */}
-          <div className={styles.back}>
-            <div
-              className={cn(styles.container, {
-                [styles.containerInfoState]: state === "requesting-permission",
-                [styles.containerErrorState]: state === "permission-denied",
-              })}
-            >
-              <div className={styles.content}>
-                {/* Header */}
-                <WidgetHeader title="Voice notes" className="!justify-start" />
-
-                {/* Body */}
-                <div className={styles.recordingBody}>
-                  {state === "requesting-permission" ||
-                  state === "permission-denied" ? (
-                    <>
-                      <p className={styles.permissionTitle}>
-                        {state === "requesting-permission"
-                          ? "Requesting microphone permission"
-                          : "Microphone permissions blocked"}
-                      </p>
-                      <p className={styles.permissionText}>
-                        {state === "requesting-permission" ? (
-                          <>
-                            If you don't see the request, click the{" "}
-                            <img
-                              src="/icons/si_info-line.svg"
-                              alt="info icon"
-                              style={{
-                                display: "inline",
-                                width: "14px",
-                                height: "14px",
-                                verticalAlign: "middle",
-                              }}
-                            />{" "}
-                            icon next to the URL address bar.
-                          </>
-                        ) : (
-                          <>
-                            To enable, click the{" "}
-                            <img
-                              src="/icons/si_info-line.svg"
-                              alt="info icon"
-                              style={{
-                                display: "inline",
-                                width: "14px",
-                                height: "14px",
-                                verticalAlign: "middle",
-                              }}
-                            />{" "}
-                            icon next to the URL address bar.
-                          </>
-                        )}
-                      </p>
-                      {state === "permission-denied" && (
-                        <button
-                          onClick={() => {
-                            reset();
-                            handleStartRecording();
-                          }}
-                          className={styles.permissionRetry}
-                        >
-                          Click here to retry
-                        </button>
-                      )}
-                    </>
-                  ) : state === "processing" && !showSuccess ? (
-                    <div className={styles.transcribingWrapper}>
-                      <div className={styles.transcribingContent}>
-                        <p className={styles.transcribingTitle}>
-                          Transcribing note...
-                        </p>
+                  {/* Middle: Text or Content */}
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      justifyContent: "flex-start",
+                      minWidth: 0,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {state === "recording" || state === "paused" ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "2px",
+                          height: "20px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {miniWaveformBars}
                       </div>
-                      <button onClick={handleReset} className={styles.okButton}>
-                        OK
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Waveform visualization */}
-                      <div className={styles.waveformContainer}>
-                        {waveformBars}
-                      </div>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          color: "var(--color-muted-foreground)",
+                        }}
+                      >
+                        Processing...
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
 
-                      {/* Timer */}
-                      <div className={styles.timerContainer}>
-                        <p className={styles.timer}>{formatTime(duration)}</p>
-                      </div>
-
-                      {/* Controls */}
-                      <div className={styles.recordingControls}>
-                        <RecordingControls
-                          state={state}
-                          isMuted={isMuted}
-                          showSuccess={showSuccess}
-                          onToggleMute={toggleMute}
-                          onPause={pauseRecording}
-                          onResume={resumeRecording}
-                          onStop={handleStopRecording}
-                        />
-                      </div>
-                    </>
+              {/* Right: Controls */}
+              {state !== "idle" && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  {state === "recording" && (
+                    <button
+                      onClick={pauseRecording}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <PauseIcon size={12} style={{ opacity: 0.8 }} />
+                    </button>
                   )}
+                  {state === "paused" && (
+                    <button
+                      onClick={resumeRecording}
+                      style={{
+                        width: "28px",
+                        height: "28px",
+                        borderRadius: "50%",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <PlayIcon
+                        size={12}
+                        style={{ opacity: 0.8, marginLeft: "1px" }}
+                      />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleStopRecording}
+                    style={{
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "50%",
+                      background: "var(--color-primary)",
+                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "var(--color-primary-foreground)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <CheckIcon size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </WidgetContainer>
+        ) : (
+          <div
+            className={cn(styles.flipContainer, {
+              [styles.flipped]: isFlipped,
+            })}
+          >
+            <div className={styles.flipper}>
+              {/* Front Side (Idle) */}
+              <div className={styles.front}>
+                <div className={styles.container}>
+                  <div className={styles.content}>
+                    {/* Header */}
+                    <WidgetHeader
+                      title="Voice notes"
+                      className="!justify-start"
+                    />
+
+                    {/* Body */}
+                    <div className={styles.body}>
+                      {/* Button Container */}
+                      <div className={styles.buttonContainer}>
+                        <button
+                          onClick={handleStartRecording}
+                          onMouseEnter={() => setIsHovered(true)}
+                          onMouseLeave={() => setIsHovered(false)}
+                          className={cn(styles.button, "group")}
+                        >
+                          <div className={styles.buttonOuter}>
+                            {/* Main shading background */}
+                            <div className={styles.buttonBackground} />
+
+                            {/* Gradient border */}
+                            <div className={styles.buttonBorder} />
+
+                            {/* Top highlight for lighter upper half */}
+                            <div className={styles.buttonTopHighlight} />
+
+                            {/* Recording indicator dot (positioned top-right) */}
+                            <div
+                              className={cn(styles.recordingDot, {
+                                [styles.recordingDotHover]: isHovered,
+                              })}
+                            />
+                          </div>
+                        </button>
+                      </div>
+
+                      {/* Text */}
+                      <p className={styles.bodyText}>Start a voice note</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Back Side (Recording) */}
+              <div className={styles.back}>
+                <div
+                  className={cn(styles.container, {
+                    [styles.containerInfoState]:
+                      state === "requesting-permission",
+                    [styles.containerErrorState]: state === "permission-denied",
+                  })}
+                >
+                  <div className={styles.content}>
+                    {/* Header */}
+                    <WidgetHeader
+                      title="Voice notes"
+                      className="!justify-start"
+                    />
+
+                    {/* Body */}
+                    <div className={styles.recordingBody}>
+                      {state === "requesting-permission" ||
+                      state === "permission-denied" ? (
+                        <>
+                          <p className={styles.permissionTitle}>
+                            {state === "requesting-permission"
+                              ? "Requesting microphone permission"
+                              : "Microphone permissions blocked"}
+                          </p>
+                          <p className={styles.permissionText}>
+                            {state === "requesting-permission" ? (
+                              <>
+                                If you don't see the request, click the{" "}
+                                <img
+                                  src="/icons/si_info-line.svg"
+                                  alt="info icon"
+                                  style={{
+                                    display: "inline",
+                                    width: "14px",
+                                    height: "14px",
+                                    verticalAlign: "middle",
+                                  }}
+                                />{" "}
+                                icon next to the URL address bar.
+                              </>
+                            ) : (
+                              <>
+                                To enable, click the{" "}
+                                <img
+                                  src="/icons/si_info-line.svg"
+                                  alt="info icon"
+                                  style={{
+                                    display: "inline",
+                                    width: "14px",
+                                    height: "14px",
+                                    verticalAlign: "middle",
+                                  }}
+                                />{" "}
+                                icon next to the URL address bar.
+                              </>
+                            )}
+                          </p>
+                          {state === "permission-denied" && (
+                            <button
+                              onClick={() => {
+                                reset();
+                                handleStartRecording();
+                              }}
+                              className={styles.permissionRetry}
+                            >
+                              Click here to retry
+                            </button>
+                          )}
+                        </>
+                      ) : state === "processing" && !showSuccess ? (
+                        <div className={styles.transcribingWrapper}>
+                          <div className={styles.transcribingContent}>
+                            <p className={styles.transcribingTitle}>
+                              Transcribing note...
+                            </p>
+                          </div>
+                          <button
+                            onClick={handleReset}
+                            className={styles.okButton}
+                          >
+                            OK
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Waveform visualization */}
+                          <div className={styles.waveformContainer}>
+                            {waveformBars}
+                          </div>
+
+                          {/* Timer */}
+                          <div className={styles.timerContainer}>
+                            <p className={styles.timer}>
+                              {formatTime(duration)}
+                            </p>
+                          </div>
+
+                          {/* Controls */}
+                          <div className={styles.recordingControls}>
+                            <RecordingControls
+                              state={state}
+                              isMuted={isMuted}
+                              showSuccess={showSuccess}
+                              onToggleMute={toggleMute}
+                              onPause={pauseRecording}
+                              onResume={resumeRecording}
+                              onStop={handleStopRecording}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </ClientOnly>
   );

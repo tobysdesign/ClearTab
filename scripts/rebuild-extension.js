@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const config = {
-  outputDir: path.join(__dirname, '..', 'dist', 'extension')
+  outputDir: path.join(__dirname, "..", "dist", "extension"),
 };
 
 // Copy the simple HTML from the previously working extension
@@ -18,7 +18,7 @@ const indexHtml = `<!DOCTYPE html>
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body, html {
       width: 100vw;
       height: 100vh;
@@ -27,7 +27,7 @@ const indexHtml = `<!DOCTYPE html>
       color: #ffffff;
       overflow: hidden;
     }
-    
+
     .dashboard {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -36,7 +36,7 @@ const indexHtml = `<!DOCTYPE html>
       padding: 16px;
       height: 100vh;
     }
-    
+
     .widget {
       background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
       border-radius: 12px;
@@ -47,12 +47,12 @@ const indexHtml = `<!DOCTYPE html>
       overflow: hidden;
       transition: all 0.3s ease;
     }
-    
+
     .widget:hover {
-      border-color: #555;
+      border-color: #5a5a5a;
       transform: translateY(-2px);
     }
-    
+
     .widget-header {
       display: flex;
       justify-content: space-between;
@@ -61,18 +61,18 @@ const indexHtml = `<!DOCTYPE html>
       padding-bottom: 12px;
       border-bottom: 1px solid #333;
     }
-    
+
     .widget-title {
       font-size: 18px;
       font-weight: 600;
       color: #fff;
     }
-    
+
     .widget-content {
       flex: 1;
       overflow-y: auto;
     }
-    
+
     .time-widget {
       grid-column: span 2;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -82,33 +82,33 @@ const indexHtml = `<!DOCTYPE html>
       align-items: center;
       text-align: center;
     }
-    
+
     .time {
       font-size: 4rem;
       font-weight: 300;
       margin-bottom: 8px;
     }
-    
+
     .date {
       font-size: 1.5rem;
       opacity: 0.9;
     }
-    
+
     .greeting {
       font-size: 1.2rem;
       margin-bottom: 16px;
       opacity: 0.8;
     }
-    
+
     .quick-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    
+
     .action-btn {
       background: #333;
-      border: 1px solid #555;
+      border: 1px solid #5a5a5a;
       color: white;
       padding: 12px;
       border-radius: 8px;
@@ -116,18 +116,18 @@ const indexHtml = `<!DOCTYPE html>
       transition: all 0.2s;
       font-size: 14px;
     }
-    
+
     .action-btn:hover {
       background: #444;
       transform: translateY(-1px);
     }
-    
+
     .notes-list, .tasks-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-    
+
     .note-item, .task-item {
       background: #2a2a2a;
       padding: 12px;
@@ -135,69 +135,69 @@ const indexHtml = `<!DOCTYPE html>
       border: 1px solid #333;
       font-size: 14px;
     }
-    
+
     .weather-info {
       text-align: center;
     }
-    
+
     .weather-temp {
       font-size: 3rem;
       font-weight: 300;
       margin: 16px 0;
     }
-    
+
     .weather-desc {
       font-size: 1.1rem;
       opacity: 0.8;
     }
-    
+
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
       margin-top: 16px;
     }
-    
+
     .stat-item {
       text-align: center;
       padding: 12px;
       background: #2a2a2a;
       border-radius: 8px;
     }
-    
+
     .stat-number {
       font-size: 2rem;
       font-weight: 600;
       color: #667eea;
     }
-    
+
     .stat-label {
       font-size: 0.9rem;
       opacity: 0.7;
       margin-top: 4px;
     }
-    
+
     .calendar-today {
       font-size: 1.1rem;
       margin-bottom: 16px;
       color: #667eea;
     }
-    
+
     .scrollbar {
       scrollbar-width: thin;
-      scrollbar-color: #555 #2a2a2a;
+      scrollbar-color: #5a5a5a #2a2a2a;
     }
-    
+
     .scrollbar::-webkit-scrollbar {
       width: 6px;
     }
-    
+
     .scrollbar::-webkit-scrollbar-track {
       background: #2a2a2a;
     }
-    
+
     .scrollbar::-webkit-scrollbar-thumb {
-      background: #555;
+      background: #5a5a5a;
       border-radius: 3px;
     }
   </style>
@@ -210,7 +210,7 @@ const indexHtml = `<!DOCTYPE html>
       <div class="time" id="current-time">12:00</div>
       <div class="date" id="current-date">Today</div>
     </div>
-    
+
     <!-- Quick Actions Widget -->
     <div class="widget">
       <div class="widget-header">
@@ -225,7 +225,7 @@ const indexHtml = `<!DOCTYPE html>
         </div>
       </div>
     </div>
-    
+
     <!-- Notes Widget -->
     <div class="widget">
       <div class="widget-header">
@@ -239,7 +239,7 @@ const indexHtml = `<!DOCTYPE html>
         </div>
       </div>
     </div>
-    
+
     <!-- Tasks Widget -->
     <div class="widget">
       <div class="widget-header">
@@ -253,7 +253,7 @@ const indexHtml = `<!DOCTYPE html>
         </div>
       </div>
     </div>
-    
+
     <!-- Weather Widget -->
     <div class="widget">
       <div class="widget-header">
@@ -266,7 +266,7 @@ const indexHtml = `<!DOCTYPE html>
         </div>
       </div>
     </div>
-    
+
     <!-- Stats Widget -->
     <div class="widget">
       <div class="widget-header">
@@ -289,17 +289,17 @@ const indexHtml = `<!DOCTYPE html>
       </div>
     </div>
   </div>
-  
+
   <script>
     // Update time and date
     function updateTime() {
       const now = new Date();
       const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       const dateString = now.toLocaleDateString([], {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
-      
+
       document.getElementById('current-time').textContent = timeString;
       document.getElementById('current-date').textContent = dateString;
-      
+
       // Update greeting
       const hour = now.getHours();
       let greeting = 'Good evening';
@@ -307,24 +307,24 @@ const indexHtml = `<!DOCTYPE html>
       else if (hour < 17) greeting = 'Good afternoon';
       document.getElementById('greeting').textContent = greeting + '!';
     }
-    
+
     // Quick actions
     function openFullDashboard() {
       window.open('http://localhost:3000?skipOnboarding=true&expandAll=true', '_blank');
     }
-    
+
     function newNote() {
       window.open('http://localhost:3000?skipOnboarding=true&action=newNote', '_blank');
     }
-    
+
     function newTask() {
       window.open('http://localhost:3000?skipOnboarding=true&action=newTask', '_blank');
     }
-    
+
     function openSettings() {
       window.open('http://localhost:3000/settings', '_blank');
     }
-    
+
     // Try to load real data from Supabase API
     function loadData() {
       try {
@@ -335,12 +335,12 @@ const indexHtml = `<!DOCTYPE html>
         console.log('Using offline mode');
       }
     }
-    
+
     // Initialize
     updateTime();
     setInterval(updateTime, 1000);
     loadData();
-    
+
     // Load real weather if geolocation is available
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
@@ -351,7 +351,7 @@ const indexHtml = `<!DOCTYPE html>
 </body>
 </html>`;
 
-fs.writeFileSync(path.join(config.outputDir, 'index.html'), indexHtml);
+fs.writeFileSync(path.join(config.outputDir, "index.html"), indexHtml);
 
-console.log('Extension rebuilt with original bento grid layout!');
-console.log('Output directory:', config.outputDir);
+console.log("Extension rebuilt with original bento grid layout!");
+console.log("Output directory:", config.outputDir);

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { format } from "@/lib/date-utils";
-import { Button } from "@cleartab/ui";
+import { Button, Input, Select, SelectItem } from "@cleartab/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -231,47 +231,46 @@ export const CountdownWidgetSettings = React.forwardRef<
             onSubmit={handleSubmit}
           >
             <div className={`${sharedStyles.field} ${sharedStyles.fieldGrow}`}>
-              <span className={sharedStyles.label}>Label</span>
-              <input
+              <span className={sharedStyles.label}>Event name</span>
+              <Input
                 id="countdown-label"
                 value={labelInput}
                 onChange={(event) => setLabelInput(event.target.value)}
                 placeholder="“Birthday”"
-                className={sharedStyles.input}
               />
             </div>
 
             <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
               <span className={sharedStyles.label}>Date</span>
-              <input
+              <Input
                 id="countdown-date"
                 type="date"
                 value={dateInput}
                 onChange={(event) => setDateInput(event.target.value)}
-                className={`${sharedStyles.input} ${sharedStyles.inputAuto}`}
+                className={sharedStyles.inputAuto}
               />
             </div>
 
             <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
               <span className={sharedStyles.label}>Recurrence</span>
-              <select
+              <Select
                 id="countdown-recurrence"
                 value={recurrenceInput}
-                onChange={(event) => setRecurrenceInput(event.target.value as Recurrence)}
-                className={`${sharedStyles.input} ${sharedStyles.inputSelect} ${sharedStyles.selectAuto}`}
+                onValueChange={(val) => setRecurrenceInput(val as Recurrence)}
+                className={sharedStyles.selectAuto}
               >
                 {recurrenceOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value}>
                     {option.label}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
+              </Select>
             </div>
 
-            <div className={`${sharedStyles.fieldAuto} ${sharedStyles.inlineActions}`}>
+            <div className={`${sharedStyles.fieldAuto} ${sharedStyles.inlineActions}`} style={{ marginLeft: 'auto' }}>
               <Button
                 type="button"
-                className={`${sharedStyles.button} ${sharedStyles.buttonPill} ${sharedStyles.buttonSubtle}`}
+                className={`${sharedStyles.button} ${sharedStyles.buttonPill} ${sharedStyles.buttonGhost}`}
                 onClick={handleCancelEdit}
                 disabled={saving}
                 tooltipLabel="Cancel"
@@ -290,16 +289,16 @@ export const CountdownWidgetSettings = React.forwardRef<
               </Button>
             </div>
           </form>
-        ) : (
+        ) : summary ? (
           <div
             className={sharedStyles.row}
             style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr)) auto" }}
           >
             <div className={sharedStyles.rowMeta}>
               <div>
-                <div className={sharedStyles.label}>Name</div>
+                <div className={sharedStyles.label}>Event name</div>
                 <div className={sharedStyles.rowTitle}>
-                  {loading ? "Loading…" : summary?.title ?? "—"}
+                  {loading ? "Loading…" : summary.title}
                 </div>
               </div>
             </div>
@@ -313,7 +312,7 @@ export const CountdownWidgetSettings = React.forwardRef<
               <div>
                 <div className={sharedStyles.label}>Recurrence</div>
                 <div className={sharedStyles.rowTitle}>
-                  {loading ? "Loading…" : formatRecurrence(summary?.recurrence ?? "none")}
+                  {loading ? "Loading…" : formatRecurrence(summary.recurrence)}
                 </div>
               </div>
             </div>
@@ -334,11 +333,11 @@ export const CountdownWidgetSettings = React.forwardRef<
                     onSelect={() => handleEditStart()}
                     disabled={loading || saving}
                   >
-                    {summary ? "Edit details" : "Add countdown"}
+                    Edit details
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className={sharedStyles.menuDanger}
-                    disabled={!summary || clearing}
+                    disabled={clearing}
                     onSelect={() => handleClear()}
                   >
                     Clear countdown
@@ -346,6 +345,16 @@ export const CountdownWidgetSettings = React.forwardRef<
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+          </div>
+        ) : (
+          <div className={sharedStyles.innerCard} style={{ display: 'flex', justifyContent: 'center', padding: '32px' }}>
+            <Button
+              onClick={() => handleEditStart()}
+              className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
+              disabled={loading}
+            >
+              {loading ? "Loading…" : "Create Countdown"}
+            </Button>
           </div>
         )}
       </div>

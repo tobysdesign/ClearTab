@@ -9,10 +9,14 @@
 /* Application-specific design tokens */
 :root {
   /* spacing scale */
-  --space-1: 0.25rem; /* 3px */
-  --space-2: 0.5rem; /* 6px */
-  --space-3: 0.75rem; /* 9px */
-  --space-4: 1rem; /* 12px */
+  --space-1: 0.25rem;
+  /* 3px */
+  --space-2: 0.5rem;
+  /* 6px */
+  --space-3: 0.75rem;
+  /* 9px */
+  --space-4: 1rem;
+  /* 12px */
   --radius-2: 8px;
 
   /* fluid type around 12px base */
@@ -48,33 +52,33 @@
   --radius-3xl: 3rem;
 
   /* App-specific variables */
-  --font-inter-display: "Inter Display", system-ui, sans-serif;
+
   --font-tiny: "Tiny", serif;
 
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --card: var(--color-card);
+  --card-foreground: var(--color-card-foreground);
+  --popover: var(--color-popover);
+  --popover-foreground: var(--color-popover-foreground);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--color-secondary);
+  --secondary-foreground: var(--color-secondary-foreground);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-muted-foreground);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-accent-foreground);
+  --destructive: var(--color-destructive);
+  --destructive-foreground: var(--color-destructive-foreground);
+  --border: var(--color-border);
+  --input: var(--color-input);
+  --ring: var(--color-ring);
   --radius: 0.5rem;
   --shadow-input:
-      0px 2px 3px -1px rgba(0, 0, 0, 0.1),
-      0px 1px 0px 0px rgba(25, 28, 33, 0.02),
-      0px 0px 0px 1px rgba(25, 28, 33, 0.08);
+    0px 2px 3px -1px rgba(0, 0, 0, 0.1),
+    0px 1px 0px 0px rgba(25, 28, 33, 0.02),
+    0px 0px 0px 1px rgba(25, 28, 33, 0.08);
 
   /* Pink Color Palette */
   --almost-pink: 322 29% 92%;
@@ -105,12 +109,13 @@ html {
 
 /* Respect motion preferences */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -178,9 +183,9 @@ html {
   /* visual */
   background-color: rgba(0, 0, 0, 0.4);
   box-shadow:
-      0 25px 50px -12px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 0 20px rgba(255, 255, 255, 0.1);
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
 
   /* state */
@@ -451,6 +456,7 @@ html {
   font-size: 14px !important;
   font-weight: 500 !important;
 }
+
 .text-xs {
   font-size: 12px !important;
   font-weight: 400 !important;
@@ -462,134 +468,155 @@ html {
 
 @keyframes fade-in {
   0% {
-      opacity: 0;
+    opacity: 0;
   }
+
   100% {
-      opacity: 1;
+    opacity: 1;
   }
 }
 
 @keyframes fade-out {
   0% {
-      opacity: 1;
+    opacity: 1;
   }
+
   100% {
-      opacity: 0;
+    opacity: 0;
   }
 }
 
 /* Weather Widget Animations */
 @keyframes float {
+
   0%,
   100% {
-      transform: translateY(0);
+    transform: translateY(0);
   }
+
   50% {
-      transform: translateY(-5px);
+    transform: translateY(-5px);
   }
 }
 
 @keyframes rain {
   0% {
-      transform: translateY(-4px);
-      opacity: 0;
+    transform: translateY(-4px);
+    opacity: 0;
   }
+
   50% {
-      opacity: 1;
+    opacity: 1;
   }
+
   100% {
-      transform: translateY(4px);
-      opacity: 0;
+    transform: translateY(4px);
+    opacity: 0;
   }
 }
 
 @keyframes breeze {
   0% {
-      transform: translateX(-2px);
+    transform: translateX(-2px);
   }
+
   50% {
-      transform: translateX(2px);
+    transform: translateX(2px);
   }
+
   100% {
-      transform: translateX(-2px);
+    transform: translateX(-2px);
   }
 }
 
 @keyframes flash {
+
   0%,
   100% {
-      opacity: 0;
+    opacity: 0;
   }
+
   50% {
-      opacity: 1;
+    opacity: 1;
   }
 }
 
 @keyframes sun-pulse {
+
   0%,
   100% {
-      transform: scale(1);
-      opacity: 1;
+    transform: scale(1);
+    opacity: 1;
   }
+
   50% {
-      transform: scale(0.95);
-      opacity: 0.9;
+    transform: scale(0.95);
+    opacity: 0.9;
   }
 }
 
 @keyframes spin-slow {
   from {
-      transform: rotate(0deg);
+    transform: rotate(0deg);
   }
+
   to {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
 
 @keyframes fadeIn {
   from {
-      opacity: 0;
-      transform: translateY(10px);
+    opacity: 0;
+    transform: translateY(10px);
   }
+
   to {
-      opacity: 1;
-      transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @keyframes highlight {
   0% {
-      background-color: #222222;
+    background-color: #222222;
   }
+
   30% {
-      background-color: #3d3d3d;
+    background-color: #3d3d3d;
   }
+
   100% {
-      background-color: #222222;
+    background-color: #222222;
   }
 }
 
 @keyframes promote {
   0% {
-      transform: translateY(0);
+    transform: translateY(0);
   }
+
   50% {
-      transform: translateY(-20px);
+    transform: translateY(-20px);
   }
+
   100% {
-      transform: translateY(0);
+    transform: translateY(0);
   }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
 .animate-rain {
   animation: rain 1.5s linear infinite;
 }
+
 .animate-breeze {
   animation: breeze 2s ease-in-out infinite;
 }
+
 .animate-flash {
   animation: flash 2s ease-in-out infinite;
 }
@@ -619,78 +646,58 @@ html {
    =========================================== */
 
 .dark {
-  --color-background: 0 0% 0% / 0.05;
-  --color-foreground: 0 0% 86.7%;
-  --color-card: 0 0% 0% / 0.1;
-  --color-card-foreground: 0 0% 86.7%;
-  --color-popover: 0 0% 0% / 0.15;
-  --color-popover-foreground: 0 0% 86.7%;
-  --color-primary: 0 0% 86.7%;
-  --color-primary-foreground: 222.2 47.4% 11.2%;
-  --color-secondary: 0 0% 100% / 0.05;
-  --color-secondary-foreground: 0 0% 86.7%;
-  --color-muted: 0 0% 100% / 0.03;
-  --color-muted-foreground: 215 20.2% 65.1%;
-  --color-accent: 0 0% 100% / 0.05;
-  --color-accent-foreground: 0 0% 86.7%;
+  --color-background: 0 0% 4%;
+  --color-foreground: 0 0% 98%;
+  --color-card: 0 0% 4%;
+  --color-card-foreground: 0 0% 98%;
+  --color-popover: 0 0% 4%;
+  --color-popover-foreground: 0 0% 98%;
+  --color-primary: 0 0% 98%;
+  --color-primary-foreground: 0 0% 9%;
+  --color-secondary: 0 0% 14.9%;
+  --color-secondary-foreground: 0 0% 98%;
+  --color-muted: 0 0% 14.9%;
+  --color-muted-foreground: 0 0% 63.9%;
+  --color-accent: 0 0% 14.9%;
+  --color-accent-foreground: 0 0% 98%;
   --color-destructive: 0 62.8% 30.6%;
-  --color-destructive-foreground: 0 0% 86.7%;
-  --color-border: 0 0% 100% / 0.08;
-  --color-input: 0 0% 100% / 0.05;
-  --color-ring: 212.7 26.8% 83.9%;
-
-  --background: 0 0% 3.9%;
-  --foreground: 0 0% 82%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 82%;
-  --popover: 0 0% 3.9%;
-  --popover-foreground: 0 0% 82%;
-  --primary: 0 0% 82%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 82%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 82%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 82%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
+  --color-destructive-foreground: 0 0% 98%;
+  --color-border: 0 0% 14.9%;
+  --color-input: 0 0% 14.9%;
+  --color-ring: 0 0% 83.1%;
 }
 
 .light {
-  --background: 0 0% 100%;
-  --foreground: 224 71.4% 4.1%;
-  --card: 0 0% 100%;
-  --card-foreground: 224 71.4% 4.1%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 224 71.4% 4.1%;
-  --primary: 224 71.4% 4.1%;
-  --primary-foreground: 210 20% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 224 71.4% 4.1%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 224 71.4% 4.1%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
+  --color-background: 0 0% 100%;
+  --color-foreground: 0 0% 4%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 0 0% 4%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 0 0% 4%;
+  --color-primary: 0 0% 4%;
+  --color-primary-foreground: 0 0% 98%;
+  --color-secondary: 0 0% 96.1%;
+  --color-secondary-foreground: 0 0% 4%;
+  --color-muted: 0 0% 96.1%;
+  --color-muted-foreground: 0 0% 45.1%;
+  --color-accent: 0 0% 96.1%;
+  --color-accent-foreground: 0 0% 4%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 0 0% 98%;
+  --color-border: 0 0% 89.8%;
+  --color-input: 0 0% 89.8%;
+  --color-ring: 0 0% 4%;
 }
 
 @layer base {
   * {
-      border-color: hsl(var(--border));
+    border-color: hsl(var(--border));
   }
+
   body {
-      background-color: hsl(var(--background));
-      color: hsl(var(--foreground));
-      overflow: hidden;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    overflow: hidden;
   }
 }
 
@@ -728,7 +735,7 @@ textarea::placeholder {
   background-color: #ff4f4f !important;
 }
 
-.task-important-switch[data-state="unchecked"] > span {
+.task-important-switch[data-state="unchecked"]>span {
   background-color: #4d4949;
 }
 
@@ -795,11 +802,9 @@ textarea::placeholder {
 
 .widgetHead {
   padding: 24px 24px 0;
-  background: linear-gradient(
-      182deg,
+  background: linear-gradient(182deg,
       rgb(39 39 39) 0%,
-      rgb(33 33 33 / 0%) 50%
-  );
+      rgb(33 33 33 / 0%) 50%);
   position: absolute;
   z-index: 100;
   backdrop-filter: blur(6px);
@@ -810,6 +815,7 @@ textarea::placeholder {
   justify-content: space-between;
   height: 60px;
 }
+
 .font-light {
   color: #c4c4c4;
   font-family: "Inter Display", sans-serif;
@@ -818,6 +824,7 @@ textarea::placeholder {
   line-height: 0.9;
   margin-bottom: 4px;
 }
+
 .rely {
   position: relative;
 }

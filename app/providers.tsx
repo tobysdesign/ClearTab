@@ -6,7 +6,7 @@ import React from "react";
 import { AiChat } from "@/components/ai";
 import QueryProvider from "@/app/query-provider";
 import { LayoutProvider } from "@/hooks/use-layout";
-import { SupabaseAuthProvider } from "@/components/auth/supabase-auth-provider";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { usePathname } from "next/navigation";
 
 function ChatOverlayWrapper({ children }: { children: React.ReactNode }) {
@@ -25,7 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryProvider>
-      <SupabaseAuthProvider>
+      <AuthProvider>
         <LayoutProvider>
           <TooltipProvider>
             <ChatProvider>
@@ -35,7 +35,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             </ChatProvider>
           </TooltipProvider>
         </LayoutProvider>
-      </SupabaseAuthProvider>
+      </AuthProvider>
     </QueryProvider>
   );
 }

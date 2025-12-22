@@ -139,6 +139,20 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     loadTasks();
   }, [loadTasks]);
 
+  // Listen for delete-all events from settings
+  useEffect(() => {
+    const handleDeleteAll = (event: Event) => {
+      const detail = (event as CustomEvent<{ domain: 'tasks' | 'notes' | 'voice' }>).detail;
+      if (detail?.domain === 'tasks') {
+        console.log('📣 TasksWidget: Received delete-all event, refreshing...');
+        loadTasks();
+      }
+    };
+
+    window.addEventListener('data-deleted-all', handleDeleteAll as EventListener);
+    return () => window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
+  }, [loadTasks]);
+
   // Handle granular task updates from modal
   const handleTaskUpdate = useCallback(
     (updatedTask: Task, operation: "update" | "create" | "delete") => {
@@ -168,15 +182,14 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
 
   // Register task update callback with modal
   useEffect(() => {
+    console.log('📝 TaskWidget: Registering task update callback');
     registerTaskUpdateCallback(handleTaskUpdate);
     return () => {
+      console.log('🗑️ TaskWidget: Unregistering task update callback');
       unregisterTaskUpdateCallback(handleTaskUpdate);
     };
-  }, [
-    handleTaskUpdate,
-    registerTaskUpdateCallback,
-    unregisterTaskUpdateCallback,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateTaskLocal = useCallback(
     async (updatedTask: Partial<Task> & { id: string }) => {
@@ -361,7 +374,6 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                         return (
                           <motion.div
                             key={task.id}
-                            layoutId={`card-${task.id}`}
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ x: -50, opacity: 0 }}
@@ -414,7 +426,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                     className={cn(
                                       tasksStyles.taskDueDate,
                                       new Date(task.dueDate) < new Date() &&
-                                        tasksStyles.taskDueDateOverdue,
+                                      tasksStyles.taskDueDateOverdue,
                                     )}
                                   >
                                     {formatDateSmart(task.dueDate)}
