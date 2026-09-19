@@ -1,7 +1,10 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { dbMinimal } from "@/lib/db-minimal";
+import { user as userTable } from "@/shared/schema-tables";
 import type { NextAuthConfig } from "next-auth";
 
 export const config = {
@@ -32,6 +35,22 @@ export const config = {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
+
+        if (token.sub) {
+          try {
+            await dbMinimal
+              .update(userTable)
+              .set({
+                accessToken: account.access_token,
+                ...(account.refresh_token ? { refreshToken: account.refresh_token } : {}),
+                tokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
+                googleCalendarConnected: true,
+              } as any)
+              .where(eq(userTable.id, token.sub));
+          } catch (error) {
+            console.error("Error saving calendar tokens to database in jwt callback:", error);
+          }
+        }
       }
       return token;
     },

@@ -366,7 +366,7 @@ export function ScheduleWidget() {
                 description={disconnectionMessage || "Connect your Google Calendar to see your schedule."}
                 action={{
                   label: "Connect",
-                  onClick: () => window.location.href = '/api/auth/connect-primary-calendar?next=/',
+                  onClick: () => signIn('google'),
                 }}
               />
             </WidgetContent>
