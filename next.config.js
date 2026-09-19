@@ -87,31 +87,11 @@ const nextConfig = {
     : ['tsx', 'ts', 'jsx', 'js'],
   webpack: (config, { dev, isServer }) => {
 
-    // Optimize webpack caching to reduce serialization warnings
     if (dev) {
-      config.cache = {
-        type: 'filesystem',
-        cacheDirectory: resolve(__dirname, '.next/cache/webpack'),
-        buildDependencies: {
-          config: [__filename],
-        },
-      };
-
       // Suppress cache serialization warnings in development
       config.infrastructureLogging = {
         level: "error",
       };
-
-      // Speed up development builds
-      config.optimization = {
-        ...config.optimization,
-        removeAvailableModules: false,
-        removeEmptyChunks: false,
-        splitChunks: false,
-      };
-
-      // Don't try to externalize for API routes - causes issues
-      // Let dynamic imports handle the optimization instead
     }
 
     config.resolve.alias = {
