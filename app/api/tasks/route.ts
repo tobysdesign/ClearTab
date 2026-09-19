@@ -17,9 +17,9 @@ export async function GET(request: NextRequest) {
 
     if (!devBypass) {
       const session = await auth();
-
-      if (!session?.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in GET /api/tasks");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
       userId = session.user.id;
     }
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
 
     if (!devBypass) {
       const session = await auth();
-
-      if (!session?.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in POST /api/tasks");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
       userId = session.user.id;
     }
@@ -138,13 +138,12 @@ export async function PUT(request: NextRequest) {
 
     if (!devBypass) {
       const session = await auth();
-
-      if (!session?.user) {
-        console.log('PUT /api/tasks - No user found, unauthorized');
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!session?.user?.id) {
+        console.log('PUT /api/tasks - No user ID found, unauthorized');
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
       userId = session.user.id;
-      console.log('PUT /api/tasks - User found:', session.user.id);
+      console.log('PUT /api/tasks - User found:', userId);
     } else {
       console.log('PUT /api/tasks - Using dev bypass with default user');
     }
@@ -220,9 +219,9 @@ export async function DELETE(request: NextRequest) {
 
     if (!devBypass) {
       const session = await auth();
-
-      if (!session?.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in DELETE /api/tasks");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
       userId = session.user.id;
     }

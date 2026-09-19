@@ -81,7 +81,7 @@ export class SharedApiClient {
           } else {
             // Exchange token with Supabase
             resolve({
-              data: { session: { access_token: result?.token } },
+              data: { session: { access_token: result } },
               error: null,
             });
           }

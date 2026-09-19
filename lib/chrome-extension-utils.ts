@@ -3,7 +3,7 @@
  * Safely handle Chrome extension APIs with fallbacks for web environment
  */
 
-type ChromeApi = typeof chrome;
+type ChromeApi = any;
 
 const getChromeApi = (): ChromeApi | null => {
   if (typeof globalThis !== 'undefined' && 'chrome' in globalThis) {

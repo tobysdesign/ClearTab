@@ -30,6 +30,7 @@ const mockTasks: Task[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: "demo",
+    order: 1,
   },
   {
     id: "2",
@@ -47,6 +48,7 @@ const mockTasks: Task[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: "demo",
+    order: 2,
   },
   {
     id: "3",
@@ -64,6 +66,7 @@ const mockTasks: Task[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: "demo",
+    order: 3,
   },
 ];
 

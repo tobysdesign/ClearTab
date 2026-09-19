@@ -30,7 +30,7 @@ async function createUser(email: string) {
     id: authUser.id,
     email: email,
     googleCalendarConnected: false,
-  });
+  } as any);
 
   console.log(`User with email ${email} created successfully`);
 }

@@ -1,6 +1,5 @@
-
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@/auth';
 import { getAiContext } from '@/lib/ai/context-service';
 import { dbMinimal } from '@/lib/db-minimal';
 import { userPreferences } from '@/shared/schema-tables';
@@ -11,8 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const session = await auth();
     
     // Development bypass
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';

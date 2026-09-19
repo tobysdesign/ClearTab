@@ -1,63 +1,55 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./weather-widget-new.module.css";
-import {
-  PartlyCloudyIcon,
-  SunIcon,
-  CloudIcon,
-  RainIcon,
-} from "@/components/ui/weather-icons";
 import { getWeatherIcon } from "./WeatherIcons";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
-import { WidgetContainer } from "@cleartab/ui";
-
-const weatherData = [
-  {
-    label: "5 Day Forecast",
-    location: "Sydney, NSW",
-    isForecast: true,
-    forecast: [
-      { day: "Thu", condition: "Partly cloudy", high: "22", low: "4" },
-      { day: "Fri", condition: "Sunny", high: "19", low: "5" },
-      { day: "Sat", condition: "Cloudy", high: "20", low: "8" },
-      { day: "Sun", condition: "Rain", high: "19", low: "9" },
-      { day: "Mon", condition: "Partly cloudy", high: "18", low: "5" },
-    ],
-  },
-  {
-    label: "Tomorrow",
-    location: "Sydney, NSW",
-    temperature: "26",
-    condition: "Partly cloudy",
-    high: "27",
-    low: "5",
-  },
-  {
-    label: "Today",
-    location: "Sydney, NSW",
-    temperature: "28",
-    condition: "Cloudy with low chance of rain",
-    high: "29",
-    low: "6",
-  },
-];
+import { WidgetContainer, WidgetLoader } from "@cleartab/ui";
+import { fetchWeather, type WeatherData } from "@/lib/actions/weather";
 
 export function WeatherWidgetNew() {
-  const [cards, setCards] = useState(weatherData);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [cards, setCards] = useState<WeatherData[]>([]);
 
   const { ref, isMini } = useWidgetHeight();
 
+  // 1. Fetch preferences to get location
+  const { data: prefs } = useQuery({
+    queryKey: ["preferences"],
+    queryFn: async () => {
+      const res = await fetch("/api/preferences");
+      if (res.ok) {
+        const { data } = await res.json();
+        return data;
+      }
+      return null;
+    },
+  });
+
+  const location = prefs?.location || "Sydney, NSW";
+
+  // 2. Fetch real weather data
+  const { isLoading, error } = useQuery({
+    queryKey: ["weather", location],
+    queryFn: async () => {
+      const result = await fetchWeather({ location });
+
+      if (result?.data?.success && result.data.data) {
+        setCards(result.data.data);
+        return result.data.data;
+      }
+      throw new Error(result?.data?.error || "Failed to fetch weather");
+    },
+    enabled: !!location,
+  });
+
   // A piece of state to hold the card we're removing, to add it back later
-  const [exitingCard, setExitingCard] = useState<
-    (typeof weatherData)[0] | null
-  >(null);
+  const [exitingCard, setExitingCard] = useState<WeatherData | null>(null);
 
   const handleCardClick = () => {
     // Prevent new animations while one is already in progress
-    if (exitingCard) return;
+    if (exitingCard || cards.length === 0) return;
 
     const topCard = cards[cards.length - 1]; // Get the last card (blue/top card)
     setExitingCard(topCard); // Store the card that is leaving
@@ -72,6 +64,37 @@ export function WeatherWidgetNew() {
   };
 
   const currentData = cards[cards.length - 1]; // The visible card (top of stack)
+
+  if (isLoading || cards.length === 0) {
+    return (
+      <div ref={ref} className={styles.container}>
+        <WidgetContainer>
+          <WidgetLoader className="Weather" />
+        </WidgetContainer>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div ref={ref} className={styles.container}>
+        <WidgetContainer>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              color: "#5a5a5a",
+              fontSize: "14px",
+            }}
+          >
+            <p>Weather unavailable</p>
+          </div>
+        </WidgetContainer>
+      </div>
+    );
+  }
 
   return (
     <motion.div

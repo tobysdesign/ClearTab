@@ -43,26 +43,31 @@ const sections: SectionConfig[] = [
   {
     id: "schedule",
     label: "Schedule",
+    description: "Manage your connected Google accounts and calendar visibility.",
     component: AccountSettings,
   },
   {
     id: "layout",
     label: "Layout Preferences",
+    description: "Customize the dashboard layout, dock position, and theme.",
     component: DisplaySettings,
   },
   {
     id: "data",
     label: "Your Data",
+    description: "Export or clear your notes, tasks, and voice recordings.",
     component: NotesVoiceTasksSettings,
   },
   {
     id: "weather",
     label: "Weather",
+    description: "Configure your location and weather unit preferences.",
     component: WeatherSettings,
   },
   {
     id: "countdown",
     label: "Countdown",
+    description: "Set up the target date and title for your countdown widget.",
     component: CountdownWidgetSettings,
   },
 ];
@@ -93,6 +98,7 @@ export function SettingsDrawer({
 }: SettingsDrawerProps) {
   const { user, loading: authLoading, signOut } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
+
   const [activeSection, setActiveSection] =
     React.useState<SectionId>("schedule");
   const contentScrollRef = React.useRef<HTMLDivElement>(null);
@@ -298,11 +304,11 @@ export function SettingsDrawer({
             <div className={styles.sidebarFooter}>
               <div className={styles.profile}>
                 <div className={styles.avatar}>
-                  {user?.user_metadata?.avatar_url ? (
+                  {user?.image ? (
                     <Image
-                      src={user.user_metadata.avatar_url}
+                      src={user.image}
                       alt={
-                        user.user_metadata.full_name ??
+                        user.name ??
                         user.email ??
                         "User avatar"
                       }
@@ -320,7 +326,7 @@ export function SettingsDrawer({
                   <span className={styles.profileName}>
                     {authLoading
                       ? "Loading…"
-                      : user?.user_metadata?.full_name ||
+                      : user?.name ||
                       user?.email ||
                       "Guest"}
                   </span>

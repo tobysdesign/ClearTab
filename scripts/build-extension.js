@@ -71,9 +71,6 @@ if (fs.existsSync(iconsBackupDir)) {
   fs.rmSync(iconsBackupDir, { recursive: true });
 }
 
-// NOTE: We no longer move API routes - the build handles this via IS_EXTENSION env var
-// The Next.js config will exclude API routes when IS_EXTENSION=true
-
 // Replace server actions with extension stubs
 const actionsDir = path.join(__dirname, "../lib/actions");
 const settingsStubsFile = path.join(actionsDir, "extension-stubs.ts");
@@ -97,6 +94,25 @@ if (fs.existsSync(aiStubsFile)) {
   fs.copyFileSync(aiStubsFile, aiFile);
 }
 
+// Temporarily move API routes (Next.js static export does not support API routes)
+const apiDir = path.join(__dirname, "../app/api");
+const apiBackupDir = path.join(__dirname, "../app/_api_disabled");
+const authDir = path.join(__dirname, "../app/auth");
+const authBackupDir = path.join(__dirname, "../app/_auth_disabled");
+
+console.log("Temporarily disabling API and Auth routes for static export...");
+let apiMoved = false;
+let authMoved = false;
+
+if (fs.existsSync(apiDir)) {
+  fs.renameSync(apiDir, apiBackupDir);
+  apiMoved = true;
+}
+if (fs.existsSync(authDir)) {
+  fs.renameSync(authDir, authBackupDir);
+  authMoved = true;
+}
+
 // Build Next.js app
 console.log("Building Next.js app...");
 try {
@@ -107,6 +123,13 @@ try {
   // export happens automatically due to output: 'export' in next.config.js when IS_EXTENSION=true
 } catch (error) {
   console.error("Error building Next.js app:", error);
+  // Restore API/Auth routes on error
+  if (apiMoved && fs.existsSync(apiBackupDir)) {
+    fs.renameSync(apiBackupDir, apiDir);
+  }
+  if (authMoved && fs.existsSync(authBackupDir)) {
+    fs.renameSync(authBackupDir, authDir);
+  }
   // Restore server actions on error
   if (fs.existsSync(settingsBackup)) {
     fs.renameSync(settingsBackup, settingsFile);
@@ -117,7 +140,17 @@ try {
   process.exit(1);
 }
 
-// Restore server actions only (API routes are not moved anymore)
+// Restore API and Auth routes
+if (apiMoved && fs.existsSync(apiBackupDir)) {
+  console.log("Restoring API routes...");
+  fs.renameSync(apiBackupDir, apiDir);
+}
+if (authMoved && fs.existsSync(authBackupDir)) {
+  console.log("Restoring Auth routes...");
+  fs.renameSync(authBackupDir, authDir);
+}
+
+// Restore server actions only
 if (fs.existsSync(settingsBackup)) {
   fs.renameSync(settingsBackup, settingsFile);
 }

@@ -1,13 +1,11 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, User as UserIcon, Loader2, Sparkles, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { Send, Bot, User as UserIcon, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import styles from "./chat-widget.module.css";
 
 interface Message {
     role: "user" | "assistant";
@@ -35,9 +33,9 @@ export function ChatWidget() {
     }, [messages, isLoading]);
 
     const checkAiAvailability = async () => {
-        if (typeof window !== "undefined" && window.ai) {
+        if (typeof window !== "undefined" && (window as any).ai) {
             try {
-                const capabilities = await window.ai.languageModel.capabilities();
+                const capabilities = await (window as any).ai.languageModel.capabilities();
                 if (capabilities.available === "readily") {
                     setIsAiAvailable(true);
                 } else {
@@ -85,9 +83,10 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         `.trim();
 
         try {
-            if (!window.ai) throw new Error("AI not supported");
+            const windowAi = (window as any).ai;
+            if (!windowAi) throw new Error("AI not supported");
 
-            const session = await window.ai.languageModel.create({
+            const session = await windowAi.languageModel.create({
                 systemPrompt
             });
 
@@ -145,26 +144,26 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-background/50 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden shadow-xl">
-            <div className="flex items-center gap-2 p-3 border-b border-white/10 bg-white/5">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span className="text-sm font-medium text-white/90">
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <Sparkles className={styles.headerIcon} />
+                <span className={styles.headerTitle}>
                     {isAiAvailable === true ? "On-Device Assistant" : "Assistant (Offline)"}
                 </span>
             </div>
 
-            <ScrollArea className="flex-1 p-4">
-                <div className="flex flex-col gap-4 min-h-[200px]">
+            <ScrollArea className={styles.scrollArea}>
+                <div className={styles.messagesContainer}>
                     {messages.length === 0 && (
-                        <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground mt-10">
-                            <Bot className="w-8 h-8 mb-2 opacity-50" />
+                        <div className={styles.emptyState}>
+                            <Bot className={styles.emptyIcon} />
                             {isAiAvailable === false ? (
-                                <div className="max-w-[200px] text-xs text-yellow-500/80 bg-yellow-500/10 p-2 rounded">
-                                    <AlertTriangle className="w-4 h-4 mx-auto mb-1" />
+                                <div className={styles.alertBox}>
+                                    <AlertCircle className={styles.alertIcon} />
                                     Chrome AI not detected. Enable <code>chrome://flags/#prompt-api-for-gemini-nano</code>
                                 </div>
                             ) : (
-                                <p className="text-sm">Ready to help (offline mode)</p>
+                                <p className={styles.emptyText}>Ready to help (offline mode)</p>
                             )}
                         </div>
                     )}
@@ -175,24 +174,22 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={cn(
-                                "flex gap-3 text-sm max-w-[95%]",
-                                m.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
+                                styles.messageRow,
+                                m.role === "user" ? styles.userRow : styles.assistantRow
                             )}
                         >
                             <div
                                 className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                                    m.role === "user" ? "bg-blue-600" : "bg-purple-600"
+                                    styles.avatar,
+                                    m.role === "user" ? styles.userAvatar : styles.assistantAvatar
                                 )}
                             >
                                 {m.role === "user" ? <UserIcon size={14} /> : <Bot size={14} />}
                             </div>
                             <div
                                 className={cn(
-                                    "p-3 rounded-lg overflow-hidden",
-                                    m.role === "user"
-                                        ? "bg-blue-600/20 text-white border border-blue-500/30"
-                                        : "bg-white/10 text-white border border-white/10"
+                                    styles.messageBubble,
+                                    m.role === "user" ? styles.userBubble : styles.assistantBubble
                                 )}
                             >
                                 {m.content}
@@ -201,32 +198,31 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
                     ))}
 
                     {isLoading && (
-                        <div className="flex gap-3 max-w-[85%] mr-auto items-center">
-                            <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                            <span className="text-xs text-white/40">Generating...</span>
+                        <div className={styles.loadingIndicator}>
+                            <Loader2 className={styles.loadingSpinner} />
+                            <span className={styles.loadingText}>Generating...</span>
                         </div>
                     )}
                     <div ref={scrollRef} />
                 </div>
             </ScrollArea>
 
-            <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 bg-white/5">
-                <div className="flex gap-2">
-                    <Input
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <div className={styles.formContainer}>
+                    <input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={isAiAvailable === false ? "AI not available" : "Ask about your schedule..."}
-                        className="bg-black/20 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-purple-500/50"
+                        className={styles.input}
                         disabled={isAiAvailable === false}
                     />
-                    <Button
+                    <button
                         type="submit"
-                        size="icon"
                         disabled={isLoading || !input.trim() || isAiAvailable === false}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        className={styles.button}
                     >
                         <Send size={16} />
-                    </Button>
+                    </button>
                 </div>
             </form>
         </div>

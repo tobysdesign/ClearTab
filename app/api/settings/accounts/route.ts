@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { auth } from "@/auth";
+import { dbMinimal } from "@/lib/db-minimal";
+import { user as userTable, connectedAccounts } from "@/shared/schema-tables";
+import { googleApiService } from "@/lib/google-api-service";
 import type { ConnectedAccountWithEmail } from '@/shared/types';
 
 export async function GET(_request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { user: userTable, connectedAccounts }, { googleApiService }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema-tables'),
-      import('@/lib/google-api-service'),
-    ]);
-
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
@@ -21,16 +17,13 @@ export async function GET(_request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for accounts API');
       userId = '00000000-0000-4000-8000-000000000000';
     } else {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (!authUser) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const session = await auth();
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in GET /api/settings/accounts");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
 
-      userId = authUser.id;
+      userId = session.user.id;
     }
 
     // Fetch connected accounts from database
@@ -46,12 +39,12 @@ export async function GET(_request: NextRequest) {
       if (!account.accessToken) continue;
 
       try {
-        const auth = {
+        const authInfo = {
           accessToken: account.accessToken,
           refreshToken: account.refreshToken || undefined,
         };
 
-        const email = await googleApiService.getUserInfo(auth);
+        const email = await googleApiService.getUserInfo(authInfo);
         accountsWithEmail.push({
           ...account,
           email,
@@ -78,13 +71,6 @@ export async function GET(_request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { connectedAccounts }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema-tables'),
-    ]);
-
     const { searchParams } = new URL(request.url);
     const accountId = searchParams.get('id');
 
@@ -104,16 +90,13 @@ export async function DELETE(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for account deletion');
       userId = '00000000-0000-4000-8000-000000000000';
     } else {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (!authUser) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const session = await auth();
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in DELETE /api/settings/accounts");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
 
-      userId = authUser.id;
+      userId = session.user.id;
     }
 
     // Verify the account belongs to the current user before deleting

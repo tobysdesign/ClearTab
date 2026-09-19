@@ -11,9 +11,10 @@ export async function GET(_request: NextRequest) {
     const session = await auth();
     console.log('🔵 CALENDAR ROUTE - Auth session:', session?.user?.email);
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
+      console.error("❌ Session or user ID missing in GET /api/calendar");
       return NextResponse.json(
-        { error: "Unauthorized", success: false, data: [] },
+        { error: "Unauthorized - No User ID", success: false, data: [] },
         { status: 401 }
       );
     }

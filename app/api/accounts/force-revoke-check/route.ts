@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { auth } from '@/auth';
 import { dbMinimal } from '@/lib/db-minimal';
 import { connectedAccounts } from '@/shared/schema-tables';
 import { eq } from 'drizzle-orm';
-// Remove googleapis dependency - replaced with direct API calls
 
 // This endpoint forces a check on a linked account to see if its tokens are still valid.
 // If tokens are invalid (e.g., user revoked access in Google), it deletes the stale connection.
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const session = await auth();
+    const user = session?.user;
 
-    if (!user) {
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -38,7 +37,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Attempt to use the stored tokens to see if they are still valid.
-    // Make a lightweight API call to Google to check the token validity.
     try {
       const response = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo', {
         method: 'POST',
@@ -64,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Stale connection successfully removed.' });
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Force revoke check error:", error);
     return NextResponse.json(
       { error: error.message || 'Failed to check account status' },

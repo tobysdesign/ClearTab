@@ -331,7 +331,7 @@ export function EditTaskForm({
         // (though we usually want to trust the server result)
 
         if (onSave) {
-          onSave(result, existingTaskId ? 'update' : 'create');
+          onSave(result, targetId ? 'update' : 'create');
         }
 
         setLastSaveResult({ data: { success: true, data: result } });

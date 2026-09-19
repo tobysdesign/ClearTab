@@ -1,5 +1,6 @@
 # Packages & locks
 node_modules/
+.pnpm-store/
 **/package-lock.json
 **/yarn.lock
 pnpm-debug.log*
@@ -47,6 +48,9 @@ docs-and-demos/
 docs/
 CLAUDE.md
 WARP.md
+cursor.md
+context/
+browser-tools-mcp/
 Instructions.md
 DEPLOYMENT.md
 SUPABASE_SETUP.md

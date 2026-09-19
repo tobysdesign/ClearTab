@@ -37,5 +37,5 @@
     "**/*.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "stories/**"]
+  "exclude": ["node_modules", "stories/**", "browser-tools-mcp", "vite.config.extension.ts", "packages/ui/src/stories"]
 }

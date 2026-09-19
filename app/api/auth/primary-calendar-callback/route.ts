@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { dbMinimal } from '@/lib/db-minimal';
+import { user as userTable } from '@/shared/schema-tables';
+import { googleApiService } from '@/lib/google-api-service';
 
-type UserInsert = {
+type UserUpdate = {
   accessToken?: string | null;
   refreshToken?: string | null;
   tokenExpiry?: Date | null;
@@ -11,14 +15,6 @@ type UserInsert = {
 
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { user: userTable }, { googleApiService }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema-tables'),
-      import('@/lib/google-api-service'),
-    ]);
-
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -39,28 +35,28 @@ export async function GET(request: NextRequest) {
 
     // Parse state to get redirect URL and user info
     let nextUrl = '/settings';
-    let userId: string | null = null;
+    let userIdState: string | null = null;
     if (state) {
       try {
         const parsedState = JSON.parse(state);
         nextUrl = parsedState.nextUrl || '/settings';
-        userId = parsedState.userId;
+        userIdState = parsedState.userId;
       } catch (e) {
         console.warn('Failed to parse primary OAuth state:', e);
       }
     }
 
     // Verify user is still authenticated
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+    const session = await auth();
+    const authUser = session?.user;
 
-    if (!authUser || (userId && authUser.id !== userId)) {
+    if (!authUser || (userIdState && authUser.id !== userIdState)) {
       console.error('User not authenticated or user ID mismatch during primary OAuth callback');
       const errorUrl = '/settings?error=primary_not_authenticated';
       return NextResponse.redirect(new URL(errorUrl, request.url));
     }
+
+    const userId = authUser.id;
 
     // Exchange authorization code for tokens
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -98,16 +94,16 @@ export async function GET(request: NextRequest) {
       }
 
       // Get user info to verify the Google account
-      const auth = {
+      const authInfo = {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
       };
 
-      const googleEmail = await googleApiService.getUserInfo(auth);
+      const googleEmail = await googleApiService.getUserInfo(authInfo);
       const googleId = googleEmail; // Use email as Google ID for simplicity
 
       // Update user record with Google Calendar tokens
-      const updateData: Partial<UserInsert> = {
+      const updateData: Partial<UserUpdate> = {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
         tokenExpiry: tokens.expires_in
@@ -120,12 +116,11 @@ export async function GET(request: NextRequest) {
       await dbMinimal
         .update(userTable)
         .set(updateData as any)
-        .where(eq(userTable.id, authUser.id));
+        .where(eq(userTable.id, userId));
 
-      console.log(`✅ PRIMARY: Connected primary Google Calendar account: ${googleEmail} for user: ${authUser.id}`);
+      console.log(`✅ PRIMARY: Connected primary Google Calendar account: ${googleEmail} for user: ${userId}`);
 
       // Redirect back to dashboard/settings
-      // Strip any error params from nextUrl and redirect to clean dashboard
       const cleanUrl = nextUrl.split('?')[0]; // Remove any existing query params
       const finalUrl = cleanUrl === '/settings' || cleanUrl === '/'
         ? '/?calendar=connected'

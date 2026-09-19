@@ -1,21 +1,11 @@
-/* Settings Drawer – MuddyTab refresh */
-
 .drawerContent {
     max-width: 960px;
     margin: 0 auto;
-    border-radius: 24px 24px 0 0;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #0d0d0d;
-    backdrop-filter: blur(24px);
     overflow: visible;
     /* Allow negative positioned close button to show */
     display: flex;
     flex-direction: column;
     padding-bottom: 0px;
-    margin-top: 0 !important;
-    flex: 1 1 auto;
-    min-height: 0;
-    position: relative;
 }
 
 .drawerContent::after {
@@ -29,6 +19,7 @@
     min-height: 0;
     height: 100%;
     position: relative;
+
 }
 
 .sidebar {
@@ -249,6 +240,7 @@
     gap: 18px;
     min-height: 0;
     scroll-behavior: smooth;
+
 }
 
 .sectionHeading {

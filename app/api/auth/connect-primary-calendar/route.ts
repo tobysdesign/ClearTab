@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }] = await Promise.all([
-      import('@/lib/supabase/server'),
-    ]);
+    const session = await auth();
 
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.id) {
+      console.error("❌ Session or user ID missing in GET /api/auth/connect-primary-calendar");
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+
+    const userId = session.user.id;
 
     // Get the next URL from query params for redirect after auth
     const { searchParams } = new URL(request.url);
@@ -42,7 +38,7 @@ export async function GET(request: NextRequest) {
       state: JSON.stringify({
         nextUrl,
         isPrimary: true,
-        userId: authUser.id
+        userId: userId
       }),
     });
 

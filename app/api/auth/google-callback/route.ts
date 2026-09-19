@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { auth } from "@/auth";
+import { dbMinimal } from "@/lib/db-minimal";
+import { connectedAccounts, user as userTable } from "@/shared/schema-tables";
+import { googleApiService } from "@/lib/google-api-service";
 
 type ConnectedAccountInsert = {
   userId: string;
@@ -12,14 +16,6 @@ type ConnectedAccountInsert = {
 
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { connectedAccounts, user: userTable }, { googleApiService }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema-tables'),
-      import('@/lib/google-api-service'),
-    ]);
-
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
     const state = searchParams.get('state');
@@ -62,18 +58,14 @@ export async function GET(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for OAuth callback');
       userId = '00000000-0000-4000-8000-000000000000';
     } else {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (!authUser) {
+      const session = await auth();
+      if (!session?.user?.id) {
         console.error('User not authenticated during OAuth callback');
         const errorUrl = '/settings?error=not_authenticated';
         return NextResponse.redirect(new URL(errorUrl, request.url));
       }
 
-      userId = authUser.id;
+      userId = session.user.id;
     }
 
     // Exchange authorization code for tokens
@@ -113,12 +105,12 @@ export async function GET(request: NextRequest) {
       }
 
       // Get user info to identify the account
-      const auth = {
+      const authInfo = {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
       };
 
-      const userInfo = await googleApiService.getUserInfo(auth);
+      const userInfo = await googleApiService.getUserInfo(authInfo);
 
       // Handle PRIMARY account calendar connection (updates user table)
       if (isPrimary) {
@@ -135,7 +127,7 @@ export async function GET(request: NextRequest) {
               : null,
             googleCalendarConnected: true,
             googleId: userInfo,
-          })
+          } as any)
           .where(eq(userTable.id, userId));
 
         console.log(`✅ PRIMARY: Connected primary Google Calendar account: ${userInfo} for user: ${userId}`);

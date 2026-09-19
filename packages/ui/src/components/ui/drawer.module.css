@@ -44,7 +44,6 @@
   display: flex;
   height: 80vh;
   flex-direction: column;
-  background-color: #111111;
   border-radius: 10px 10px 0 0;
 }
 
@@ -76,4 +75,4 @@
 .description {
   font-size: 0.875rem;
   color: var(--muted-foreground, #6b7280);
-} 
+}

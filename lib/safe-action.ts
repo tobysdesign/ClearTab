@@ -1,5 +1,5 @@
 import { createSafeActionClient } from 'next-safe-action'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/auth'
 
 const handleServerError = (e: Error) => {
   console.error('Server action error:', e)
@@ -11,17 +11,13 @@ const baseClient = createSafeActionClient({
 })
 
 export const action = baseClient.use(async ({ next }) => {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth()
+  const userId = session?.user?.id || null
 
   // Pass userId as null if not authenticated. Individual actions will validate if userId is required.
-  const userId = user?.id || null; 
-
   return next({
     ctx: {
       userId: userId,
     },
   })
-}) 
+})

@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
+import { auth } from '@/auth';
+import { dbMinimal } from '@/lib/db-minimal';
+import { user as userTable } from '@/shared/schema-tables';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }, { dbMinimal }, { user: userTable }] = await Promise.all([
-      import('@/lib/supabase/server'),
-      import('@/lib/db-minimal'),
-      import('@/shared/schema-tables'),
-    ]);
+    const session = await auth();
+    const authUser = session?.user;
 
-    const supabase = await createClient();
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
+    if (!authUser?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -27,7 +21,7 @@ export async function POST(request: NextRequest) {
         refreshToken: null,
         googleCalendarConnected: false,
         tokenExpiry: null,
-      })
+      } as any)
       .where(eq(userTable.id, authUser.id));
 
     console.log(`Cleared expired primary Google tokens for user: ${authUser.id}`);

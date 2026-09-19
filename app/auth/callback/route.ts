@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
               googleId: userInsertValues.googleId,
               // DON'T reset googleCalendarConnected, accessToken, refreshToken
               // Those are only set by the calendar OAuth flow
-            })
+            } as any)
             .where(eq(userTable.id, data.user.id));
 
           console.log(`Updated existing user ${data.user.id} profile (preserved calendar tokens)`);
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
           // Insert new user with conflict resolution on googleId
           await db
             .insert(userTable)
-            .values({ ...userInsertValues, id: data.user.id })
+            .values({ ...userInsertValues, id: data.user.id } as any)
             .onConflictDoUpdate({
               target: userTable.googleId,
               set: {
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
                 googleCalendarConnected: userInsertValues.googleCalendarConnected,
                 accessToken: userInsertValues.accessToken,
                 refreshToken: userInsertValues.refreshToken,
-              },
+              } as any,
             });
 
           console.log(`Inserted/updated user ${data.user.id} with Google ID ${userInsertValues.googleId}`);

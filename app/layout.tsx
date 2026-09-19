@@ -12,10 +12,7 @@ import Loading from "./loading";
 import dynamic from "next/dynamic";
 import { TaskModalProvider } from "@/hooks/use-task-modal";
 
-const SettingsDrawer = dynamic(
-  () => import("@/components/settings/settings-drawer").then((mod) => ({ default: mod.SettingsDrawer })),
-  { loading: () => null }
-);
+import { SettingsDrawer } from "@/components/settings/settings-drawer";
 
 const TasksDrawer = dynamic(
   () => import("@/components/tasks/tasks-drawer").then((mod) => ({ default: mod.TasksDrawer })),

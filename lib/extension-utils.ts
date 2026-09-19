@@ -12,9 +12,9 @@ export function isExtensionEnvironment(): boolean {
 
   // Check for Chrome extension APIs
   const hasExtensionAPI = !!(
-    window.chrome &&
-    window.chrome.runtime &&
-    window.chrome.runtime.id
+    (window as any).chrome &&
+    (window as any).chrome.runtime &&
+    (window as any).chrome.runtime.id
   );
 
   // Check if we're in an extension context (new tab override)
@@ -34,8 +34,8 @@ export async function getSupabaseClient() {
     const { createExtensionClient } = await import('@/lib/supabase/extension-client');
     return createExtensionClient();
   } else {
-    const { createClient } = await import('@/lib/supabase/client');
-    return createClient();
+    // Non-extension environment now uses NextAuth
+    return null;
   }
 }
 

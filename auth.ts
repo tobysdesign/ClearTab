@@ -35,16 +35,16 @@ export const config = {
       }
       return token;
     },
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       // Send properties to the client
       if (token) {
         session.accessToken = token.accessToken as string;
         session.refreshToken = token.refreshToken as string;
         session.expiresAt = token.expiresAt as number;
-      }
-      // Add user ID to session
-      if (user) {
-        session.user.id = user.id;
+        // Add user ID to session from JWT token SUB (subject) field
+        if (token.sub) {
+          session.user.id = token.sub;
+        }
       }
       return session;
     },

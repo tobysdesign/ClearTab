@@ -45,6 +45,50 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const localAiSessionRef = useRef<any>(null)
+
+  const initLocalAiSession = useCallback(async () => {
+    if (localAiSessionRef.current) return localAiSessionRef.current;
+
+    let dbContext = "";
+    const resolvedAgentName = agentName || "Alex";
+    const resolvedUserName = userName || "User";
+
+    try {
+      const res = await fetch('/api/ai-context');
+      if (res.ok) {
+        const body = await res.json();
+        if (body.success) {
+          dbContext = body.data.context;
+        }
+      }
+    } catch (e) {
+      console.warn("Context fetch failed, using default prompt", e);
+    }
+
+    const systemPrompt = `
+You are ${resolvedAgentName}, a productivity assistant for ${resolvedUserName}.
+Use this context to answer questions:
+${dbContext || 'No context available.'}
+
+Be concise. Do not answer questions unrelated to the user's data or productivity.
+    `.trim();
+
+    try {
+      const windowAi = (window as any).ai;
+      if (!windowAi) throw new Error("AI not supported");
+
+      const session = await windowAi.languageModel.create({
+        systemPrompt
+      });
+
+      localAiSessionRef.current = session;
+      return session;
+    } catch (err) {
+      console.error("Failed to init local session:", err);
+      throw err;
+    }
+  }, [userName, agentName]);
 
   // Create task mutation
   const createTaskMutation = useMutation({
@@ -137,6 +181,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Check for Gemini Nano!
+      if (typeof window !== "undefined" && (window as any).ai && hasSeenOnboarding) {
+        try {
+          console.log("Gemini Nano detected! Using local AI for non-streaming...");
+          const session = await initLocalAiSession();
+          const responseText = await session.prompt(userMessage);
+          setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+          return;
+        } catch (nanoError) {
+          console.warn("Gemini Nano prompt failed, falling back to remote:", nanoError);
+        }
+      }
+
       // Get AI response
       const onboardingStepNumber = typeof onboardingStep === 'string' ?
         ({ "welcome": 1, "agent-name": 2, "user-name": 3, "setup-complete": 4 }[onboardingStep] || 1) :
@@ -176,7 +233,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsThinking(false)
     }
-  }, [inputValue, hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, createTaskMutation, createNoteMutation, toast, userName, agentName])
+  }, [inputValue, hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, createTaskMutation, createNoteMutation, toast, userName, agentName, initLocalAiSession])
 
   const processStreamingMessage = useCallback(async (initialMessage?: string) => {
     if ((!inputValue.trim() && !initialMessage) && hasSeenOnboarding) return
@@ -210,6 +267,52 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           console.log('STREAMING: Creating note from user message:', noteMatch[1])
           await createNoteMutation.mutateAsync(noteMatch[1])
           return // Don't send hashtag commands to AI at all
+        }
+      }
+
+      // Check for Gemini Nano!
+      if (typeof window !== "undefined" && (window as any).ai && hasSeenOnboarding) {
+        try {
+          console.log("Gemini Nano detected! Using local AI for streaming...");
+          const session = await initLocalAiSession();
+          
+          let messageIndex = -1;
+          setIsThinking(false);
+          setThinkingContent('');
+
+          const stream = session.promptStreaming(userMessage);
+          for await (const chunk of stream) {
+            if (messageIndex === -1) {
+              setMessages(prev => {
+                const newMessages = [...prev, { role: 'assistant' as const, content: chunk, isStreaming: true }];
+                messageIndex = newMessages.length - 1;
+                return newMessages;
+              });
+            } else {
+              setMessages(prev => {
+                const updated = [...prev];
+                updated[messageIndex] = {
+                  ...updated[messageIndex],
+                  content: chunk
+                };
+                return updated;
+              });
+            }
+          }
+
+          if (messageIndex >= 0) {
+            setMessages(prev => {
+              const updated = [...prev];
+              updated[messageIndex] = {
+                ...updated[messageIndex],
+                isStreaming: false
+              };
+              return updated;
+            });
+          }
+          return;
+        } catch (nanoError) {
+          console.warn("Gemini Nano streaming failed, falling back to remote:", nanoError);
         }
       }
 

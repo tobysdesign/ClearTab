@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from "@/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Lazy load dependencies
-    const [{ createClient }] = await Promise.all([
-      import('@/lib/supabase/server'),
-    ]);
-
     // Development bypass for testing
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
 
     if (!devBypass) {
-      const supabase = await createClient();
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
-
-      if (!authUser) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const session = await auth();
+      if (!session?.user?.id) {
+        console.error("❌ Session or user ID missing in GET /api/auth/google-link-url");
+        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
       }
     }
 

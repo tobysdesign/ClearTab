@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { createClient } from "@/lib/supabase/server";
+import { auth } from "@/auth";
 import { dbMinimal } from "@/lib/db-minimal";
 import { appSettings } from "@/shared/schema-tables";
 
@@ -184,10 +184,7 @@ async function saveUserConfig(
 
 export async function GET(_request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -227,10 +224,7 @@ export async function GET(_request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -322,10 +316,7 @@ export async function PATCH(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(

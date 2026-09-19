@@ -14,10 +14,8 @@ import {
 import { useToast } from "@cleartab/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
-import {
-  getSupabaseClient,
-  isExtensionEnvironment,
-} from "@/lib/extension-utils";
+import { isExtensionEnvironment } from "@/lib/extension-utils";
+import { createNote } from "@/lib/actions/notes";
 import {
   Tooltip,
   TooltipTrigger,
@@ -173,21 +171,11 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
   const [waveformHistory, setWaveformHistory] = useState<Uint8Array[]>([]);
   const { toast } = useToast();
 
   // Use auth
   const { user } = useAuth();
-
-  // Initialize Supabase client based on environment
-  useEffect(() => {
-    const initSupabase = async () => {
-      const client = await getSupabaseClient();
-      setSupabase(client);
-    };
-    initSupabase();
-  }, []);
 
   const {
     state,
@@ -218,85 +206,35 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
         console.log("Saving note for user:", user.id);
 
-        // Check if Supabase client is available (extension may be offline)
-        if (!supabase) {
-          console.warn("No Supabase client available, saving to local storage");
-
-          // Save to local storage as fallback for extension
-          const localNote = {
-            id: Date.now().toString(),
-            title: `Voice Note - ${new Date().toLocaleDateString()}`,
-            content: [
-              {
-                id: "voice-note-block",
-                type: "paragraph",
-                props: {
-                  textColor: "default",
-                  backgroundColor: "default",
-                  textAlignment: "left",
-                },
-                content: [{ type: "text", text, styles: {} }],
-                children: [],
+        // Save note using server action
+        const result = await createNote({
+          title: `Voice Note - ${new Date().toLocaleDateString()}`,
+          content: [
+            {
+              id: "voice-note-block",
+              type: "paragraph",
+              props: {
+                textColor: "default",
+                backgroundColor: "default",
+                textAlignment: "left",
               },
-            ],
-            user_id: user.id,
-            created_at: new Date().toISOString(),
-          };
+              content: [{ type: "text", text, styles: {} }],
+              children: [],
+            },
+          ],
+        });
 
-          const existingNotes = JSON.parse(
-            localStorage.getItem("voice_notes") || "[]",
-          );
-          existingNotes.push(localNote);
-          localStorage.setItem("voice_notes", JSON.stringify(existingNotes));
-
-          toast({
-            title: "Success",
-            description: "Voice note saved locally (extension mode)",
-          });
-
-          setShowSuccess(true);
-          setTimeout(() => {
-            setShowSuccess(false);
-            setIsFlipped(false);
-            reset();
-          }, 2000);
-
-          return;
-        }
-
-        // Save note to Supabase
-        const { data, error } = await supabase
-          .from("notes")
-          .insert({
-            title: `Voice Note - ${new Date().toLocaleDateString()}`,
-            content: [
-              {
-                id: "voice-note-block",
-                type: "paragraph",
-                props: {
-                  textColor: "default",
-                  backgroundColor: "default",
-                  textAlignment: "left",
-                },
-                content: [{ type: "text", text, styles: {} }],
-                children: [],
-              },
-            ],
-            user_id: user.id,
-          })
-          .select();
-
-        if (error) {
-          console.error("Error saving note:", error);
+        if (!result?.data?.success) {
+          console.error("Error saving note:", result?.data?.error);
           toast({
             title: "Error",
-            description: "Failed to save voice note",
+            description: result?.data?.error || "Failed to save voice note",
             variant: "destructive",
           });
           return;
         }
 
-        console.log("Note saved successfully:", data);
+        console.log("Note saved successfully:", result.data);
 
         toast({
           title: "Success",
@@ -803,7 +741,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                     {/* Body */}
                     <div className={styles.recordingBody}>
                       {state === "requesting-permission" ||
-                      state === "permission-denied" ? (
+                        state === "permission-denied" ? (
                         <>
                           <p className={styles.permissionTitle}>
                             {state === "requesting-permission"

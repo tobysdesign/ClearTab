@@ -44,21 +44,21 @@ export function TasksDrawer() {
           <div className={styles.header}>
             <DrawerTitle className={styles.title}>
               {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-              (activeTaskId && !activeTaskId.startsWith("draft-"))
+                (activeTaskId && !activeTaskId.startsWith("draft-"))
                 ? "EDIT TASK"
                 : "CREATE TASK"}
             </DrawerTitle>
             <DrawerDescription className="sr-only">
               {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-              (activeTaskId && !activeTaskId.startsWith("draft-"))
+                (activeTaskId && !activeTaskId.startsWith("draft-"))
                 ? "Edit the selected task details"
                 : "Create a new task with title, description, and due date"}
             </DrawerDescription>
 
             {/* Show actions menu for edit mode, X button for create mode */}
             {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-            (activeTaskId && !activeTaskId.startsWith("draft-")) ? (
-                <SimpleDropdown
+              (activeTaskId && !activeTaskId.startsWith("draft-")) ? (
+              <SimpleDropdown
                 trigger={
                   <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
                     ⋮

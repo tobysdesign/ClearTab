@@ -11,7 +11,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
 import { WidgetLoader, WidgetContainer, WidgetHeader, WidgetContent } from "@cleartab/ui";
 import { useAuth } from '@/components/auth/auth-provider'
-import { getSupabaseClient, isExtensionEnvironment } from '@/lib/extension-utils'
+import { isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
 import { useWidgetHeight } from '@/hooks/use-widget-height'
 
