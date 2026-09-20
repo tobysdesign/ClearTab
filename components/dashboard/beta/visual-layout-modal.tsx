@@ -24,25 +24,210 @@ interface VisualLayoutModalProps {
 
 interface MiniBlockProps {
   label: string
-  isEnabled?: boolean
   className?: string
   isLight?: boolean
+  style?: React.CSSProperties
 }
 
 function MiniWireframeBlock({
   label,
-  isEnabled = true,
   className = '',
   isLight = false,
+  style,
 }: MiniBlockProps) {
   return (
     <div
-      className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
-        !isEnabled ? styles.miniBlockOff : ''
-      } ${className}`}
+      className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${className}`}
+      style={style}
     >
       <span className={styles.miniBlockName}>{label}</span>
       <span className={styles.miniGripDots}>:::</span>
+    </div>
+  )
+}
+
+// 1. default_4right Dynamic Preview
+function Default4RightPreview({ widgets }: { widgets: WidgetVisibilityState }) {
+  const hasNotes = widgets.notes
+  const hasTasks = widgets.tasks
+  const row1 = (['schedule', 'weather'] as WidgetId[]).filter((id) => widgets[id])
+  const row2 = (['countdown', 'recorder'] as WidgetId[]).filter((id) => widgets[id])
+  const hasRow1 = row1.length > 0
+  const hasRow2 = row2.length > 0
+  const hasGrid = hasRow1 || hasRow2
+  const hasRight = hasTasks || hasGrid
+
+  const renderRightStack = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%', gap: 4 }}>
+      {hasTasks && (
+        <MiniWireframeBlock
+          label="Tasks"
+          isLight
+          style={{ flex: hasGrid ? '0 0 34%' : 1, width: '100%' }}
+        />
+      )}
+      {hasGrid && (
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: 4 }}>
+          {hasRow1 && (
+            <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+              {row1.map((id) => (
+                <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+              ))}
+            </div>
+          )}
+          {hasRow2 && (
+            <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+              {row2.map((id) => (
+                <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+
+  if (hasNotes && hasRight) {
+    return (
+      <div style={{ display: 'flex', width: '100%', height: '100%', gap: 4 }}>
+        <MiniWireframeBlock label="Notes" isLight style={{ flex: 1, height: '100%' }} />
+        {renderRightStack()}
+      </div>
+    )
+  }
+
+  if (hasNotes && !hasRight) {
+    return <MiniWireframeBlock label="Notes" isLight style={{ width: '100%', height: '100%' }} />
+  }
+
+  if (!hasNotes && hasRight) {
+    return renderRightStack()
+  }
+
+  return null
+}
+
+// 2. 3left Dynamic Preview
+function ThreeLeftPreview({ widgets }: { widgets: WidgetVisibilityState }) {
+  const top = (['notes', 'tasks'] as WidgetId[]).filter((id) => widgets[id])
+  const leftCluster = (['weather', 'countdown', 'recorder'] as WidgetId[]).filter((id) => widgets[id])
+  const hasSchedule = widgets.schedule
+  const hasTop = top.length > 0
+  const hasLeftCluster = leftCluster.length > 0
+  const hasBottom = hasLeftCluster || hasSchedule
+
+  const renderTop = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasBottom ? '0 0 58%' : 1 }}>
+      {top.map((id) => (
+        <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} isLight style={{ flex: 1 }} />
+      ))}
+    </div>
+  )
+
+  const renderBottom = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasTop ? '0 0 42%' : 1 }}>
+      {hasLeftCluster && (
+        <div style={{ display: 'flex', gap: 3, flex: hasSchedule ? 1.4 : 1 }}>
+          {leftCluster.map((id) => (
+            <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+          ))}
+        </div>
+      )}
+      {hasSchedule && (
+        <MiniWireframeBlock label="Schedule" style={{ flex: hasLeftCluster ? 1.6 : 1 }} />
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 4 }}>
+      {hasTop && renderTop()}
+      {hasBottom && renderBottom()}
+    </div>
+  )
+}
+
+// 3. 3right Dynamic Preview
+function ThreeRightPreview({ widgets }: { widgets: WidgetVisibilityState }) {
+  const top = (['tasks', 'notes'] as WidgetId[]).filter((id) => widgets[id])
+  const rightCluster = (['weather', 'countdown', 'recorder'] as WidgetId[]).filter((id) => widgets[id])
+  const hasSchedule = widgets.schedule
+  const hasTop = top.length > 0
+  const hasRightCluster = rightCluster.length > 0
+  const hasBottom = hasSchedule || hasRightCluster
+
+  const renderTop = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasBottom ? '0 0 58%' : 1 }}>
+      {top.map((id) => (
+        <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} isLight style={{ flex: 1 }} />
+      ))}
+    </div>
+  )
+
+  const renderBottom = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasTop ? '0 0 42%' : 1 }}>
+      {hasSchedule && (
+        <MiniWireframeBlock label="Schedule" style={{ flex: hasRightCluster ? 1.6 : 1 }} />
+      )}
+      {hasRightCluster && (
+        <div style={{ display: 'flex', gap: 3, flex: hasSchedule ? 1.4 : 1 }}>
+          {rightCluster.map((id) => (
+            <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 4 }}>
+      {hasTop && renderTop()}
+      {hasBottom && renderBottom()}
+    </div>
+  )
+}
+
+// 4. 2left2right Dynamic Preview
+function TwoLeftTwoRightPreview({ widgets }: { widgets: WidgetVisibilityState }) {
+  const top = (['notes', 'tasks'] as WidgetId[]).filter((id) => widgets[id])
+  const left2 = (['weather', 'recorder'] as WidgetId[]).filter((id) => widgets[id])
+  const right2 = (['countdown', 'schedule'] as WidgetId[]).filter((id) => widgets[id])
+  const hasTop = top.length > 0
+  const hasLeft2 = left2.length > 0
+  const hasRight2 = right2.length > 0
+  const hasBottom = hasLeft2 || hasRight2
+
+  const renderTop = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasBottom ? '0 0 58%' : 1 }}>
+      {top.map((id) => (
+        <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} isLight style={{ flex: 1 }} />
+      ))}
+    </div>
+  )
+
+  const renderBottom = () => (
+    <div style={{ display: 'flex', gap: 4, width: '100%', flex: hasTop ? '0 0 42%' : 1 }}>
+      {hasLeft2 && (
+        <div style={{ display: 'flex', gap: 3, flex: 1 }}>
+          {left2.map((id) => (
+            <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+          ))}
+        </div>
+      )}
+      {hasRight2 && (
+        <div style={{ display: 'flex', gap: 3, flex: 1 }}>
+          {right2.map((id) => (
+            <MiniWireframeBlock key={id} label={WIDGET_METADATA[id].name} style={{ flex: 1 }} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', gap: 4 }}>
+      {hasTop && renderTop()}
+      {hasBottom && renderBottom()}
     </div>
   )
 }
@@ -95,7 +280,7 @@ export function VisualLayoutModal({
           </button>
         </div>
 
-        {/* 1. Layout Preset Selection Grid */}
+        {/* 1. Layout Preset Selection Grid with Live Dynamic Wireframes */}
         <div className={styles.sectionHeader}>
           <span>1. Select Layout Structure</span>
         </div>
@@ -116,28 +301,7 @@ export function VisualLayoutModal({
             </div>
 
             <div className={styles.wireframeFrame}>
-              <div className={styles.default4RightBlueprint}>
-                <MiniWireframeBlock
-                  label="Notes"
-                  isEnabled={widgets.notes}
-                  className={styles.default4RightNotes}
-                  isLight
-                />
-                <div className={styles.default4RightRightCol}>
-                  <MiniWireframeBlock
-                    label="Tasks"
-                    isEnabled={widgets.tasks}
-                    className={styles.default4RightTasks}
-                    isLight
-                  />
-                  <div className={styles.default4RightGrid2x2}>
-                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
-                  </div>
-                </div>
-              </div>
+              <Default4RightPreview widgets={widgets} />
             </div>
           </div>
 
@@ -156,24 +320,7 @@ export function VisualLayoutModal({
             </div>
 
             <div className={styles.wireframeFrame}>
-              <div className={styles.twoRowBlueprint}>
-                <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
-                </div>
-                <div className={styles.twoRowBottomSplit}>
-                  <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
-                  </div>
-                  <MiniWireframeBlock
-                    label="Schedule"
-                    isEnabled={widgets.schedule}
-                    className={styles.cluster1Schedule}
-                  />
-                </div>
-              </div>
+              <ThreeLeftPreview widgets={widgets} />
             </div>
           </div>
 
@@ -192,24 +339,7 @@ export function VisualLayoutModal({
             </div>
 
             <div className={styles.wireframeFrame}>
-              <div className={styles.twoRowBlueprint}>
-                <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
-                </div>
-                <div className={styles.twoRowBottomSplit}>
-                  <MiniWireframeBlock
-                    label="Schedule"
-                    isEnabled={widgets.schedule}
-                    className={styles.cluster1Schedule}
-                  />
-                  <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
-                  </div>
-                </div>
-              </div>
+              <ThreeRightPreview widgets={widgets} />
             </div>
           </div>
 
@@ -228,22 +358,7 @@ export function VisualLayoutModal({
             </div>
 
             <div className={styles.wireframeFrame}>
-              <div className={styles.twoRowBlueprint}>
-                <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
-                </div>
-                <div className={styles.twoRowBottomSplit}>
-                  <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
-                  </div>
-                  <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
-                  </div>
-                </div>
-              </div>
+              <TwoLeftTwoRightPreview widgets={widgets} />
             </div>
           </div>
         </div>
@@ -253,7 +368,7 @@ export function VisualLayoutModal({
           <div className={styles.sectionHeader}>
             <span>2. Toggle Widget Visibility</span>
             <span style={{ fontSize: 11, color: '#71717a', textTransform: 'none' }}>
-              Turn widgets on or off across your active layout
+              Turn widgets on or off — previews above update live
             </span>
           </div>
 
