@@ -12,10 +12,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      process.env.GOOGLE_AI_KEY;
+
     if (!apiKey) {
       return NextResponse.json(
-        { success: false, error: "OpenAI API key not configured" },
+        {
+          success: false,
+          error: "Google Gemini API key not configured. Please add GEMINI_API_KEY to your .env.local file.",
+        },
         { status: 500 }
       );
     }
@@ -30,34 +37,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Forward to OpenAI Whisper API
-    const openaiFormData = new FormData();
-    openaiFormData.append("file", audioFile);
-    openaiFormData.append("model", "whisper-1");
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const base64Audio = Buffer.from(arrayBuffer).toString("base64");
+    const mimeType = audioFile.type || "audio/webm";
 
-    const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+    // Use Google Gemini 2.0 Flash for speech transcription
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
-      body: openaiFormData,
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: "Transcribe the following audio accurately and verbatim. Return ONLY the transcribed text. Do not include any timestamps, introductory remarks, markdown headers, quotes, or conversational filler.",
+              },
+              {
+                inlineData: {
+                  mimeType,
+                  data: base64Audio,
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.1,
+        },
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenAI Whisper API error:", response.status, errorText);
+      console.error("Google Gemini transcription error:", response.status, errorText);
       return NextResponse.json(
-        { success: false, error: `Transcription failed: ${response.statusText}` },
+        { success: false, error: `Google transcription failed: ${response.statusText}` },
         { status: response.status }
       );
     }
 
     const result = await response.json();
+    const transcribedText =
+      result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
     return NextResponse.json({
       success: true,
       data: {
-        text: result.text || "",
+        text: transcribedText,
       },
     });
   } catch (error) {
