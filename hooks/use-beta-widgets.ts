@@ -148,9 +148,9 @@ const ORIENTATION_KEY = 'cleartab-beta-orientation-v2'
 
 export function useBetaWidgets() {
   const [widgets, setWidgets] = useState<WidgetVisibilityState>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY)
+        const stored = window.localStorage.getItem(STORAGE_KEY)
         if (stored) {
           const parsed = JSON.parse(stored)
           return { ...DEFAULT_WIDGET_STATE, ...parsed }
@@ -163,9 +163,9 @@ export function useBetaWidgets() {
   })
 
   const [activePreset, setActivePreset] = useState<PresetId>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
-        const stored = localStorage.getItem(PRESET_KEY) as PresetId | null
+        const stored = window.localStorage.getItem(PRESET_KEY) as PresetId | null
         if (stored && (stored in PRESETS || stored === 'custom')) {
           return stored
         }
@@ -175,9 +175,9 @@ export function useBetaWidgets() {
   })
 
   const [primaryOrder, setPrimaryOrder] = useState<PrimaryWidgetId[]>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
-        const stored = localStorage.getItem(ORDER_KEY)
+        const stored = window.localStorage.getItem(ORDER_KEY)
         if (stored) {
           const parsed = JSON.parse(stored)
           if (Array.isArray(parsed?.primary)) return parsed.primary
@@ -188,11 +188,11 @@ export function useBetaWidgets() {
   })
 
   const [utilityOrder, setUtilityOrder] = useState<UtilityWidgetId[]>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
-        const stored = localStorage.getItem(ORDER_KEY)
+        const stored = window.localStorage.getItem(ORDER_KEY)
         if (stored) {
-          const parsed = JSON.parse(stored)
+          const parsed = window.JSON.parse(stored)
           if (Array.isArray(parsed?.utility)) return parsed.utility
         }
       } catch {}
@@ -201,9 +201,9 @@ export function useBetaWidgets() {
   })
 
   const [layoutOrientation, setLayoutOrientation] = useState<LayoutOrientation>(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
-        const stored = localStorage.getItem(ORIENTATION_KEY) as LayoutOrientation | null
+        const stored = window.localStorage.getItem(ORIENTATION_KEY) as LayoutOrientation | null
         if (stored === 'rows' || stored === 'columns' || stored === 'inverted') {
           return stored
         }
@@ -214,11 +214,12 @@ export function useBetaWidgets() {
 
   // Sync to localStorage
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets))
-      localStorage.setItem(PRESET_KEY, activePreset)
-      localStorage.setItem(ORDER_KEY, JSON.stringify({ primary: primaryOrder, utility: utilityOrder }))
-      localStorage.setItem(ORIENTATION_KEY, layoutOrientation)
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets))
+      window.localStorage.setItem(PRESET_KEY, activePreset)
+      window.localStorage.setItem(ORDER_KEY, JSON.stringify({ primary: primaryOrder, utility: utilityOrder }))
+      window.localStorage.setItem(ORIENTATION_KEY, layoutOrientation)
     } catch (e) {
       console.warn('Failed to save beta widget state to localStorage', e)
     }
