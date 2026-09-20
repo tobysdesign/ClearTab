@@ -108,10 +108,15 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   useEffect(() => {
     if (isDragging) {
       document.body.classList.add('dragging')
+      const handlePointerUp = () => setIsDragging(false)
+      window.addEventListener('pointerup', handlePointerUp)
+      window.addEventListener('blur', handlePointerUp)
+      return () => {
+        document.body.classList.remove('dragging')
+        window.removeEventListener('pointerup', handlePointerUp)
+        window.removeEventListener('blur', handlePointerUp)
+      }
     } else {
-      document.body.classList.remove('dragging')
-    }
-    return () => {
       document.body.classList.remove('dragging')
     }
   }, [isDragging])
