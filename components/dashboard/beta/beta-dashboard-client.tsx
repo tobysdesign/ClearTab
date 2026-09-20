@@ -120,60 +120,57 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const calculateDropZones = useCallback(
-    (dockWidth: number, dockHeight: number): DropZone[] => {
-      const margin = 10
-      const isVertical = position === 'left' || position === 'right'
-      const width = isVertical ? dockHeight : dockWidth
-      const height = isVertical ? dockWidth : dockHeight
+  const calculateDropZones = useCallback(() => {
+    if (typeof window === 'undefined') return []
 
-      return [
-        {
-          id: 'bottom',
-          x: (window.innerWidth - width) / 2,
-          y: window.innerHeight - height - margin,
-          width,
-          height,
-        },
-        {
-          id: 'top',
-          x: (window.innerWidth - width) / 2,
-          y: margin,
-          width,
-          height,
-        },
-        {
-          id: 'left',
-          x: margin,
-          y: (window.innerHeight - width) / 2,
-          width: height,
-          height: width,
-        },
-        {
-          id: 'right',
-          x: window.innerWidth - height - margin,
-          y: (window.innerHeight - width) / 2,
-          width: height,
-          height: width,
-        },
-      ]
-    },
-    [position]
-  )
+    const windowWidth = window.innerWidth
+    const windowHeight = window.innerHeight
+    const isVertical = position === 'left' || position === 'right'
+    const DOCK_WIDTH_HORIZONTAL = 150
+    const DOCK_HEIGHT = 52
+    const width = isVertical ? DOCK_HEIGHT : DOCK_WIDTH_HORIZONTAL
+    const height = isVertical ? DOCK_WIDTH_HORIZONTAL : DOCK_HEIGHT
+    const margin = 10
+
+    const newZones: DropZone[] = [
+      {
+        id: 'bottom',
+        x: (windowWidth - width) / 2,
+        y: windowHeight - height - margin,
+        width,
+        height,
+      },
+      {
+        id: 'top',
+        x: (windowWidth - width) / 2,
+        y: margin,
+        width,
+        height,
+      },
+      {
+        id: 'left',
+        x: margin,
+        y: (windowHeight - width) / 2,
+        width,
+        height,
+      },
+      {
+        id: 'right',
+        x: windowWidth - width - margin,
+        y: (windowHeight - width) / 2,
+        width,
+        height,
+      },
+    ]
+
+    setDropZones(newZones)
+    return newZones
+  }, [position])
 
   useEffect(() => {
-    const handleResize = () => {
-      const dockElement = document.querySelector('[data-dock]') as HTMLElement
-      if (dockElement) {
-        const width = dockElement.offsetWidth
-        const height = dockElement.offsetHeight
-        setDropZones(calculateDropZones(width, height))
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    calculateDropZones()
+    window.addEventListener('resize', calculateDropZones)
+    return () => window.removeEventListener('resize', calculateDropZones)
   }, [calculateDropZones])
 
   useEffect(() => {
@@ -188,7 +185,15 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
       window.removeEventListener('dock-position-change', handleDockPositionChange as EventListener)
   }, [])
 
-  const currentZone = dropZones.find((z) => z.id === position)
+  const defaultZone: DropZone = {
+    id: position,
+    x: typeof window !== 'undefined' ? (window.innerWidth - 150) / 2 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight - 62 : 0,
+    width: 150,
+    height: 52,
+  }
+
+  const currentZone = dropZones.find((z) => z.id === position) || defaultZone
 
   useEffect(() => {
     if (currentZone) {
@@ -259,10 +264,6 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
     }
     setNearestZoneId(null)
     setDragOrigin(null)
-  }
-
-  if (!currentZone) {
-    return <LoadingState />
   }
 
   const isVertical = position === 'left' || position === 'right'
