@@ -1,0 +1,152 @@
+.dashboardContainer {
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  transition: padding 0.3s ease;
+}
+
+.adaptiveGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Primary Workspace Section (Notes + Tasks) */
+.primarySection {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  min-height: 0;
+  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primarySectionWithUtility {
+  flex: 1;
+}
+
+.primarySectionFullHeight {
+  flex: 1;
+  height: 100%;
+}
+
+.primaryWidgetNotes {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primaryWidgetNotesShared {
+  flex: 1.4;
+}
+
+.primaryWidgetNotesSolo {
+  flex: 1;
+  width: 100%;
+}
+
+.primaryWidgetTasks {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primaryWidgetTasksShared {
+  flex: 1;
+}
+
+.primaryWidgetTasksSolo {
+  flex: 1;
+  width: 100%;
+}
+
+/* Utility Section (Weather, Recorder, Countdown, Schedule) */
+.utilitySection {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-height: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.utilitySectionNormal {
+  height: clamp(170px, 28vh, 240px);
+  flex-shrink: 0;
+}
+
+.utilitySectionExpanded {
+  flex: 1;
+  height: 100%;
+}
+
+.utilityCols4 {
+  grid-template-columns: 1fr 1fr 1fr 1.35fr;
+}
+
+.utilityCols3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.utilityCols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.utilityCols1 {
+  grid-template-columns: 1fr;
+}
+
+.utilityWidgetCard {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Solo widget fallback */
+.soloWidgetContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile responsive fallback */
+@media (max-width: 768px) {
+  .adaptiveGrid {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 20px;
+  }
+
+  .primarySection {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .primaryWidgetNotes,
+  .primaryWidgetTasks {
+    height: 400px;
+    flex: none;
+  }
+
+  .utilitySection {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+
+  .utilityWidgetCard {
+    height: 200px;
+  }
+}

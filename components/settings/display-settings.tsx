@@ -112,6 +112,33 @@ export const DisplaySettings = React.forwardRef<HTMLElement, DisplaySettingsProp
               <SelectItem value="light">Light</SelectItem>
             </Select>
           </div>
+
+          <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span className={sharedStyles.label}>Experimental Layout</span>
+              <span style={{ fontSize: 11, color: '#71717a' }}>
+                Toggle widgets on/off with fluid layout adaptation
+              </span>
+            </div>
+            <a
+              href="/beta"
+              style={{
+                fontSize: 12,
+                padding: '5px 12px',
+                borderRadius: 6,
+                background: 'rgba(99, 102, 241, 0.15)',
+                color: '#a5b4fc',
+                textDecoration: 'none',
+                fontWeight: 500,
+                border: '1px solid rgba(99, 102, 241, 0.3)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              Try Beta ↗
+            </a>
+          </div>
         </div>
       </section>
     )
