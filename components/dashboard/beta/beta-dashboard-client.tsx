@@ -52,6 +52,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   const {
     presetLayout,
     setPresetLayout,
+    widgets,
+    toggleWidget,
+    activeCount,
+    totalCount,
   } = useBetaWidgets()
 
   const [position, setPosition] = useState<DockPosition>(() => {
@@ -331,6 +335,17 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           }}
         >
           <span>🎛️ Layout: {presetLayout}</span>
+          <span
+            style={{
+              fontSize: 10,
+              padding: '1px 5px',
+              borderRadius: 9999,
+              background: 'rgba(59, 130, 246, 0.3)',
+              color: '#93c5fd',
+            }}
+          >
+            {activeCount}/{totalCount}
+          </span>
         </button>
 
         <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
@@ -362,6 +377,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             notes={notes}
             tasks={tasks}
             presetLayout={presetLayout}
+            visibleWidgets={widgets}
             dockPosition={position}
             searchQuery={searchQuery}
           />
@@ -443,6 +459,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         onClose={() => setIsLayoutModalOpen(false)}
         presetLayout={presetLayout}
         setPresetLayout={setPresetLayout}
+        widgets={widgets}
+        toggleWidget={toggleWidget}
+        activeCount={activeCount}
+        totalCount={totalCount}
       />
     </div>
   )

@@ -1,7 +1,14 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { BetaPresetLayout, LAYOUT_PRESET_METADATA } from '@/hooks/use-beta-widgets'
+import { Switch } from '@/components/ui/switch'
+import {
+  BetaPresetLayout,
+  WidgetId,
+  WidgetVisibilityState,
+  WIDGET_METADATA,
+  LAYOUT_PRESET_METADATA,
+} from '@/hooks/use-beta-widgets'
 import styles from './visual-layout-modal.module.css'
 
 interface VisualLayoutModalProps {
@@ -9,17 +16,31 @@ interface VisualLayoutModalProps {
   onClose: () => void
   presetLayout: BetaPresetLayout
   setPresetLayout: (layout: BetaPresetLayout) => void
+  widgets: WidgetVisibilityState
+  toggleWidget: (id: WidgetId) => void
+  activeCount: number
+  totalCount: number
 }
 
 interface MiniBlockProps {
   label: string
+  isEnabled?: boolean
   className?: string
   isLight?: boolean
 }
 
-function MiniWireframeBlock({ label, className = '', isLight = false }: MiniBlockProps) {
+function MiniWireframeBlock({
+  label,
+  isEnabled = true,
+  className = '',
+  isLight = false,
+}: MiniBlockProps) {
   return (
-    <div className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${className}`}>
+    <div
+      className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
+        !isEnabled ? styles.miniBlockOff : ''
+      } ${className}`}
+    >
       <span className={styles.miniBlockName}>{label}</span>
       <span className={styles.miniGripDots}>:::</span>
     </div>
@@ -31,6 +52,10 @@ export function VisualLayoutModal({
   onClose,
   presetLayout = 'default_4right',
   setPresetLayout,
+  widgets,
+  toggleWidget,
+  activeCount,
+  totalCount,
 }: VisualLayoutModalProps) {
   // Close on Escape key
   useEffect(() => {
@@ -46,6 +71,8 @@ export function VisualLayoutModal({
 
   if (!isOpen) return null
 
+  const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
+
   const handleSelectLayout = (layout: BetaPresetLayout) => {
     setPresetLayout(layout)
   }
@@ -58,7 +85,7 @@ export function VisualLayoutModal({
           <div className={styles.headerTitleRow}>
             <h2 className={styles.modalTitle}>Choose Dashboard Layout</h2>
             <span className={styles.activeCountBadge}>
-              Active: {LAYOUT_PRESET_METADATA[presetLayout]?.name || presetLayout}
+              Active: {LAYOUT_PRESET_METADATA[presetLayout]?.name || presetLayout} ({activeCount}/{totalCount} widgets)
             </span>
           </div>
 
@@ -68,7 +95,11 @@ export function VisualLayoutModal({
           </button>
         </div>
 
-        {/* Layout Blueprint Grid */}
+        {/* 1. Layout Preset Selection Grid */}
+        <div className={styles.sectionHeader}>
+          <span>1. Select Layout Structure</span>
+        </div>
+
         <div className={styles.layoutsGrid}>
           {/* Preset 1: default_4right */}
           <div
@@ -86,14 +117,24 @@ export function VisualLayoutModal({
 
             <div className={styles.wireframeFrame}>
               <div className={styles.default4RightBlueprint}>
-                <MiniWireframeBlock label="Notes" className={styles.default4RightNotes} isLight />
+                <MiniWireframeBlock
+                  label="Notes"
+                  isEnabled={widgets.notes}
+                  className={styles.default4RightNotes}
+                  isLight
+                />
                 <div className={styles.default4RightRightCol}>
-                  <MiniWireframeBlock label="Tasks" className={styles.default4RightTasks} isLight />
+                  <MiniWireframeBlock
+                    label="Tasks"
+                    isEnabled={widgets.tasks}
+                    className={styles.default4RightTasks}
+                    isLight
+                  />
                   <div className={styles.default4RightGrid2x2}>
-                    <MiniWireframeBlock label="Schedule" />
-                    <MiniWireframeBlock label="Weather" />
-                    <MiniWireframeBlock label="Count" />
-                    <MiniWireframeBlock label="Voice" />
+                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
                 </div>
               </div>
@@ -117,16 +158,20 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isLight />
-                  <MiniWireframeBlock label="Tasks" isLight />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
                   <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" />
-                    <MiniWireframeBlock label="Count" />
-                    <MiniWireframeBlock label="Voice" />
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
-                  <MiniWireframeBlock label="Schedule" className={styles.cluster1Schedule} />
+                  <MiniWireframeBlock
+                    label="Schedule"
+                    isEnabled={widgets.schedule}
+                    className={styles.cluster1Schedule}
+                  />
                 </div>
               </div>
             </div>
@@ -149,15 +194,19 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Tasks" isLight />
-                  <MiniWireframeBlock label="Notes" isLight />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
-                  <MiniWireframeBlock label="Schedule" className={styles.cluster1Schedule} />
+                  <MiniWireframeBlock
+                    label="Schedule"
+                    isEnabled={widgets.schedule}
+                    className={styles.cluster1Schedule}
+                  />
                   <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" />
-                    <MiniWireframeBlock label="Count" />
-                    <MiniWireframeBlock label="Voice" />
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
                 </div>
               </div>
@@ -181,21 +230,58 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isLight />
-                  <MiniWireframeBlock label="Tasks" isLight />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
                   <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Weather" />
-                    <MiniWireframeBlock label="Voice" />
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
                   <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Count" />
-                    <MiniWireframeBlock label="Schedule" />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 2. Dedicated Widget Toggles Below Layout Options */}
+        <div className={styles.togglesSection}>
+          <div className={styles.sectionHeader}>
+            <span>2. Toggle Widget Visibility</span>
+            <span style={{ fontSize: 11, color: '#71717a', textTransform: 'none' }}>
+              Turn widgets on or off across your active layout
+            </span>
+          </div>
+
+          <div className={styles.togglesGrid}>
+            {widgetKeys.map((id) => {
+              const meta = WIDGET_METADATA[id]
+              const isChecked = widgets[id] ?? false
+              return (
+                <div
+                  key={id}
+                  className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`}
+                  onClick={() => toggleWidget(id)}
+                >
+                  <div className={styles.toggleLabelGroup}>
+                    <span className={styles.toggleIcon}>{meta.icon}</span>
+                    <span className={styles.toggleName}>{meta.name}</span>
+                  </div>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={isChecked}
+                      onCheckedChange={() => toggleWidget(id)}
+                      aria-label={`Toggle ${meta.name}`}
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>
