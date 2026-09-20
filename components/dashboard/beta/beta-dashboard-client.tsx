@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
 import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
+import { WidgetTogglePopover } from './widget-toggle-popover'
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
@@ -270,7 +271,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
 
   return (
     <div ref={containerRef} className="dashboard-container">
-      {/* Floating Beta Indicator pill */}
+      {/* Floating Beta Indicator & Controls pill */}
       <div
         style={{
           position: 'fixed',
@@ -282,12 +283,12 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           gap: 8,
           padding: '4px 10px',
           borderRadius: 9999,
-          background: 'rgba(24, 24, 27, 0.75)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          background: 'rgba(24, 24, 27, 0.85)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.14)',
           fontSize: 12,
           color: '#e4e4e7',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
         }}
       >
         <span
@@ -296,28 +297,71 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             fontWeight: 700,
             letterSpacing: '0.05em',
             textTransform: 'uppercase',
-            padding: '1px 6px',
-            borderRadius: 4,
+            padding: '2px 7px',
+            borderRadius: 6,
             background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
             color: '#fff',
           }}
         >
           Beta
         </span>
-        <span style={{ color: '#a1a1aa' }}>Adaptive Layout</span>
+
+        {/* Quick layout trigger button */}
+        <WidgetTogglePopover
+          widgets={widgets}
+          activePreset={activePreset}
+          activeCount={activeCount}
+          totalCount={totalCount}
+          toggleWidget={toggleWidget}
+          applyPreset={applyPreset}
+          resetToAll={resetToAll}
+          side="bottom"
+        >
+          <button
+            type="button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: 6,
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 500,
+              padding: '3px 8px',
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+          >
+            <span>🎛️ Customize Layout</span>
+            <span
+              style={{
+                fontSize: 10,
+                padding: '1px 5px',
+                borderRadius: 9999,
+                background: 'rgba(99, 102, 241, 0.3)',
+                color: '#a5b4fc',
+              }}
+            >
+              {activeCount}/{totalCount}
+            </span>
+          </button>
+        </WidgetTogglePopover>
+
         <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
         <Link
           href="/"
           style={{
-            color: '#93c5fd',
+            color: '#a1a1aa',
             textDecoration: 'none',
-            fontWeight: 500,
+            fontWeight: 400,
             fontSize: 11,
-            transition: 'opacity 0.15s',
+            transition: 'color 0.15s',
           }}
           title="Return to Classic rigid layout"
         >
-          Classic Layout
+          Classic
         </Link>
       </div>
 
@@ -340,28 +384,51 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         </Suspense>
       </div>
 
-      {typeof document !== 'undefined' &&
+      {isDragging &&
+        dropZones.map((zone) => {
+          if (zone.id === position) return null
+          return (
+            <div
+              key={zone.id}
+              className={cn(
+                'drop-zone',
+                nearestZoneId === zone.id ? 'drop-zone-active' : 'drop-zone-inactive'
+              )}
+              style={{
+                left: zone.x + zone.width / 2,
+                top: zone.y + zone.height / 2,
+                width: zone.id === 'left' || zone.id === 'right' ? '52px' : '150px',
+                height: zone.id === 'left' || zone.id === 'right' ? '150px' : '50px',
+              }}
+            />
+          )
+        })}
+
+      {typeof window !== 'undefined' &&
         createPortal(
           <motion.div
-            data-dock
-            className={cn(
-              styles.dock,
-              styles[`dock-${position}`],
-              isDragging && styles.dragging
-            )}
-            animate={controls}
-            initial={currentZone ? { x: currentZone.x, y: currentZone.y } : false}
             drag
-            dragMomentum={false}
+            dragConstraints={{
+              left: 0,
+              right: typeof window !== 'undefined' ? window.innerWidth - 100 : 1000,
+              top: 0,
+              bottom: typeof window !== 'undefined' ? window.innerHeight - 100 : 1000,
+            }}
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
-            whileDrag={{ scale: 1.05 }}
+            dragMomentum={false}
+            className="dock-container"
+            animate={controls}
+            initial={currentZone ? { x: currentZone.x, y: currentZone.y } : undefined}
+            style={{ position: 'fixed', top: 0, left: 0, zIndex: 50 }}
           >
-            <div className={styles.dockInner}>
-              <div className={styles.dragHandle}>
-                <DragIcon size={16} />
-              </div>
+            <div
+              className={cn(
+                'dock-content',
+                isVertical ? 'dock-content-vertical' : 'dock-content-horizontal'
+              )}
+            >
               <BetaDockContent
                 showSearch={showSearch}
                 searchQuery={searchQuery}
@@ -379,6 +446,16 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 resetToAll={resetToAll}
                 dockPosition={position}
               />
+
+              <div
+                className="dock-handle"
+                onPointerDown={(e) => {
+                  const target = e.currentTarget as HTMLDivElement
+                  target.setPointerCapture(e.pointerId)
+                }}
+              >
+                <DragIcon size={16} className="text-white/60" />
+              </div>
             </div>
           </motion.div>,
           document.body
