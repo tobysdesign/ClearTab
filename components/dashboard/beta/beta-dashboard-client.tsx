@@ -53,7 +53,13 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
     activePreset,
     activeCount,
     totalCount,
+    primaryOrder,
+    utilityOrder,
+    layoutOrientation,
+    setLayoutOrientation,
     toggleWidget,
+    swapPrimaryOrder,
+    moveUtility,
     applyPreset,
     resetToAll,
   } = useBetaWidgets()
@@ -312,7 +318,13 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           activePreset={activePreset}
           activeCount={activeCount}
           totalCount={totalCount}
+          primaryOrder={primaryOrder}
+          utilityOrder={utilityOrder}
+          layoutOrientation={layoutOrientation}
+          setLayoutOrientation={setLayoutOrientation}
           toggleWidget={toggleWidget}
+          swapPrimaryOrder={swapPrimaryOrder}
+          moveUtility={moveUtility}
           applyPreset={applyPreset}
           resetToAll={resetToAll}
           side="bottom"
@@ -378,6 +390,9 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             notes={notes}
             tasks={tasks}
             visibleWidgets={widgets}
+            primaryOrder={primaryOrder}
+            utilityOrder={utilityOrder}
+            layoutOrientation={layoutOrientation}
             dockPosition={position}
             searchQuery={searchQuery}
           />
@@ -441,7 +456,13 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 activePreset={activePreset}
                 activeCount={activeCount}
                 totalCount={totalCount}
+                primaryOrder={primaryOrder}
+                utilityOrder={utilityOrder}
+                layoutOrientation={layoutOrientation}
+                setLayoutOrientation={setLayoutOrientation}
                 toggleWidget={toggleWidget}
+                swapPrimaryOrder={swapPrimaryOrder}
+                moveUtility={moveUtility}
                 applyPreset={applyPreset}
                 resetToAll={resetToAll}
                 dockPosition={position}

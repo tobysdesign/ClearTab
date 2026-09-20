@@ -4,7 +4,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 
 export type WidgetId = 'notes' | 'tasks' | 'schedule' | 'weather' | 'recorder' | 'countdown'
 
+export type PrimaryWidgetId = 'notes' | 'tasks'
+export type UtilityWidgetId = 'weather' | 'recorder' | 'countdown' | 'schedule'
+
 export type PresetId = 'all' | 'focus' | 'planner' | 'capture' | 'minimal' | 'custom'
+
+export type LayoutOrientation = 'rows' | 'columns' | 'inverted'
 
 export interface WidgetMeta {
   id: WidgetId
@@ -70,6 +75,9 @@ export const DEFAULT_WIDGET_STATE: WidgetVisibilityState = {
   countdown: true,
 }
 
+export const DEFAULT_PRIMARY_ORDER: PrimaryWidgetId[] = ['notes', 'tasks']
+export const DEFAULT_UTILITY_ORDER: UtilityWidgetId[] = ['weather', 'recorder', 'countdown', 'schedule']
+
 export const PRESETS: Record<Exclude<PresetId, 'custom'>, { name: string; description: string; widgets: WidgetVisibilityState }> = {
   all: {
     name: 'All Widgets',
@@ -133,8 +141,10 @@ export const PRESETS: Record<Exclude<PresetId, 'custom'>, { name: string; descri
   },
 }
 
-const STORAGE_KEY = 'cleartab-beta-widgets-v1'
-const PRESET_KEY = 'cleartab-beta-preset-v1'
+const STORAGE_KEY = 'cleartab-beta-widgets-v2'
+const PRESET_KEY = 'cleartab-beta-preset-v2'
+const ORDER_KEY = 'cleartab-beta-order-v2'
+const ORIENTATION_KEY = 'cleartab-beta-orientation-v2'
 
 export function useBetaWidgets() {
   const [widgets, setWidgets] = useState<WidgetVisibilityState>(() => {
@@ -164,15 +174,55 @@ export function useBetaWidgets() {
     return 'all'
   })
 
+  const [primaryOrder, setPrimaryOrder] = useState<PrimaryWidgetId[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(ORDER_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed?.primary)) return parsed.primary
+        }
+      } catch {}
+    }
+    return DEFAULT_PRIMARY_ORDER
+  })
+
+  const [utilityOrder, setUtilityOrder] = useState<UtilityWidgetId[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(ORDER_KEY)
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed?.utility)) return parsed.utility
+        }
+      } catch {}
+    }
+    return DEFAULT_UTILITY_ORDER
+  })
+
+  const [layoutOrientation, setLayoutOrientation] = useState<LayoutOrientation>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(ORIENTATION_KEY) as LayoutOrientation | null
+        if (stored === 'rows' || stored === 'columns' || stored === 'inverted') {
+          return stored
+        }
+      } catch {}
+    }
+    return 'rows'
+  })
+
   // Sync to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets))
       localStorage.setItem(PRESET_KEY, activePreset)
+      localStorage.setItem(ORDER_KEY, JSON.stringify({ primary: primaryOrder, utility: utilityOrder }))
+      localStorage.setItem(ORIENTATION_KEY, layoutOrientation)
     } catch (e) {
       console.warn('Failed to save beta widget state to localStorage', e)
     }
-  }, [widgets, activePreset])
+  }, [widgets, activePreset, primaryOrder, utilityOrder, layoutOrientation])
 
   const toggleWidget = useCallback((id: WidgetId) => {
     setWidgets((prev) => {
@@ -188,6 +238,26 @@ export function useBetaWidgets() {
     })
   }, [])
 
+  const swapPrimaryOrder = useCallback(() => {
+    setPrimaryOrder((prev) => [prev[1] ?? 'tasks', prev[0] ?? 'notes'])
+    setActivePreset('custom')
+  }, [])
+
+  const moveUtility = useCallback((id: UtilityWidgetId, direction: 'left' | 'right') => {
+    setUtilityOrder((prev) => {
+      const idx = prev.indexOf(id)
+      if (idx === -1) return prev
+      const targetIdx = direction === 'left' ? idx - 1 : idx + 1
+      if (targetIdx < 0 || targetIdx >= prev.length) return prev
+
+      const next = [...prev]
+      const [item] = next.splice(idx, 1)
+      next.splice(targetIdx, 0, item)
+      return next
+    })
+    setActivePreset('custom')
+  }, [])
+
   const applyPreset = useCallback((presetId: Exclude<PresetId, 'custom'>) => {
     const preset = PRESETS[presetId]
     if (!preset) return
@@ -197,6 +267,9 @@ export function useBetaWidgets() {
 
   const resetToAll = useCallback(() => {
     setWidgets({ ...DEFAULT_WIDGET_STATE })
+    setPrimaryOrder(DEFAULT_PRIMARY_ORDER)
+    setUtilityOrder(DEFAULT_UTILITY_ORDER)
+    setLayoutOrientation('rows')
     setActivePreset('all')
   }, [])
 
@@ -211,7 +284,13 @@ export function useBetaWidgets() {
     activePreset,
     activeCount,
     totalCount,
+    primaryOrder,
+    utilityOrder,
+    layoutOrientation,
+    setLayoutOrientation,
     toggleWidget,
+    swapPrimaryOrder,
+    moveUtility,
     applyPreset,
     resetToAll,
   }

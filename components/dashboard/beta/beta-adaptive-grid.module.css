@@ -9,144 +9,78 @@
   transition: padding 0.3s ease;
 }
 
-.adaptiveGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.panelGroupFull {
   width: 100%;
   height: 100%;
   min-height: 0;
+  min-width: 0;
+}
+
+.widgetPanel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  position: relative;
   overflow: hidden;
 }
 
-/* Primary Workspace Section (Notes + Tasks) */
-.primarySection {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  min-height: 0;
-  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.primarySectionWithUtility {
-  flex: 1;
-}
-
-.primarySectionFullHeight {
-  flex: 1;
-  height: 100%;
-}
-
-.primaryWidgetNotes {
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.primaryWidgetNotesShared {
-  flex: 1.4;
-}
-
-.primaryWidgetNotesSolo {
-  flex: 1;
-  width: 100%;
-}
-
-.primaryWidgetTasks {
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  transition: flex 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.primaryWidgetTasksShared {
-  flex: 1;
-}
-
-.primaryWidgetTasksSolo {
-  flex: 1;
-  width: 100%;
-}
-
-/* Utility Section (Weather, Recorder, Countdown, Schedule) */
-.utilitySection {
-  display: grid;
-  gap: 10px;
-  width: 100%;
-  min-height: 0;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.utilitySectionNormal {
-  height: clamp(170px, 28vh, 240px);
+/* Horizontal resize handle (resizing columns) */
+.resizeHandleHorizontal {
+  width: 2px;
+  margin: 0 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: col-resize;
   flex-shrink: 0;
 }
 
-.utilitySectionExpanded {
-  flex: 1;
-  height: 100%;
+.resizeHandleHorizontal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  right: -6px;
 }
 
-.utilityCols4 {
-  grid-template-columns: 1fr 1fr 1fr 1.35fr;
+.resizeHandleHorizontal:hover,
+.resizeHandleHorizontal[data-resize-handle-active] {
+  background-color: #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
 }
 
-.utilityCols3 {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-.utilityCols2 {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.utilityCols1 {
-  grid-template-columns: 1fr;
-}
-
-.utilityWidgetCard {
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
+/* Vertical resize handle (resizing rows) */
+.resizeHandleVertical {
+  height: 2px;
+  margin: 4px 0;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  transition: all 0.2s ease;
   position: relative;
+  cursor: row-resize;
+  flex-shrink: 0;
 }
 
-/* Solo widget fallback */
-.soloWidgetContainer {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.resizeHandleVertical::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -6px;
+  bottom: -6px;
 }
 
-/* Mobile responsive fallback */
+.resizeHandleVertical:hover,
+.resizeHandleVertical[data-resize-handle-active] {
+  background-color: #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+}
+
 @media (max-width: 768px) {
-  .adaptiveGrid {
+  .dashboardContainer {
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 20px;
-  }
-
-  .primarySection {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .primaryWidgetNotes,
-  .primaryWidgetTasks {
-    height: 400px;
-    flex: none;
-  }
-
-  .utilitySection {
-    grid-template-columns: 1fr !important;
-    height: auto !important;
-  }
-
-  .utilityWidgetCard {
-    height: 200px;
   }
 }

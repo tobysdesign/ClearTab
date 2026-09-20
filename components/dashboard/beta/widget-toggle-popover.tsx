@@ -10,7 +10,10 @@ import {
 import { Switch } from '@/components/ui/switch'
 import {
   WidgetId,
+  PrimaryWidgetId,
+  UtilityWidgetId,
   PresetId,
+  LayoutOrientation,
   WIDGET_METADATA,
   PRESETS,
   WidgetVisibilityState,
@@ -23,7 +26,13 @@ interface WidgetTogglePopoverProps {
   activePreset: PresetId
   activeCount: number
   totalCount: number
+  primaryOrder: PrimaryWidgetId[]
+  utilityOrder: UtilityWidgetId[]
+  layoutOrientation: LayoutOrientation
+  setLayoutOrientation: (orientation: LayoutOrientation) => void
   toggleWidget: (id: WidgetId) => void
+  swapPrimaryOrder: () => void
+  moveUtility: (id: UtilityWidgetId, direction: 'left' | 'right') => void
   applyPreset: (presetId: Exclude<PresetId, 'custom'>) => void
   resetToAll: () => void
   side?: 'top' | 'bottom' | 'left' | 'right'
@@ -35,7 +44,13 @@ export function WidgetTogglePopover({
   activePreset,
   activeCount,
   totalCount,
+  primaryOrder,
+  utilityOrder,
+  layoutOrientation,
+  setLayoutOrientation,
   toggleWidget,
+  swapPrimaryOrder,
+  moveUtility,
   applyPreset,
   resetToAll,
   side = 'top',
@@ -54,7 +69,6 @@ export function WidgetTogglePopover({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const widgetKeys = Object.keys(WIDGET_METADATA) as WidgetId[]
   const presetKeys = Object.keys(PRESETS) as (Exclude<PresetId, 'custom'>)[]
 
   return (
@@ -84,6 +98,33 @@ export function WidgetTogglePopover({
             </Link>
           </div>
 
+          {/* Layout Orientation */}
+          <div className={styles.sectionLabel}>Orientation</div>
+          <div className={styles.orientationRow}>
+            <button
+              type="button"
+              onClick={() => setLayoutOrientation('rows')}
+              className={`${styles.orientationChip} ${layoutOrientation === 'rows' ? styles.orientationChipActive : ''}`}
+            >
+              <span>☰</span> Rows
+            </button>
+            <button
+              type="button"
+              onClick={() => setLayoutOrientation('columns')}
+              className={`${styles.orientationChip} ${layoutOrientation === 'columns' ? styles.orientationChipActive : ''}`}
+            >
+              <span>❚❚</span> Columns
+            </button>
+            <button
+              type="button"
+              onClick={() => setLayoutOrientation('inverted')}
+              className={`${styles.orientationChip} ${layoutOrientation === 'inverted' ? styles.orientationChipActive : ''}`}
+            >
+              <span>⇅</span> Inverted
+            </button>
+          </div>
+
+          {/* Quick Presets */}
           <div className={styles.sectionLabel}>Presets</div>
           <div className={styles.presetsRow}>
             {presetKeys.map((key) => {
@@ -103,16 +144,26 @@ export function WidgetTogglePopover({
             })}
           </div>
 
-          <div className={styles.sectionLabel}>Toggle Widgets</div>
-          <div className={styles.widgetList}>
-            {widgetKeys.map((id) => {
+          {/* Primary Workspace Widgets */}
+          <div className={styles.sectionHeaderRow}>
+            <span className={styles.sectionLabel}>Workspace Widgets</span>
+            <button
+              type="button"
+              onClick={swapPrimaryOrder}
+              className={styles.swapBtn}
+              title="Swap Notes and Tasks positions"
+            >
+              ⇄ Swap Order
+            </button>
+          </div>
+          <div className={styles.widgetList} style={{ maxHeight: 110, marginBottom: 12 }}>
+            {primaryOrder.map((id) => {
               const meta = WIDGET_METADATA[id]
               const isChecked = widgets[id] ?? false
               return (
                 <div
                   key={id}
                   className={`${styles.widgetRow} ${isChecked ? styles.widgetRowActive : ''}`}
-                  onClick={() => toggleWidget(id)}
                 >
                   <div className={styles.widgetInfo}>
                     <span className={styles.widgetIcon}>{meta.icon}</span>
@@ -121,7 +172,60 @@ export function WidgetTogglePopover({
                       <span className={styles.widgetDesc}>{meta.description}</span>
                     </div>
                   </div>
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div className={styles.widgetControls}>
+                    <Switch
+                      checked={isChecked}
+                      onCheckedChange={() => toggleWidget(id)}
+                      aria-label={`Toggle ${meta.name}`}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Utility Shelf Widgets */}
+          <div className={styles.sectionHeaderRow}>
+            <span className={styles.sectionLabel}>Utility Shelf</span>
+            <span style={{ fontSize: 10, color: '#71717a' }}>Reorder with ◀ ▶</span>
+          </div>
+          <div className={styles.widgetList} style={{ maxHeight: 180 }}>
+            {utilityOrder.map((id, index) => {
+              const meta = WIDGET_METADATA[id]
+              const isChecked = widgets[id] ?? false
+              return (
+                <div
+                  key={id}
+                  className={`${styles.widgetRow} ${isChecked ? styles.widgetRowActive : ''}`}
+                >
+                  <div className={styles.widgetInfo}>
+                    <span className={styles.widgetIcon}>{meta.icon}</span>
+                    <div className={styles.widgetText}>
+                      <span className={styles.widgetName}>{meta.name}</span>
+                      <span className={styles.widgetDesc}>{meta.description}</span>
+                    </div>
+                  </div>
+                  <div className={styles.widgetControls}>
+                    <div className={styles.reorderGroup}>
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveUtility(id, 'left')}
+                        className={styles.reorderBtn}
+                        title="Move left/up"
+                      >
+                        ◀
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === utilityOrder.length - 1}
+                        onClick={() => moveUtility(id, 'right')}
+                        className={styles.reorderBtn}
+                        title="Move right/down"
+                      >
+                        ▶
+                      </button>
+                    </div>
                     <Switch
                       checked={isChecked}
                       onCheckedChange={() => toggleWidget(id)}
@@ -134,16 +238,14 @@ export function WidgetTogglePopover({
           </div>
 
           <div className={styles.footer}>
-            <span className={styles.footerHint}>Shortcut: ⌘L</span>
-            {activeCount < totalCount && (
-              <button
-                type="button"
-                onClick={resetToAll}
-                className={styles.resetBtn}
-              >
-                Reset All
-              </button>
-            )}
+            <span className={styles.footerHint}>Drag splitters to resize</span>
+            <button
+              type="button"
+              onClick={resetToAll}
+              className={styles.resetBtn}
+            >
+              Reset
+            </button>
           </div>
         </div>
       </PopoverContent>

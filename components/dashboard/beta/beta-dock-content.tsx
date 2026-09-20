@@ -12,7 +12,10 @@ import { WidgetTogglePopover } from './widget-toggle-popover'
 import {
   WidgetVisibilityState,
   WidgetId,
+  PrimaryWidgetId,
+  UtilityWidgetId,
   PresetId,
+  LayoutOrientation,
 } from '@/hooks/use-beta-widgets'
 import styles from '../dock-content.module.css'
 
@@ -28,7 +31,13 @@ interface BetaDockContentProps {
   activePreset: PresetId
   activeCount: number
   totalCount: number
+  primaryOrder: PrimaryWidgetId[]
+  utilityOrder: UtilityWidgetId[]
+  layoutOrientation: LayoutOrientation
+  setLayoutOrientation: (orientation: LayoutOrientation) => void
   toggleWidget: (id: WidgetId) => void
+  swapPrimaryOrder: () => void
+  moveUtility: (id: UtilityWidgetId, direction: 'left' | 'right') => void
   applyPreset: (presetId: Exclude<PresetId, 'custom'>) => void
   resetToAll: () => void
   dockPosition: 'top' | 'left' | 'right' | 'bottom'
@@ -46,7 +55,13 @@ export function BetaDockContent({
   activePreset,
   activeCount,
   totalCount,
+  primaryOrder,
+  utilityOrder,
+  layoutOrientation,
+  setLayoutOrientation,
   toggleWidget,
+  swapPrimaryOrder,
+  moveUtility,
   applyPreset,
   resetToAll,
   dockPosition,
@@ -83,7 +98,13 @@ export function BetaDockContent({
         activePreset={activePreset}
         activeCount={activeCount}
         totalCount={totalCount}
+        primaryOrder={primaryOrder}
+        utilityOrder={utilityOrder}
+        layoutOrientation={layoutOrientation}
+        setLayoutOrientation={setLayoutOrientation}
         toggleWidget={toggleWidget}
+        swapPrimaryOrder={swapPrimaryOrder}
+        moveUtility={moveUtility}
         applyPreset={applyPreset}
         resetToAll={resetToAll}
         side={popoverSide}
