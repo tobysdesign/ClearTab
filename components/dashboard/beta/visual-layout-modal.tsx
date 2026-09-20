@@ -6,6 +6,7 @@ import {
   BetaPresetLayout,
   WidgetId,
   WidgetVisibilityState,
+  WIDGET_METADATA,
 } from '@/hooks/use-beta-widgets'
 import styles from './visual-layout-modal.module.css'
 
@@ -20,45 +21,23 @@ interface VisualLayoutModalProps {
   totalCount: number
 }
 
-interface BlockProps {
-  id: WidgetId
+interface MiniBlockProps {
   label: string
   isEnabled: boolean
-  onToggle: (id: WidgetId) => void
   className?: string
   isLight?: boolean
 }
 
-function InteractiveWidgetBlock({
-  id,
-  label,
-  isEnabled,
-  onToggle,
-  className = '',
-  isLight = false,
-}: BlockProps) {
+function MiniWireframeBlock({ label, isEnabled, className = '', isLight = false }: MiniBlockProps) {
   return (
     <div
-      className={`${styles.widgetBlock} ${isLight ? styles.widgetBlockLight : ''} ${
-        !isEnabled ? styles.widgetBlockOff : ''
+      className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
+        !isEnabled ? styles.miniBlockOff : ''
       } ${className}`}
-      onClick={(e) => {
-        // Toggle on clicking anywhere on the widget card in the preview
-        e.stopPropagation()
-        onToggle(id)
-      }}
     >
-      <span className={styles.widgetNameLabel}>{label}</span>
-
-      <div onClick={(e) => e.stopPropagation()}>
-        <Switch
-          checked={isEnabled}
-          onCheckedChange={() => onToggle(id)}
-          aria-label={`Toggle ${label}`}
-        />
-      </div>
-
-      <span className={styles.dragDots}>:::</span>
+      <span className={styles.miniBlockName}>{label}</span>
+      <div className={`${styles.miniToggleIndicator} ${!isEnabled ? styles.miniToggleIndicatorOff : ''}`} />
+      <span className={styles.miniGripDots}>:::</span>
     </div>
   )
 }
@@ -66,7 +45,7 @@ function InteractiveWidgetBlock({
 export function VisualLayoutModal({
   isOpen,
   onClose,
-  presetLayout,
+  presetLayout = 'default_4right',
   setPresetLayout,
   widgets,
   toggleWidget,
@@ -87,14 +66,17 @@ export function VisualLayoutModal({
 
   if (!isOpen) return null
 
+  const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className={styles.modalHeader}>
           <div className={styles.headerTitleRow}>
-            <h2 className={styles.modalTitle}>Choose Layout</h2>
+            <h2 className={styles.modalTitle}>Choose Dashboard Layout</h2>
             <span className={styles.activeCountBadge}>
-              {activeCount}/{totalCount} Widgets Enabled
+              {activeCount}/{totalCount} Active Widgets
             </span>
           </div>
 
@@ -104,274 +86,193 @@ export function VisualLayoutModal({
           </button>
         </div>
 
-        <div className={styles.layoutsContainer}>
-          {/* 1. default_4right */}
-          <div className={styles.layoutColumn}>
-            <div className={styles.layoutNameTitle}>
-              <span>default_4right</span>
+        {/* 1. Layout Preset Selection Grid */}
+        <div className={styles.sectionHeader}>
+          <span>Select Structure Blueprint</span>
+        </div>
+
+        <div className={styles.layoutsGrid}>
+          {/* Preset 1: default_4right */}
+          <div
+            className={`${styles.layoutCard} ${
+              presetLayout === 'default_4right' ? styles.layoutCardActive : ''
+            }`}
+            onClick={() => setPresetLayout('default_4right')}
+          >
+            <div className={styles.layoutTitleRow}>
+              <span className={styles.layoutName}>default_4right</span>
               {presetLayout === 'default_4right' && (
-                <span className={styles.activeLayoutPill}>Active</span>
+                <span className={styles.activeBadge}>Active</span>
               )}
             </div>
 
-            <div
-              className={`${styles.layoutFrame} ${
-                presetLayout === 'default_4right' ? styles.layoutFrameActive : ''
-              }`}
-              onClick={() => setPresetLayout('default_4right')}
-            >
-              <div className={styles.default4RightContainer}>
-                {/* Notes takes full height of left side */}
-                <InteractiveWidgetBlock
-                  id="notes"
+            <div className={styles.wireframeFrame}>
+              <div className={styles.default4RightBlueprint}>
+                <MiniWireframeBlock
                   label="Notes"
                   isEnabled={widgets.notes}
-                  onToggle={toggleWidget}
                   className={styles.default4RightNotes}
                   isLight
                 />
-
-                {/* Right Column */}
                 <div className={styles.default4RightRightCol}>
-                  <InteractiveWidgetBlock
-                    id="tasks"
+                  <MiniWireframeBlock
                     label="Tasks"
                     isEnabled={widgets.tasks}
-                    onToggle={toggleWidget}
                     className={styles.default4RightTasks}
+                    isLight
                   />
-
                   <div className={styles.default4RightGrid2x2}>
-                    <InteractiveWidgetBlock
-                      id="schedule"
-                      label="Schedule"
-                      isEnabled={widgets.schedule}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="weather"
-                      label="Weather"
-                      isEnabled={widgets.weather}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="countdown"
-                      label="Count"
-                      isEnabled={widgets.countdown}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="recorder"
-                      label="Voice"
-                      isEnabled={widgets.recorder}
-                      onToggle={toggleWidget}
-                    />
+                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 2. 3left */}
-          <div className={styles.layoutColumn}>
-            <div className={styles.layoutNameTitle}>
-              <span>3left</span>
+          {/* Preset 2: 3left */}
+          <div
+            className={`${styles.layoutCard} ${
+              presetLayout === '3left' ? styles.layoutCardActive : ''
+            }`}
+            onClick={() => setPresetLayout('3left')}
+          >
+            <div className={styles.layoutTitleRow}>
+              <span className={styles.layoutName}>3left</span>
               {presetLayout === '3left' && (
-                <span className={styles.activeLayoutPill}>Active</span>
+                <span className={styles.activeBadge}>Active</span>
               )}
             </div>
 
-            <div
-              className={`${styles.layoutFrame} ${
-                presetLayout === '3left' ? styles.layoutFrameActive : ''
-              }`}
-              onClick={() => setPresetLayout('3left')}
-            >
-              <div className={styles.twoRowLayoutContainer}>
+            <div className={styles.wireframeFrame}>
+              <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <InteractiveWidgetBlock
-                    id="notes"
-                    label="Notes"
-                    isEnabled={widgets.notes}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
-                  <InteractiveWidgetBlock
-                    id="tasks"
-                    label="Tasks"
-                    isEnabled={widgets.tasks}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
                 </div>
-
                 <div className={styles.twoRowBottomSplit}>
-                  <div className={styles.bottom3Cluster}>
-                    <InteractiveWidgetBlock
-                      id="weather"
-                      label="Weather"
-                      isEnabled={widgets.weather}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="countdown"
-                      label="Count"
-                      isEnabled={widgets.countdown}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="recorder"
-                      label="Voice"
-                      isEnabled={widgets.recorder}
-                      onToggle={toggleWidget}
-                    />
+                  <div className={styles.cluster3}>
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
-
-                  <InteractiveWidgetBlock
-                    id="schedule"
+                  <MiniWireframeBlock
                     label="Schedule"
                     isEnabled={widgets.schedule}
-                    onToggle={toggleWidget}
-                    className={styles.bottom1Schedule}
+                    className={styles.cluster1Schedule}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 3. 3right */}
-          <div className={styles.layoutColumn}>
-            <div className={styles.layoutNameTitle}>
-              <span>3right</span>
+          {/* Preset 3: 3right */}
+          <div
+            className={`${styles.layoutCard} ${
+              presetLayout === '3right' ? styles.layoutCardActive : ''
+            }`}
+            onClick={() => setPresetLayout('3right')}
+          >
+            <div className={styles.layoutTitleRow}>
+              <span className={styles.layoutName}>3right</span>
               {presetLayout === '3right' && (
-                <span className={styles.activeLayoutPill}>Active</span>
+                <span className={styles.activeBadge}>Active</span>
               )}
             </div>
 
-            <div
-              className={`${styles.layoutFrame} ${
-                presetLayout === '3right' ? styles.layoutFrameActive : ''
-              }`}
-              onClick={() => setPresetLayout('3right')}
-            >
-              <div className={styles.twoRowLayoutContainer}>
+            <div className={styles.wireframeFrame}>
+              <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <InteractiveWidgetBlock
-                    id="tasks"
-                    label="Tasks"
-                    isEnabled={widgets.tasks}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
-                  <InteractiveWidgetBlock
-                    id="notes"
-                    label="Notes"
-                    isEnabled={widgets.notes}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
                 </div>
-
                 <div className={styles.twoRowBottomSplit}>
-                  <InteractiveWidgetBlock
-                    id="schedule"
+                  <MiniWireframeBlock
                     label="Schedule"
                     isEnabled={widgets.schedule}
-                    onToggle={toggleWidget}
-                    className={styles.bottom1Schedule}
+                    className={styles.cluster1Schedule}
                   />
-
-                  <div className={styles.bottom3Cluster}>
-                    <InteractiveWidgetBlock
-                      id="weather"
-                      label="Weather"
-                      isEnabled={widgets.weather}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="countdown"
-                      label="Count"
-                      isEnabled={widgets.countdown}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="recorder"
-                      label="Voice"
-                      isEnabled={widgets.recorder}
-                      onToggle={toggleWidget}
-                    />
+                  <div className={styles.cluster3}>
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 4. 2left2right */}
-          <div className={styles.layoutColumn}>
-            <div className={styles.layoutNameTitle}>
-              <span>2left2right</span>
+          {/* Preset 4: 2left2right */}
+          <div
+            className={`${styles.layoutCard} ${
+              presetLayout === '2left2right' ? styles.layoutCardActive : ''
+            }`}
+            onClick={() => setPresetLayout('2left2right')}
+          >
+            <div className={styles.layoutTitleRow}>
+              <span className={styles.layoutName}>2left2right</span>
               {presetLayout === '2left2right' && (
-                <span className={styles.activeLayoutPill}>Active</span>
+                <span className={styles.activeBadge}>Active</span>
               )}
             </div>
 
-            <div
-              className={`${styles.layoutFrame} ${
-                presetLayout === '2left2right' ? styles.layoutFrameActive : ''
-              }`}
-              onClick={() => setPresetLayout('2left2right')}
-            >
-              <div className={styles.twoRowLayoutContainer}>
+            <div className={styles.wireframeFrame}>
+              <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <InteractiveWidgetBlock
-                    id="notes"
-                    label="Notes"
-                    isEnabled={widgets.notes}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
-                  <InteractiveWidgetBlock
-                    id="tasks"
-                    label="Tasks"
-                    isEnabled={widgets.tasks}
-                    onToggle={toggleWidget}
-                    isLight
-                  />
+                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
+                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
                 </div>
-
                 <div className={styles.twoRowBottomSplit}>
-                  <div className={styles.bottom2Cluster}>
-                    <InteractiveWidgetBlock
-                      id="weather"
-                      label="Weather"
-                      isEnabled={widgets.weather}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="recorder"
-                      label="Voice"
-                      isEnabled={widgets.recorder}
-                      onToggle={toggleWidget}
-                    />
+                  <div className={styles.cluster2}>
+                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
+                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
                   </div>
-
-                  <div className={styles.bottom2Cluster}>
-                    <InteractiveWidgetBlock
-                      id="countdown"
-                      label="Count"
-                      isEnabled={widgets.countdown}
-                      onToggle={toggleWidget}
-                    />
-                    <InteractiveWidgetBlock
-                      id="schedule"
-                      label="Schedule"
-                      isEnabled={widgets.schedule}
-                      onToggle={toggleWidget}
-                    />
+                  <div className={styles.cluster2}>
+                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
+                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* 2. Dedicated Widget Toggles Section */}
+        <div className={styles.togglesSection}>
+          <div className={styles.sectionHeader}>
+            <span>Toggle Widget Visibility</span>
+            <span style={{ fontSize: 11, color: '#71717a', textTransform: 'none' }}>
+              Turn widgets on or off for the active layout
+            </span>
+          </div>
+
+          <div className={styles.togglesGrid}>
+            {widgetKeys.map((id) => {
+              const meta = WIDGET_METADATA[id]
+              const isChecked = widgets[id] ?? false
+              return (
+                <div
+                  key={id}
+                  className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`}
+                  onClick={() => toggleWidget(id)}
+                >
+                  <div className={styles.toggleLabelGroup}>
+                    <span className={styles.toggleIcon}>{meta.icon}</span>
+                    <span className={styles.toggleName}>{meta.name}</span>
+                  </div>
+
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Switch
+                      checked={isChecked}
+                      onCheckedChange={() => toggleWidget(id)}
+                      aria-label={`Toggle ${meta.name}`}
+                    />
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>

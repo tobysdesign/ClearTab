@@ -3,9 +3,9 @@
   position: fixed;
   inset: 0;
   z-index: 99999;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -24,17 +24,17 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   box-shadow: 
-    0 30px 60px -12px rgba(0, 0, 0, 0.8),
+    0 30px 60px -12px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(255, 255, 255, 0.08);
-  max-width: 1320px;
+  max-width: 1200px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   color: #fff;
   padding: 24px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow-y: auto;
   animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -66,14 +66,16 @@
   margin: 0;
 }
 
-.activeCountBadge {
+.sectionHeader {
   font-size: 12px;
-  font-weight: 500;
-  padding: 3px 9px;
-  border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.2);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #a1a1aa;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .closeButton {
@@ -81,7 +83,8 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #d4d4d8;
   font-size: 13px;
-  padding: 6px 14px;
+  font-weight: 500;
+  padding: 6px 16px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -91,54 +94,72 @@
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
 
-/* Horizontal scroll / grid for the 4 layout designs */
-.layoutsContainer {
+/* 4 Layout Cards Grid */
+.layoutsGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(240px, 1fr));
-  gap: 20px;
-  overflow-x: auto;
-  padding: 8px 4px 16px 4px;
-  box-sizing: border-box;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-@media (max-width: 1080px) {
-  .layoutsContainer {
+@media (max-width: 960px) {
+  .layoutsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 600px) {
-  .layoutsContainer {
+@media (max-width: 540px) {
+  .layoutsGrid {
     grid-template-columns: 1fr;
   }
 }
 
-/* Single Layout Column */
-.layoutColumn {
+.layoutCard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
-.layoutNameTitle {
-  font-size: 14px;
-  font-weight: 500;
-  color: #a1a1aa;
-  letter-spacing: -0.01em;
-  font-family: inherit;
-  margin: 0;
+.layoutCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6);
+}
+
+.layoutCardActive {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb, 0 16px 36px -8px rgba(37, 99, 235, 0.4);
+}
+
+.layoutTitleRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.activeLayoutPill {
-  font-size: 10px;
+.layoutName {
+  font-size: 13px;
   font-weight: 600;
+  color: #f4f4f5;
+  font-family: monospace;
+}
+
+.activeBadge {
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 2px 7px;
@@ -147,96 +168,106 @@
   color: #fff;
 }
 
-/* Outer layout frame (representing screen container) */
-.layoutFrame {
-  height: 310px;
+/* Wireframe Thumbnail Canvas */
+.wireframeFrame {
+  height: 220px;
   width: 100%;
-  background: #1e1e22;
-  border: 2px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 8px;
+  background: #1c1c1f;
+  border-radius: 10px;
+  padding: 6px;
   box-sizing: border-box;
   display: flex;
-  gap: 6px;
+  gap: 5px;
   overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none; /* Allows clicking anywhere on card to select layout */
 }
 
-.layoutFrame:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6);
-}
-
-.layoutFrameActive {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6, 0 16px 36px -8px rgba(59, 130, 246, 0.35);
-  background: #222228;
-}
-
-/* Individual Interactive Widget Card */
-.widgetBlock {
-  border-radius: 8px;
+/* Miniature Block Styling */
+.miniBlock {
+  border-radius: 6px;
   background: #9ca3af;
-  color: #18181b;
+  color: #111827;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 6px;
+  padding: 6px 4px;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  user-select: none;
-  position: relative;
   overflow: hidden;
+  text-align: center;
 }
 
-.widgetBlockLight {
+.miniBlockLight {
   background: #e4e4e7;
-  color: #111827;
+  color: #09090b;
 }
 
-.widgetBlockOff {
-  opacity: 0.35;
-  background: #4b5563 !important;
+.miniBlockOff {
+  opacity: 0.3;
+  background: #3f3f46 !important;
   color: #9ca3af !important;
 }
 
-.widgetNameLabel {
-  font-size: 11px;
-  font-weight: 600;
+.miniBlockName {
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: -0.01em;
-  text-align: center;
-  margin-top: 2px;
 }
 
-.dragDots {
-  font-size: 10px;
-  color: rgba(0, 0, 0, 0.45);
+.miniToggleIndicator {
+  width: 18px;
+  height: 9px;
+  border-radius: 9999px;
+  background: #2563eb;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.miniToggleIndicator::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.miniToggleIndicatorOff {
+  background: #52525b;
+}
+
+.miniToggleIndicatorOff::after {
+  left: 1px;
+  right: auto;
+}
+
+.miniGripDots {
+  font-size: 8px;
+  color: rgba(0, 0, 0, 0.4);
   line-height: 1;
   letter-spacing: 1px;
-  margin-bottom: 2px;
 }
 
-.widgetBlockOff .dragDots {
-  color: rgba(255, 255, 255, 0.25);
+.miniBlockOff .miniGripDots {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 /* Blueprint 1: default_4right */
-.default4RightContainer {
+.default4RightBlueprint {
   display: flex;
   width: 100%;
   height: 100%;
-  gap: 6px;
+  gap: 5px;
 }
 
 .default4RightNotes {
   flex: 1;
   height: 100%;
-  background: #ffffff;
-  color: #09090b;
 }
 
 .default4RightRightCol {
@@ -244,14 +275,12 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .default4RightTasks {
-  height: 85px;
+  height: 60px;
   width: 100%;
-  background: #6b7280;
-  color: #f9fafb;
 }
 
 .default4RightGrid2x2 {
@@ -259,68 +288,130 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 6px;
+  gap: 5px;
 }
 
 /* Blueprint 2, 3, 4: Two-Row structures */
-.twoRowLayoutContainer {
+.twoRowBlueprint {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  gap: 6px;
+  gap: 5px;
 }
 
 .twoRowTopSplit {
-  height: 175px;
+  height: 125px;
   display: flex;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
 }
 
 .twoRowTopSplit > div {
   flex: 1;
   height: 100%;
-  background: #e4e4e7;
-  color: #111827;
 }
 
 .twoRowBottomSplit {
   flex: 1;
   display: flex;
-  gap: 6px;
+  gap: 5px;
   width: 100%;
 }
 
-.bottom3Cluster {
+.cluster3 {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex: 1.35;
 }
 
-.bottom3Cluster > div {
+.cluster3 > div {
   flex: 1;
   height: 100%;
-  background: #6b7280;
-  color: #f9fafb;
 }
 
-.bottom1Schedule {
+.cluster1Schedule {
   flex: 1.65;
   height: 100%;
-  background: #9ca3af;
-  color: #111827;
 }
 
-.bottom2Cluster {
+.cluster2 {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
 }
 
-.bottom2Cluster > div {
+.cluster2 > div {
   flex: 1;
   height: 100%;
-  background: #6b7280;
-  color: #f9fafb;
+}
+
+/* Dedicated Widget Toggle Bar */
+.togglesSection {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.togglesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .togglesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .togglesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleRow:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.toggleRowActive {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.toggleLabelGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggleIcon {
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggleName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #f4f4f5;
 }
