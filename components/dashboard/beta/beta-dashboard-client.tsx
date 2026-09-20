@@ -55,6 +55,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
     totalCount,
     primaryOrder,
     utilityOrder,
+    layoutMode,
+    setLayoutMode,
+    presetLayout,
+    setPresetLayout,
     layoutOrientation,
     setLayoutOrientation,
     toggleWidget,
@@ -320,6 +324,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           totalCount={totalCount}
           primaryOrder={primaryOrder}
           utilityOrder={utilityOrder}
+          presetLayout={presetLayout}
+          setPresetLayout={setPresetLayout}
+          layoutMode={layoutMode}
+          setLayoutMode={setLayoutMode}
           layoutOrientation={layoutOrientation}
           setLayoutOrientation={setLayoutOrientation}
           toggleWidget={toggleWidget}
@@ -390,9 +398,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             notes={notes}
             tasks={tasks}
             visibleWidgets={widgets}
-            primaryOrder={primaryOrder}
-            utilityOrder={utilityOrder}
-            layoutOrientation={layoutOrientation}
+            presetLayout={presetLayout}
             dockPosition={position}
             searchQuery={searchQuery}
           />
@@ -458,6 +464,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 totalCount={totalCount}
                 primaryOrder={primaryOrder}
                 utilityOrder={utilityOrder}
+                presetLayout={presetLayout}
+                setPresetLayout={setPresetLayout}
+                layoutMode={layoutMode}
+                setLayoutMode={setLayoutMode}
                 layoutOrientation={layoutOrientation}
                 setLayoutOrientation={setLayoutOrientation}
                 toggleWidget={toggleWidget}

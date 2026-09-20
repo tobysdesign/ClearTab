@@ -13,11 +13,14 @@ import {
   PrimaryWidgetId,
   UtilityWidgetId,
   PresetId,
+  BetaPresetLayout,
+  LayoutMode,
   LayoutOrientation,
   WIDGET_METADATA,
   PRESETS,
   WidgetVisibilityState,
 } from '@/hooks/use-beta-widgets'
+import { VisualPresetPicker } from './visual-preset-picker'
 import styles from './widget-toggle-popover.module.css'
 
 interface WidgetTogglePopoverProps {
@@ -28,6 +31,10 @@ interface WidgetTogglePopoverProps {
   totalCount: number
   primaryOrder: PrimaryWidgetId[]
   utilityOrder: UtilityWidgetId[]
+  presetLayout: BetaPresetLayout
+  setPresetLayout: (layout: BetaPresetLayout) => void
+  layoutMode: LayoutMode
+  setLayoutMode: (mode: LayoutMode) => void
   layoutOrientation: LayoutOrientation
   setLayoutOrientation: (orientation: LayoutOrientation) => void
   toggleWidget: (id: WidgetId) => void
@@ -46,6 +53,10 @@ export function WidgetTogglePopover({
   totalCount,
   primaryOrder,
   utilityOrder,
+  presetLayout,
+  setPresetLayout,
+  layoutMode,
+  setLayoutMode,
   layoutOrientation,
   setLayoutOrientation,
   toggleWidget,
@@ -98,34 +109,18 @@ export function WidgetTogglePopover({
             </Link>
           </div>
 
-          {/* Layout Orientation */}
-          <div className={styles.sectionLabel}>Orientation</div>
-          <div className={styles.orientationRow}>
-            <button
-              type="button"
-              onClick={() => setLayoutOrientation('rows')}
-              className={`${styles.orientationChip} ${layoutOrientation === 'rows' ? styles.orientationChipActive : ''}`}
-            >
-              <span>☰</span> Rows
-            </button>
-            <button
-              type="button"
-              onClick={() => setLayoutOrientation('columns')}
-              className={`${styles.orientationChip} ${layoutOrientation === 'columns' ? styles.orientationChipActive : ''}`}
-            >
-              <span>❚❚</span> Columns
-            </button>
-            <button
-              type="button"
-              onClick={() => setLayoutOrientation('inverted')}
-              className={`${styles.orientationChip} ${layoutOrientation === 'inverted' ? styles.orientationChipActive : ''}`}
-            >
-              <span>⇅</span> Inverted
-            </button>
+          {/* Visual Blueprint Layout Presets matching Figma Mock */}
+          <div className={styles.sectionLabel}>Visual Layout Presets</div>
+          <div style={{ marginBottom: 14 }}>
+            <VisualPresetPicker
+              presetLayout={presetLayout}
+              setPresetLayout={setPresetLayout}
+              widgets={widgets}
+            />
           </div>
 
           {/* Quick Presets */}
-          <div className={styles.sectionLabel}>Presets</div>
+          <div className={styles.sectionLabel}>Context Presets</div>
           <div className={styles.presetsRow}>
             {presetKeys.map((key) => {
               const preset = PRESETS[key]

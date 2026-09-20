@@ -15,6 +15,8 @@ import {
   PrimaryWidgetId,
   UtilityWidgetId,
   PresetId,
+  BetaPresetLayout,
+  LayoutMode,
   LayoutOrientation,
 } from '@/hooks/use-beta-widgets'
 import styles from '../dock-content.module.css'
@@ -33,6 +35,10 @@ interface BetaDockContentProps {
   totalCount: number
   primaryOrder: PrimaryWidgetId[]
   utilityOrder: UtilityWidgetId[]
+  presetLayout: BetaPresetLayout
+  setPresetLayout: (layout: BetaPresetLayout) => void
+  layoutMode: LayoutMode
+  setLayoutMode: (mode: LayoutMode) => void
   layoutOrientation: LayoutOrientation
   setLayoutOrientation: (orientation: LayoutOrientation) => void
   toggleWidget: (id: WidgetId) => void
@@ -57,6 +63,10 @@ export function BetaDockContent({
   totalCount,
   primaryOrder,
   utilityOrder,
+  presetLayout,
+  setPresetLayout,
+  layoutMode,
+  setLayoutMode,
   layoutOrientation,
   setLayoutOrientation,
   toggleWidget,
@@ -100,6 +110,10 @@ export function BetaDockContent({
         totalCount={totalCount}
         primaryOrder={primaryOrder}
         utilityOrder={utilityOrder}
+        presetLayout={presetLayout}
+        setPresetLayout={setPresetLayout}
+        layoutMode={layoutMode}
+        setLayoutMode={setLayoutMode}
         layoutOrientation={layoutOrientation}
         setLayoutOrientation={setLayoutOrientation}
         toggleWidget={toggleWidget}

@@ -12,9 +12,8 @@ import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import {
   WidgetVisibilityState,
-  PrimaryWidgetId,
-  UtilityWidgetId,
-  LayoutOrientation,
+  WidgetId,
+  BetaPresetLayout,
 } from '@/hooks/use-beta-widgets'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import styles from './beta-adaptive-grid.module.css'
@@ -23,9 +22,7 @@ interface BetaAdaptiveGridProps {
   notes: React.ReactNode
   tasks: React.ReactNode
   visibleWidgets: WidgetVisibilityState
-  primaryOrder: PrimaryWidgetId[]
-  utilityOrder: UtilityWidgetId[]
-  layoutOrientation: LayoutOrientation
+  presetLayout: BetaPresetLayout
   dockPosition: 'top' | 'left' | 'right' | 'bottom'
   searchQuery?: string
 }
@@ -34,28 +31,18 @@ export function BetaAdaptiveGrid({
   notes,
   tasks,
   visibleWidgets,
-  primaryOrder,
-  utilityOrder,
-  layoutOrientation,
+  presetLayout = 'default_4right',
   dockPosition,
   searchQuery: _searchQuery,
 }: BetaAdaptiveGridProps) {
   const padding = useDockPadding(dockPosition)
 
-  const visiblePrimary = primaryOrder.filter((id) => visibleWidgets[id])
-  const visibleUtility = utilityOrder.filter((id) => visibleWidgets[id])
-
-  const hasPrimary = visiblePrimary.length > 0
-  const hasUtility = visibleUtility.length > 0
-
-  const renderPrimaryComponent = (id: PrimaryWidgetId) => {
-    if (id === 'notes') return notes
-    if (id === 'tasks') return tasks
-    return null
-  }
-
-  const renderUtilityComponent = (id: UtilityWidgetId) => {
+  const renderWidget = (id: WidgetId) => {
     switch (id) {
+      case 'notes':
+        return notes
+      case 'tasks':
+        return tasks
       case 'weather':
         return <WeatherWidgetNew />
       case 'recorder':
@@ -67,33 +54,39 @@ export function BetaAdaptiveGrid({
     }
   }
 
-  // Primary Section (Notes + Tasks)
-  const renderPrimaryGroup = (direction: 'horizontal' | 'vertical' = 'horizontal') => {
-    if (visiblePrimary.length === 0) return null
+  // Helper to render an array of widgets horizontally
+  const renderHorizontalCluster = (
+    widgetIds: WidgetId[],
+    keyPrefix: string,
+    weights?: Record<string, number>
+  ) => {
+    const active = widgetIds.filter((id) => visibleWidgets[id])
+    if (active.length === 0) return null
 
-    if (visiblePrimary.length === 1) {
-      const id = visiblePrimary[0]
+    if (active.length === 1) {
       return (
-        <div className={styles.widgetPanel} key={`single-primary-${id}`}>
-          {renderPrimaryComponent(id)}
+        <div className={styles.widgetPanel} key={`${keyPrefix}-${active[0]}`}>
+          {renderWidget(active[0])}
         </div>
       )
     }
 
+    const equalSize = Math.round(100 / active.length)
+
     return (
       <PanelGroup
-        key={`primary-group-${visiblePrimary.join('-')}`}
-        direction={direction}
+        key={`${keyPrefix}-${active.join('-')}`}
+        direction="horizontal"
         className={styles.panelGroupFull}
       >
-        {visiblePrimary.map((id, index) => {
-          const defaultSize = id === 'notes' ? 60 : 40
+        {active.map((id, index) => {
+          const defaultSize = weights?.[id] ?? equalSize
           return (
             <React.Fragment key={id}>
-              <Panel defaultSize={defaultSize} minSize={20} className={styles.widgetPanel}>
-                {renderPrimaryComponent(id)}
+              <Panel defaultSize={defaultSize} minSize={10} className={styles.widgetPanel}>
+                {renderWidget(id)}
               </Panel>
-              {index < visiblePrimary.length - 1 && (
+              {index < active.length - 1 && (
                 <PanelResizeHandle className={styles.resizeHandleHorizontal} />
               )}
             </React.Fragment>
@@ -103,116 +96,273 @@ export function BetaAdaptiveGrid({
     )
   }
 
-  // Utility Section (Weather, Recorder, Countdown, Schedule)
-  const renderUtilityGroup = (direction: 'horizontal' | 'vertical' = 'horizontal') => {
-    if (visibleUtility.length === 0) return null
+  // =========================================================================
+  // 1. default_4right
+  // Left: Notes (tall full-height)
+  // Right: Top Tasks, Bottom 2x2 grid (Schedule | Weather / Count | Voice)
+  // =========================================================================
+  const renderDefault4Right = () => {
+    const hasNotes = visibleWidgets.notes
+    const hasTasks = visibleWidgets.tasks
 
-    if (visibleUtility.length === 1) {
-      const id = visibleUtility[0]
-      return (
-        <div className={styles.widgetPanel} key={`single-utility-${id}`}>
-          {renderUtilityComponent(id)}
-        </div>
-      )
+    const row1Widgets: WidgetId[] = (['schedule', 'weather'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const row2Widgets: WidgetId[] = (['countdown', 'recorder'] as WidgetId[]).filter((id) => visibleWidgets[id])
+
+    const hasRow1 = row1Widgets.length > 0
+    const hasRow2 = row2Widgets.length > 0
+    const hasGrid2x2 = hasRow1 || hasRow2
+    const hasRight = hasTasks || hasGrid2x2
+
+    // Render the right-side content
+    const renderRightColumn = () => {
+      if (hasTasks && hasGrid2x2) {
+        return (
+          <PanelGroup direction="vertical" className={styles.panelGroupFull}>
+            {/* Top: Tasks */}
+            <Panel defaultSize={34} minSize={15} className={styles.widgetPanel}>
+              {renderWidget('tasks')}
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleVertical} />
+            {/* Bottom: 2x2 grid */}
+            <Panel defaultSize={66} minSize={25} className={styles.widgetPanel}>
+              {render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets)}
+            </Panel>
+          </PanelGroup>
+        )
+      }
+
+      if (hasTasks && !hasGrid2x2) {
+        return <div className={styles.widgetPanel}>{renderWidget('tasks')}</div>
+      }
+
+      if (!hasTasks && hasGrid2x2) {
+        return render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets)
+      }
+
+      return null
     }
 
-    const count = visibleUtility.length
-    const equalShare = Math.round(100 / count)
+    const render2x2Grid = (
+      hR1: boolean,
+      hR2: boolean,
+      r1: WidgetId[],
+      r2: WidgetId[]
+    ) => {
+      if (hR1 && hR2) {
+        return (
+          <PanelGroup direction="vertical" className={styles.panelGroupFull}>
+            <Panel defaultSize={50} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(r1, 'd4r-r1')}
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleVertical} />
+            <Panel defaultSize={50} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(r2, 'd4r-r2')}
+            </Panel>
+          </PanelGroup>
+        )
+      }
+      if (hR1) return renderHorizontalCluster(r1, 'd4r-r1')
+      if (hR2) return renderHorizontalCluster(r2, 'd4r-r2')
+      return null
+    }
+
+    if (!hasNotes && hasRight) {
+      return renderRightColumn()
+    }
+    if (hasNotes && !hasRight) {
+      return <div className={styles.widgetPanel}>{renderWidget('notes')}</div>
+    }
+    if (!hasNotes && !hasRight) {
+      return null
+    }
 
     return (
       <PanelGroup
-        key={`utility-group-${visibleUtility.join('-')}`}
-        direction={direction}
+        key={`default-4right-${row1Widgets.join('-')}-${row2Widgets.join('-')}`}
+        direction="horizontal"
         className={styles.panelGroupFull}
       >
-        {visibleUtility.map((id, index) => {
-          const isSchedule = id === 'schedule'
-          const share = isSchedule && count > 2 ? equalShare + 10 : equalShare
-          const isHorizontal = direction === 'horizontal'
-          return (
-            <React.Fragment key={id}>
-              <Panel defaultSize={share} minSize={10} className={styles.widgetPanel}>
-                {renderUtilityComponent(id)}
-              </Panel>
-              {index < visibleUtility.length - 1 && (
-                <PanelResizeHandle
-                  className={isHorizontal ? styles.resizeHandleHorizontal : styles.resizeHandleVertical}
-                />
-              )}
-            </React.Fragment>
-          )
-        })}
+        <Panel defaultSize={48} minSize={25} className={styles.widgetPanel}>
+          {renderWidget('notes')}
+        </Panel>
+        <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+        <Panel defaultSize={52} minSize={25} className={styles.widgetPanel}>
+          {renderRightColumn()}
+        </Panel>
       </PanelGroup>
     )
   }
 
-  // Render combined layout based on orientation
-  const renderLayout = () => {
-    // Only Primary is active
-    if (hasPrimary && !hasUtility) {
-      return renderPrimaryGroup('horizontal')
+  // =========================================================================
+  // 2. 3left
+  // Top: Notes | Tasks
+  // Bottom: [Weather | Count | Voice] on left, Schedule on right
+  // =========================================================================
+  const render3Left = () => {
+    const topWidgets: WidgetId[] = (['notes', 'tasks'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const leftCluster: WidgetId[] = (['weather', 'countdown', 'recorder'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const hasSchedule = visibleWidgets.schedule
+
+    const hasTop = topWidgets.length > 0
+    const hasLeftCluster = leftCluster.length > 0
+    const hasBottom = hasLeftCluster || hasSchedule
+
+    const renderBottomRow = () => {
+      if (hasLeftCluster && hasSchedule) {
+        return (
+          <PanelGroup direction="horizontal" className={styles.panelGroupFull}>
+            <Panel defaultSize={55} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(leftCluster, '3l-left')}
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={45} minSize={20} className={styles.widgetPanel}>
+              {renderWidget('schedule')}
+            </Panel>
+          </PanelGroup>
+        )
+      }
+      if (hasLeftCluster) return renderHorizontalCluster(leftCluster, '3l-left')
+      if (hasSchedule) return <div className={styles.widgetPanel}>{renderWidget('schedule')}</div>
+      return null
     }
 
-    // Only Utility is active
-    if (!hasPrimary && hasUtility) {
-      return renderUtilityGroup('horizontal')
-    }
-
-    // Both Primary and Utility are active:
-    // 1. Column layout: Primary left, Utility right
-    if (layoutOrientation === 'columns') {
+    if (hasTop && hasBottom) {
       return (
-        <PanelGroup
-          key={`columns-${visiblePrimary.join('-')}-${visibleUtility.join('-')}`}
-          direction="horizontal"
-          className={styles.panelGroupFull}
-        >
-          <Panel defaultSize={68} minSize={30} className={styles.widgetPanel}>
-            {renderPrimaryGroup('vertical')}
-          </Panel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <Panel defaultSize={32} minSize={20} className={styles.widgetPanel}>
-            {renderUtilityGroup('vertical')}
-          </Panel>
-        </PanelGroup>
-      )
-    }
-
-    // 2. Inverted Rows: Utility on top, Primary on bottom
-    if (layoutOrientation === 'inverted') {
-      return (
-        <PanelGroup
-          key={`inverted-${visibleUtility.join('-')}-${visiblePrimary.join('-')}`}
-          direction="vertical"
-          className={styles.panelGroupFull}
-        >
-          <Panel defaultSize={35} minSize={15} className={styles.widgetPanel}>
-            {renderUtilityGroup('horizontal')}
+        <PanelGroup direction="vertical" className={styles.panelGroupFull}>
+          <Panel defaultSize={62} minSize={25} className={styles.widgetPanel}>
+            {renderHorizontalCluster(topWidgets, '3l-top')}
           </Panel>
           <PanelResizeHandle className={styles.resizeHandleVertical} />
-          <Panel defaultSize={65} minSize={25} className={styles.widgetPanel}>
-            {renderPrimaryGroup('horizontal')}
+          <Panel defaultSize={38} minSize={18} className={styles.widgetPanel}>
+            {renderBottomRow()}
           </Panel>
         </PanelGroup>
       )
     }
 
-    // 3. Default Rows: Primary on top, Utility on bottom
-    return (
-      <PanelGroup
-        key={`rows-${visiblePrimary.join('-')}-${visibleUtility.join('-')}`}
-        direction="vertical"
-        className={styles.panelGroupFull}
-      >
-        <Panel defaultSize={65} minSize={25} className={styles.widgetPanel}>
-          {renderPrimaryGroup('horizontal')}
-        </Panel>
-        <PanelResizeHandle className={styles.resizeHandleVertical} />
-        <Panel defaultSize={35} minSize={15} className={styles.widgetPanel}>
-          {renderUtilityGroup('horizontal')}
-        </Panel>
-      </PanelGroup>
-    )
+    if (hasTop && !hasBottom) return renderHorizontalCluster(topWidgets, '3l-top')
+    if (!hasTop && hasBottom) return renderBottomRow()
+    return null
+  }
+
+  // =========================================================================
+  // 3. 3right
+  // Top: Tasks | Notes
+  // Bottom: Schedule on left, [Weather | Count | Voice] on right
+  // =========================================================================
+  const render3Right = () => {
+    const topWidgets: WidgetId[] = (['tasks', 'notes'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const rightCluster: WidgetId[] = (['weather', 'countdown', 'recorder'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const hasSchedule = visibleWidgets.schedule
+
+    const hasTop = topWidgets.length > 0
+    const hasRightCluster = rightCluster.length > 0
+    const hasBottom = hasSchedule || hasRightCluster
+
+    const renderBottomRow = () => {
+      if (hasSchedule && hasRightCluster) {
+        return (
+          <PanelGroup direction="horizontal" className={styles.panelGroupFull}>
+            <Panel defaultSize={45} minSize={20} className={styles.widgetPanel}>
+              {renderWidget('schedule')}
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={55} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(rightCluster, '3r-right')}
+            </Panel>
+          </PanelGroup>
+        )
+      }
+      if (hasSchedule) return <div className={styles.widgetPanel}>{renderWidget('schedule')}</div>
+      if (hasRightCluster) return renderHorizontalCluster(rightCluster, '3r-right')
+      return null
+    }
+
+    if (hasTop && hasBottom) {
+      return (
+        <PanelGroup direction="vertical" className={styles.panelGroupFull}>
+          <Panel defaultSize={62} minSize={25} className={styles.widgetPanel}>
+            {renderHorizontalCluster(topWidgets, '3r-top')}
+          </Panel>
+          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <Panel defaultSize={38} minSize={18} className={styles.widgetPanel}>
+            {renderBottomRow()}
+          </Panel>
+        </PanelGroup>
+      )
+    }
+
+    if (hasTop && !hasBottom) return renderHorizontalCluster(topWidgets, '3r-top')
+    if (!hasTop && hasBottom) return renderBottomRow()
+    return null
+  }
+
+  // =========================================================================
+  // 4. 2left2right
+  // Top: Notes | Tasks
+  // Bottom: [Weather | Voice] on left, [Count | Schedule] on right
+  // =========================================================================
+  const render2Left2Right = () => {
+    const topWidgets: WidgetId[] = (['notes', 'tasks'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const left2: WidgetId[] = (['weather', 'recorder'] as WidgetId[]).filter((id) => visibleWidgets[id])
+    const right2: WidgetId[] = (['countdown', 'schedule'] as WidgetId[]).filter((id) => visibleWidgets[id])
+
+    const hasTop = topWidgets.length > 0
+    const hasLeft2 = left2.length > 0
+    const hasRight2 = right2.length > 0
+    const hasBottom = hasLeft2 || hasRight2
+
+    const renderBottomRow = () => {
+      if (hasLeft2 && hasRight2) {
+        return (
+          <PanelGroup direction="horizontal" className={styles.panelGroupFull}>
+            <Panel defaultSize={50} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(left2, '2l2r-left')}
+            </Panel>
+            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <Panel defaultSize={50} minSize={20} className={styles.widgetPanel}>
+              {renderHorizontalCluster(right2, '2l2r-right')}
+            </Panel>
+          </PanelGroup>
+        )
+      }
+      if (hasLeft2) return renderHorizontalCluster(left2, '2l2r-left')
+      if (hasRight2) return renderHorizontalCluster(right2, '2l2r-right')
+      return null
+    }
+
+    if (hasTop && hasBottom) {
+      return (
+        <PanelGroup direction="vertical" className={styles.panelGroupFull}>
+          <Panel defaultSize={62} minSize={25} className={styles.widgetPanel}>
+            {renderHorizontalCluster(topWidgets, '2l2r-top')}
+          </Panel>
+          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <Panel defaultSize={38} minSize={18} className={styles.widgetPanel}>
+            {renderBottomRow()}
+          </Panel>
+        </PanelGroup>
+      )
+    }
+
+    if (hasTop && !hasBottom) return renderHorizontalCluster(topWidgets, '2l2r-top')
+    if (!hasTop && hasBottom) return renderBottomRow()
+    return null
+  }
+
+  const renderActiveLayout = () => {
+    switch (presetLayout) {
+      case 'default_4right':
+        return renderDefault4Right()
+      case '3left':
+        return render3Left()
+      case '3right':
+        return render3Right()
+      case '2left2right':
+        return render2Left2Right()
+      default:
+        return renderDefault4Right()
+    }
   }
 
   return (
@@ -225,7 +375,7 @@ export function BetaAdaptiveGrid({
         paddingLeft: `${padding.paddingLeft}px`,
       }}
     >
-      {renderLayout()}
+      {renderActiveLayout()}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 .popoverCard {
-  width: 360px;
-  max-width: calc(100vw - 32px);
+  width: 480px;
+  max-width: calc(100vw - 24px);
   background: rgba(18, 18, 20, 0.94);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);

@@ -9,6 +9,10 @@ export type UtilityWidgetId = 'weather' | 'recorder' | 'countdown' | 'schedule'
 
 export type PresetId = 'all' | 'focus' | 'planner' | 'capture' | 'minimal' | 'custom'
 
+export type BetaPresetLayout = 'default_4right' | '3left' | '3right' | '2left2right'
+
+export type LayoutMode = 'notes-hero' | 'classic-rows' | 'columns'
+
 export type LayoutOrientation = 'rows' | 'columns' | 'inverted'
 
 export interface WidgetMeta {
@@ -145,6 +149,8 @@ const STORAGE_KEY = 'cleartab-beta-widgets-v2'
 const PRESET_KEY = 'cleartab-beta-preset-v2'
 const ORDER_KEY = 'cleartab-beta-order-v2'
 const ORIENTATION_KEY = 'cleartab-beta-orientation-v2'
+const LAYOUT_MODE_KEY = 'cleartab-beta-layout-mode-v1'
+const PRESET_LAYOUT_KEY = 'cleartab-beta-preset-layout-v1'
 
 export function useBetaWidgets() {
   const [widgets, setWidgets] = useState<WidgetVisibilityState>(() => {
@@ -200,6 +206,30 @@ export function useBetaWidgets() {
     return DEFAULT_UTILITY_ORDER
   })
 
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>(() => {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      try {
+        const stored = window.localStorage.getItem(LAYOUT_MODE_KEY) as LayoutMode | null
+        if (stored === 'notes-hero' || stored === 'classic-rows' || stored === 'columns') {
+          return stored
+        }
+      } catch {}
+    }
+    return 'notes-hero'
+  })
+
+  const [presetLayout, setPresetLayout] = useState<BetaPresetLayout>(() => {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      try {
+        const stored = window.localStorage.getItem(PRESET_LAYOUT_KEY) as BetaPresetLayout | null
+        if (stored === 'default_4right' || stored === '3left' || stored === '3right' || stored === '2left2right') {
+          return stored
+        }
+      } catch {}
+    }
+    return 'default_4right'
+  })
+
   const [layoutOrientation, setLayoutOrientation] = useState<LayoutOrientation>(() => {
     if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
       try {
@@ -220,10 +250,12 @@ export function useBetaWidgets() {
       window.localStorage.setItem(PRESET_KEY, activePreset)
       window.localStorage.setItem(ORDER_KEY, JSON.stringify({ primary: primaryOrder, utility: utilityOrder }))
       window.localStorage.setItem(ORIENTATION_KEY, layoutOrientation)
+      window.localStorage.setItem(LAYOUT_MODE_KEY, layoutMode)
+      window.localStorage.setItem(PRESET_LAYOUT_KEY, presetLayout)
     } catch (e) {
       console.warn('Failed to save beta widget state to localStorage', e)
     }
-  }, [widgets, activePreset, primaryOrder, utilityOrder, layoutOrientation])
+  }, [widgets, activePreset, primaryOrder, utilityOrder, layoutOrientation, layoutMode])
 
   const toggleWidget = useCallback((id: WidgetId) => {
     setWidgets((prev) => {
@@ -294,5 +326,9 @@ export function useBetaWidgets() {
     moveUtility,
     applyPreset,
     resetToAll,
+    layoutMode,
+    setLayoutMode,
+    presetLayout,
+    setPresetLayout,
   }
 }
