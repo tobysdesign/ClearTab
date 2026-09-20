@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     const base64Audio = Buffer.from(arrayBuffer).toString("base64");
     const mimeType = audioFile.type || "audio/webm";
 
-    // Use Google Gemini 2.0 Flash for speech transcription
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // Use Google Gemini Flash for speech transcription
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
