@@ -12,16 +12,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey =
+    let apiKey =
       process.env.GEMINI_API_KEY ||
       process.env.GOOGLE_API_KEY ||
       process.env.GOOGLE_AI_KEY;
+
+    // Fallback in case dev server was started before .env.local was saved
+    if (!apiKey) {
+      try {
+        const fs = await import("fs");
+        const path = await import("path");
+        const envPath = path.resolve(process.cwd(), ".env.local");
+        if (fs.existsSync(envPath)) {
+          const content = fs.readFileSync(envPath, "utf-8");
+          const match = content.match(/^(?:GEMINI_API_KEY|GOOGLE_API_KEY|GOOGLE_AI_KEY)=["']?([^"'\r\n]+)["']?/m);
+          if (match?.[1]) {
+            apiKey = match[1].trim();
+          }
+        }
+      } catch (err) {
+        console.warn("Could not read fallback .env.local:", err);
+      }
+    }
 
     if (!apiKey) {
       return NextResponse.json(
         {
           success: false,
-          error: "Google Gemini API key not configured. Please add GEMINI_API_KEY to your .env.local file.",
+          error: "Google Gemini API key not configured. Please add GEMINI_API_KEY to your .env.local file and restart your dev server.",
         },
         { status: 500 }
       );
