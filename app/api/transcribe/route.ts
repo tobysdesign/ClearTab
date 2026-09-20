@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           {
             parts: [
               {
-                text: "Transcribe the following audio accurately and verbatim. Return ONLY the transcribed text. Do not include any timestamps, introductory remarks, markdown headers, quotes, or conversational filler.",
+                text: "Transcribe the following audio accurately and verbatim.\n\n- If there are multiple distinct voices or speakers, identify each speaker by voice characteristics and label their dialogue turns as \"Voice 1:\", \"Voice 2:\", etc. on separate lines.\n- If there is only a single speaker throughout the recording, transcribe the text directly without adding voice or speaker labels.\n- Return ONLY the transcribed text. Do not include introductory remarks, timestamps, markdown blocks, or conversational commentary.",
               },
               {
                 inlineData: {
