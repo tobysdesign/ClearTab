@@ -251,8 +251,17 @@ export function NotesWidget() {
       }
     };
 
+    const handleNoteCreated = () => {
+      console.log('📣 NotesWidget: Received note-created event, refreshing...');
+      loadNotes();
+    };
+
     window.addEventListener('data-deleted-all', handleDeleteAll as EventListener);
-    return () => window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
+    window.addEventListener('note-created', handleNoteCreated as EventListener);
+    return () => {
+      window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
+      window.removeEventListener('note-created', handleNoteCreated as EventListener);
+    };
   }, []); // Empty dependencies - loadNotes is stable from useNotes hook
 
   // Single effect to handle initialization and note deletion

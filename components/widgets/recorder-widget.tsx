@@ -16,6 +16,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { isExtensionEnvironment } from "@/lib/extension-utils";
 import { createNote } from "@/lib/actions/notes";
+import { stringToQuillDelta } from "@/lib/quill-utils";
 import {
   Tooltip,
   TooltipTrigger,
@@ -209,19 +210,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         // Save note using server action
         const result = await createNote({
           title: `Voice Note - ${new Date().toLocaleDateString()}`,
-          content: [
-            {
-              id: "voice-note-block",
-              type: "paragraph",
-              props: {
-                textColor: "default",
-                backgroundColor: "default",
-                textAlignment: "left",
-              },
-              content: [{ type: "text", text, styles: {} }],
-              children: [],
-            },
-          ],
+          content: stringToQuillDelta(text),
         });
 
         if (!result?.data?.success) {
@@ -235,6 +224,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         }
 
         console.log("Note saved successfully:", result.data);
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("note-created", { detail: result.data }));
+        }
 
         toast({
           title: "Success",
@@ -276,12 +269,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   useEffect(() => {
     if (state === "processing" && audioBlob && !showSuccess) {
       console.log("Audio blob ready, starting transcription...");
-      // DEV: Pause here to inspect the transcribing state
-      // Uncomment the next line to automatically transcribe in production
-      // transcribeAudio()
-      console.log(
-        "DEV MODE: Pausing at transcription state. Call transcribeAudio() to continue.",
-      );
+      transcribeAudio();
     }
   }, [state, audioBlob, showSuccess, transcribeAudio]);
 
