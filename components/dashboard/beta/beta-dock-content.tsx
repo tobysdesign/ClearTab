@@ -18,8 +18,6 @@ interface BetaDockContentProps {
   setShowSettings: (show: boolean) => void
   setShowSearch: (show: boolean) => void
   isVertical: boolean
-  activeCount: number
-  totalCount: number
   onOpenLayoutModal: () => void
 }
 
@@ -31,8 +29,6 @@ export function BetaDockContent({
   setShowSettings: _setShowSettings,
   setShowSearch: _setShowSearch,
   isVertical,
-  activeCount,
-  totalCount,
   onOpenLayoutModal,
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
@@ -52,32 +48,16 @@ export function BetaDockContent({
         isVertical ? styles.containerVertical : styles.containerHorizontal
       )}
     >
-      <div style={{ position: 'relative' }}>
-        <DockIconButton
-          onClick={onOpenLayoutModal}
-          title={`Choose Visual Layout (${activeCount}/${totalCount} active) • ⌘L`}
-          shortcut="⌘L"
-        >
-          <LayoutToggleIcon
-            isToggled={activeCount < totalCount}
-            size={16}
-          />
-        </DockIconButton>
-        {activeCount < totalCount && (
-          <span
-            style={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              backgroundColor: '#3b82f6',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-      </div>
+      <DockIconButton
+        onClick={onOpenLayoutModal}
+        title="Choose Dashboard Layout (⌘L)"
+        shortcut="⌘L"
+      >
+        <LayoutToggleIcon
+          isToggled={false}
+          size={16}
+        />
+      </DockIconButton>
 
       <ShinyAiButton
         onClick={handleToggleChat}

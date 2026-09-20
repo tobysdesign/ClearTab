@@ -1,13 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { Switch } from '@/components/ui/switch'
-import {
-  BetaPresetLayout,
-  WidgetId,
-  WidgetVisibilityState,
-  WIDGET_METADATA,
-} from '@/hooks/use-beta-widgets'
+import { BetaPresetLayout, LAYOUT_PRESET_METADATA } from '@/hooks/use-beta-widgets'
 import styles from './visual-layout-modal.module.css'
 
 interface VisualLayoutModalProps {
@@ -15,28 +9,18 @@ interface VisualLayoutModalProps {
   onClose: () => void
   presetLayout: BetaPresetLayout
   setPresetLayout: (layout: BetaPresetLayout) => void
-  widgets: WidgetVisibilityState
-  toggleWidget: (id: WidgetId) => void
-  activeCount: number
-  totalCount: number
 }
 
 interface MiniBlockProps {
   label: string
-  isEnabled: boolean
   className?: string
   isLight?: boolean
 }
 
-function MiniWireframeBlock({ label, isEnabled, className = '', isLight = false }: MiniBlockProps) {
+function MiniWireframeBlock({ label, className = '', isLight = false }: MiniBlockProps) {
   return (
-    <div
-      className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
-        !isEnabled ? styles.miniBlockOff : ''
-      } ${className}`}
-    >
+    <div className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${className}`}>
       <span className={styles.miniBlockName}>{label}</span>
-      <div className={`${styles.miniToggleIndicator} ${!isEnabled ? styles.miniToggleIndicatorOff : ''}`} />
       <span className={styles.miniGripDots}>:::</span>
     </div>
   )
@@ -47,10 +31,6 @@ export function VisualLayoutModal({
   onClose,
   presetLayout = 'default_4right',
   setPresetLayout,
-  widgets,
-  toggleWidget,
-  activeCount,
-  totalCount,
 }: VisualLayoutModalProps) {
   // Close on Escape key
   useEffect(() => {
@@ -66,7 +46,9 @@ export function VisualLayoutModal({
 
   if (!isOpen) return null
 
-  const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
+  const handleSelectLayout = (layout: BetaPresetLayout) => {
+    setPresetLayout(layout)
+  }
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -76,7 +58,7 @@ export function VisualLayoutModal({
           <div className={styles.headerTitleRow}>
             <h2 className={styles.modalTitle}>Choose Dashboard Layout</h2>
             <span className={styles.activeCountBadge}>
-              {activeCount}/{totalCount} Active Widgets
+              Active: {LAYOUT_PRESET_METADATA[presetLayout]?.name || presetLayout}
             </span>
           </div>
 
@@ -86,18 +68,14 @@ export function VisualLayoutModal({
           </button>
         </div>
 
-        {/* 1. Layout Preset Selection Grid */}
-        <div className={styles.sectionHeader}>
-          <span>Select Structure Blueprint</span>
-        </div>
-
+        {/* Layout Blueprint Grid */}
         <div className={styles.layoutsGrid}>
           {/* Preset 1: default_4right */}
           <div
             className={`${styles.layoutCard} ${
               presetLayout === 'default_4right' ? styles.layoutCardActive : ''
             }`}
-            onClick={() => setPresetLayout('default_4right')}
+            onClick={() => handleSelectLayout('default_4right')}
           >
             <div className={styles.layoutTitleRow}>
               <span className={styles.layoutName}>default_4right</span>
@@ -108,24 +86,14 @@ export function VisualLayoutModal({
 
             <div className={styles.wireframeFrame}>
               <div className={styles.default4RightBlueprint}>
-                <MiniWireframeBlock
-                  label="Notes"
-                  isEnabled={widgets.notes}
-                  className={styles.default4RightNotes}
-                  isLight
-                />
+                <MiniWireframeBlock label="Notes" className={styles.default4RightNotes} isLight />
                 <div className={styles.default4RightRightCol}>
-                  <MiniWireframeBlock
-                    label="Tasks"
-                    isEnabled={widgets.tasks}
-                    className={styles.default4RightTasks}
-                    isLight
-                  />
+                  <MiniWireframeBlock label="Tasks" className={styles.default4RightTasks} isLight />
                   <div className={styles.default4RightGrid2x2}>
-                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
+                    <MiniWireframeBlock label="Schedule" />
+                    <MiniWireframeBlock label="Weather" />
+                    <MiniWireframeBlock label="Count" />
+                    <MiniWireframeBlock label="Voice" />
                   </div>
                 </div>
               </div>
@@ -137,7 +105,7 @@ export function VisualLayoutModal({
             className={`${styles.layoutCard} ${
               presetLayout === '3left' ? styles.layoutCardActive : ''
             }`}
-            onClick={() => setPresetLayout('3left')}
+            onClick={() => handleSelectLayout('3left')}
           >
             <div className={styles.layoutTitleRow}>
               <span className={styles.layoutName}>3left</span>
@@ -149,20 +117,16 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
+                  <MiniWireframeBlock label="Notes" isLight />
+                  <MiniWireframeBlock label="Tasks" isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
                   <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
+                    <MiniWireframeBlock label="Weather" />
+                    <MiniWireframeBlock label="Count" />
+                    <MiniWireframeBlock label="Voice" />
                   </div>
-                  <MiniWireframeBlock
-                    label="Schedule"
-                    isEnabled={widgets.schedule}
-                    className={styles.cluster1Schedule}
-                  />
+                  <MiniWireframeBlock label="Schedule" className={styles.cluster1Schedule} />
                 </div>
               </div>
             </div>
@@ -173,7 +137,7 @@ export function VisualLayoutModal({
             className={`${styles.layoutCard} ${
               presetLayout === '3right' ? styles.layoutCardActive : ''
             }`}
-            onClick={() => setPresetLayout('3right')}
+            onClick={() => handleSelectLayout('3right')}
           >
             <div className={styles.layoutTitleRow}>
               <span className={styles.layoutName}>3right</span>
@@ -185,19 +149,15 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
+                  <MiniWireframeBlock label="Tasks" isLight />
+                  <MiniWireframeBlock label="Notes" isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
-                  <MiniWireframeBlock
-                    label="Schedule"
-                    isEnabled={widgets.schedule}
-                    className={styles.cluster1Schedule}
-                  />
+                  <MiniWireframeBlock label="Schedule" className={styles.cluster1Schedule} />
                   <div className={styles.cluster3}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
+                    <MiniWireframeBlock label="Weather" />
+                    <MiniWireframeBlock label="Count" />
+                    <MiniWireframeBlock label="Voice" />
                   </div>
                 </div>
               </div>
@@ -209,7 +169,7 @@ export function VisualLayoutModal({
             className={`${styles.layoutCard} ${
               presetLayout === '2left2right' ? styles.layoutCardActive : ''
             }`}
-            onClick={() => setPresetLayout('2left2right')}
+            onClick={() => handleSelectLayout('2left2right')}
           >
             <div className={styles.layoutTitleRow}>
               <span className={styles.layoutName}>2left2right</span>
@@ -221,58 +181,21 @@ export function VisualLayoutModal({
             <div className={styles.wireframeFrame}>
               <div className={styles.twoRowBlueprint}>
                 <div className={styles.twoRowTopSplit}>
-                  <MiniWireframeBlock label="Notes" isEnabled={widgets.notes} isLight />
-                  <MiniWireframeBlock label="Tasks" isEnabled={widgets.tasks} isLight />
+                  <MiniWireframeBlock label="Notes" isLight />
+                  <MiniWireframeBlock label="Tasks" isLight />
                 </div>
                 <div className={styles.twoRowBottomSplit}>
                   <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Weather" isEnabled={widgets.weather} />
-                    <MiniWireframeBlock label="Voice" isEnabled={widgets.recorder} />
+                    <MiniWireframeBlock label="Weather" />
+                    <MiniWireframeBlock label="Voice" />
                   </div>
                   <div className={styles.cluster2}>
-                    <MiniWireframeBlock label="Count" isEnabled={widgets.countdown} />
-                    <MiniWireframeBlock label="Schedule" isEnabled={widgets.schedule} />
+                    <MiniWireframeBlock label="Count" />
+                    <MiniWireframeBlock label="Schedule" />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* 2. Dedicated Widget Toggles Section */}
-        <div className={styles.togglesSection}>
-          <div className={styles.sectionHeader}>
-            <span>Toggle Widget Visibility</span>
-            <span style={{ fontSize: 11, color: '#71717a', textTransform: 'none' }}>
-              Turn widgets on or off for the active layout
-            </span>
-          </div>
-
-          <div className={styles.togglesGrid}>
-            {widgetKeys.map((id) => {
-              const meta = WIDGET_METADATA[id]
-              const isChecked = widgets[id] ?? false
-              return (
-                <div
-                  key={id}
-                  className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`}
-                  onClick={() => toggleWidget(id)}
-                >
-                  <div className={styles.toggleLabelGroup}>
-                    <span className={styles.toggleIcon}>{meta.icon}</span>
-                    <span className={styles.toggleName}>{meta.name}</span>
-                  </div>
-
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={isChecked}
-                      onCheckedChange={() => toggleWidget(id)}
-                      aria-label={`Toggle ${meta.name}`}
-                    />
-                  </div>
-                </div>
-              )
-            })}
           </div>
         </div>
       </div>

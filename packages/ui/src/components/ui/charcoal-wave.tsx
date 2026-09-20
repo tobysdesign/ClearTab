@@ -27,7 +27,6 @@ export function CharcoalWave() {
       powerPreference: "low-power",
       depth: false,
       stencil: false,
-      desynchronized: true,
     });
     if (!gl) return;
 

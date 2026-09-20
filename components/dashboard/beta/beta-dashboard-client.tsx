@@ -50,23 +50,8 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false)
 
   const {
-    widgets,
-    activePreset,
-    activeCount,
-    totalCount,
-    primaryOrder,
-    utilityOrder,
-    layoutMode,
-    setLayoutMode,
     presetLayout,
     setPresetLayout,
-    layoutOrientation,
-    setLayoutOrientation,
-    toggleWidget,
-    swapPrimaryOrder,
-    moveUtility,
-    applyPreset,
-    resetToAll,
   } = useBetaWidgets()
 
   const [position, setPosition] = useState<DockPosition>(() => {
@@ -345,18 +330,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             transition: 'all 0.15s',
           }}
         >
-          <span>🎛️ Choose Layout</span>
-          <span
-            style={{
-              fontSize: 10,
-              padding: '1px 5px',
-              borderRadius: 9999,
-              background: 'rgba(59, 130, 246, 0.3)',
-              color: '#93c5fd',
-            }}
-          >
-            {activeCount}/{totalCount}
-          </span>
+          <span>🎛️ Layout: {presetLayout}</span>
         </button>
 
         <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
@@ -387,7 +361,6 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           <BetaAdaptiveGrid
             notes={notes}
             tasks={tasks}
-            visibleWidgets={widgets}
             presetLayout={presetLayout}
             dockPosition={position}
             searchQuery={searchQuery}
@@ -448,8 +421,6 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
-                activeCount={activeCount}
-                totalCount={totalCount}
                 onOpenLayoutModal={() => setIsLayoutModalOpen(true)}
               />
 
@@ -472,10 +443,6 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         onClose={() => setIsLayoutModalOpen(false)}
         presetLayout={presetLayout}
         setPresetLayout={setPresetLayout}
-        widgets={widgets}
-        toggleWidget={toggleWidget}
-        activeCount={activeCount}
-        totalCount={totalCount}
       />
     </div>
   )
