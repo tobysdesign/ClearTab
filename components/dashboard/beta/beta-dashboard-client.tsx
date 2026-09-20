@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
 import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
-import { WidgetTogglePopover } from './widget-toggle-popover'
+import { VisualLayoutModal } from './visual-layout-modal'
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
@@ -47,6 +47,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   const [isDragging, setIsDragging] = useState(false)
   const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(null)
+  const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false)
 
   const {
     widgets,
@@ -124,6 +125,10 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
       if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault()
         setShowSettings((prev) => !prev)
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
+        e.preventDefault()
+        setIsLayoutModalOpen((prev) => !prev)
       }
     }
 
@@ -316,58 +321,38 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           Beta
         </span>
 
-        {/* Quick layout trigger button */}
-        <WidgetTogglePopover
-          widgets={widgets}
-          activePreset={activePreset}
-          activeCount={activeCount}
-          totalCount={totalCount}
-          primaryOrder={primaryOrder}
-          utilityOrder={utilityOrder}
-          presetLayout={presetLayout}
-          setPresetLayout={setPresetLayout}
-          layoutMode={layoutMode}
-          setLayoutMode={setLayoutMode}
-          layoutOrientation={layoutOrientation}
-          setLayoutOrientation={setLayoutOrientation}
-          toggleWidget={toggleWidget}
-          swapPrimaryOrder={swapPrimaryOrder}
-          moveUtility={moveUtility}
-          applyPreset={applyPreset}
-          resetToAll={resetToAll}
-          side="bottom"
+        {/* Layout modal trigger button */}
+        <button
+          type="button"
+          onClick={() => setIsLayoutModalOpen(true)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            background: 'rgba(255, 255, 255, 0.08)',
+            border: '1px solid rgba(255, 255, 255, 0.14)',
+            borderRadius: 6,
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 500,
+            padding: '4px 9px',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
         >
-          <button
-            type="button"
+          <span>🎛️ Choose Layout</span>
+          <span
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: 6,
-              color: '#fff',
-              fontSize: 11,
-              fontWeight: 500,
-              padding: '3px 8px',
-              cursor: 'pointer',
-              transition: 'background 0.15s',
+              fontSize: 10,
+              padding: '1px 5px',
+              borderRadius: 9999,
+              background: 'rgba(59, 130, 246, 0.3)',
+              color: '#93c5fd',
             }}
           >
-            <span>🎛️ Customize Layout</span>
-            <span
-              style={{
-                fontSize: 10,
-                padding: '1px 5px',
-                borderRadius: 9999,
-                background: 'rgba(99, 102, 241, 0.3)',
-                color: '#a5b4fc',
-              }}
-            >
-              {activeCount}/{totalCount}
-            </span>
-          </button>
-        </WidgetTogglePopover>
+            {activeCount}/{totalCount}
+          </span>
+        </button>
 
         <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
         <Link
@@ -458,24 +443,9 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
-                widgets={widgets}
-                activePreset={activePreset}
                 activeCount={activeCount}
                 totalCount={totalCount}
-                primaryOrder={primaryOrder}
-                utilityOrder={utilityOrder}
-                presetLayout={presetLayout}
-                setPresetLayout={setPresetLayout}
-                layoutMode={layoutMode}
-                setLayoutMode={setLayoutMode}
-                layoutOrientation={layoutOrientation}
-                setLayoutOrientation={setLayoutOrientation}
-                toggleWidget={toggleWidget}
-                swapPrimaryOrder={swapPrimaryOrder}
-                moveUtility={moveUtility}
-                applyPreset={applyPreset}
-                resetToAll={resetToAll}
-                dockPosition={position}
+                onOpenLayoutModal={() => setIsLayoutModalOpen(true)}
               />
 
               <div
@@ -491,6 +461,17 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           </motion.div>,
           document.body
         )}
+
+      <VisualLayoutModal
+        isOpen={isLayoutModalOpen}
+        onClose={() => setIsLayoutModalOpen(false)}
+        presetLayout={presetLayout}
+        setPresetLayout={setPresetLayout}
+        widgets={widgets}
+        toggleWidget={toggleWidget}
+        activeCount={activeCount}
+        totalCount={totalCount}
+      />
     </div>
   )
 }

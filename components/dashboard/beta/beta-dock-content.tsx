@@ -8,17 +8,6 @@ import { DockIconButton, ShinyAiButton } from '@cleartab/ui'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
-import { WidgetTogglePopover } from './widget-toggle-popover'
-import {
-  WidgetVisibilityState,
-  WidgetId,
-  PrimaryWidgetId,
-  UtilityWidgetId,
-  PresetId,
-  BetaPresetLayout,
-  LayoutMode,
-  LayoutOrientation,
-} from '@/hooks/use-beta-widgets'
 import styles from '../dock-content.module.css'
 
 interface BetaDockContentProps {
@@ -29,24 +18,9 @@ interface BetaDockContentProps {
   setShowSettings: (show: boolean) => void
   setShowSearch: (show: boolean) => void
   isVertical: boolean
-  widgets: WidgetVisibilityState
-  activePreset: PresetId
   activeCount: number
   totalCount: number
-  primaryOrder: PrimaryWidgetId[]
-  utilityOrder: UtilityWidgetId[]
-  presetLayout: BetaPresetLayout
-  setPresetLayout: (layout: BetaPresetLayout) => void
-  layoutMode: LayoutMode
-  setLayoutMode: (mode: LayoutMode) => void
-  layoutOrientation: LayoutOrientation
-  setLayoutOrientation: (orientation: LayoutOrientation) => void
-  toggleWidget: (id: WidgetId) => void
-  swapPrimaryOrder: () => void
-  moveUtility: (id: UtilityWidgetId, direction: 'left' | 'right') => void
-  applyPreset: (presetId: Exclude<PresetId, 'custom'>) => void
-  resetToAll: () => void
-  dockPosition: 'top' | 'left' | 'right' | 'bottom'
+  onOpenLayoutModal: () => void
 }
 
 export function BetaDockContent({
@@ -57,24 +31,9 @@ export function BetaDockContent({
   setShowSettings: _setShowSettings,
   setShowSearch: _setShowSearch,
   isVertical,
-  widgets,
-  activePreset,
   activeCount,
   totalCount,
-  primaryOrder,
-  utilityOrder,
-  presetLayout,
-  setPresetLayout,
-  layoutMode,
-  setLayoutMode,
-  layoutOrientation,
-  setLayoutOrientation,
-  toggleWidget,
-  swapPrimaryOrder,
-  moveUtility,
-  applyPreset,
-  resetToAll,
-  dockPosition,
+  onOpenLayoutModal,
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
 
@@ -86,16 +45,6 @@ export function BetaDockContent({
     }
   }
 
-  // Popover placement should be opposite to dock position
-  const popoverSide =
-    dockPosition === 'bottom'
-      ? 'top'
-      : dockPosition === 'top'
-        ? 'bottom'
-        : dockPosition === 'left'
-          ? 'right'
-          : 'left'
-
   return (
     <div
       className={cn(
@@ -103,52 +52,32 @@ export function BetaDockContent({
         isVertical ? styles.containerVertical : styles.containerHorizontal
       )}
     >
-      <WidgetTogglePopover
-        widgets={widgets}
-        activePreset={activePreset}
-        activeCount={activeCount}
-        totalCount={totalCount}
-        primaryOrder={primaryOrder}
-        utilityOrder={utilityOrder}
-        presetLayout={presetLayout}
-        setPresetLayout={setPresetLayout}
-        layoutMode={layoutMode}
-        setLayoutMode={setLayoutMode}
-        layoutOrientation={layoutOrientation}
-        setLayoutOrientation={setLayoutOrientation}
-        toggleWidget={toggleWidget}
-        swapPrimaryOrder={swapPrimaryOrder}
-        moveUtility={moveUtility}
-        applyPreset={applyPreset}
-        resetToAll={resetToAll}
-        side={popoverSide}
-      >
-        <div style={{ position: 'relative' }}>
-          <DockIconButton
-            title={`Customize Adaptive Layout (${activeCount}/${totalCount} active) • ⌘L`}
-            shortcut="⌘L"
-          >
-            <LayoutToggleIcon
-              isToggled={activeCount < totalCount}
-              size={16}
-            />
-          </DockIconButton>
-          {activeCount < totalCount && (
-            <span
-              style={{
-                position: 'absolute',
-                top: 4,
-                right: 4,
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                backgroundColor: '#6366f1',
-                pointerEvents: 'none',
-              }}
-            />
-          )}
-        </div>
-      </WidgetTogglePopover>
+      <div style={{ position: 'relative' }}>
+        <DockIconButton
+          onClick={onOpenLayoutModal}
+          title={`Choose Visual Layout (${activeCount}/${totalCount} active) • ⌘L`}
+          shortcut="⌘L"
+        >
+          <LayoutToggleIcon
+            isToggled={activeCount < totalCount}
+            size={16}
+          />
+        </DockIconButton>
+        {activeCount < totalCount && (
+          <span
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              backgroundColor: '#3b82f6',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
+      </div>
 
       <ShinyAiButton
         onClick={handleToggleChat}
