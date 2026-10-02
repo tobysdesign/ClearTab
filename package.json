@@ -13,7 +13,8 @@
     "start": "next start",
     "generate-icons": "node scripts/generate-icons.js",
     "analyze": "ANALYZE=true pnpm build",
-    "create-user": "tsx -r dotenv/config scripts/create-user.ts"
+    "create-user": "tsx -r dotenv/config scripts/create-user.ts",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",
@@ -75,7 +76,8 @@
     "react-resizable-panels": "^3.0.3",
     "ts-prune": "^0.10.3",
     "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.3"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
