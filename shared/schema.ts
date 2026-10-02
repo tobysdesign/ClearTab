@@ -263,6 +263,11 @@ export const userPreferences = pgTable(
     openaiApiKey: text("openai_api_key"),
     theme: text("theme").default("dark"),
     currency: text("currency").default("USD"),
+
+    // Beta dashboard layout
+    layout: text("layout").default("notetaker"),
+    widgets: jsonb("widgets").$type<Record<string, boolean>>(),
+    customLayout: jsonb("custom_layout").$type<{ tree: unknown } | null>(),
   },
   (table) => ({
     rls: pgPolicy("user_preferences RLS policy", {
