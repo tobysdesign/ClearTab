@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { notetakerToTree, taskmasterToTree, evenToTree, minimalToTree, presetToTree } from './panel-tree'
 import { findPath, swapWidgets } from './panel-tree'
+import { splitWidgetIn, moveWidget } from './panel-tree'
 
 describe('preset to tree converters', () => {
   it('notetakerToTree puts notes on the left and a 2x2 utility grid on the right', () => {
@@ -84,5 +85,38 @@ describe('swapWidgets', () => {
   it('is a no-op when swapping a widget with itself', () => {
     const tree = notetakerToTree()
     expect(swapWidgets(tree, 'notes', 'notes')).toEqual(tree)
+  })
+})
+
+describe('splitWidgetIn', () => {
+  it('dropping on the left edge of weather inserts the dragged widget to its left', () => {
+    const tree = notetakerToTree()
+    const result = splitWidgetIn(tree, 'recorder', 'weather', 'left')
+    const weatherParentPath = findPath(result, 'weather')!.slice(0, -1)
+    expect(findPath(result, 'recorder')).toEqual([...weatherParentPath, 0])
+    expect(findPath(result, 'weather')).toEqual([...weatherParentPath, 1])
+  })
+
+  it('removing the dragged widget collapses its old parent split to the remaining sibling', () => {
+    const tree = notetakerToTree()
+    const result = splitWidgetIn(tree, 'schedule', 'notes', 'top')
+    expect(findPath(result, 'weather')).toEqual([1, 1, 0])
+  })
+})
+
+describe('moveWidget', () => {
+  it('dispatches center drops to swapWidgets', () => {
+    const tree = notetakerToTree()
+    expect(moveWidget(tree, 'schedule', 'weather', 'center')).toEqual(swapWidgets(tree, 'schedule', 'weather'))
+  })
+
+  it('dispatches edge drops to splitWidgetIn', () => {
+    const tree = notetakerToTree()
+    expect(moveWidget(tree, 'recorder', 'weather', 'left')).toEqual(splitWidgetIn(tree, 'recorder', 'weather', 'left'))
+  })
+
+  it('is a no-op when dragging a widget onto itself', () => {
+    const tree = notetakerToTree()
+    expect(moveWidget(tree, 'notes', 'notes', 'center')).toEqual(tree)
   })
 })
