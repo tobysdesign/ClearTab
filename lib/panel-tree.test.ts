@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { notetakerToTree, taskmasterToTree, evenToTree, minimalToTree, presetToTree } from './panel-tree'
 import { findPath, swapWidgets } from './panel-tree'
 import { splitWidgetIn, moveWidget } from './panel-tree'
+import { collapseForVisibility } from './panel-tree'
+import type { PanelNode, WidgetId } from './panel-tree'
 
 describe('preset to tree converters', () => {
   it('notetakerToTree puts notes on the left and a 2x2 utility grid on the right', () => {
@@ -118,5 +120,34 @@ describe('moveWidget', () => {
   it('is a no-op when dragging a widget onto itself', () => {
     const tree = notetakerToTree()
     expect(moveWidget(tree, 'notes', 'notes', 'center')).toEqual(tree)
+  })
+})
+
+describe('collapseForVisibility', () => {
+  it('returns the tree unchanged when every widget is visible', () => {
+    const tree = notetakerToTree()
+    expect(collapseForVisibility(tree, () => true)).toEqual(tree)
+  })
+
+  it('collapses a split to its one remaining visible child', () => {
+    const tree = notetakerToTree()
+    const isVisible = (id: WidgetId) => id !== 'weather'
+    const result = collapseForVisibility(tree, isVisible)
+    expect(findPath(result!, 'schedule')).toEqual([1, 1, 0])
+    expect(findPath(result!, 'weather')).toBeNull()
+  })
+
+  it('returns null when every widget under a node is hidden', () => {
+    const tree: PanelNode = {
+      type: 'split', direction: 'row', sizes: [50, 50],
+      children: [{ type: 'widget', id: 'schedule' }, { type: 'widget', id: 'weather' }],
+    }
+    expect(collapseForVisibility(tree, () => false)).toBeNull()
+  })
+
+  it('collapsing to the only visible widget returns just that leaf', () => {
+    const tree = notetakerToTree()
+    const isVisible = (id: WidgetId) => id === 'notes'
+    expect(collapseForVisibility(tree, isVisible)).toEqual({ type: 'widget', id: 'notes' })
   })
 })
