@@ -14,6 +14,7 @@ import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
 import { useBetaWidgets } from '@/hooks/use-beta-widgets'
 import styles from '../dashboard-client.module.css'
+import betaStyles from './beta-dashboard-client.module.css'
 
 interface BetaDashboardClientProps {
   notes: ReactNode
@@ -56,6 +57,8 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
     toggleWidget,
     activeCount,
     totalCount,
+    customLayout,
+    moveWidgetInCustomLayout,
   } = useBetaWidgets()
 
   const [position, setPosition] = useState<DockPosition>(() => {
@@ -281,37 +284,8 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   return (
     <div ref={containerRef} className="dashboard-container">
       {/* Floating Beta Indicator & Controls pill */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 14,
-          right: 18,
-          zIndex: 9998,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '4px 10px',
-          borderRadius: 9999,
-          background: 'rgba(24, 24, 27, 0.85)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.14)',
-          fontSize: 12,
-          color: '#e4e4e7',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-        }}
-      >
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            padding: '2px 7px',
-            borderRadius: 6,
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-            color: '#fff',
-          }}
-        >
+      <div className={betaStyles.betaPill}>
+        <span className={betaStyles.betaBadge}>
           Beta
         </span>
 
@@ -319,45 +293,18 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         <button
           type="button"
           onClick={() => setIsLayoutModalOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.14)',
-            borderRadius: 6,
-            color: '#fff',
-            fontSize: 11,
-            fontWeight: 500,
-            padding: '4px 9px',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-          }}
+          className={betaStyles.layoutButton}
         >
           <span>🎛️ Layout: {presetLayout}</span>
-          <span
-            style={{
-              fontSize: 10,
-              padding: '1px 5px',
-              borderRadius: 9999,
-              background: 'rgba(59, 130, 246, 0.3)',
-              color: '#93c5fd',
-            }}
-          >
+          <span className={betaStyles.countBadge}>
             {activeCount}/{totalCount}
           </span>
         </button>
 
-        <span style={{ color: 'rgba(255,255,255,0.2)' }}>•</span>
+        <span className={betaStyles.pillSeparator}>•</span>
         <Link
           href="/"
-          style={{
-            color: '#a1a1aa',
-            textDecoration: 'none',
-            fontWeight: 400,
-            fontSize: 11,
-            transition: 'color 0.15s',
-          }}
+          className={betaStyles.classicLink}
           title="Return to Classic rigid layout"
         >
           Classic
@@ -378,6 +325,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
             tasks={tasks}
             presetLayout={presetLayout}
             visibleWidgets={widgets}
+            customLayout={customLayout}
             dockPosition={position}
             searchQuery={searchQuery}
           />
@@ -447,7 +395,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                   target.setPointerCapture(e.pointerId)
                 }}
               >
-                <DragIcon size={16} className="text-white/60" />
+                <DragIcon size={16} className={betaStyles.dockDragIcon} />
               </div>
             </div>
           </motion.div>,
@@ -463,6 +411,8 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         toggleWidget={toggleWidget}
         activeCount={activeCount}
         totalCount={totalCount}
+        customLayout={customLayout}
+        onMoveWidget={moveWidgetInCustomLayout}
       />
     </div>
   )
