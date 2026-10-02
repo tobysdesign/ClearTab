@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { notetakerToTree, taskmasterToTree, evenToTree, minimalToTree, presetToTree } from './panel-tree'
+import { findPath, swapWidgets } from './panel-tree'
 
 describe('preset to tree converters', () => {
   it('notetakerToTree puts notes on the left and a 2x2 utility grid on the right', () => {
@@ -51,5 +52,37 @@ describe('preset to tree converters', () => {
   it('presetToTree dispatches to the matching converter', () => {
     expect(presetToTree('notetaker')).toEqual(notetakerToTree())
     expect(presetToTree('even')).toEqual(evenToTree())
+  })
+})
+
+describe('findPath', () => {
+  it('finds the path to a leaf nested inside the utility grid', () => {
+    const tree = notetakerToTree()
+    expect(findPath(tree, 'weather')).toEqual([1, 1, 0, 1])
+  })
+
+  it('returns null for a widget not present in the tree', () => {
+    expect(findPath({ type: 'widget', id: 'notes' }, 'tasks')).toBeNull()
+  })
+})
+
+describe('swapWidgets', () => {
+  it('swaps two leaves, leaving the tree shape unchanged', () => {
+    const tree = notetakerToTree()
+    const result = swapWidgets(tree, 'schedule', 'weather')
+    expect(findPath(result, 'weather')).toEqual(findPath(tree, 'schedule'))
+    expect(findPath(result, 'schedule')).toEqual(findPath(tree, 'weather'))
+  })
+
+  it('swapping notes and tasks moves notes into the tall left slot', () => {
+    const tree = notetakerToTree()
+    const result = swapWidgets(tree, 'notes', 'tasks')
+    expect(findPath(result, 'tasks')).toEqual([0])
+    expect(findPath(result, 'notes')).toEqual([1, 0])
+  })
+
+  it('is a no-op when swapping a widget with itself', () => {
+    const tree = notetakerToTree()
+    expect(swapWidgets(tree, 'notes', 'notes')).toEqual(tree)
   })
 })
