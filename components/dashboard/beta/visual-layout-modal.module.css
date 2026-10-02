@@ -421,3 +421,11 @@
   background-color: #22c55e;
   border-color: #22c55e;
 }
+
+.draggableBlock {
+  cursor: grab;
+}
+
+.draggableBlock:active {
+  cursor: grabbing;
+}

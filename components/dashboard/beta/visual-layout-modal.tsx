@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { Switch } from '@/components/ui/switch'
 import {
   BetaPresetLayout,
@@ -68,6 +69,45 @@ function renderTreeWireframe(node: PanelNode): React.ReactNode {
     <div className={node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol}>
       <div className={styles.wireframeFlex1}>{renderTreeWireframe(node.children[0])}</div>
       <div className={styles.wireframeFlex1}>{renderTreeWireframe(node.children[1])}</div>
+    </div>
+  )
+}
+
+function DraggableTreeWireframe({
+  node,
+  registerRef,
+  onDragEnd,
+}: {
+  node: PanelNode
+  registerRef: (id: WidgetId, el: HTMLDivElement | null) => void
+  onDragEnd: (draggedId: WidgetId, point: { x: number; y: number }) => void
+}) {
+  if (node.type === 'widget') {
+    const meta = WIDGET_METADATA[node.id]
+    const isLight = node.id === 'notes' || node.id === 'tasks'
+    return (
+      <motion.div
+        ref={(el) => registerRef(node.id, el)}
+        className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${styles.wireframeFlex1} ${styles.draggableBlock}`}
+        drag
+        dragSnapToOrigin
+        dragElastic={0.2}
+        whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
+        onDragEnd={(_event, info) => onDragEnd(node.id, info.point)}
+      >
+        <span className={styles.miniBlockName}>{meta.name}</span>
+        <span className={styles.miniGripDots}>:::</span>
+      </motion.div>
+    )
+  }
+  return (
+    <div className={node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol}>
+      <div className={styles.wireframeFlex1}>
+        <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDragEnd={onDragEnd} />
+      </div>
+      <div className={styles.wireframeFlex1}>
+        <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDragEnd={onDragEnd} />
+      </div>
     </div>
   )
 }
@@ -252,7 +292,7 @@ export function VisualLayoutModal({
   activeCount,
   totalCount,
   customLayout,
-  onMoveWidget: _onMoveWidget,
+  onMoveWidget,
 }: VisualLayoutModalProps) {
   useEffect(() => {
     if (!isOpen) return
@@ -271,6 +311,44 @@ export function VisualLayoutModal({
   const rawActiveTree: PanelNode | null = presetLayout === 'custom' ? customLayout.tree : presetToTree(presetLayout)
   const activeTree = rawActiveTree ? collapseForVisibility(rawActiveTree, isVisible) : null
   const customCollapsedTree = customLayout.tree ? collapseForVisibility(customLayout.tree, isVisible) : null
+
+  const blockRefs = useRef(new Map<WidgetId, HTMLDivElement>())
+  const registerRef = useCallback((id: WidgetId, el: HTMLDivElement | null) => {
+    if (el) blockRefs.current.set(id, el)
+    else blockRefs.current.delete(id)
+  }, [])
+
+  const handleDragEnd = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
+    let targetId: WidgetId | null = null
+    let targetRect: DOMRect | null = null
+    blockRefs.current.forEach((el, id) => {
+      if (id === draggedId) return
+      const rect = el.getBoundingClientRect()
+      if (point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom) {
+        targetId = id
+        targetRect = rect
+      }
+    })
+    if (!targetId || !targetRect) return
+    const relX = (point.x - targetRect.left) / targetRect.width
+    const relY = (point.y - targetRect.top) / targetRect.height
+    const inCenter = relX >= 0.25 && relX <= 0.75 && relY >= 0.25 && relY <= 0.75
+    let zone: DropZone
+    if (inCenter) {
+      zone = 'center'
+    } else {
+      const distances: Record<'left' | 'right' | 'top' | 'bottom', number> = {
+        left: relX,
+        right: 1 - relX,
+        top: relY,
+        bottom: 1 - relY,
+      }
+      zone = (Object.keys(distances) as Array<'left' | 'right' | 'top' | 'bottom'>).reduce((closest, key) =>
+        distances[key] < distances[closest] ? key : closest
+      , 'left')
+    }
+    onMoveWidget(draggedId, targetId, zone)
+  }, [onMoveWidget])
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -292,7 +370,7 @@ export function VisualLayoutModal({
         <div className={styles.layoutBuilder}>
           <div className={styles.bigPreviewFrame}>
             {activeTree
-              ? renderTreeWireframe(activeTree)
+              ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDragEnd={handleDragEnd} />
               : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
           </div>
           <div className={styles.layoutRail}>
