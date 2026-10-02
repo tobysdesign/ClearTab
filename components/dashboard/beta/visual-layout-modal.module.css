@@ -98,56 +98,119 @@
   color: #fff;
 }
 
-/* 4 Layout Cards Grid */
-.layoutsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+/* Big preview + thumbnail rail */
+.layoutBuilder {
+  display: flex;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-@media (max-width: 960px) {
-  .layoutsGrid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 768px) {
+  .layoutBuilder {
+    flex-direction: column;
   }
 }
 
-@media (max-width: 540px) {
-  .layoutsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.layoutCard {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  cursor: pointer;
+.bigPreviewFrame {
+  flex: 1;
+  min-width: 0;
+  height: 440px;
+  background: #1c1c1f;
   border-radius: 14px;
   padding: 10px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.emptyCustomHint {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  color: #71717a;
+  font-size: 13px;
+}
+
+.layoutRail {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 440px;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .layoutRail {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: none;
+  }
+}
+
+.railCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.02);
   border: 2px solid rgba(255, 255, 255, 0.08);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
-.layoutCard:hover {
+.railCard:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6);
 }
 
-.layoutCardActive {
+.railCardActive {
   background: rgba(37, 99, 235, 0.12);
   border-color: #2563eb;
-  box-shadow: 0 0 0 1px #2563eb, 0 16px 36px -8px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 0 0 1px #2563eb;
 }
 
-.layoutTitleRow {
+.railCardCustom:not(.railCardActive) {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.railCardTitleRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.railCardFrame {
+  height: 90px;
+  width: 100%;
+  background: #1c1c1f;
+  border-radius: 8px;
+  padding: 4px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+.customPlusIcon {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: rgba(139, 92, 246, 0.6);
 }
 
 .layoutName {
@@ -168,26 +231,11 @@
   color: #fff;
 }
 
-/* Wireframe Thumbnail Canvas */
-.wireframeFrame {
-  height: 220px;
-  width: 100%;
-  background: #1c1c1f;
-  border-radius: 10px;
-  padding: 6px;
-  box-sizing: border-box;
-  display: flex;
-  gap: 5px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  pointer-events: none; /* Allows clicking anywhere on card to select layout */
-}
-
 /* Miniature Block Styling */
 .miniBlock {
   border-radius: 6px;
-  background: #9ca3af;
-  color: #111827;
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -197,153 +245,104 @@
   transition: all 0.2s ease;
   overflow: hidden;
   text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .miniBlockLight {
-  background: #e4e4e7;
-  color: #09090b;
+  background: rgba(255, 255, 255, 0.16);
+  color: #f4f4f5;
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .miniBlockOff {
   opacity: 0.3;
-  background: #3f3f46 !important;
-  color: #9ca3af !important;
+  background: rgba(255, 255, 255, 0.03);
+  color: #52525b;
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
-.miniBlockName {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.miniToggleIndicator {
-  width: 18px;
-  height: 9px;
-  border-radius: 9999px;
-  background: #2563eb;
-  position: relative;
-  transition: background 0.2s;
-}
-
-.miniToggleIndicator::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  right: 1px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  transition: all 0.2s;
-}
-
-.miniToggleIndicatorOff {
-  background: #52525b;
-}
-
-.miniToggleIndicatorOff::after {
-  left: 1px;
-  right: auto;
-}
-
-.miniGripDots {
-  font-size: 8px;
-  color: rgba(0, 0, 0, 0.4);
-  line-height: 1;
-  letter-spacing: 1px;
-}
-
-.miniBlockOff .miniGripDots {
-  color: rgba(255, 255, 255, 0.2);
-}
-
-/* Blueprint 1: default_4right */
-.default4RightBlueprint {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  gap: 5px;
-}
-
-.default4RightNotes {
-  flex: 1;
-  height: 100%;
-}
-
-.default4RightRightCol {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.default4RightTasks {
-  height: 60px;
-  width: 100%;
-}
-
-.default4RightGrid2x2 {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 5px;
-}
-
-/* Blueprint 2, 3, 4: Two-Row structures */
-.twoRowBlueprint {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  gap: 5px;
-}
-
-.twoRowTopSplit {
-  height: 125px;
-  display: flex;
-  gap: 5px;
-  width: 100%;
-}
-
-.twoRowTopSplit > div {
-  flex: 1;
-  height: 100%;
-}
-
-.twoRowBottomSplit {
-  flex: 1;
-  display: flex;
-  gap: 5px;
-  width: 100%;
-}
-
-.cluster3 {
+/* Wireframe Layout Classes */
+.wireframeRow {
   display: flex;
   gap: 4px;
-  flex: 1.35;
+  width: 100%;
+  height: 100%;
 }
 
-.cluster3 > div {
+.wireframeCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+}
+
+.wireframeColFlex {
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  height: 100%;
+  gap: 4px;
+  min-height: 0;
+  min-width: 0;
 }
 
-.cluster1Schedule {
-  flex: 1.65;
-  height: 100%;
+.wireframeFlex1 {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
 }
 
-.cluster2 {
+.wireframeFlex1_5 {
+  flex: 1.5;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.wireframeFlex3 {
+  flex: 3;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.wireframeTop34 {
+  height: 34%;
+  min-height: 0;
+}
+
+.wireframeTop100 {
+  height: 100%;
+  min-height: 0;
+}
+
+.wireframeGrid2x2 {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+  min-height: 0;
+}
+
+.wireframeGridRow {
   display: flex;
   gap: 4px;
   flex: 1;
+  min-height: 0;
 }
 
-.cluster2 > div {
-  flex: 1;
-  height: 100%;
+.escKey {
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+.sectionSubtitle {
+  font-size: 11px;
+  color: #71717a;
+  text-transform: none;
+  font-weight: 400;
 }
 
 /* Dedicated Widget Toggle Bar */
@@ -414,4 +413,11 @@
   font-size: 13px;
   font-weight: 500;
   color: #f4f4f5;
+}
+
+/* Higher-specificity override (no !important) so "on" reads as green,
+   scoped to this modal only — the shared Switch used elsewhere stays white. */
+.togglesGrid .widgetSwitch[data-state='checked'] {
+  background-color: #22c55e;
+  border-color: #22c55e;
 }
