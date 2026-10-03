@@ -61,23 +61,22 @@ interface DropTarget {
 }
 
 /** Shared hit-test: given the dragged widget's current pointer position, find which
- * other tile it's over and whether that's a center (swap) or edge (split) drop. */
+ * other tile it's over and whether that's a center (swap) or edge (split) drop.
+ * Queries the live DOM at the cursor point rather than a maintained ref map —
+ * a map keyed by widget id can go stale the instant two tiles trade ids in the
+ * same commit (e.g. right after a swap), since their ref callbacks re-register
+ * in the same pass; elementsFromPoint always reflects what's actually rendered. */
 function computeDropTarget(
-  blockRefs: Map<WidgetId, HTMLDivElement>,
-  draggedId: WidgetId,
+  draggedEl: HTMLElement,
   point: { x: number; y: number },
 ): DropTarget | null {
-  let targetId: WidgetId | null = null
-  let targetRect: DOMRect | null = null
-  blockRefs.forEach((el, id) => {
-    if (id === draggedId) return
-    const rect = el.getBoundingClientRect()
-    if (point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom) {
-      targetId = id
-      targetRect = rect
-    }
-  })
-  if (!targetId || !targetRect) return null
+  const stack = document.elementsFromPoint(point.x, point.y)
+  const targetEl = stack.find(
+    (el): el is HTMLElement => el !== draggedEl && !draggedEl.contains(el) && el instanceof HTMLElement && el.hasAttribute('data-widget-id'),
+  )
+  if (!targetEl) return null
+  const targetId = targetEl.getAttribute('data-widget-id') as WidgetId
+  const targetRect = targetEl.getBoundingClientRect()
   const relX = (point.x - targetRect.left) / targetRect.width
   const relY = (point.y - targetRect.top) / targetRect.height
   const inCenter = relX >= 0.25 && relX <= 0.75 && relY >= 0.25 && relY <= 0.75
@@ -136,28 +135,27 @@ function renderTreeWireframe(node: PanelNode, className: string = styles.wirefra
 
 function DraggableTreeWireframe({
   node,
-  registerRef,
   onDrag,
   onDragEnd,
 }: {
   node: PanelNode
-  registerRef: (id: WidgetId, el: HTMLDivElement | null) => void
-  onDrag: (draggedId: WidgetId, point: { x: number; y: number }) => void
-  onDragEnd: (draggedId: WidgetId, point: { x: number; y: number }) => void
+  onDrag: (draggedEl: HTMLElement, point: { x: number; y: number }) => void
+  onDragEnd: (draggedId: WidgetId, draggedEl: HTMLElement, point: { x: number; y: number }) => void
 }) {
   if (node.type === 'widget') {
     const meta = WIDGET_METADATA[node.id]
     const isLight = node.id === 'notes' || node.id === 'tasks'
     return (
       <motion.div
-        ref={(el) => registerRef(node.id, el)}
+        data-widget-id={node.id}
+        layoutId={node.id}
         className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${styles.wireframeFlex1} ${styles.draggableBlock}`}
         drag
         dragSnapToOrigin
         dragElastic={0.2}
         whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
-        onDrag={(_event, info) => onDrag(node.id, info.point)}
-        onDragEnd={(_event, info) => onDragEnd(node.id, info.point)}
+        onDrag={(event, info) => onDrag(event.currentTarget as HTMLElement, info.point)}
+        onDragEnd={(event, info) => onDragEnd(node.id, event.currentTarget as HTMLElement, info.point)}
       >
         <span className={styles.miniBlockName}>{meta.name}</span>
         <span className={styles.miniGripDots}>:::</span>
@@ -166,8 +164,8 @@ function DraggableTreeWireframe({
   }
   return (
     <div className={`${node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol} ${styles.wireframeFlex1}`}>
-      <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDrag={onDrag} onDragEnd={onDragEnd} />
-      <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDrag={onDrag} onDragEnd={onDragEnd} />
+      <DraggableTreeWireframe node={node.children[0]} onDrag={onDrag} onDragEnd={onDragEnd} />
+      <DraggableTreeWireframe node={node.children[1]} onDrag={onDrag} onDragEnd={onDragEnd} />
     </div>
   )
 }
@@ -363,22 +361,16 @@ export function VisualLayoutModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  const blockRefs = useRef(new Map<WidgetId, HTMLDivElement>())
-  const registerRef = useCallback((id: WidgetId, el: HTMLDivElement | null) => {
-    if (el) blockRefs.current.set(id, el)
-    else blockRefs.current.delete(id)
-  }, [])
-
   // Imperative, not React state: updating this via setState on every pointermove
   // would re-render the whole modal (and recompute the entire tree) mid-drag,
   // fighting framer-motion's own transform updates on the dragged element and
   // making it appear to freeze. The indicator div is updated directly instead.
   const dropIndicatorRef = useRef<HTMLDivElement>(null)
 
-  const handleDrag = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
+  const handleDrag = useCallback((draggedEl: HTMLElement, point: { x: number; y: number }) => {
     const el = dropIndicatorRef.current
     if (!el) return
-    const target = computeDropTarget(blockRefs.current, draggedId, point)
+    const target = computeDropTarget(draggedEl, point)
     if (!target) {
       el.style.opacity = '0'
       return
@@ -392,9 +384,9 @@ export function VisualLayoutModal({
     el.style.height = `${r.height}px`
   }, [])
 
-  const handleDragEnd = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
+  const handleDragEnd = useCallback((draggedId: WidgetId, draggedEl: HTMLElement, point: { x: number; y: number }) => {
     if (dropIndicatorRef.current) dropIndicatorRef.current.style.opacity = '0'
-    const target = computeDropTarget(blockRefs.current, draggedId, point)
+    const target = computeDropTarget(draggedEl, point)
     if (!target) return
     onMoveWidget(draggedId, target.targetId, target.zone)
   }, [onMoveWidget])
@@ -429,10 +421,13 @@ export function VisualLayoutModal({
             <div className={styles.sectionHeader}><span>Select Layout Structure</span></div>
             <div className={styles.bigPreviewFrame}>
               {activeTree
-                ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDrag={handleDrag} onDragEnd={handleDragEnd} />
+                ? <DraggableTreeWireframe node={activeTree} onDrag={handleDrag} onDragEnd={handleDragEnd} />
                 : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
             </div>
-            <div ref={dropIndicatorRef} className={styles.dropIndicator} style={{ opacity: 0 }} />
+            <div ref={dropIndicatorRef} className={styles.dropIndicator} style={{ opacity: 0 }}>
+              <span className={styles.dropIndicatorSwapLabel}>⇄ Swap</span>
+              <span className={styles.dropIndicatorSplitLabel}>⊞ Split</span>
+            </div>
 
             <div className={styles.togglesSection}>
               <div className={styles.sectionHeader}>
