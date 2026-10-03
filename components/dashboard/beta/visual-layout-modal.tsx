@@ -418,7 +418,6 @@ export function VisualLayoutModal({
 
         <div className={styles.layoutBuilder}>
           <div className={styles.leftColumn}>
-            <div className={styles.sectionHeader}><span>Select Layout Structure</span></div>
             <div className={styles.bigPreviewFrame}>
               {activeTree
                 ? <DraggableTreeWireframe node={activeTree} onDrag={handleDrag} onDragEnd={handleDragEnd} />
@@ -430,10 +429,6 @@ export function VisualLayoutModal({
             </div>
 
             <div className={styles.togglesSection}>
-              <div className={styles.sectionHeader}>
-                <span>Toggle Widget Visibility</span>
-                <span className={styles.sectionSubtitle}>Turn widgets on or off — previews update live</span>
-              </div>
               <div className={styles.togglesGrid}>
                 {widgetKeys.map((id) => {
                   const meta = WIDGET_METADATA[id]

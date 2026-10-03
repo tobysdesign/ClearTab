@@ -26,7 +26,7 @@
   box-shadow: 
     0 30px 60px -12px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(255, 255, 255, 0.08);
-  max-width: 1200px;
+  max-width: 880px;
   width: 100%;
   max-height: 92vh;
   display: flex;
@@ -64,18 +64,6 @@
   letter-spacing: -0.02em;
   color: #f4f4f5;
   margin: 0;
-}
-
-.sectionHeader {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #a1a1aa;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .closeButton {
@@ -122,7 +110,7 @@
 .bigPreviewFrame {
   width: 100%;
   flex-shrink: 0;
-  height: 440px;
+  height: 320px;
   background: #1c1c1f;
   border-radius: 14px;
   padding: 10px;
@@ -364,13 +352,6 @@
 .escKey {
   opacity: 0.6;
   font-size: 11px;
-}
-
-.sectionSubtitle {
-  font-size: 11px;
-  color: #71717a;
-  text-transform: none;
-  font-weight: 400;
 }
 
 /* Dedicated Widget Toggle Bar */
