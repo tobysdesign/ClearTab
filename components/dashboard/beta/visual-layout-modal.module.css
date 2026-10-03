@@ -111,9 +111,17 @@
   }
 }
 
-.bigPreviewFrame {
+.leftColumn {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
+  gap: 16px;
+}
+
+.bigPreviewFrame {
+  width: 100%;
+  flex-shrink: 0;
   height: 440px;
   background: #1c1c1f;
   border-radius: 14px;
@@ -142,7 +150,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: 440px;
   overflow-y: auto;
 }
 
@@ -158,6 +165,8 @@
 .railCard {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: 6px;
   cursor: pointer;
   border-radius: 12px;
@@ -191,7 +200,8 @@
 }
 
 .railCardFrame {
-  height: 90px;
+  flex: 1;
+  min-height: 60px;
   width: 100%;
   background: #1c1c1f;
   border-radius: 8px;

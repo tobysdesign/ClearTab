@@ -55,20 +55,20 @@ function MiniWireframeBlock({
   )
 }
 
-function renderTreeWireframe(node: PanelNode): React.ReactNode {
+function renderTreeWireframe(node: PanelNode, className: string = styles.wireframeFlex1): React.ReactNode {
   if (node.type === 'widget') {
     return (
       <MiniWireframeBlock
         label={WIDGET_METADATA[node.id].name}
         isLight={node.id === 'notes' || node.id === 'tasks'}
-        className={styles.wireframeFlex1}
+        className={className}
       />
     )
   }
   return (
-    <div className={node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol}>
-      <div className={styles.wireframeFlex1}>{renderTreeWireframe(node.children[0])}</div>
-      <div className={styles.wireframeFlex1}>{renderTreeWireframe(node.children[1])}</div>
+    <div className={`${node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol} ${className}`}>
+      {renderTreeWireframe(node.children[0], styles.wireframeFlex1)}
+      {renderTreeWireframe(node.children[1], styles.wireframeFlex1)}
     </div>
   )
 }
@@ -101,13 +101,9 @@ function DraggableTreeWireframe({
     )
   }
   return (
-    <div className={node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol}>
-      <div className={styles.wireframeFlex1}>
-        <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDragEnd={onDragEnd} />
-      </div>
-      <div className={styles.wireframeFlex1}>
-        <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDragEnd={onDragEnd} />
-      </div>
+    <div className={`${node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol} ${styles.wireframeFlex1}`}>
+      <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDragEnd={onDragEnd} />
+      <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDragEnd={onDragEnd} />
     </div>
   )
 }
@@ -303,15 +299,6 @@ export function VisualLayoutModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
-
-  const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
-
-  const isVisible = (id: WidgetId) => widgets[id] ?? false
-  const rawActiveTree: PanelNode | null = presetLayout === 'custom' ? customLayout.tree : presetToTree(presetLayout)
-  const activeTree = rawActiveTree ? collapseForVisibility(rawActiveTree, isVisible) : null
-  const customCollapsedTree = customLayout.tree ? collapseForVisibility(customLayout.tree, isVisible) : null
-
   const blockRefs = useRef(new Map<WidgetId, HTMLDivElement>())
   const registerRef = useCallback((id: WidgetId, el: HTMLDivElement | null) => {
     if (el) blockRefs.current.set(id, el)
@@ -350,6 +337,15 @@ export function VisualLayoutModal({
     onMoveWidget(draggedId, targetId, zone)
   }, [onMoveWidget])
 
+  if (!isOpen) return null
+
+  const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
+
+  const isVisible = (id: WidgetId) => widgets[id] ?? false
+  const rawActiveTree: PanelNode | null = presetLayout === 'custom' ? customLayout.tree : presetToTree(presetLayout)
+  const activeTree = rawActiveTree ? collapseForVisibility(rawActiveTree, isVisible) : null
+  const customCollapsedTree = customLayout.tree ? collapseForVisibility(customLayout.tree, isVisible) : null
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -366,13 +362,45 @@ export function VisualLayoutModal({
           </button>
         </div>
 
-        <div className={styles.sectionHeader}><span>1. Select Layout Structure</span></div>
         <div className={styles.layoutBuilder}>
-          <div className={styles.bigPreviewFrame}>
-            {activeTree
-              ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDragEnd={handleDragEnd} />
-              : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
+          <div className={styles.leftColumn}>
+            <div className={styles.sectionHeader}><span>Select Layout Structure</span></div>
+            <div className={styles.bigPreviewFrame}>
+              {activeTree
+                ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDragEnd={handleDragEnd} />
+                : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
+            </div>
+
+            <div className={styles.togglesSection}>
+              <div className={styles.sectionHeader}>
+                <span>Toggle Widget Visibility</span>
+                <span className={styles.sectionSubtitle}>Turn widgets on or off — previews update live</span>
+              </div>
+              <div className={styles.togglesGrid}>
+                {widgetKeys.map((id) => {
+                  const meta = WIDGET_METADATA[id]
+                  const isChecked = widgets[id] ?? false
+                  return (
+                    <div key={id} className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`} onClick={() => toggleWidget(id)}>
+                      <div className={styles.toggleLabelGroup}>
+                        <span className={styles.toggleIcon}>{meta.icon}</span>
+                        <span className={styles.toggleName}>{meta.name}</span>
+                      </div>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Switch
+                          checked={isChecked}
+                          onCheckedChange={() => toggleWidget(id)}
+                          aria-label={`Toggle ${meta.name}`}
+                          className={styles.widgetSwitch}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
+
           <div className={styles.layoutRail}>
             <div className={`${styles.railCard} ${presetLayout === 'notetaker' ? styles.railCardActive : ''}`} onClick={() => setPresetLayout('notetaker')}>
               <div className={styles.railCardTitleRow}>
@@ -411,35 +439,6 @@ export function VisualLayoutModal({
                 {customCollapsedTree ? renderTreeWireframe(customCollapsedTree) : <span className={styles.customPlusIcon}>+</span>}
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className={styles.togglesSection}>
-          <div className={styles.sectionHeader}>
-            <span>2. Toggle Widget Visibility</span>
-            <span className={styles.sectionSubtitle}>Turn widgets on or off — previews update live</span>
-          </div>
-          <div className={styles.togglesGrid}>
-            {widgetKeys.map((id) => {
-              const meta = WIDGET_METADATA[id]
-              const isChecked = widgets[id] ?? false
-              return (
-                <div key={id} className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`} onClick={() => toggleWidget(id)}>
-                  <div className={styles.toggleLabelGroup}>
-                    <span className={styles.toggleIcon}>{meta.icon}</span>
-                    <span className={styles.toggleName}>{meta.name}</span>
-                  </div>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <Switch
-                      checked={isChecked}
-                      onCheckedChange={() => toggleWidget(id)}
-                      aria-label={`Toggle ${meta.name}`}
-                      className={styles.widgetSwitch}
-                    />
-                  </div>
-                </div>
-              )
-            })}
           </div>
         </div>
       </div>
