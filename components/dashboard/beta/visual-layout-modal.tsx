@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useCallback, useState } from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -369,14 +369,31 @@ export function VisualLayoutModal({
     else blockRefs.current.delete(id)
   }, [])
 
-  const [hoverTarget, setHoverTarget] = useState<DropTarget | null>(null)
+  // Imperative, not React state: updating this via setState on every pointermove
+  // would re-render the whole modal (and recompute the entire tree) mid-drag,
+  // fighting framer-motion's own transform updates on the dragged element and
+  // making it appear to freeze. The indicator div is updated directly instead.
+  const dropIndicatorRef = useRef<HTMLDivElement>(null)
 
   const handleDrag = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
-    setHoverTarget(computeDropTarget(blockRefs.current, draggedId, point))
+    const el = dropIndicatorRef.current
+    if (!el) return
+    const target = computeDropTarget(blockRefs.current, draggedId, point)
+    if (!target) {
+      el.style.opacity = '0'
+      return
+    }
+    const r = dropIndicatorRect(target)
+    el.className = `${styles.dropIndicator} ${target.zone === 'center' ? styles.dropIndicatorCenter : styles.dropIndicatorEdge}`
+    el.style.opacity = '1'
+    el.style.left = `${r.left}px`
+    el.style.top = `${r.top}px`
+    el.style.width = `${r.width}px`
+    el.style.height = `${r.height}px`
   }, [])
 
   const handleDragEnd = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
-    setHoverTarget(null)
+    if (dropIndicatorRef.current) dropIndicatorRef.current.style.opacity = '0'
     const target = computeDropTarget(blockRefs.current, draggedId, point)
     if (!target) return
     onMoveWidget(draggedId, target.targetId, target.zone)
@@ -415,15 +432,7 @@ export function VisualLayoutModal({
                 ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDrag={handleDrag} onDragEnd={handleDragEnd} />
                 : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
             </div>
-            {hoverTarget && (() => {
-              const r = dropIndicatorRect(hoverTarget)
-              return (
-                <div
-                  className={`${styles.dropIndicator} ${hoverTarget.zone === 'center' ? styles.dropIndicatorCenter : styles.dropIndicatorEdge}`}
-                  style={{ left: r.left, top: r.top, width: r.width, height: r.height }}
-                />
-              )
-            })()}
+            <div ref={dropIndicatorRef} className={styles.dropIndicator} style={{ opacity: 0 }} />
 
             <div className={styles.togglesSection}>
               <div className={styles.sectionHeader}>
