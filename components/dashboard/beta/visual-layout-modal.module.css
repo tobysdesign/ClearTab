@@ -256,6 +256,24 @@
   overflow: hidden;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.06);
+  container-type: size;
+  container-name: wireframeTile;
+}
+
+/* A tile too small to fit its label/handle keeps its grey fill but drops the text,
+   instead of letting it overflow or collide with a neighboring tile. */
+@container wireframeTile (max-width: 64px) {
+  .miniBlockName,
+  .miniGripDots {
+    display: none;
+  }
+}
+
+@container wireframeTile (max-height: 24px) {
+  .miniBlockName,
+  .miniGripDots {
+    display: none;
+  }
 }
 
 .miniBlockLight {
@@ -438,4 +456,25 @@
 
 .draggableBlock:active {
   cursor: grabbing;
+}
+
+/* Live drop-zone indicator: shows what a release will do before you let go.
+   Full-tile highlight = swap (center drop); half-tile highlight = split (edge drop). */
+.dropIndicator {
+  position: fixed;
+  z-index: 5;
+  pointer-events: none;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: left 0.08s ease-out, top 0.08s ease-out, width 0.08s ease-out, height 0.08s ease-out;
+}
+
+.dropIndicatorCenter {
+  background: rgba(37, 99, 235, 0.25);
+  border: 2px solid #2563eb;
+}
+
+.dropIndicatorEdge {
+  background: rgba(34, 197, 94, 0.25);
+  border: 2px solid #22c55e;
 }

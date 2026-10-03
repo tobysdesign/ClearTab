@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useEffect, useRef, useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -49,14 +49,71 @@ function MiniWireframeBlock({
       } ${className}`}
       style={style}
     >
-      {isLight && (
-        <>
-          <span className={styles.miniBlockName}>{label}</span>
-          <span className={styles.miniGripDots}>:::</span>
-        </>
-      )}
+      {isLight && <span className={styles.miniBlockName}>{label}</span>}
     </div>
   )
+}
+
+interface DropTarget {
+  targetId: WidgetId
+  zone: DropZone
+  rect: DOMRect
+}
+
+/** Shared hit-test: given the dragged widget's current pointer position, find which
+ * other tile it's over and whether that's a center (swap) or edge (split) drop. */
+function computeDropTarget(
+  blockRefs: Map<WidgetId, HTMLDivElement>,
+  draggedId: WidgetId,
+  point: { x: number; y: number },
+): DropTarget | null {
+  let targetId: WidgetId | null = null
+  let targetRect: DOMRect | null = null
+  blockRefs.forEach((el, id) => {
+    if (id === draggedId) return
+    const rect = el.getBoundingClientRect()
+    if (point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom) {
+      targetId = id
+      targetRect = rect
+    }
+  })
+  if (!targetId || !targetRect) return null
+  const relX = (point.x - targetRect.left) / targetRect.width
+  const relY = (point.y - targetRect.top) / targetRect.height
+  const inCenter = relX >= 0.25 && relX <= 0.75 && relY >= 0.25 && relY <= 0.75
+  let zone: DropZone
+  if (inCenter) {
+    zone = 'center'
+  } else {
+    const distances: Record<'left' | 'right' | 'top' | 'bottom', number> = {
+      left: relX,
+      right: 1 - relX,
+      top: relY,
+      bottom: 1 - relY,
+    }
+    zone = (Object.keys(distances) as Array<'left' | 'right' | 'top' | 'bottom'>).reduce((closest, key) =>
+      distances[key] < distances[closest] ? key : closest
+    , 'left')
+  }
+  return { targetId, zone, rect: targetRect }
+}
+
+/** Rect (viewport coords) the live drop-indicator overlay should cover for a given zone —
+ * the whole tile for a center/swap drop, or just the relevant half for an edge/split drop. */
+function dropIndicatorRect(target: DropTarget): { left: number; top: number; width: number; height: number } {
+  const { rect, zone } = target
+  switch (zone) {
+    case 'center':
+      return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+    case 'left':
+      return { left: rect.left, top: rect.top, width: rect.width / 2, height: rect.height }
+    case 'right':
+      return { left: rect.left + rect.width / 2, top: rect.top, width: rect.width / 2, height: rect.height }
+    case 'top':
+      return { left: rect.left, top: rect.top, width: rect.width, height: rect.height / 2 }
+    case 'bottom':
+      return { left: rect.left, top: rect.top + rect.height / 2, width: rect.width, height: rect.height / 2 }
+  }
 }
 
 function renderTreeWireframe(node: PanelNode, className: string = styles.wireframeFlex1): React.ReactNode {
@@ -80,10 +137,12 @@ function renderTreeWireframe(node: PanelNode, className: string = styles.wirefra
 function DraggableTreeWireframe({
   node,
   registerRef,
+  onDrag,
   onDragEnd,
 }: {
   node: PanelNode
   registerRef: (id: WidgetId, el: HTMLDivElement | null) => void
+  onDrag: (draggedId: WidgetId, point: { x: number; y: number }) => void
   onDragEnd: (draggedId: WidgetId, point: { x: number; y: number }) => void
 }) {
   if (node.type === 'widget') {
@@ -97,6 +156,7 @@ function DraggableTreeWireframe({
         dragSnapToOrigin
         dragElastic={0.2}
         whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
+        onDrag={(_event, info) => onDrag(node.id, info.point)}
         onDragEnd={(_event, info) => onDragEnd(node.id, info.point)}
       >
         <span className={styles.miniBlockName}>{meta.name}</span>
@@ -106,8 +166,8 @@ function DraggableTreeWireframe({
   }
   return (
     <div className={`${node.direction === 'row' ? styles.wireframeRow : styles.wireframeCol} ${styles.wireframeFlex1}`}>
-      <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDragEnd={onDragEnd} />
-      <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDragEnd={onDragEnd} />
+      <DraggableTreeWireframe node={node.children[0]} registerRef={registerRef} onDrag={onDrag} onDragEnd={onDragEnd} />
+      <DraggableTreeWireframe node={node.children[1]} registerRef={registerRef} onDrag={onDrag} onDragEnd={onDragEnd} />
     </div>
   )
 }
@@ -309,36 +369,17 @@ export function VisualLayoutModal({
     else blockRefs.current.delete(id)
   }, [])
 
+  const [hoverTarget, setHoverTarget] = useState<DropTarget | null>(null)
+
+  const handleDrag = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
+    setHoverTarget(computeDropTarget(blockRefs.current, draggedId, point))
+  }, [])
+
   const handleDragEnd = useCallback((draggedId: WidgetId, point: { x: number; y: number }) => {
-    let targetId: WidgetId | null = null
-    let targetRect: DOMRect | null = null
-    blockRefs.current.forEach((el, id) => {
-      if (id === draggedId) return
-      const rect = el.getBoundingClientRect()
-      if (point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom) {
-        targetId = id
-        targetRect = rect
-      }
-    })
-    if (!targetId || !targetRect) return
-    const relX = (point.x - targetRect.left) / targetRect.width
-    const relY = (point.y - targetRect.top) / targetRect.height
-    const inCenter = relX >= 0.25 && relX <= 0.75 && relY >= 0.25 && relY <= 0.75
-    let zone: DropZone
-    if (inCenter) {
-      zone = 'center'
-    } else {
-      const distances: Record<'left' | 'right' | 'top' | 'bottom', number> = {
-        left: relX,
-        right: 1 - relX,
-        top: relY,
-        bottom: 1 - relY,
-      }
-      zone = (Object.keys(distances) as Array<'left' | 'right' | 'top' | 'bottom'>).reduce((closest, key) =>
-        distances[key] < distances[closest] ? key : closest
-      , 'left')
-    }
-    onMoveWidget(draggedId, targetId, zone)
+    setHoverTarget(null)
+    const target = computeDropTarget(blockRefs.current, draggedId, point)
+    if (!target) return
+    onMoveWidget(draggedId, target.targetId, target.zone)
   }, [onMoveWidget])
 
   if (!isOpen) return null
@@ -371,9 +412,18 @@ export function VisualLayoutModal({
             <div className={styles.sectionHeader}><span>Select Layout Structure</span></div>
             <div className={styles.bigPreviewFrame}>
               {activeTree
-                ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDragEnd={handleDragEnd} />
+                ? <DraggableTreeWireframe node={activeTree} registerRef={registerRef} onDrag={handleDrag} onDragEnd={handleDragEnd} />
                 : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
             </div>
+            {hoverTarget && (() => {
+              const r = dropIndicatorRect(hoverTarget)
+              return (
+                <div
+                  className={`${styles.dropIndicator} ${hoverTarget.zone === 'center' ? styles.dropIndicatorCenter : styles.dropIndicatorEdge}`}
+                  style={{ left: r.left, top: r.top, width: r.width, height: r.height }}
+                />
+              )
+            })()}
 
             <div className={styles.togglesSection}>
               <div className={styles.sectionHeader}>
