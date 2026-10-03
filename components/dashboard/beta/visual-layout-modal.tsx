@@ -49,8 +49,12 @@ function MiniWireframeBlock({
       } ${className}`}
       style={style}
     >
-      <span className={styles.miniBlockName}>{label}</span>
-      <span className={styles.miniGripDots}>:::</span>
+      {isLight && (
+        <>
+          <span className={styles.miniBlockName}>{label}</span>
+          <span className={styles.miniGripDots}>:::</span>
+        </>
+      )}
     </div>
   )
 }
@@ -95,8 +99,12 @@ function DraggableTreeWireframe({
         whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
         onDragEnd={(_event, info) => onDragEnd(node.id, info.point)}
       >
-        <span className={styles.miniBlockName}>{meta.name}</span>
-        <span className={styles.miniGripDots}>:::</span>
+        {isLight && (
+          <>
+            <span className={styles.miniBlockName}>{meta.name}</span>
+            <span className={styles.miniGripDots}>:::</span>
+          </>
+        )}
       </motion.div>
     )
   }
