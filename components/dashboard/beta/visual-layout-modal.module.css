@@ -89,6 +89,7 @@
 /* Big preview + thumbnail rail */
 .layoutBuilder {
   display: flex;
+  align-items: flex-start;
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -139,6 +140,12 @@
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+  /* overflow-y: auto forces overflow-x to compute to auto too (per spec,
+     a non-visible axis can't sit next to a visible one) -- this padding
+     keeps the active-state box-shadow ring and border from getting
+     clipped flush against that now-scrolling edge. */
+  padding: 0 4px;
+  margin: 0 -4px;
 }
 
 @media (max-width: 768px) {
@@ -187,7 +194,7 @@
 }
 
 .railCardFrame {
-  height: 64px;
+  height: 44px;
   width: 100%;
   background: #1c1c1f;
   border-radius: 8px;
