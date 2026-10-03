@@ -99,12 +99,8 @@ function DraggableTreeWireframe({
         whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
         onDragEnd={(_event, info) => onDragEnd(node.id, info.point)}
       >
-        {isLight && (
-          <>
-            <span className={styles.miniBlockName}>{meta.name}</span>
-            <span className={styles.miniGripDots}>:::</span>
-          </>
-        )}
+        <span className={styles.miniBlockName}>{meta.name}</span>
+        <span className={styles.miniGripDots}>:::</span>
       </motion.div>
     )
   }
