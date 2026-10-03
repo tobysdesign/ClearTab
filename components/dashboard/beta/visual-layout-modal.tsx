@@ -142,11 +142,20 @@ function DraggableTreeWireframe({
   onDrag: (draggedEl: HTMLElement, point: { x: number; y: number }) => void
   onDragEnd: (draggedId: WidgetId, draggedEl: HTMLElement, point: { x: number; y: number }) => void
 }) {
+  // A ref owned by this component instance, not event.currentTarget: framer-motion
+  // replays/reuses the underlying event object across pan samples outside normal
+  // DOM dispatch, where currentTarget is only valid momentarily -- reading it from
+  // onDrag can see it already nulled out, crashing computeDropTarget. Called
+  // unconditionally (before the branch below) so it's safe regardless of whether
+  // this position renders as a widget leaf or a split on a given render.
+  const elRef = useRef<HTMLDivElement>(null)
+
   if (node.type === 'widget') {
     const meta = WIDGET_METADATA[node.id]
     const isLight = node.id === 'notes' || node.id === 'tasks'
     return (
       <motion.div
+        ref={elRef}
         data-widget-id={node.id}
         layoutId={node.id}
         className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${styles.wireframeFlex1} ${styles.draggableBlock}`}
@@ -154,8 +163,8 @@ function DraggableTreeWireframe({
         dragSnapToOrigin
         dragElastic={0.2}
         whileDrag={{ zIndex: 10, boxShadow: '0 12px 28px -6px rgba(0,0,0,0.6)' }}
-        onDrag={(event, info) => onDrag(event.currentTarget as HTMLElement, info.point)}
-        onDragEnd={(event, info) => onDragEnd(node.id, event.currentTarget as HTMLElement, info.point)}
+        onDrag={(_event, info) => { if (elRef.current) onDrag(elRef.current, info.point) }}
+        onDragEnd={(_event, info) => { if (elRef.current) onDragEnd(node.id, elRef.current, info.point) }}
       >
         <span className={styles.miniBlockName}>{meta.name}</span>
         <span className={styles.miniGripDots}>:::</span>
