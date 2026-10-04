@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState, Suspense, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
 import { motion, PanInfo, useAnimationControls } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
 import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
 import { VisualLayoutModal } from './visual-layout-modal'
+import { KeyboardShortcutsModal } from './keyboard-shortcuts-modal'
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
@@ -49,6 +49,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
   const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(null)
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false)
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false)
 
   const {
     presetLayout,
@@ -126,6 +127,14 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
         e.preventDefault()
         setIsLayoutModalOpen((prev) => !prev)
+      }
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        const target = e.target as HTMLElement
+        const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+        if (!isTyping) {
+          e.preventDefault()
+          setIsShortcutsModalOpen((prev) => !prev)
+        }
       }
     }
 
@@ -283,34 +292,6 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
 
   return (
     <div ref={containerRef} className="dashboard-container">
-      {/* Floating Beta Indicator & Controls pill */}
-      <div className={betaStyles.betaPill}>
-        <span className={betaStyles.betaBadge}>
-          Beta
-        </span>
-
-        {/* Layout modal trigger button */}
-        <button
-          type="button"
-          onClick={() => setIsLayoutModalOpen(true)}
-          className={betaStyles.layoutButton}
-        >
-          <span>🎛️ Layout: {presetLayout}</span>
-          <span className={betaStyles.countBadge}>
-            {activeCount}/{totalCount}
-          </span>
-        </button>
-
-        <span className={betaStyles.pillSeparator}>•</span>
-        <Link
-          href="/"
-          className={betaStyles.classicLink}
-          title="Return to Classic rigid layout"
-        >
-          Classic
-        </Link>
-      </div>
-
       <PieGuide
         isDragging={isDragging}
         hoveredSlice={nearestZoneId}
@@ -386,6 +367,7 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
                 onOpenLayoutModal={() => setIsLayoutModalOpen(true)}
+                onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
               />
 
               <div
@@ -413,6 +395,11 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
         totalCount={totalCount}
         customLayout={customLayout}
         onMoveWidget={moveWidgetInCustomLayout}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={isShortcutsModalOpen}
+        onClose={() => setIsShortcutsModalOpen(false)}
       />
     </div>
   )

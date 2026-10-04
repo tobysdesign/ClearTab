@@ -19,6 +19,7 @@ interface BetaDockContentProps {
   setShowSearch: (show: boolean) => void
   isVertical: boolean
   onOpenLayoutModal: () => void
+  onOpenShortcuts: () => void
 }
 
 export function BetaDockContent({
@@ -30,6 +31,7 @@ export function BetaDockContent({
   setShowSearch: _setShowSearch,
   isVertical,
   onOpenLayoutModal,
+  onOpenShortcuts,
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
 
@@ -93,6 +95,14 @@ export function BetaDockContent({
       )}
 
       <SettingsTrigger />
+
+      <DockIconButton
+        onClick={onOpenShortcuts}
+        title="Keyboard Shortcuts (?)"
+        shortcut="?"
+      >
+        <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
+      </DockIconButton>
     </div>
   )
 }

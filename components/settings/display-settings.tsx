@@ -115,13 +115,13 @@ export const DisplaySettings = React.forwardRef<HTMLElement, DisplaySettingsProp
 
           <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span className={sharedStyles.label}>Experimental Layout</span>
+              <span className={sharedStyles.label}>Classic Layout</span>
               <span style={{ fontSize: 11, color: '#71717a' }}>
-                Toggle widgets on/off with fluid layout adaptation
+                Switch back to the original fixed dashboard layout
               </span>
             </div>
             <a
-              href="/beta"
+              href="/classic"
               style={{
                 fontSize: 12,
                 padding: '5px 12px',
@@ -136,7 +136,7 @@ export const DisplaySettings = React.forwardRef<HTMLElement, DisplaySettingsProp
                 gap: 4,
               }}
             >
-              Try Beta ↗
+              Open Classic ↗
             </a>
           </div>
         </div>
