@@ -49,14 +49,12 @@ interface MiniBlockProps {
 }
 
 function MiniWireframeBlock({
-  id,
   label,
   isEnabled = true,
   className = '',
   isLight = false,
   style,
 }: MiniBlockProps) {
-  const icon = id ? WIDGET_ICON[id] : undefined
   return (
     <div
       className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
@@ -64,7 +62,6 @@ function MiniWireframeBlock({
       } ${className}`}
       style={style}
     >
-      {icon && <span className={`material-symbols-outlined ${styles.miniBlockIcon}`}>{icon}</span>}
       {isLight && <span className={styles.miniBlockName}>{label}</span>}
     </div>
   )
@@ -172,6 +169,7 @@ function DraggableTreeWireframe({
     const isLight = node.id === 'notes' || node.id === 'tasks'
     return (
       <motion.div
+        key={node.id}
         ref={elRef}
         data-widget-id={node.id}
         layoutId={node.id}
