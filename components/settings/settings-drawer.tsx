@@ -10,7 +10,6 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { Button } from "@cleartab/ui";
-import { DisplaySettings } from "./display-settings";
 import { CountdownWidgetSettings } from "./countdown-widget-settings";
 import { NotesVoiceTasksSettings } from "./notes-voice-tasks-settings";
 import { WeatherSettings } from "./weather-settings";
@@ -20,7 +19,7 @@ import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useAuth } from "@/components/auth/auth-provider";
 import styles from "./settings-drawer.module.css";
 
-type SectionId = "schedule" | "layout" | "data" | "weather" | "countdown";
+type SectionId = "schedule" | "data" | "weather" | "countdown";
 
 interface SectionProps {
   sectionId: SectionId;
@@ -47,12 +46,6 @@ const sections: SectionConfig[] = [
     component: AccountSettings,
   },
   {
-    id: "layout",
-    label: "Layout Preferences",
-    description: "Customize the dashboard layout, dock position, and theme.",
-    component: DisplaySettings,
-  },
-  {
     id: "data",
     label: "Your Data",
     description: "Export or clear your notes, tasks, and voice recordings.",
@@ -73,16 +66,13 @@ const sections: SectionConfig[] = [
 ];
 
 const legacyTabMap: Record<string, SectionId> = {
-  "Display options": "layout",
   "Notes, Tasks & Voice": "data",
   "Countdown Widget": "countdown",
   Weather: "weather",
   Account: "schedule",
   Schedule: "schedule",
-  "Layout Prefs.": "layout",
   "Your Data": "data",
   Countdown: "countdown",
-  layout: "layout",
   schedule: "schedule",
   data: "data",
   weather: "weather",
