@@ -27,10 +27,11 @@ interface VisualLayoutModalProps {
   onMoveWidget: (draggedId: WidgetId, targetId: WidgetId, zone: DropZone) => void
 }
 
-// Material Symbols Outlined ligature names for the thumbnail tiles that don't
-// carry a text label. Tasks intentionally has none -- it keeps a text-only tile.
-const THUMBNAIL_ICON: Partial<Record<WidgetId, string>> = {
+// Material Symbols Outlined ligature names, used both for thumbnail tiles that
+// don't carry a text label and for the widget-visibility toggle row's icons.
+const WIDGET_ICON: Record<WidgetId, string> = {
   notes: 'edit_note',
+  tasks: 'checklist',
   schedule: 'calendar_today',
   weather: 'partly_cloudy_day',
   recorder: 'mic',
@@ -54,7 +55,7 @@ function MiniWireframeBlock({
   isLight = false,
   style,
 }: MiniBlockProps) {
-  const icon = id ? THUMBNAIL_ICON[id] : undefined
+  const icon = id ? WIDGET_ICON[id] : undefined
   return (
     <div
       className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
@@ -470,7 +471,9 @@ export function VisualLayoutModal({
                   return (
                     <div key={id} className={`${styles.toggleRow} ${isChecked ? styles.toggleRowActive : ''}`} onClick={() => toggleWidget(id)}>
                       <div className={styles.toggleLabelGroup}>
-                        <span className={styles.toggleIcon}>{meta.icon}</span>
+                        <span className={styles.toggleIcon}>
+                          <span className="material-symbols-outlined">{WIDGET_ICON[id]}</span>
+                        </span>
                         <span className={styles.toggleName}>{meta.name}</span>
                       </div>
                       <div onClick={(e) => e.stopPropagation()}>
