@@ -5,10 +5,13 @@
   background: transparent;
 }
 
-.panel {
+.panelPositioner {
   position: fixed;
   z-index: 99999;
   transform: translateX(-50%);
+}
+
+.panel {
   transform-origin: bottom center;
   background: #141416;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -24,9 +27,8 @@
 }
 
 .tail {
-  position: absolute;
-  bottom: -7px;
-  left: 50%;
+  position: fixed;
+  z-index: 99999;
   width: 14px;
   height: 14px;
   background: #141416;
@@ -34,4 +36,5 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   transform: translateX(-50%) rotate(45deg);
   border-radius: 0 0 3px 0;
+  pointer-events: none;
 }
