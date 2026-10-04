@@ -426,7 +426,11 @@
    Full-tile highlight = swap (center drop); half-tile highlight = split (edge drop). */
 .dropIndicator {
   position: fixed;
-  z-index: 5;
+  /* Portaled to document.body (see visual-layout-modal.tsx), landing as a
+     sibling of DockPanel's own portaled content (panel is z-index: 99999) --
+     needs to sit above that to be visible over the tiles, not just above
+     local siblings the way the old in-tree z-index: 5 only had to. */
+  z-index: 100000;
   pointer-events: none;
   border-radius: 6px;
   box-sizing: border-box;
