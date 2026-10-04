@@ -262,6 +262,18 @@
   }
 }
 
+.miniBlockIcon {
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+}
+
+/* A tile with only an icon (no label below it) centers the icon vertically
+   instead of following .miniBlock's label-top/dots-bottom space-between. */
+.miniBlockIcon:only-child {
+  margin: auto 0;
+}
+
 @container wireframeTile (max-height: 24px) {
   .miniBlockName,
   .miniGripDots {

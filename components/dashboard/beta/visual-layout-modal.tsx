@@ -27,7 +27,18 @@ interface VisualLayoutModalProps {
   onMoveWidget: (draggedId: WidgetId, targetId: WidgetId, zone: DropZone) => void
 }
 
+// Material Symbols Outlined ligature names for the thumbnail tiles that don't
+// carry a text label. Tasks intentionally has none -- it keeps a text-only tile.
+const THUMBNAIL_ICON: Partial<Record<WidgetId, string>> = {
+  notes: 'edit_note',
+  schedule: 'calendar_today',
+  weather: 'partly_cloudy_day',
+  recorder: 'mic',
+  countdown: 'timer_5',
+}
+
 interface MiniBlockProps {
+  id?: WidgetId
   label: string
   isEnabled?: boolean
   className?: string
@@ -36,12 +47,14 @@ interface MiniBlockProps {
 }
 
 function MiniWireframeBlock({
+  id,
   label,
   isEnabled = true,
   className = '',
   isLight = false,
   style,
 }: MiniBlockProps) {
+  const icon = id ? THUMBNAIL_ICON[id] : undefined
   return (
     <div
       className={`${styles.miniBlock} ${isLight ? styles.miniBlockLight : ''} ${
@@ -49,6 +62,7 @@ function MiniWireframeBlock({
       } ${className}`}
       style={style}
     >
+      {icon && <span className={`material-symbols-outlined ${styles.miniBlockIcon}`}>{icon}</span>}
       {isLight && <span className={styles.miniBlockName}>{label}</span>}
     </div>
   )
@@ -119,6 +133,7 @@ function renderTreeWireframe(node: PanelNode, className: string = styles.wirefra
   if (node.type === 'widget') {
     return (
       <MiniWireframeBlock
+        id={node.id}
         label={WIDGET_METADATA[node.id].name}
         isLight={node.id === 'notes' || node.id === 'tasks'}
         className={className}
@@ -191,6 +206,7 @@ function NotetakerPreview({ widgets }: { widgets: WidgetVisibilityState }) {
     <div className={styles.wireframeColFlex}>
       {widgets.tasks && (
         <MiniWireframeBlock
+          id="tasks"
           label="Tasks"
           isLight
           className={hasGrid ? styles.wireframeTop34 : styles.wireframeTop100}
@@ -202,6 +218,7 @@ function NotetakerPreview({ widgets }: { widgets: WidgetVisibilityState }) {
             {row1.map(id => (
               <MiniWireframeBlock
                 key={id}
+                id={id}
                 label={WIDGET_METADATA[id].name}
                 isEnabled={widgets[id]}
                 className={styles.wireframeFlex1}
@@ -212,6 +229,7 @@ function NotetakerPreview({ widgets }: { widgets: WidgetVisibilityState }) {
             {row2.map(id => (
               <MiniWireframeBlock
                 key={id}
+                id={id}
                 label={WIDGET_METADATA[id].name}
                 isEnabled={widgets[id]}
                 className={styles.wireframeFlex1}
@@ -225,7 +243,7 @@ function NotetakerPreview({ widgets }: { widgets: WidgetVisibilityState }) {
 
   return (
     <div className={styles.wireframeRow}>
-      {hasNotes && <MiniWireframeBlock label="Notes" isLight className={styles.wireframeFlex1} />}
+      {hasNotes && <MiniWireframeBlock id="notes" label="Notes" isLight className={styles.wireframeFlex1} />}
       {hasRight && renderRight()}
     </div>
   )
@@ -243,6 +261,7 @@ function TaskmasterPreview({ widgets }: { widgets: WidgetVisibilityState }) {
     <div className={styles.wireframeColFlex}>
       {widgets.notes && (
         <MiniWireframeBlock
+          id="notes"
           label="Notes"
           isLight
           className={hasGrid ? styles.wireframeTop34 : styles.wireframeTop100}
@@ -254,6 +273,7 @@ function TaskmasterPreview({ widgets }: { widgets: WidgetVisibilityState }) {
             {row1.map(id => (
               <MiniWireframeBlock
                 key={id}
+                id={id}
                 label={WIDGET_METADATA[id].name}
                 isEnabled={widgets[id]}
                 className={styles.wireframeFlex1}
@@ -264,6 +284,7 @@ function TaskmasterPreview({ widgets }: { widgets: WidgetVisibilityState }) {
             {row2.map(id => (
               <MiniWireframeBlock
                 key={id}
+                id={id}
                 label={WIDGET_METADATA[id].name}
                 isEnabled={widgets[id]}
                 className={styles.wireframeFlex1}
@@ -277,7 +298,7 @@ function TaskmasterPreview({ widgets }: { widgets: WidgetVisibilityState }) {
 
   return (
     <div className={styles.wireframeRow}>
-      {hasTasks && <MiniWireframeBlock label="Tasks" isLight className={styles.wireframeFlex1} />}
+      {hasTasks && <MiniWireframeBlock id="tasks" label="Tasks" isLight className={styles.wireframeFlex1} />}
       {hasRight && renderRight()}
     </div>
   )
@@ -294,6 +315,7 @@ function EvenPreview({ widgets }: { widgets: WidgetVisibilityState }) {
           {top.map(id => (
             <MiniWireframeBlock
               key={id}
+              id={id}
               label={WIDGET_METADATA[id].name}
               isLight
               className={styles.wireframeFlex1}
@@ -306,6 +328,7 @@ function EvenPreview({ widgets }: { widgets: WidgetVisibilityState }) {
           {bottom.map(id => (
             <MiniWireframeBlock
               key={id}
+              id={id}
               label={WIDGET_METADATA[id].name}
               className={styles.wireframeFlex1}
             />
@@ -327,6 +350,7 @@ function MinimalPreview({ widgets }: { widgets: WidgetVisibilityState }) {
           {top.map(id => (
             <MiniWireframeBlock
               key={id}
+              id={id}
               label={WIDGET_METADATA[id].name}
               isLight
               className={styles.wireframeFlex1}
@@ -339,6 +363,7 @@ function MinimalPreview({ widgets }: { widgets: WidgetVisibilityState }) {
           {bottom.map(id => (
             <MiniWireframeBlock
               key={id}
+              id={id}
               label={WIDGET_METADATA[id].name}
               className={styles.wireframeFlex1}
             />
