@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useEffect, useRef, useCallback } from 'react'
+import React, { useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { DockPanel } from '@cleartab/ui'
 import { Switch } from '@/components/ui/switch'
 import {
   BetaPresetLayout,
@@ -387,15 +388,6 @@ export function VisualLayoutModal({
   customLayout,
   onMoveWidget,
 }: VisualLayoutModalProps) {
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
-
   // Imperative, not React state: updating this via setState on every pointermove
   // would re-render the whole modal (and recompute the entire tree) mid-drag,
   // fighting framer-motion's own transform updates on the dragged element and
@@ -426,8 +418,6 @@ export function VisualLayoutModal({
     onMoveWidget(draggedId, target.targetId, target.zone)
   }, [onMoveWidget])
 
-  if (!isOpen) return null
-
   const widgetKeys: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'recorder', 'countdown']
 
   const isVisible = (id: WidgetId) => widgets[id] ?? false
@@ -436,8 +426,7 @@ export function VisualLayoutModal({
   const customCollapsedTree = customLayout.tree ? collapseForVisibility(customLayout.tree, isVisible) : null
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+    <DockPanel isOpen={isOpen} onClose={onClose} anchorSelector='[data-testid="layout-trigger"]' className={styles.panelContent}>
         <div className={styles.modalHeader}>
           <div className={styles.headerTitleRow}>
             <h2 className={styles.modalTitle}>Choose Dashboard Layout</h2>
@@ -531,7 +520,6 @@ export function VisualLayoutModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </DockPanel>
   )
 }

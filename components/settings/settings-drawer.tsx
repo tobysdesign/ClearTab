@@ -3,19 +3,12 @@
 import * as React from "react";
 import Image from "next/image";
 import { CloseIcon } from "@/components/icons";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
-import { Button } from "@cleartab/ui";
+import { Button, DockPanel } from "@cleartab/ui";
 import { CountdownWidgetSettings } from "./countdown-widget-settings";
 import { NotesVoiceTasksSettings } from "./notes-voice-tasks-settings";
 import { WeatherSettings } from "./weather-settings";
 import { AccountSettings } from "./account-settings";
 import { cn } from "@/lib/utils";
-import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { useAuth } from "@/components/auth/auth-provider";
 import styles from "./settings-drawer.module.css";
 
@@ -233,24 +226,12 @@ export function SettingsDrawer({
   };
 
   return (
-    <Drawer
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      shouldScaleBackground={false}
-      modal
+    <DockPanel
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      anchorSelector='[data-testid="settings-trigger"]'
+      className={styles.drawerContent}
     >
-      <DrawerContent
-        overlayVariant="settings"
-        className={styles.drawerContent}
-        showHandle={false}
-      >
-        <VisuallyHidden>
-          <DrawerTitle>Settings</DrawerTitle>
-          <DrawerDescription>
-            Application settings and preferences
-          </DrawerDescription>
-        </VisuallyHidden>
-
         <div className={styles.container}>
           <Button
             variant="ghost-icon"
@@ -354,7 +335,6 @@ export function SettingsDrawer({
             </div>
           </main>
         </div>
-      </DrawerContent>
-    </Drawer>
+    </DockPanel>
   );
 }

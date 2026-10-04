@@ -54,6 +54,7 @@ export function BetaDockContent({
         onClick={onOpenLayoutModal}
         title="Choose Dashboard Layout (⌘L)"
         shortcut="⌘L"
+        data-testid="layout-trigger"
       >
         <LayoutToggleIcon
           isToggled={false}
@@ -100,6 +101,7 @@ export function BetaDockContent({
         onClick={onOpenShortcuts}
         title="Keyboard Shortcuts (?)"
         shortcut="?"
+        data-testid="shortcuts-trigger"
       >
         <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
       </DockIconButton>
