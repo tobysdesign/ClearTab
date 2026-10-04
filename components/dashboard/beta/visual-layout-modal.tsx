@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { DockPanel } from '@cleartab/ui'
 import { Switch } from '@/components/ui/switch'
@@ -78,11 +79,19 @@ interface DropTarget {
  * Queries the live DOM at the cursor point rather than a maintained ref map —
  * a map keyed by widget id can go stale the instant two tiles trade ids in the
  * same commit (e.g. right after a swap), since their ref callbacks re-register
- * in the same pass; elementsFromPoint always reflects what's actually rendered. */
+ * in the same pass; elementsFromPoint always reflects what's actually rendered.
+ *
+ * `point` is framer-motion's PanInfo.point, which is page-relative (includes
+ * scroll offset) -- elementsFromPoint and getBoundingClientRect are both
+ * viewport-relative, so it's converted here before use. Otherwise, with any
+ * page scroll, the hit-test silently finds whatever unrelated element happens
+ * to sit at the scroll-shifted coordinates (e.g. a rail thumbnail far from
+ * the actual cursor position), rather than the tile actually under the drag. */
 function computeDropTarget(
   draggedEl: HTMLElement,
-  point: { x: number; y: number },
+  pagePoint: { x: number; y: number },
 ): DropTarget | null {
+  const point = { x: pagePoint.x - window.scrollX, y: pagePoint.y - window.scrollY }
   const stack = document.elementsFromPoint(point.x, point.y)
   const targetEl = stack.find(
     (el): el is HTMLElement => el !== draggedEl && !draggedEl.contains(el) && el instanceof HTMLElement && el.hasAttribute('data-widget-id'),
@@ -445,10 +454,20 @@ export function VisualLayoutModal({
                 ? <DraggableTreeWireframe node={activeTree} onDrag={handleDrag} onDragEnd={handleDragEnd} />
                 : <div className={styles.emptyCustomHint}>Drag a widget to start customizing</div>}
             </div>
-            <div ref={dropIndicatorRef} className={styles.dropIndicator} style={{ opacity: 0 }}>
-              <span className={styles.dropIndicatorSwapLabel}>⇄ Swap</span>
-              <span className={styles.dropIndicatorSplitLabel}>⊞ Split</span>
-            </div>
+            {/* Portaled straight to document.body, not just rendered inline: this tree
+                sits inside DockPanel's transform: translateX(-50%) positioning wrapper,
+                and position: fixed on a descendant of a transformed ancestor anchors to
+                that ancestor's box instead of the true viewport (a CSS behavior, not a
+                bug in the fixed positioning itself) -- so without the portal, this
+                indicator's computed left/top would render offset by wherever the panel
+                itself sits, not at the actual cursor/target location. */}
+            {typeof document !== 'undefined' && createPortal(
+              <div ref={dropIndicatorRef} className={styles.dropIndicator} style={{ opacity: 0 }}>
+                <span className={styles.dropIndicatorSwapLabel}>⇄ Swap</span>
+                <span className={styles.dropIndicatorSplitLabel}>⊞ Split</span>
+              </div>,
+              document.body,
+            )}
 
             <div className={styles.togglesSection}>
               <div className={styles.togglesGrid}>
