@@ -110,10 +110,15 @@
      clipped flush against that now-scrolling edge. */
   padding: 0 4px;
   margin: 0 -4px;
+  /* Size as if empty, so the rail never drives the row's height: the left
+     column alone sets it, and align-items: stretch then gives the rail that
+     exact height for its flex: 1 cards to share. */
+  contain: size;
 }
 
 @media (max-width: 768px) {
   .layoutRail {
+    contain: none;
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;

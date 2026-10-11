@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import tasksStyles from "./tasks-widget.module.css";
 
 import { ClientOnly } from "@cleartab/ui";
-import { CloseIcon } from "@/components/icons";
+import { CloseIcon, LabelImportantIcon } from "@/components/icons";
 
 import { formatDateSmart } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
@@ -342,7 +342,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
         <AddButton onClick={handleAddTask} tooltip="Add task" />
       </WidgetHeader>
       <WidgetContent>
-        <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>
+        <div className={tasksStyles.tasksContainer}>
           <div className="ListContent">
             <div className={tasksStyles.tasksEmpty}>
               {tasks.length === 0 ? (
@@ -421,6 +421,12 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                 </h3>
                               </div>
                               <div className={tasksStyles.tasksContentRight}>
+                                {task.isHighPriority && (
+                                  <LabelImportantIcon
+                                    size={16}
+                                    className={tasksStyles.taskPriorityIndicator}
+                                  />
+                                )}
                                 {task.dueDate && (
                                   <span
                                     className={cn(
@@ -430,15 +436,6 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                     )}
                                   >
                                     {formatDateSmart(task.dueDate)}
-                                  </span>
-                                )}
-                                {task.isHighPriority && (
-                                  <span
-                                    className={
-                                      tasksStyles.taskPriorityIndicator
-                                    }
-                                  >
-                                    !
                                   </span>
                                 )}
                               </div>

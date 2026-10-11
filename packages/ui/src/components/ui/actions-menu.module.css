@@ -22,8 +22,8 @@
 }
 
 .popoverContent {
-    /* layout */
-    z-index: 50;
+    /* layout: above dock panels (99999) such as Settings */
+    z-index: 100001;
 
     /* box model */
     width: auto;

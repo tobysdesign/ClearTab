@@ -683,7 +683,7 @@
 
 /* Tasks-specific override for different padding */
 .tasks-widget .ListContent {
-    padding: ok0 0.75rem;
+    padding: 0 0.75rem;
 }
 
 /* Notes-specific collapsed state - highly specific selector */
@@ -691,7 +691,7 @@
     padding: 0 0.5rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 0.5rem;
 }
 

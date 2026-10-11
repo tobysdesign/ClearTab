@@ -1,0 +1,24 @@
+.icon {
+  position: relative;
+  display: inline-grid;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.tile {
+  grid-area: 1 / 1;
+  display: block;
+  filter: drop-shadow(0 6px 14px oklch(0 0 0 / 0.35));
+}
+
+.icon[data-size="small"] .tile {
+  filter: drop-shadow(0 2px 4px oklch(0 0 0 / 0.3));
+}
+
+/* Eyes sit on the tab, slightly below centre */
+.eyes {
+  grid-area: 1 / 1;
+  place-self: center;
+  translate: 0 43%;
+  color: oklch(0.96 0.003 260);
+}

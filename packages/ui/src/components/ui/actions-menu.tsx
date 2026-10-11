@@ -37,8 +37,8 @@ export const ActionsMenu = React.memo(function ActionsMenu({ onDelete, isNewNote
           variant="ghost-icon"
           size="icon"
           onClick={handleTriggerClick}
+          tooltipLabel="More actions"
         >
-          <span className={styles.srOnly}>Open menu</span>
           <MoreActionsIcon size={16} />
         </Button>
       </PopoverTrigger>

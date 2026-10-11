@@ -366,8 +366,8 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
-                onOpenLayoutModal={() => setIsLayoutModalOpen(true)}
-                onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+                onOpenLayoutModal={() => setIsLayoutModalOpen((prev) => !prev)}
+                onOpenShortcuts={() => setIsShortcutsModalOpen((prev) => !prev)}
               />
 
               <div

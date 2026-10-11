@@ -5,19 +5,23 @@ import authConfig from "@/auth.config"
 
 const { auth } = NextAuth(authConfig)
 
+const PUBLIC_PAGES = ['/', '/privacy']
+
 export default auth((req) => {
   const isLoggedIn = !!req.auth
   const isAuthPage = req.nextUrl.pathname.startsWith('/login')
+  // Landing and legal pages are public (Google's OAuth reviewers must reach them signed out)
+  const isPublicPage = PUBLIC_PAGES.includes(req.nextUrl.pathname)
   const isApiRoute = req.nextUrl.pathname.startsWith('/api/')
 
   // Allow API routes and logout to pass through
-  if (isApiRoute || req.nextUrl.pathname.startsWith('/logout')) {
+  if (isApiRoute || isPublicPage || req.nextUrl.pathname.startsWith('/logout')) {
     return NextResponse.next()
   }
 
   // If on login page and already authenticated, redirect to home
   if (isAuthPage && isLoggedIn) {
-    return NextResponse.redirect(new URL('/', req.url))
+    return NextResponse.redirect(new URL('/tab', req.url))
   }
 
   // If not authenticated and not on login page, redirect to login
@@ -31,6 +35,7 @@ export default auth((req) => {
 })
 
 export const config = {
-  // Exclude ALL Next.js internals and public assets from middleware to avoid intercepting chunk/flight requests
-  matcher: ['/((?!_next/|favicon.ico|assets|icons|manifest.json|robots.txt).*)'],
+  // Exclude ALL Next.js internals and public assets from middleware to avoid intercepting chunk/flight requests.
+  // 'icon' also covers icons/, icon.svg and icon-192/512.png so favicons and bookmarks work signed out.
+  matcher: ['/((?!_next/|favicon.ico|icon|apple-icon|manifest.json|manifest.webmanifest|assets|robots.txt).*)'],
 }

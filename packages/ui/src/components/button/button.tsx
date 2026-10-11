@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from "../ui/tooltip";
 
 import styles from "./button.module.css";
 import { cn } from "@/lib/utils";
@@ -9,8 +9,9 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva(styles.baseButton, {
   variants: {
     variant: {
-      default: styles.default,
+      default: null,
       destructive: styles.destructive,
+      success: styles.success,
       outline: styles.outline,
       secondary: styles.secondary,
       ghost: styles.ghost,
@@ -19,7 +20,7 @@ const buttonVariants = cva(styles.baseButton, {
       white: styles.white,
     },
     size: {
-      default: styles.sizeDefault,
+      default: null,
       sm: styles.sizeSm,
       lg: styles.sizeLg,
       icon: styles.iconSize,
@@ -40,34 +41,36 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, tooltipLabel, shortcut, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, tooltipLabel, shortcut, title, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-    const contentLabel = tooltipLabel || (props["aria-label"] as string) || props.title || "";
+    const contentLabel = tooltipLabel || (props["aria-label"] as string) || title || "";
+    const hasTooltip = Boolean(contentLabel || shortcut);
 
+    // The native title is dropped when our tooltip renders, so the browser's
+    // own tooltip doesn't stack on top of it. aria-label keeps icon-only
+    // buttons named for screen readers.
     const buttonEl = (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        title={hasTooltip ? undefined : title}
+        aria-label={props["aria-label"] ?? (hasTooltip ? contentLabel : undefined)}
         {...props}
       />
     );
 
-    if (!contentLabel && !shortcut) {
+    if (!hasTooltip) {
       return buttonEl;
     }
 
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{buttonEl}</TooltipTrigger>
-          <TooltipContent>
-            <span>{contentLabel}</span>
-            {shortcut ? (
-              <span style={{ marginLeft: 8, opacity: 0.8 }}>{shortcut}</span>
-            ) : null}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>{buttonEl}</TooltipTrigger>
+        <TooltipContent>
+          <span>{contentLabel}</span>
+          {shortcut ? <TooltipShortcut>{shortcut}</TooltipShortcut> : null}
+        </TooltipContent>
+      </Tooltip>
     );
   },
 );

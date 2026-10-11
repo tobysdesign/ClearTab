@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { dbMinimal } from "@/lib/db-minimal";
 import { user as userTable } from "@/shared/schema-tables";
+import { googleApiService } from "@/lib/google-api-service";
 import type { NextAuthConfig } from "next-auth";
 
 export const config = {
@@ -51,6 +52,37 @@ export const config = {
             console.error("Error saving calendar tokens to database in jwt callback:", error);
           }
         }
+        return token;
+      }
+
+      // Google access tokens last ~1 hour. Refresh them here (with a 60s buffer) so the
+      // session never hands out a stale token and the calendar doesn't fall into "reconnect".
+      const expiresAt = token.expiresAt as number | undefined;
+      if (!token.refreshToken || !expiresAt || Date.now() < (expiresAt - 60) * 1000) {
+        return token;
+      }
+
+      try {
+        const refreshed = await googleApiService.refreshAccessToken(token.refreshToken as string);
+        token.accessToken = refreshed.access_token;
+        token.expiresAt = Math.floor(Date.now() / 1000) + refreshed.expires_in;
+        delete token.error;
+
+        if (token.sub) {
+          await dbMinimal
+            .update(userTable)
+            .set({
+              accessToken: refreshed.access_token,
+              tokenExpiry: new Date((token.expiresAt as number) * 1000),
+              googleCalendarConnected: true,
+            } as any)
+            .where(eq(userTable.id, token.sub));
+        }
+        console.log("🔄 jwt: refreshed Google access token");
+      } catch (error) {
+        // Leave the old token in place; /api/calendar decides whether this needs reauthorising
+        console.error("❌ jwt: Google token refresh failed:", error);
+        token.error = "RefreshAccessTokenError";
       }
       return token;
     },

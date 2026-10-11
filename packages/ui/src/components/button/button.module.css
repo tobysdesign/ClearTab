@@ -1,34 +1,25 @@
-.ghostIcon {
-    border: 1px solid #2e2e2e;
-    background-color: #2b2b2b;
-    color: #8d8d8d;
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
-}
-
-.ghostIcon:hover {
-    background-color: #3b3b3b;
-    color: #d2d2d2;
-}
-
-.iconSize {
-    height: 32px;
-    width: 32px;
-    border-radius: 50%;
-}
-
 .baseButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 6px;
     white-space: nowrap;
-    font-size: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #d4d4d8;
+    font-size: 13px;
     font-weight: 500;
+    padding: 6px 16px;
+    border-radius: 8px;
     outline: none;
     cursor: pointer;
-    border: none;
+    transition: all 0.15s ease;
+}
+
+.baseButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #f4f4f4;
 }
 
 .baseButton:focus-visible {
@@ -50,74 +41,93 @@
     transition: color 0.2s ease;
 }
 
-.default {
-    background: linear-gradient(180deg, #2f2f2f 0%, #242424 100%);
-    color: #f4f4f4;
-    border-radius: 999px;
-    padding: 0 1rem;
-    min-height: 36px;
-}
-
-.default:hover {
-    background: linear-gradient(180deg, #383838 0%, #2a2a2a 100%);
-}
-
 .destructive {
     background: linear-gradient(180deg, #612323 0%, #501818 100%);
+    border-color: rgba(255, 120, 120, 0.2);
     color: #ffecec;
-    border-radius: 999px;
-    padding: 0 1rem;
-    min-height: 36px;
 }
 
+.destructive:hover {
+    background: linear-gradient(180deg, #702929 0%, #5c1c1c 100%);
+    border-color: rgba(255, 120, 120, 0.3);
+    color: #ffffff;
+}
+
+.success {
+    background: linear-gradient(180deg, #1f7a45 0%, #17633a 100%);
+    border-color: rgba(120, 255, 170, 0.22);
+    color: #ffffff;
+}
+
+.success:hover {
+    background: linear-gradient(180deg, #248c50 0%, #1b7043 100%);
+    border-color: rgba(120, 255, 170, 0.32);
+    color: #ffffff;
+}
+
+/* Outline: base shape, no fill */
 .outline {
-    border: 1px solid #282828;
     background: transparent;
-    color: #7e7e7e;
-    border-radius: 999px;
-    padding: 0 1rem;
-    min-height: 36px;
-    transition:
-        border-color 0.2s ease,
-        color 0.2s ease;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #a1a1aa;
 }
 
 .outline:hover {
-    border-color: #c4c4c4;
-    color: #c4c4c4;
-    background: transparent;
-}
-
-.secondary {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.3);
     color: #f4f4f4;
-    border-radius: 999px;
-    padding: 0 1rem;
-    min-height: 36px;
 }
 
+/* Secondary: base shape, stronger fill */
+.secondary {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #f4f4f4;
+}
+
+.secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.24);
+    color: #ffffff;
+}
+
+/* Ghost: base shape, fill + border only on hover */
 .ghost {
     background: transparent;
-    color: #f4f4f4;
-    border-radius: 999px;
-    padding: 0 1rem;
-    min-height: 36px;
-    transition:
-        background-color 0.2s ease,
-        color 0.2s ease;
+    border-color: transparent;
+    color: #d4d4d8;
 }
 
 .ghost:hover {
     background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
     color: #ffffff;
+}
+
+.ghostIcon {
+    border: 1px solid #2e2e2e;
+    background-color: #2b2b2b;
+    color: #8d8d8d;
+}
+
+.ghostIcon:hover {
+    background-color: #3b3b3b;
+    border-color: #2e2e2e;
+    color: #d2d2d2;
 }
 
 .link {
     background: transparent;
+    border-color: transparent;
     color: #7ab8ff;
     padding: 0;
-    min-height: 36px;
     border-radius: 0;
+}
+
+.link:hover {
+    background: transparent;
+    border-color: transparent;
+    color: #a3cfff;
 }
 
 .white {
@@ -137,11 +147,6 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.sizeDefault {
-    min-height: 36px;
-    padding: 0 1rem;
-}
-
 .sizeSm {
     min-height: 32px;
     padding: 0 0.75rem;
@@ -152,4 +157,11 @@
     min-height: 44px;
     padding: 0 1.25rem;
     font-size: 15px;
+}
+
+/* Square icon button, keeps base border-radius */
+.iconSize {
+    width: 32px;
+    height: 32px;
+    padding: 0;
 }

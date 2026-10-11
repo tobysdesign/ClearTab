@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from 'react'
-import { askAi } from '@/lib/actions/ai'
 import { useSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -11,7 +10,27 @@ export interface Message {
   role: 'user' | 'assistant'
   isStreaming?: boolean
   quickReplies?: string[]
+  /** time from send to first token, shown as "Thought for Ns" */
+  thoughtMs?: number
+  /** set when a #task / #note command ran instead of the model */
+  tool?: { kind: 'task' | 'note'; text: string }
+  /** text from a note the user is asking about */
+  quote?: string
+  /** tasks the AI suggested from a note, awaiting confirmation */
+  taskSuggestions?: TaskSuggestion[]
+  /** how many suggested tasks were added (set once confirmed) */
+  tasksAdded?: number
 }
+
+export interface TaskSuggestion {
+  title: string
+  isHighPriority: boolean
+  /** YYYY-MM-DD or null */
+  dueDate: string | null
+}
+
+export const MAKE_TASKS_REPLY = 'Make tasks from this'
+const SUMMARISE_REPLY = 'Summarise this'
 
 interface ChatContextType {
   isChatOpen: boolean
@@ -26,6 +45,18 @@ interface ChatContextType {
   setInputValue: React.Dispatch<React.SetStateAction<string>>
   processMessage: (initialMessage?: string) => Promise<void>
   processStreamingMessage: (initialMessage?: string) => Promise<void>
+  retryLastMessage: () => Promise<void>
+  /** text from a note that follow-up questions are about */
+  contextText: string | null
+  clearContext: () => void
+  /** Ask AI from a note selection: opens chat with the text as context */
+  askAboutText: (text: string) => void
+  /** Ask the AI to suggest tasks from some note text */
+  suggestTasks: (text: string, label?: string) => Promise<void>
+  addSuggestedTasks: (messageIndex: number, tasks: TaskSuggestion[]) => Promise<void>
+  /** Create tasks directly (used by the editor's + Task button) */
+  createTasks: (tasks: Array<Partial<TaskSuggestion> & { title: string }>) => Promise<number>
+  sendQuickReply: (reply: string) => Promise<void>
   isStreamingMode: boolean
   toggleStreamingMode: () => void
   cancelMessage: () => void
@@ -34,6 +65,102 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
+// Chat runs entirely on Chrome's built-in Prompt API (Gemini Nano). Chrome 138+ exposes a
+// global `LanguageModel`; earlier builds used `window.ai.languageModel`.
+function getLanguageModelApi(): { api: any; legacy: boolean } | null {
+  if (typeof window === 'undefined') return null
+  const g = globalThis as any
+  if (g.LanguageModel) return { api: g.LanguageModel, legacy: false }
+  if (g.ai?.languageModel) return { api: g.ai.languageModel, legacy: true }
+  return null
+}
+
+async function isLocalAiAvailable(): Promise<boolean> {
+  const found = getLanguageModelApi()
+  if (!found) return false
+  try {
+    if (!found.legacy) return (await found.api.availability()) !== 'unavailable'
+    return (await found.api.capabilities())?.available !== 'no'
+  } catch {
+    return false
+  }
+}
+
+const LOCAL_AI_UNAVAILABLE_MESSAGE =
+  "AI chat runs on Chrome's built-in Gemini Nano, so your data never leaves your device. " +
+  "It isn't available in this browser. Use desktop Chrome 138 or later; the first time, " +
+  "Chrome may take a few minutes to download the model."
+
+const TASKS_SCHEMA = {
+  type: 'object',
+  properties: {
+    tasks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          important: { type: 'boolean' },
+          due: { type: ['string', 'null'] },
+        },
+        required: ['title', 'important', 'due'],
+      },
+    },
+  },
+  required: ['tasks'],
+}
+
+function localDateISO(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+/* The model sometimes answers "tomorrow" or "ASAP" instead of a date */
+function normaliseDue(due: unknown): string | null {
+  if (typeof due !== 'string') return null
+  const value = due.trim().toLowerCase()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+  const today = new Date()
+  if (['today', 'immediately', 'now', 'asap', 'straight away', 'right away'].includes(value)) return localDateISO(today)
+  if (value === 'tomorrow') {
+    today.setDate(today.getDate() + 1)
+    return localDateISO(today)
+  }
+  return null
+}
+
+/* Creating the first session after a page load can take ~15s while Chrome loads
+   the model; after a short wait, tell the user what's happening */
+async function withWarmUpNotice<T>(work: Promise<T>, notify: (text: string) => void): Promise<T> {
+  const timer = setTimeout(() => notify('Getting the on-device model ready…'), 2500)
+  try {
+    return await work
+  } finally {
+    clearTimeout(timer)
+    notify('')
+  }
+}
+
+/* Pulls a task list out of the model's reply; tolerates prose around the JSON */
+function parseTaskSuggestions(raw: string): TaskSuggestion[] {
+  const match = raw.match(/\{[\s\S]*\}/)
+  if (!match) return []
+  try {
+    const parsed = JSON.parse(match[0])
+    const list = Array.isArray(parsed?.tasks) ? parsed.tasks : []
+    return list
+      .filter((t: any) => typeof t?.title === 'string' && t.title.trim())
+      .slice(0, 12)
+      .map((t: any) => ({
+        title: t.title.trim().replace(/\.$/, ''),
+        isHighPriority: t.important === true,
+        dueDate: normaliseDue(t.due),
+      }))
+  } catch {
+    return []
+  }
+}
+
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -41,6 +168,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [thinkingContent, setThinkingContent] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [isStreamingMode, setIsStreamingMode] = useState(true)
+  const [contextText, setContextText] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
@@ -74,62 +202,40 @@ ${dbContext || 'No context available.'}
 Be concise. Do not answer questions unrelated to the user's data or productivity.
     `.trim();
 
-    try {
-      const windowAi = (window as any).ai;
-      if (!windowAi) throw new Error("AI not supported");
+    const found = getLanguageModelApi();
+    if (!found) throw new Error("Local AI not supported");
 
-      const session = await windowAi.languageModel.create({
-        systemPrompt
-      });
+    const session = found.legacy
+      ? await found.api.create({ systemPrompt })
+      : await found.api.create({ initialPrompts: [{ role: 'system', content: systemPrompt }] });
 
-      localAiSessionRef.current = session;
-      return session;
-    } catch (err) {
-      console.error("Failed to init local session:", err);
-      throw err;
-    }
+    localAiSessionRef.current = session;
+    return session;
   }, [userName, agentName]);
 
-  // Create task mutation
-  const createTaskMutation = useMutation({
-    mutationFn: async (content: string) => {
-      // Validate task content
-      const trimmedContent = content.trim()
-      if (!trimmedContent || trimmedContent.length < 5) {
-        throw new Error('Task content must be at least 5 characters')
-      }
-      
-      // Additional validation - don't allow single words
-      if (!/\s/.test(trimmedContent) && trimmedContent.length < 10) {
-        throw new Error('Task content appears to be too short or a single word')
-      }
-      
-      console.log('Creating task with content:', content)
-      console.trace('Task creation stack trace:')
+  // Creates tasks via the API. The API reads `title` (sending `content` saved them as "Untitled Task").
+  const createTasks = useCallback(async (items: Array<Partial<TaskSuggestion> & { title: string }>) => {
+    let created = 0
+    for (const item of items) {
+      const title = item.title.trim().slice(0, 200)
+      if (!title) continue
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: content.trim() }),
+        body: JSON.stringify({
+          title,
+          isHighPriority: item.isHighPriority ?? false,
+          // Midday UTC keeps a date-only due date on the same day in every timezone
+          dueDate: item.dueDate ? `${item.dueDate}T12:00:00Z` : null,
+        }),
       })
       if (!response.ok) throw new Error('Failed to create task')
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
-      toast({
-        title: 'Task created',
-        description: 'Your task has been created successfully.',
-      })
-    },
-    onError: (error) => {
-      console.error('Failed to create task:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to create task. Please try again.',
-        variant: 'destructive',
-      })
-    },
-  })
+      created += 1
+    }
+    console.log('ChatProvider: created', created, 'tasks')
+    queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    return created
+  }, [queryClient])
 
   // Create note mutation
   const createNoteMutation = useMutation({
@@ -137,7 +243,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       const response = await fetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        // The editor stores Quill deltas, so wrap the text; the first line becomes the title
+        body: JSON.stringify({
+          title: content.split('\n')[0].slice(0, 60),
+          content: { ops: [{ insert: `${content}\n` }] },
+        }),
       })
       if (!response.ok) throw new Error('Failed to create note')
       return response.json()
@@ -151,267 +261,86 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     },
   })
 
-  const processMessage = useCallback(async (initialMessage?: string) => {
-    if ((!inputValue.trim() && !initialMessage) && hasSeenOnboarding) return
+  // Handles #task / #note commands. Returns true when the message was a command.
+  const handleHashtagCommand = useCallback(async (userMessage: string) => {
+    const taskMatch = userMessage.match(/#task\s+(.+)/)
+    const noteMatch = userMessage.match(/#note\s+(.+)/)
+    const match = taskMatch ? { kind: 'task' as const, text: taskMatch[1] } : noteMatch ? { kind: 'note' as const, text: noteMatch[1] } : null
+    if (!match) return false
 
-    setIsThinking(true)
-    const userMessage = initialMessage || inputValue || ''
-    setInputValue('')
+    if (match.kind === 'task') await createTasks([{ title: match.text }])
+    else await createNoteMutation.mutateAsync(match.text)
+    setMessages(prev => [...prev, { role: 'assistant', content: '', tool: match }])
+    return true
+  }, [createTasks, createNoteMutation])
 
-    // Add user message to chat
-    if (userMessage) {
-      setMessages(prev => [...prev, { role: 'user', content: userMessage }])
-    }
-
-    try {
-      // Process hashtags before sending to AI
-      if (userMessage.trim()) {
-        const taskMatch = userMessage.match(/#task\s+(.+)/)
-        const noteMatch = userMessage.match(/#note\s+(.+)/)
-
-        if (taskMatch) {
-          console.log('Creating task from user message:', taskMatch[1])
-          await createTaskMutation.mutateAsync(taskMatch[1])
-          return // Don't send hashtag commands to AI at all
-        }
-        if (noteMatch) {
-          console.log('Creating note from user message:', noteMatch[1])
-          await createNoteMutation.mutateAsync(noteMatch[1])
-          return // Don't send hashtag commands to AI at all
-        }
-      }
-
-      // Check for Gemini Nano!
-      if (typeof window !== "undefined" && (window as any).ai && hasSeenOnboarding) {
-        try {
-          console.log("Gemini Nano detected! Using local AI for non-streaming...");
-          const session = await initLocalAiSession();
-          const responseText = await session.prompt(userMessage);
-          setMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
-          return;
-        } catch (nanoError) {
-          console.warn("Gemini Nano prompt failed, falling back to remote:", nanoError);
-        }
-      }
-
-      // Get AI response
-      const onboardingStepNumber = typeof onboardingStep === 'string' ?
-        ({ "welcome": 1, "agent-name": 2, "user-name": 3, "setup-complete": 4 }[onboardingStep] || 1) :
-        onboardingStep || 1
-      const response = await askAi(userMessage, hasSeenOnboarding, onboardingStepNumber, userName, agentName)
-
-      if (response.success && response.data) {
-        // Handle onboarding steps
-        if (!hasSeenOnboarding && response.data.onboardingStep) {
-          const stepMap = {
-            1: "welcome" as const,
-            2: "agent-name" as const,
-            3: "user-name" as const,
-            4: "setup-complete" as const,
-          }
-          setOnboardingStep(stepMap[response.data.onboardingStep as keyof typeof stepMap] || "welcome")
-
-          // Complete onboarding when setup is complete
-          if (response.data.onboardingStep === 4) {
-            completeOnboarding({ userName: userMessage, agentName: 'Toby' }) // Defaulting agent name for now
-          }
-        }
-
-        // Add AI response to chat
-        const aiMessage = response.data.response || ''
-        setMessages(prev => [...prev, { role: 'assistant', content: aiMessage }])
-      } else {
-        throw new Error(response.serverError || 'Failed to get AI response')
-      }
-    } catch (error) {
-      console.error('Error processing message:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to process your message. Please try again.',
-        variant: 'destructive',
-      })
-    } finally {
-      setIsThinking(false)
-    }
-  }, [inputValue, hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, createTaskMutation, createNoteMutation, toast, userName, agentName, initLocalAiSession])
-
-  const processStreamingMessage = useCallback(async (initialMessage?: string) => {
-    if ((!inputValue.trim() && !initialMessage) && hasSeenOnboarding) return
-
+  const runLocalAi = useCallback(async (userMessage: string, streaming: boolean) => {
     setIsThinking(true)
     setThinkingContent('')
-    const userMessage = initialMessage || inputValue || ''
     setInputValue('')
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
 
-    // Add user message to chat
-    if (userMessage) {
-      setMessages(prev => [...prev, { role: 'user', content: userMessage }])
-    }
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
-      // Process hashtags before sending to AI
-      if (userMessage.trim()) {
-        console.log('STREAMING: Checking message for hashtags:', userMessage)
-        const taskMatch = userMessage.match(/#task\s+(.+)/)
-        const noteMatch = userMessage.match(/#note\s+(.+)/)
-        
-        console.log('STREAMING: Task match result:', taskMatch)
-        console.log('STREAMING: Note match result:', noteMatch)
+      if (await handleHashtagCommand(userMessage)) return
 
-        if (taskMatch) {
-          console.log('STREAMING: Creating task from user message:', taskMatch[1])
-          await createTaskMutation.mutateAsync(taskMatch[1])
-          return // Don't send hashtag commands to AI at all
-        }
-        if (noteMatch) {
-          console.log('STREAMING: Creating note from user message:', noteMatch[1])
-          await createNoteMutation.mutateAsync(noteMatch[1])
-          return // Don't send hashtag commands to AI at all
+      if (!(await isLocalAiAvailable())) {
+        console.warn('ChatProvider: Prompt API unavailable in this browser')
+        setMessages(prev => [...prev, { role: 'assistant', content: LOCAL_AI_UNAVAILABLE_MESSAGE }])
+        return
+      }
+
+      const session = await withWarmUpNotice(initLocalAiSession(), setThinkingContent)
+      const startedAt = Date.now()
+      // Questions after "Ask AI" on a selection are about that text
+      const prompt = contextText
+        ? `Here is some text from my notes:\n"""\n${contextText}\n"""\n\n${userMessage}`
+        : userMessage
+
+      if (!streaming) {
+        const responseText = await session.prompt(prompt, { signal: controller.signal })
+        setMessages(prev => [...prev, { role: 'assistant', content: responseText, thoughtMs: Date.now() - startedAt }])
+        return
+      }
+
+      // The current API streams deltas; the legacy one streamed the cumulative text.
+      const legacy = getLanguageModelApi()?.legacy ?? false
+      let fullText = ''
+      let started = false
+
+      const stream = session.promptStreaming(prompt, { signal: controller.signal })
+      for await (const chunk of stream) {
+        // Keep the thinking state up until the first token arrives
+        setIsThinking(false)
+        fullText = legacy ? chunk : fullText + chunk
+        const content = fullText
+        // Updaters must stay pure (StrictMode runs them twice), so decide append vs update out here
+        if (!started) {
+          started = true
+          const thoughtMs = Date.now() - startedAt
+          setMessages(prev => [...prev, { role: 'assistant' as const, content, isStreaming: true, thoughtMs }])
+        } else {
+          setMessages(prev => {
+            const updated = [...prev]
+            updated[updated.length - 1] = { ...updated[updated.length - 1], content }
+            return updated
+          })
         }
       }
 
-      // Check for Gemini Nano!
-      if (typeof window !== "undefined" && (window as any).ai && hasSeenOnboarding) {
-        try {
-          console.log("Gemini Nano detected! Using local AI for streaming...");
-          const session = await initLocalAiSession();
-          
-          let messageIndex = -1;
-          setIsThinking(false);
-          setThinkingContent('');
-
-          const stream = session.promptStreaming(userMessage);
-          for await (const chunk of stream) {
-            if (messageIndex === -1) {
-              setMessages(prev => {
-                const newMessages = [...prev, { role: 'assistant' as const, content: chunk, isStreaming: true }];
-                messageIndex = newMessages.length - 1;
-                return newMessages;
-              });
-            } else {
-              setMessages(prev => {
-                const updated = [...prev];
-                updated[messageIndex] = {
-                  ...updated[messageIndex],
-                  content: chunk
-                };
-                return updated;
-              });
-            }
-          }
-
-          if (messageIndex >= 0) {
-            setMessages(prev => {
-              const updated = [...prev];
-              updated[messageIndex] = {
-                ...updated[messageIndex],
-                isStreaming: false
-              };
-              return updated;
-            });
-          }
-          return;
-        } catch (nanoError) {
-          console.warn("Gemini Nano streaming failed, falling back to remote:", nanoError);
-        }
-      }
-
-      // Create abort controller for cancellation
-      const controller = new AbortController()
-      abortControllerRef.current = controller
-
-      // Start streaming response
-      const response = await fetch('/api/ai/stream', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: userMessage,
-          hasSeenOnboarding,
-          userName,
-          agentName
-        }),
-        signal: controller.signal
+      setMessages(prev => {
+        if (!started) return prev
+        const updated = [...prev]
+        updated[updated.length - 1] = { ...updated[updated.length - 1], isStreaming: false }
+        return updated
       })
-
-      if (!response.ok) throw new Error('Failed to get streaming response')
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-      
-      let currentMessage = ''
-      let messageIndex = -1
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value)
-          const lines = chunk.split('\n').filter(line => line.trim())
-
-          for (const line of lines) {
-            try {
-              const data = JSON.parse(line)
-              
-              switch (data.type) {
-                case 'thinking':
-                  setThinkingContent(data.content)
-                  break
-                  
-                case 'content':
-                  if (messageIndex === -1) {
-                    // Add initial assistant message
-                    setMessages(prev => {
-                      const newMessages = [...prev, { role: 'assistant' as const, content: data.content, isStreaming: true }]
-                      messageIndex = newMessages.length - 1
-                      return newMessages
-                    })
-                  } else {
-                    // Update existing message
-                    setMessages(prev => {
-                      const updated = [...prev]
-                      updated[messageIndex] = { 
-                        ...updated[messageIndex], 
-                        content: data.fullContent || updated[messageIndex].content + data.content 
-                      }
-                      return updated
-                    })
-                  }
-                  break
-                  
-                case 'complete':
-                  setMessages(prev => {
-                    const updated = [...prev]
-                    if (messageIndex >= 0) {
-                      updated[messageIndex] = { 
-                        ...updated[messageIndex], 
-                        content: data.fullContent,
-                        isStreaming: false
-                      }
-                    }
-                    return updated
-                  })
-                  break
-                  
-                case 'error':
-                  throw new Error(data.content)
-              }
-            } catch (parseError) {
-              console.warn('Failed to parse streaming chunk:', parseError)
-            }
-          }
-        }
-      }
-
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('Message cancelled by user')
-        toast({
-          title: 'Message cancelled',
-          description: 'The message was cancelled.'
-        })
+      if (error?.name === 'AbortError') {
+        toast({ title: 'Message cancelled', description: 'The message was cancelled.' })
       } else {
-        console.error('Error processing streaming message:', error)
+        console.error('Error processing message:', error)
         toast({
           title: 'Error',
           description: 'Failed to process your message. Please try again.',
@@ -423,7 +352,144 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       setThinkingContent('')
       abortControllerRef.current = null
     }
-  }, [inputValue, hasSeenOnboarding, userName, agentName, createTaskMutation, createNoteMutation, toast])
+  }, [handleHashtagCommand, initLocalAiSession, toast, contextText])
+
+  const processMessage = useCallback(async (initialMessage?: string) => {
+    const userMessage = (initialMessage || inputValue).trim()
+    if (!userMessage) return
+    await runLocalAi(userMessage, false)
+  }, [inputValue, runLocalAi])
+
+  const processStreamingMessage = useCallback(async (initialMessage?: string) => {
+    const userMessage = (initialMessage || inputValue).trim()
+    if (!userMessage) return
+    await runLocalAi(userMessage, true)
+  }, [inputValue, runLocalAi])
+
+  // Drops the last assistant reply and asks again with the user message before it
+  const retryLastMessage = useCallback(async () => {
+    const lastUserIndex = messages.map(m => m.role).lastIndexOf('user')
+    if (lastUserIndex === -1 || isThinking) return
+    const lastUserMessage = messages[lastUserIndex].content
+    setMessages(prev => prev.slice(0, lastUserIndex))
+    await runLocalAi(lastUserMessage, true)
+  }, [messages, isThinking, runLocalAi])
+
+  // Opening chat starts loading the on-device model in the background
+  const warmedRef = useRef(false)
+  useEffect(() => {
+    if (!isChatOpen || warmedRef.current) return
+    warmedRef.current = true
+    const found = getLanguageModelApi()
+    if (!found || found.legacy) return
+    found.api
+      .create()
+      .then((session: any) => session.destroy?.())
+      .catch((error: unknown) => console.warn('ChatProvider: model warm-up failed', error))
+  }, [isChatOpen])
+
+  const clearContext = useCallback(() => setContextText(null), [])
+
+  const askAboutText = useCallback((text: string) => {
+    const quote = text.trim()
+    if (!quote) return
+    if (!hasSeenOnboarding) completeOnboarding({ userName, agentName })
+    setContextText(quote)
+    setIsChatOpen(true)
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: 'What would you like to do with this?',
+      quote,
+      quickReplies: [MAKE_TASKS_REPLY, SUMMARISE_REPLY],
+    }])
+  }, [hasSeenOnboarding, completeOnboarding, userName, agentName])
+
+  const suggestTasks = useCallback(async (text: string, label = MAKE_TASKS_REPLY) => {
+    const source = text.trim()
+    if (!source || isThinking) return
+    if (!hasSeenOnboarding) completeOnboarding({ userName, agentName })
+    setIsChatOpen(true)
+    setMessages(prev => [...prev, { role: 'user', content: label }])
+    setIsThinking(true)
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    try {
+      if (!(await isLocalAiAvailable())) {
+        setMessages(prev => [...prev, { role: 'assistant', content: LOCAL_AI_UNAVAILABLE_MESSAGE }])
+        return
+      }
+      const found = getLanguageModelApi()!
+      const today = new Date()
+      const systemPrompt = [
+        'You turn notes into a to-do list.',
+        `Today is ${today.toLocaleDateString('en-AU', { weekday: 'long' })} ${localDateISO(today)}.`,
+        'Find the actionable tasks in the text. For each task give:',
+        "- title: what the writer needs to do, starting with a verb and reusing their words, at most 8 words (\"I need to call Sam about the lease\" becomes \"Call Sam about the lease\")",
+        '- important: false, unless the text says it is urgent, important, ASAP or needed straight away',
+        '- due: the date as YYYY-MM-DD if the text mentions a day or date, otherwise null',
+        'Only include real tasks. If there are none, return an empty list.',
+        'Reply with JSON only, shaped like {"tasks":[{"title":"","important":false,"due":null}]}.',
+      ].join('\n')
+
+      const session: any = await withWarmUpNotice(
+        found.legacy
+          ? found.api.create({ systemPrompt })
+          : found.api.create({ initialPrompts: [{ role: 'system', content: systemPrompt }] }),
+        setThinkingContent,
+      )
+      const startedAt = Date.now()
+      const raw: string = await session.prompt(
+        source.slice(0, 6000),
+        found.legacy ? { signal: controller.signal } : { signal: controller.signal, responseConstraint: TASKS_SCHEMA },
+      )
+      session.destroy?.()
+
+      const tasks = parseTaskSuggestions(raw)
+      console.log('ChatProvider: suggested tasks', tasks)
+      const thoughtMs = Date.now() - startedAt
+      setMessages(prev => [...prev, tasks.length
+        ? {
+            role: 'assistant' as const,
+            content: `I found ${tasks.length} task${tasks.length === 1 ? '' : 's'}. Untick any you don't want, then add them.`,
+            taskSuggestions: tasks,
+            thoughtMs,
+          }
+        : {
+            role: 'assistant' as const,
+            content: "I couldn't find anything in there that reads like a task.",
+            thoughtMs,
+          }])
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('ChatProvider: task suggestion failed', error)
+        toast({ title: 'Error', description: "Couldn't suggest tasks. Please try again.", variant: 'destructive' })
+      }
+    } finally {
+      setIsThinking(false)
+      setThinkingContent('')
+      abortControllerRef.current = null
+    }
+  }, [isThinking, hasSeenOnboarding, completeOnboarding, userName, agentName, toast])
+
+  const addSuggestedTasks = useCallback(async (messageIndex: number, tasks: TaskSuggestion[]) => {
+    try {
+      const created = await createTasks(tasks)
+      setMessages(prev => prev.map((m, i) => (i === messageIndex ? { ...m, tasksAdded: created } : m)))
+    } catch (error) {
+      console.error('ChatProvider: adding suggested tasks failed', error)
+      toast({ title: 'Error', description: "Couldn't add those tasks. Please try again.", variant: 'destructive' })
+    }
+  }, [createTasks, toast])
+
+  const sendQuickReply = useCallback(async (reply: string) => {
+    if (reply === MAKE_TASKS_REPLY && contextText) {
+      await suggestTasks(contextText, reply)
+      return
+    }
+    await runLocalAi(reply, true)
+  }, [contextText, suggestTasks, runLocalAi])
 
   const toggleStreamingMode = useCallback(() => {
     setIsStreamingMode(prev => !prev)
@@ -440,16 +506,22 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
   const openChat = useCallback(() => {
     setIsChatOpen(true)
     if (messages.length === 0) {
-      if (hasSeenOnboarding) {
-        setMessages([{ role: 'assistant', content: 'Welcome back! What can I help you with?' }])
-      } else {
-        processMessage('')
+      // The old server-driven onboarding chat no longer exists, so finish onboarding on first open
+      if (!hasSeenOnboarding) {
+        completeOnboarding({ userName, agentName })
       }
+      setMessages([{
+        role: 'assistant',
+        content: hasSeenOnboarding
+          ? 'Welcome back! What can I help you with?'
+          : `Hi, I'm ${agentName}. Ask me about your notes, tasks or schedule, or use #task and #note to add things.`,
+      }])
     }
-  }, [hasSeenOnboarding, processMessage, messages])
+  }, [hasSeenOnboarding, completeOnboarding, userName, agentName, messages])
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false)
+    setContextText(null)
   }, [])
 
   useEffect(() => {
@@ -481,6 +553,14 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         setInputValue,
         processMessage,
         processStreamingMessage,
+        retryLastMessage,
+        contextText,
+        clearContext,
+        askAboutText,
+        suggestTasks,
+        addSuggestedTasks,
+        createTasks,
+        sendQuickReply,
         isStreamingMode,
         toggleStreamingMode,
         cancelMessage,

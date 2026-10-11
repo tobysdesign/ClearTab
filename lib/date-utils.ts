@@ -55,6 +55,8 @@ export function format(date: Date | string | null | undefined, formatStr: string
       return `${month}/${day}/${year}`;
     case 'dd/MM/yyyy':
       return `${day}/${month}/${year}`;
+    case 'd/M':
+      return `${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
     case 'dd/MM/yy':
       return `${day}/${month}/${year.toString().slice(-2)}`;
     case 'MMM d, yyyy':

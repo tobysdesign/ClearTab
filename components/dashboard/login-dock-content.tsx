@@ -33,6 +33,7 @@ export function LoginDockContent({
             {/* AI Chat button - disabled */}
             <div className="opacity-50">
                 <ShinyAiButton
+                    data-testid="ai-chat-trigger"
                     className="cursor-not-allowed pointer-events-none"
                     onClick={() => {}}
                 />

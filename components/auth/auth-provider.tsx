@@ -29,7 +29,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
     user: session?.user || null,
     session: session || null,
     signIn: async (provider: "google") => {
-      await nextAuthSignIn(provider, { callbackUrl: "/" })
+      await nextAuthSignIn(provider, { callbackUrl: "/tab" })
     },
     signOut: async () => {
       await nextAuthSignOut({ callbackUrl: "/login" })

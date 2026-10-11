@@ -2,7 +2,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import styles from './shiny-ai-button.module.css'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+import { Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from './tooltip'
 
 interface ShinyAiButtonProps {
   onClick: () => void
@@ -10,6 +10,7 @@ interface ShinyAiButtonProps {
   layoutId?: string
   tooltip?: string
   shortcut?: string
+  'data-testid'?: string
 }
 
 export function ShinyAiButton({
@@ -17,12 +18,14 @@ export function ShinyAiButton({
   className,
   layoutId,
   tooltip,
-  shortcut
+  shortcut,
+  'data-testid': testId,
 }: ShinyAiButtonProps) {
   const btn = (
     <motion.button
       layoutId={layoutId}
       onClick={onClick}
+      data-testid={testId}
       className={`${styles.dockIconButton} ${className || ''}`}
       transition={{
         type: "spring",
@@ -118,14 +121,12 @@ export function ShinyAiButton({
   if (!tooltip && !shortcut) return btn
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{btn}</TooltipTrigger>
-        <TooltipContent>
-          <span>{tooltip}</span>
-          {shortcut ? <span style={{ marginLeft: 8, opacity: 0.8 }}>{shortcut}</span> : null}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent>
+        <span>{tooltip}</span>
+        {shortcut ? <TooltipShortcut>{shortcut}</TooltipShortcut> : null}
+      </TooltipContent>
+    </Tooltip>
   )
 }

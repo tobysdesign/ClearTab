@@ -81,6 +81,8 @@ export function SettingsDrawer({
 }: SettingsDrawerProps) {
   const { user, loading: authLoading, signOut } = useAuth();
   const [isOpen, setIsOpen] = React.useState(false);
+  const isOpenRef = React.useRef(isOpen);
+  isOpenRef.current = isOpen;
 
   const [activeSection, setActiveSection] =
     React.useState<SectionId>("schedule");
@@ -148,7 +150,12 @@ export function SettingsDrawer({
   // Listen for global events requesting settings drawer
   React.useEffect(() => {
     const handleOpenSettings = (event: Event) => {
-      const customEvent = event as CustomEvent<{ tab?: string }>;
+      const customEvent = event as CustomEvent<{ tab?: string; toggle?: boolean }>;
+      // The dock button toggles: a second click closes the drawer
+      if (customEvent.detail?.toggle && isOpenRef.current) {
+        setIsOpen(false);
+        return;
+      }
       const targetSection = customEvent.detail?.tab
         ? mapToSection(customEvent.detail.tab)
         : "schedule";

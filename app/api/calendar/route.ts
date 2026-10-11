@@ -85,59 +85,67 @@ export async function GET(_request: NextRequest) {
       } catch (error) {
         console.error('❌ Calendar fetch error:', error);
 
-        // Try to refresh the token if we have a refresh token
-        if (refreshToken) {
+        // Try each distinct refresh token we know about (session first, then DB, which
+        // may be newer if the user signed in again on another device).
+        const refreshCandidates = [...new Set([sessionRefreshToken, dbUser.refreshToken].filter(Boolean))] as string[];
+        let refreshError: unknown = null;
+        let recovered = false;
+
+        for (const candidate of refreshCandidates) {
           try {
             console.log('🔄 Attempting to refresh access token...');
-            const newTokens = await googleApiService.refreshAccessToken(refreshToken);
+            const newTokens = await googleApiService.refreshAccessToken(candidate);
             currentAccessToken = newTokens.access_token;
 
-            // Save the new access token to the database
             await dbMinimal
               .update(userTable)
               .set({
                 accessToken: newTokens.access_token,
+                refreshToken: candidate,
                 tokenExpiry: new Date(Date.now() + newTokens.expires_in * 1000),
                 googleCalendarConnected: true,
               } as any)
               .where(eq(userTable.id, authUser.id));
             console.log('✅ Token refreshed and saved to database');
 
-            // Retry the calendar fetch with new token
             events = await googleApiService.getCalendarEvents(
-              { accessToken: currentAccessToken, refreshToken: refreshToken || undefined },
+              { accessToken: currentAccessToken, refreshToken: candidate },
               dbUser.email
             );
             console.log('✅ Fetched', events.length, 'events after token refresh');
-          } catch (refreshError) {
-            console.error('❌ Token refresh failed:', refreshError);
-            // Mark calendar as disconnected if refresh fails
-            await dbMinimal
-              .update(userTable)
-              .set({ googleCalendarConnected: false } as any)
-              .where(eq(userTable.id, authUser.id));
-            console.log('🔴 Marked calendar as disconnected due to token refresh failure');
-            
-            return NextResponse.json({
-              success: true,
-              data: [],
-              needsReconnection: true,
-              message: "Connection expired. Please reconnect your calendar."
-            });
+            recovered = true;
+            break;
+          } catch (err) {
+            refreshError = err;
           }
-        } else {
-          // If we have an auth error but no refresh token, we can't recover.
-          console.warn('⚠️ Auth failed and no refresh token available. Disconnecting calendar.');
+        }
+
+        if (!recovered) {
+          const reason = refreshError instanceof Error ? refreshError.message : String(refreshError ?? '');
+          // Google answers invalid_grant ("Token has been expired or revoked.") when the grant is
+          // really gone. Anything else (network, 5xx, rate limits) is transient: don't disconnect.
+          const grantRevoked = refreshCandidates.length === 0 || /invalid_grant|expired or revoked/i.test(reason);
+
+          if (!grantRevoked) {
+            console.error('⚠️ Calendar fetch failed transiently, keeping connection:', reason);
+            return NextResponse.json(
+              { success: false, data: [], error: "Couldn't reach Google Calendar. Try again shortly." },
+              { status: 503 }
+            );
+          }
+
+          console.error('❌ Google grant revoked or expired:', reason);
           await dbMinimal
             .update(userTable)
             .set({ googleCalendarConnected: false } as any)
             .where(eq(userTable.id, authUser.id));
-          
+
           return NextResponse.json({
             success: true,
             data: [],
             needsReconnection: true,
-            message: "Authentication failed. Please reconnect your calendar."
+            reason: "revoked",
+            message: "Google paused calendar access. This happens if access was removed in your Google account, your password changed, or it went unused for a while."
           });
         }
       }
@@ -147,6 +155,7 @@ export async function GET(_request: NextRequest) {
         success: true,
         data: [],
         needsReconnection: true,
+        reason: "not_connected",
         message: "Google Calendar not connected. Please sign in to sync your schedule."
       });
     }

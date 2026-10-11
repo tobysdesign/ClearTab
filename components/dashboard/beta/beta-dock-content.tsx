@@ -52,7 +52,7 @@ export function BetaDockContent({
     >
       <DockIconButton
         onClick={onOpenLayoutModal}
-        title="Choose Dashboard Layout (⌘L)"
+        title="Dashboard layout"
         shortcut="⌘L"
         data-testid="layout-trigger"
       >
@@ -63,8 +63,9 @@ export function BetaDockContent({
       </DockIconButton>
 
       <ShinyAiButton
+        data-testid="ai-chat-trigger"
         onClick={handleToggleChat}
-        tooltip={isChatOpen ? 'Close Chat' : 'Open Chat'}
+        tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
         shortcut="⌘K"
         className={cn(isChatOpen && styles.aiButtonActive)}
       />
@@ -86,7 +87,7 @@ export function BetaDockContent({
           {searchQuery && (
             <DockIconButton
               onClick={() => setSearchQuery('')}
-              title="Clear Search"
+              title="Clear search"
               shortcut="Esc"
             >
               <CloseIcon size={16} />
@@ -99,7 +100,7 @@ export function BetaDockContent({
 
       <DockIconButton
         onClick={onOpenShortcuts}
-        title="Keyboard Shortcuts (?)"
+        title="Keyboard shortcuts"
         shortcut="?"
         data-testid="shortcuts-trigger"
       >

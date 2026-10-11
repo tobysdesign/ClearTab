@@ -1,6 +1,7 @@
 import type { Preview } from '@storybook/react';
 import React from 'react';
 import '../src/styles/global.css';
+import { TooltipProvider } from '../src/components/ui/tooltip';
 
 const preview: Preview = {
   parameters: {
@@ -87,7 +88,9 @@ const preview: Preview = {
           }}
           data-theme={theme}
         >
-          <Story />
+          <TooltipProvider>
+            <Story />
+          </TooltipProvider>
         </div>
       );
     },

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CloseIcon, ChevronDownIcon, ChevronUpIcon } from '@/components/icons'
+import { DockPanel, Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from '@/components/icons'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { ChatMessages } from './chat-messages'
 import { ChatInput } from './chat-input'
@@ -14,11 +15,15 @@ export function AiChat() {
     closeChat,
     messages,
     processStreamingMessage,
+    retryLastMessage,
+    sendQuickReply,
+    addSuggestedTasks,
+    contextText,
+    clearContext,
     isThinking,
     thinkingContent,
     inputValue,
     setInputValue,
-    setMessages,
   } = useChatContext()
 
   const [isExpanded, setIsExpanded] = useState(false)
@@ -30,18 +35,6 @@ export function AiChat() {
     }
   }, [messages.length, isThinking])
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isChatOpen) {
-        closeChat()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isChatOpen, closeChat])
-
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInputValue(e.target.value)
   }, [setInputValue])
@@ -51,115 +44,102 @@ export function AiChat() {
     await processStreamingMessage()
   }, [inputValue, processStreamingMessage])
 
+  // "Make tasks from this" runs task suggestion; other replies are sent as messages
   const handleQuickReply = useCallback(async (reply: string) => {
-    // Add user message for the quick reply
-    setMessages(prev => [...prev, { role: 'user', content: reply }])
-    // Process as if user typed it
-    setInputValue(reply)
-    await processStreamingMessage(reply)
-  }, [setMessages, setInputValue, processStreamingMessage])
+    await sendQuickReply(reply)
+  }, [sendQuickReply])
+
+  const handleInsertCommand = useCallback((command: 'task' | 'note') => {
+    const rest = inputValue.replace(/#(task|note)\s*/g, '')
+    setInputValue(`#${command} ${rest}`)
+  }, [inputValue, setInputValue])
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded(prev => !prev)
   }, [])
 
-  if (!isChatOpen) return null
-
+  // Same dock-anchored panel as Settings/Layout/Shortcuts (which also handles
+  // Escape, click-outside and one-panel-at-a-time).
   return (
-    <AnimatePresence>
-      <motion.div
-        className={styles.overlay}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={closeChat}
-      >
-        <motion.div
-          className={styles.container}
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <AnimatePresence mode="wait">
-            {isExpanded && messages.length > 0 ? (
-              <motion.div
-                key="expanded"
-                className={styles.expandedContent}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className={styles.header}>
-                  <button
-                    className={styles.collapseButton}
-                    onClick={toggleExpanded}
-                    aria-label="Collapse chat"
-                  >
-                    <ChevronDownIcon size={14} />
-                  </button>
-                  <button
-                    className={styles.closeButton}
-                    onClick={closeChat}
-                    aria-label="Close chat"
-                  >
-                    <CloseIcon size={14} />
-                  </button>
-                </div>
-                <ChatMessages
-                  messages={messages}
-                  isThinking={isThinking}
-                  thinkingContent={thinkingContent}
-                  onQuickReply={handleQuickReply}
-                />
-              </motion.div>
-            ) : messages.length > 0 ? (
-              <motion.div
-                key="collapsed-indicator"
-                className={styles.collapsedIndicator}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+    <DockPanel isOpen={isChatOpen} onClose={closeChat} anchorSelector='[data-testid="ai-chat-trigger"]' className={styles.container}>
+      <div className={styles.modalHeader}>
+        <h2 className={styles.modalTitle}>AI Chat</h2>
+        <div className={styles.headerActions}>
+          {messages.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
                 <button
-                  className={styles.expandButton}
+                  type="button"
+                  className={styles.iconButton}
                   onClick={toggleExpanded}
-                  aria-label="Expand chat"
+                  aria-label={isExpanded ? 'Collapse chat' : 'Expand chat'}
                 >
-                  <ChevronUpIcon size={14} />
-                  <span className={styles.messageCount}>
-                    {messages.length} message{messages.length !== 1 ? 's' : ''}
-                  </span>
+                  {isExpanded ? <ChevronDownIcon size={14} /> : <ChevronUpIcon size={14} />}
                 </button>
-                <button
-                  className={styles.closeButton}
-                  onClick={closeChat}
-                  aria-label="Close chat"
-                >
-                  <CloseIcon size={14} />
-                </button>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+              </TooltipTrigger>
+              <TooltipContent>{isExpanded ? 'Collapse chat' : 'Expand chat'}</TooltipContent>
+            </Tooltip>
+          )}
+          <button type="button" onClick={closeChat} className={styles.closeButton}>
+            <span>Done</span>
+            <kbd className={styles.escKey}>Esc</kbd>
+          </button>
+        </div>
+      </div>
 
-          <ChatInput
-            value={inputValue}
-            onChange={handleInputChange}
-            onSubmit={handleSubmit}
-            disabled={isThinking}
-            placeholder="Message..."
-          />
+      <AnimatePresence initial={false}>
+        {isExpanded && messages.length > 0 && (
+          <motion.div
+            key="expanded"
+            className={styles.expandedContent}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChatMessages
+              messages={messages}
+              isThinking={isThinking}
+              thinkingContent={thinkingContent}
+              onQuickReply={handleQuickReply}
+              onRetry={retryLastMessage}
+              onAddTasks={addSuggestedTasks}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {!isExpanded && messages.length > 0 && (
+        <button type="button" className={styles.collapsedIndicator} onClick={toggleExpanded}>
+          {messages.length} message{messages.length !== 1 ? 's' : ''} hidden
+        </button>
+      )}
 
-          <div className={styles.hints}>
-            <span className={styles.hint}>#task</span>
-            <span className={styles.hint}>#note</span>
-            <span className={styles.shortcut}>Cmd+K</span>
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      {contextText && (
+        <div className={styles.contextChip}>
+          <span className={styles.contextLabel}>About</span>
+          <span className={styles.contextText}>{contextText}</span>
+          <button type="button" className={styles.contextClear} onClick={clearContext} aria-label="Stop asking about this text">
+            <CloseIcon size={12} />
+          </button>
+        </div>
+      )}
+
+      <ChatInput
+        value={inputValue}
+        onChange={handleInputChange}
+        onSubmit={handleSubmit}
+        onInsertCommand={handleInsertCommand}
+        disabled={isThinking}
+        placeholder="Message..."
+      />
+
+      <div className={styles.hints}>
+        <span className={styles.shortcut}>
+          <kbd className={styles.key}>⌘</kbd>
+          <kbd className={styles.key}>K</kbd>
+        </span>
+      </div>
+    </DockPanel>
   )
 }
 

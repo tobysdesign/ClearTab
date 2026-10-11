@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import styles from './dock-icon.module.css'
@@ -55,31 +54,29 @@ export const DockIcon = ({
   });
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <motion.div
-            ref={ref}
-            style={{ width, height: width }}
-            className={cn(
-              "flex cursor-pointer items-center justify-center rounded-full text-white/80 hover:bg-neutral-900/50 hover:text-white",
-              className
-            )}
-            {...props}
-          >
-            {children}
-          </motion.div>
-        </TooltipTrigger>
-        {label && (
-          <TooltipContent 
-            side="top" 
-            className={styles.tooltipContent}
-          >
-            {label}
-          </TooltipContent>
-        )}
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <motion.div
+          ref={ref}
+          style={{ width, height: width }}
+          className={cn(
+            "flex cursor-pointer items-center justify-center rounded-full text-white/80 hover:bg-neutral-900/50 hover:text-white",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </motion.div>
+      </TooltipTrigger>
+      {label && (
+        <TooltipContent 
+          side="top" 
+          className={styles.tooltipContent}
+        >
+          {label}
+        </TooltipContent>
+      )}
+    </Tooltip>
   )
 } 
 

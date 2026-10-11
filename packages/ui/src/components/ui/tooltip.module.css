@@ -1,21 +1,42 @@
-
-
 .content {
-  z-index: 50;
-  overflow: hidden;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #1a1a1a;
+  /* Above DockPanel (99999) so buttons inside dock panels get tooltips too */
+  /* Above menus and popovers (100001) and dock panels (99999) */
+  z-index: 100002;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  background: #fafafa;
   padding: 6px 12px;
-  font-size: 14px;
-  color: #e6e6e6;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #1a1a1a;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transform-origin: var(--radix-tooltip-content-transform-origin);
+  animation: tooltipIn 0.15s ease-out;
 }
 
-.content[data-state="open"] {
-  opacity: 1;
-  transform: scale(1);
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.arrow {
+  fill: #fafafa;
+}
+
+.shortcut {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: #71717a;
 }

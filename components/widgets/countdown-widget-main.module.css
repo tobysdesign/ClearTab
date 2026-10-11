@@ -9,7 +9,10 @@
 
     /* box model */
     padding: 0 24px 24px 24px;
-    height: 100%;
+    /* Fill what's left under the header (flex: 1 from WidgetContent).
+       height: 100% made this a full widget-height tall *plus* the header,
+       pushing the number and label out the bottom. */
+    min-height: 0;
 }
 
 .mainContainer {
@@ -122,7 +125,13 @@
 }
 
 .dotsGrid {
-    /* layout will be handled by JavaScript */
+    /* columns + dot size are set by DotGrid's ResizeObserver */
+    display: grid;
+    justify-items: start;
+    align-items: start;
+    /* Spread the leftover across the full box (min row gap is set in JS) */
+    justify-content: space-between;
+    align-content: space-between;
     flex: 1;
     min-height: 0;
     overflow: hidden;
@@ -163,4 +172,147 @@
     box-shadow: inset 0 0 0 3px #ee4d82;
 }
 
+/* Leftover days after the week dots: smaller, so they read as days not weeks */
+.dayDot {
+    /* visual */
+    transform: scale(0.55);
+}
+
 /* Responsive layout uses viewport-based scaling from widget-components.css */
+
+.modeWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* Lets the layout below respond to the widget's height. Named because
+       .mainContainer is also a (width-only) container: unnamed queries on its
+       children would resolve against it and never see height/aspect ratio. */
+    container: counter / size;
+}
+
+/* Wide, short widgets: count + label on the left, dots fill the right at full
+   height, instead of a squat strip of dots above a mostly-empty row. */
+@container counter (min-aspect-ratio: 3 / 2) {
+    .mainContainer {
+        flex-direction: row-reverse;
+        align-items: stretch;
+        gap: 24px;
+    }
+
+    .bottomSection {
+        align-self: flex-end;
+    }
+
+    .numberSection {
+        width: auto;
+    }
+}
+
+/* Empty state: the shared component's 2rem padding overflowed short widgets */
+.emptyState {
+    padding: 0;
+}
+
+/* Short widgets: tighten header + spacing so the count and label stay inside */
+@container counter (max-height: 200px) {
+    .modeWrapper :global(.widget-header) {
+        min-height: 0;
+        padding-top: 12px;
+        padding-bottom: 4px;
+    }
+
+    .content {
+        padding-bottom: 12px;
+    }
+
+    .mainContainer {
+        gap: 8px;
+    }
+
+    .number {
+        font-size: 36px;
+        margin-bottom: 2px;
+    }
+
+    .emptyState :global(button) {
+        margin-top: 8px;
+    }
+}
+
+.miniContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 24px;
+    gap: 16px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.miniEmptyLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.miniEmptyText {
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.miniSetDateButton {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #c4c4c4;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.miniSetDateButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.miniEventLabel {
+    font-size: 14px;
+    font-weight: 700;
+    color: #c4c4c4;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.miniRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.miniNumber {
+    font-family: "Inter Display", sans-serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: #c4c4c4;
+}
+
+.miniDaysLabel {
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+}

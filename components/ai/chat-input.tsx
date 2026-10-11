@@ -1,70 +1,109 @@
 'use client'
 
-import React, { useCallback, useState, useEffect } from 'react'
+/*
+ * Composer layout adapted from Beautiful UI's Chat Composer and Prompt Bar
+ * (https://www.beautifului.dev), MIT License, Copyright (c) 2026 Shane Levine.
+ * See components/ai/THIRD_PARTY_NOTICES.md.
+ */
+
+import React, { useCallback, useRef } from 'react'
+import { Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from '@cleartab/ui'
+import { ArrowUpIcon } from '@/components/icons'
 import styles from './chat-input.module.css'
+
+type Command = 'task' | 'note'
+
+const COMMANDS: { id: Command; label: string; hint: string }[] = [
+  { id: 'task', label: '#task', hint: 'Add a task' },
+  { id: 'note', label: '#note', hint: 'Add a note' },
+]
 
 interface ChatInputProps {
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   onSubmit: () => void
+  /** replaces the input with "#<command> " plus whatever was typed */
+  onInsertCommand?: (command: Command) => void
   disabled?: boolean
   placeholder?: string
 }
 
-export function ChatInput({ value, onChange, onSubmit, disabled, placeholder = 'Message...' }: ChatInputProps) {
-  const [hasHashtag, setHasHashtag] = useState<'task' | 'note' | null>(null)
-
-  // Detect hashtags in input
-  useEffect(() => {
-    if (value.includes('#task')) {
-      setHasHashtag('task')
-    } else if (value.includes('#note')) {
-      setHasHashtag('note')
-    } else {
-      setHasHashtag(null)
-    }
-  }, [value])
+export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled, placeholder = 'Message...' }: ChatInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const activeCommand: Command | null = value.includes('#task') ? 'task' : value.includes('#note') ? 'note' : null
+  const canSend = !disabled && value.trim().length > 0
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (!disabled && value.trim()) {
-        onSubmit()
-      }
+      if (canSend) onSubmit()
     }
-  }, [disabled, value, onSubmit])
+  }, [canSend, onSubmit])
+
+  const handleCommand = useCallback((command: Command) => {
+    onInsertCommand?.(command)
+    inputRef.current?.focus()
+  }, [onInsertCommand])
 
   return (
-    <div className={styles.container}>
-      {hasHashtag && (
-        <div className={styles.hashtagIndicator}>
-          <span className={styles.hashtagPill}>
-            {hasHashtag === 'task' ? 'Creating task' : 'Creating note'}
-          </span>
+    <div
+      role="presentation"
+      className={styles.composer}
+      onClick={() => inputRef.current?.focus()}
+    >
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={onChange}
+        onKeyDown={handleKeyDown}
+        disabled={disabled}
+        placeholder={placeholder}
+        aria-label="Chat prompt"
+        className={styles.input}
+        autoFocus
+      />
+      <div className={styles.controls}>
+        <div className={styles.commands}>
+          {COMMANDS.map((command) => (
+            <Tooltip key={command.id}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className={styles.commandChip}
+                  data-active={activeCommand === command.id}
+                  aria-pressed={activeCommand === command.id}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleCommand(command.id)
+                  }}
+                >
+                  {command.label}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{command.hint}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
-      )}
-      <div className={styles.inputWrapper}>
-        <input
-          type="text"
-          value={value}
-          onChange={onChange}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          placeholder={placeholder}
-          className={styles.input}
-          autoFocus
-        />
-        <button
-          className={styles.submitButton}
-          onClick={onSubmit}
-          disabled={disabled || !value.trim()}
-          aria-label="Send message"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 2L11 13" />
-            <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-          </svg>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className={styles.sendButton}
+              onClick={(e) => {
+                e.stopPropagation()
+                onSubmit()
+              }}
+              disabled={!canSend}
+              aria-label={activeCommand ? `Create ${activeCommand}` : 'Send message'}
+            >
+              <ArrowUpIcon size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {activeCommand ? `Create ${activeCommand}` : 'Send'} <TooltipShortcut>↵</TooltipShortcut>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   )

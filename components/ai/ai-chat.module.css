@@ -1,23 +1,80 @@
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
+/* Layout only -- background, border, radius and shadow come from DockPanel.
+   Header/close button/kbd styles mirror keyboard-shortcuts-modal so every
+   dock panel reads the same. */
+.container {
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f4f4f5;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d4d4d8;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.escKey {
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+.iconButton {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.container {
-  width: 340px;
-  max-width: calc(100vw - 32px);
-  background: #121212;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.iconButton:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
 .expandedContent {
@@ -25,86 +82,99 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 2px;
-  padding: 4px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.closeButton,
-.collapseButton,
-.expandButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
-
-.closeButton:hover,
-.collapseButton:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
 }
 
 .collapsedIndicator {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.expandButton {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  align-self: flex-start;
+  margin-bottom: 12px;
+  padding: 0;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: #71717a;
+  font-size: 12px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  transition: all 0.15s ease;
+  transition: color 0.15s ease;
 }
 
-.expandButton:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.messageCount {
-  font-size: 12px;
+.collapsedIndicator:hover {
+  color: #d4d4d8;
 }
 
 .hints {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.hint {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.35);
-  font-family: monospace;
+  gap: 4px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .shortcut {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin-left: auto;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.25);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
   font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4d4d8;
+}
+
+/* Shown while follow-up questions are about a note selection */
+.contextChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+}
+
+.contextLabel {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.contextText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.contextClear {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.contextClear:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
 }

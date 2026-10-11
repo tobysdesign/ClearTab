@@ -1,0 +1,111 @@
+.page {
+  --ink: oklch(0.95 0.003 260);
+  --ink-muted: oklch(0.68 0.004 260);
+  --ink-faint: oklch(0.48 0.004 260);
+  --line: oklch(1 0 0 / 0.09);
+
+  min-height: 100vh;
+  padding: 0 clamp(20px, 6vw, 80px) calc(96px + env(safe-area-inset-bottom, 0px));
+  background: oklch(0.165 0.003 260);
+  color: var(--ink-muted);
+  font-family: var(--font-inter-display), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The dashboard locks body scrolling; public pages need it back */
+:global(body):has(.page) {
+  overflow-y: auto;
+}
+
+.header {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(28px + env(safe-area-inset-top, 0px)) 0 0;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: clamp(56px, 10vw, 96px);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.title {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(36px, 5vw, 52px);
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+}
+
+.updated {
+  margin: 12px 0 40px;
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+.lead {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.content h2 {
+  margin: 48px 0 12px;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.content p {
+  margin: 0 0 14px;
+}
+
+.content ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.content li {
+  margin-bottom: 10px;
+}
+
+.content li::marker {
+  color: var(--ink-faint);
+}
+
+.content strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.content a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: oklch(1 0 0 / 0.25);
+  text-underline-offset: 3px;
+}
+
+.content a:hover {
+  text-decoration-color: var(--ink);
+}
+
+.back {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}

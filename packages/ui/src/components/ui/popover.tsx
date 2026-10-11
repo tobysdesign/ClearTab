@@ -12,7 +12,8 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 const PopoverAnchor = PopoverPrimitive.Anchor
 
 const popoverContentStyles: React.CSSProperties = {
-  zIndex: 99999,
+  // Above dock panels (99999), which popovers often open from
+  zIndex: 100001,
   width: 'auto',
   borderRadius: '12px',
   border: '1px solid #252525',

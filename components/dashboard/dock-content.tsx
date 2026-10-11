@@ -58,8 +58,9 @@ export function DockContent({
             </DockIconButton>
 
             <ShinyAiButton
+                data-testid="ai-chat-trigger"
                 onClick={handleToggleChat}
-                tooltip={isChatOpen ? 'Close Chat' : 'Open Chat'}
+                tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
                 shortcut="⌘K"
                 className={cn(
                     isChatOpen && styles.aiButtonActive
@@ -81,7 +82,7 @@ export function DockContent({
                     {searchQuery && (
                         <DockIconButton
                             onClick={() => setSearchQuery("")}
-                            title="Clear Search"
+                            title="Clear search"
                             shortcut="Esc"
                         >
                             <CloseIcon size={16} />

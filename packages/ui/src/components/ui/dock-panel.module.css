@@ -1,18 +1,15 @@
-.clickCatcher {
-  position: fixed;
-  inset: 0;
-  z-index: 99998;
-  background: transparent;
-}
-
 .panelPositioner {
   position: fixed;
   z-index: 99999;
-  transform: translateX(-50%);
+  /* The actual transform (translateX(-50%) for top/bottom, none for the side
+     placements) is set inline by the component per placement. */
+}
+
+.panelMotion {
+  position: relative;
 }
 
 .panel {
-  transform-origin: bottom center;
   background: #141416;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
@@ -26,15 +23,44 @@
   box-sizing: border-box;
 }
 
+/* Sibling of .panel inside .panelMotion. A small square rotated 45deg; the
+   clip-path (in pre-rotation local coords) keeps only the triangular half that
+   hangs outside the panel -- the other half would otherwise sit visibly on top
+   of the panel. Each modifier parks it on the correct edge and rotates it so
+   its rounded point faces the trigger; the component sets `left` (top/bottom)
+   or `top` (left/right) inline to line the point up with the trigger. */
 .tail {
-  position: fixed;
-  z-index: 99999;
-  width: 14px;
-  height: 14px;
-  background: #141416;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  transform: translateX(-50%) rotate(45deg);
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #3a3a3a;
+  border-right: 1px solid #3a3a3a;
+  border-bottom: 1px solid #3a3a3a;
   border-radius: 0 0 3px 0;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
   pointer-events: none;
+}
+
+/* Panel above the trigger -> point faces down off the panel's bottom edge. */
+.tailDown {
+  bottom: -9px;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Panel below the trigger -> point faces up off the panel's top edge. */
+.tailUp {
+  top: -9px;
+  transform: translateX(-50%) rotate(225deg);
+}
+
+/* Panel to the right of the trigger -> point faces left off the left edge. */
+.tailLeft {
+  left: -9px;
+  transform: translateY(-50%) rotate(135deg);
+}
+
+/* Panel to the left of the trigger -> point faces right off the right edge. */
+.tailRight {
+  right: -9px;
+  transform: translateY(-50%) rotate(315deg);
 }

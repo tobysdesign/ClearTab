@@ -1,14 +1,18 @@
 /* Note List Item Component Styles */
 
 /* Collapsed view */
+/* Fills the rail width; swaps initials for the title once there's room */
 .collapsedItem {
+  container-type: inline-size;
   height: 2.5rem;
-  width: 2.5rem;
-  margin: 0 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -35,6 +39,27 @@
   color: #c4c4c4;
 }
 
+.collapsedTitle {
+  display: none;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c4c4c4;
+}
+
+@container (min-width: 64px) {
+  .collapsedInitials {
+    display: none;
+  }
+
+  .collapsedTitle {
+    display: block;
+  }
+}
+
 /* Expanded view */
 .expandedItem {
   display: flex;
@@ -54,7 +79,17 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  align-items: flex-start;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.itemDate {
+  flex-shrink: 0;
+  font-family: "Inter Display", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8d8d8d;
+  font-variant-numeric: tabular-nums;
 }
 
 .itemContent {

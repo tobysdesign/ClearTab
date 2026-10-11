@@ -123,7 +123,7 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     },
     {
       key: "voice",
-      title: "Voice notes",
+      title: "Voice memo",
       description: "Manage recordings captured from the voice widget.",
     },
     {

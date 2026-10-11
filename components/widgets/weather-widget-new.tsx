@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { usePreferences } from "@/hooks/use-preferences";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./weather-widget-new.module.css";
@@ -9,23 +10,21 @@ import { useWidgetHeight } from "@/hooks/use-widget-height";
 import { WidgetContainer, WidgetLoader } from "@cleartab/ui";
 import { fetchWeather, type WeatherData } from "@/lib/actions/weather";
 
+// "Sydney NSW, Australia" -> "Sydney NSW": the card leads with the place
+// name alone (like iOS Weather), so drop the trailing country.
+function placeName(location?: string) {
+  if (!location) return "";
+  const i = location.lastIndexOf(",");
+  return i === -1 ? location : location.slice(0, i).trim();
+}
+
 export function WeatherWidgetNew() {
   const [cards, setCards] = useState<WeatherData[]>([]);
 
   const { ref, isMini } = useWidgetHeight();
 
   // 1. Fetch preferences to get location
-  const { data: prefs } = useQuery({
-    queryKey: ["preferences"],
-    queryFn: async () => {
-      const res = await fetch("/api/preferences");
-      if (res.ok) {
-        const { data } = await res.json();
-        return data;
-      }
-      return null;
-    },
-  });
+  const { data: prefs } = usePreferences();
 
   const location = prefs?.location || "Sydney, NSW";
 
@@ -79,16 +78,7 @@ export function WeatherWidgetNew() {
     return (
       <div ref={ref} className={styles.container}>
         <WidgetContainer>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: "#5a5a5a",
-              fontSize: "14px",
-            }}
-          >
+          <div className={styles.errorState}>
             <p>Weather unavailable</p>
           </div>
         </WidgetContainer>
@@ -105,82 +95,55 @@ export function WeatherWidgetNew() {
       animate="rest"
       style={{ pointerEvents: exitingCard ? "none" : "auto" }}
     >
-      {isMini ? (
-        <WidgetContainer
-          onClick={handleCardClick}
-          className={styles.miniButton}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "100%",
-              height: "100%",
-              padding: "0 1rem",
-              gap: "0.75rem",
-              overflow: "hidden",
-            }}
+      <AnimatePresence mode="wait" initial={false}>
+        {isMini ? (
+          <motion.div
+            key="mini"
+            className={styles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
-            <span
-              style={{
-                fontSize: "14px",
-                fontWeight: 400,
-                color: "#5a5a5a",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                flex: 1,
-              }}
+            <WidgetContainer
+              onClick={handleCardClick}
+              className={styles.miniButton}
             >
-              {currentData.location || "Loading..."}
-            </span>
+              <div className={styles.miniContainer}>
+                <span className={styles.miniLocation}>
+                  {currentData.location || "Loading..."}
+                </span>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                flexShrink: 0,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 300,
-                  color: "#c4c4c4",
-                  fontFamily: '"Inter Display", sans-serif',
-                }}
-              >
-                {!currentData.isForecast &&
-                  currentData.temperature !== undefined
-                  ? `${currentData.temperature}°`
-                  : ""}
-              </span>
+                <div className={styles.miniRight}>
+                  <span className={styles.miniTemp}>
+                    {!currentData.isForecast && currentData.temperature !== undefined
+                      ? `${currentData.temperature}°`
+                      : currentData.forecast?.[0]?.high !== undefined
+                      ? `${currentData.forecast[0].high}°`
+                      : ""}
+                  </span>
 
-              <div
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  fontSize: "3.5px", // em-based icons will scale to this
-                  flexShrink: 0,
-                }}
-              >
-                {getWeatherIcon(
-                  currentData.forecast
-                    ? currentData.forecast[0].condition
-                    : currentData.condition,
-                )}
+                  <div className={styles.miniIconContainer}>
+                    {getWeatherIcon(
+                      currentData.forecast
+                        ? currentData.forecast[0].condition
+                        : currentData.condition,
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </WidgetContainer>
-      ) : (
-        <AnimatePresence onExitComplete={handleExitComplete}>
+            </WidgetContainer>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="normal"
+            className={styles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <AnimatePresence onExitComplete={handleExitComplete}>
           {cards.map((day, index) => {
             // We only want to render the top 3 cards for the stack effect
             if (index > 2) return null;
@@ -259,50 +222,73 @@ export function WeatherWidgetNew() {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleCardClick}
                   >
-                    <div className={styles.cardHeader}>
-                      <div className={styles.date}>{day.label}</div>
-                      <div className={styles.location}>{day.location}</div>
-                    </div>
-
                     {day.isForecast ? (
-                      <div className={styles.forecastGrid}>
-                        {day.forecast?.map((item, i) => (
-                          <div key={i} className={styles.forecastDay}>
-                            <div className={styles.forecastDayLabel}>
-                              {item.day}
-                            </div>
-                            <div className={styles.forecastIcon}>
-                              {getWeatherIcon(item.condition)}
-                            </div>
-                            <div className={styles.forecastTemp}>
-                              <span className={styles.forecastHigh}>
-                                {item.high}°
-                              </span>
-                              <span className={styles.forecastLow}>
-                                {item.low}°
-                              </span>
-                            </div>
+                      <>
+                        <div className={styles.cardHeader}>
+                          <div className={styles.place}>
+                            {placeName(day.location)}
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className={styles.weatherCardGrid}>
-                        <div className={styles.leftCol}>
-                          <div className={styles.bigTemp}>
-                            {day.temperature}°
-                          </div>
-                          <div className={styles.tempRange}>
-                            <span className={styles.highTemp}>{day.high}°</span>
-                            {" / "}
-                            <span className={styles.lowTemp}>{day.low}°</span>
-                          </div>
+                          <div className={styles.date}>{day.label}</div>
                         </div>
-                        <div className={styles.rightCol}>
-                          <div className={styles.weatherIconContainer}>
-                            {getWeatherIcon(day.condition)}
+                        <div className={styles.forecastGrid}>
+                          {day.forecast?.map((item, i) => (
+                            <div key={i} className={styles.forecastDay}>
+                              <div className={styles.forecastDayLabel}>
+                                {item.day}
+                              </div>
+                              <div className={styles.forecastIcon}>
+                                {getWeatherIcon(item.condition)}
+                              </div>
+                              <div className={styles.forecastTemp}>
+                                <span className={styles.forecastHigh}>
+                                  {item.high}°
+                                </span>
+                                <span className={styles.forecastLow}>
+                                  {item.low}°
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      // Header: place + day. Body: big temp with High/Low
+                      // underneath on the left; icon + condition on the right
+                      <div className={styles.dayCard}>
+                        <div className={styles.dayHeader}>
+                          <span className={styles.place}>
+                            {placeName(day.location)}
+                          </span>
+                          <span className={styles.date}>{day.label}</span>
+                        </div>
+                        <div className={styles.dayBody}>
+                          <div className={styles.dayMain}>
+                            <div className={styles.bigTemp}>
+                              {day.temperature}°
+                            </div>
+                            <div className={styles.hiLo}>
+                              <div className={styles.hiLoItem}>
+                                <span className={styles.hiLoValue}>
+                                  {day.high}°
+                                </span>
+                                <span className={styles.hiLoLabel}>High</span>
+                              </div>
+                              <div className={styles.hiLoItem}>
+                                <span className={styles.hiLoValue}>
+                                  {day.low}°
+                                </span>
+                                <span className={styles.hiLoLabel}>Low</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className={styles.conditionText}>
-                            {day.condition}
+                          <div className={styles.daySide}>
+                            <div className={styles.weatherIconContainer}>
+                              {getWeatherIcon(day.condition)}
+                            </div>
+                            {/* Condition sits with the icon it describes */}
+                            <div className={styles.conditionText}>
+                              {day.condition}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -312,8 +298,10 @@ export function WeatherWidgetNew() {
               </motion.div>
             );
           })}
-        </AnimatePresence>
+          </AnimatePresence>
+        </motion.div>
       )}
-    </motion.div>
+    </AnimatePresence>
+  </motion.div>
   );
 }

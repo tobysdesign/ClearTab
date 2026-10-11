@@ -9,7 +9,6 @@ import type { Note } from "@/shared/schema";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NoteListItem } from "./note-list-item";
 import notesStyles from "./notes-widget.module.css";
-import { cn } from "@/lib/utils";
 
 export function NotesListMobile() {
   const { notes, isLoadingNotes } = useNotes();
@@ -36,7 +35,7 @@ export function NotesListMobile() {
       <WidgetHeader title="Notes">
         <AddButton onClick={handleCreateNew} tooltip="Add note" />
       </WidgetHeader>
-      <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
+      <div className={notesStyles.notesListScroll}>
         {isLoadingNotes ? (
           <WidgetLoader />
         ) : notes.length > 0 ? (

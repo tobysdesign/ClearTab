@@ -437,9 +437,7 @@ export function VisualLayoutModal({
         <div className={styles.modalHeader}>
           <div className={styles.headerTitleRow}>
             <h2 className={styles.modalTitle}>Choose Dashboard Layout</h2>
-            <span className={styles.activeCountBadge}>
-              {activeCount}/{totalCount} Active Widgets
-            </span>
+
           </div>
           <button type="button" onClick={onClose} className={styles.closeButton}>
             <span>Done</span>

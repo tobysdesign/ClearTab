@@ -14,7 +14,7 @@ const creatingForms = new Set<string>();
 import { DatePicker } from '@/components/ui/date-picker'
 import { TaskEditor } from '@/components/ui/task-editor'
 import { FormField, FormRow, PriorityToggle } from '@/components/ui/form-field'
-import { FormButtons, CheckboxField } from '@/components/ui/form-buttons'
+import { CheckboxField } from '@/components/ui/form-buttons'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -422,22 +422,22 @@ export function EditTaskForm({
       <div className={styles.formContent}>
         {isLoadingTask ? (
           <div className={styles.formFields}>
-            <FormField label="TITLE">
+            <FormField label="Title">
               <div className={styles.skeletonField}></div>
             </FormField>
             <div className={styles.skeletonDateRow}>
-              <FormField label="DUE BY">
+              <FormField label="Due by">
                 <div className={styles.skeletonDateField}></div>
               </FormField>
               <div className={styles.skeletonPriorityField}></div>
             </div>
-            <FormField label="DESCRIPTION">
+            <FormField label="Description">
               <div className={styles.skeletonEditor}></div>
             </FormField>
           </div>
         ) : (
           <form className={styles.formFields}>
-            <FormField label="TITLE">
+            <FormField label="Title">
               <input
                 type="text"
                 value={localTitle}
@@ -462,7 +462,7 @@ export function EditTaskForm({
             </FormField>
 
             <FormRow>
-              <FormField label="DUE BY">
+              <FormField label="Due by">
                 <DatePicker
                   date={form.watch('dueDate') || undefined}
                   onSelect={(date) => {
@@ -486,7 +486,7 @@ export function EditTaskForm({
               />
             </FormRow>
 
-            <FormField label="DESCRIPTION">
+            <FormField label="Description">
               <TaskEditor
                 key={`task-editor-${task?.id || 'new'}`}
                 initialContent={currentContent}
@@ -518,18 +518,6 @@ export function EditTaskForm({
           </form>
         )}
       </div>
-      {isLoadingTask ? (
-        <div className={styles.buttonSkeleton}>
-          <div className={styles.skeletonButton}></div>
-          <div className={styles.skeletonButton}></div>
-        </div>
-      ) : (
-        <FormButtons
-          mode={task ? 'edit' : 'create'}
-          onPrimary={onClose}
-          onSecondary={onCancel || onClose}
-        />
-      )}
     </div>
   );
 } 

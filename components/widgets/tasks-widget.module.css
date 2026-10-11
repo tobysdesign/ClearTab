@@ -149,20 +149,21 @@
 /* Tasks Widget: Task Due Date */
 .taskDueDate {
     /* typography */
-    font-size: 0.75rem;
-    color: #5a5a5a;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .taskDueDateOverdue {
     /* typography */
-    color: #666666;
+    color: #909090;
 }
 
 /* Tasks Widget: Priority Indicator */
 .taskPriorityIndicator {
-    /* typography */
-    font-size: 1rem;
-    font-weight: 500;
+    /* layout */
+    flex-shrink: 0;
+
+    /* visual */
     color: #ec4899;
 }
 

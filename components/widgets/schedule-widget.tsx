@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -33,6 +33,7 @@ interface CalendarEvent {
 interface ScheduleQueryResult {
   events: CalendarEvent[];
   needsReconnection?: boolean;
+  reconnectReason?: 'revoked' | 'not_connected';
   message?: string;
 }
 
@@ -207,7 +208,7 @@ export function ScheduleWidget() {
         // Check if calendar needs reconnection - handle gracefully without throwing
         if (json.success && json.needsReconnection) {
           console.warn('Google Calendar disconnection detected');
-          return { events: [], needsReconnection: true, message: json.message };
+          return { events: [], needsReconnection: true, reconnectReason: json.reason, message: json.message };
         }
 
         const eventsFromServer = json.data || []
@@ -239,6 +240,7 @@ export function ScheduleWidget() {
   const events = data?.events || [];
   const needsReconnection = data?.needsReconnection;
   const disconnectionMessage = data?.message;
+  const isRevoked = data?.reconnectReason === 'revoked';
 
   const [now, setNow] = useState(new Date())
   const [visibleDayKey, setVisibleDayKey] = useState<string | null>(null)
@@ -362,10 +364,10 @@ export function ScheduleWidget() {
             <WidgetHeader title="Schedule" />
             <WidgetContent scrollable={false}>
               <EmptyState
-                title="Connect Calendar"
+                title={isRevoked ? "Calendar access expired" : "Connect Calendar"}
                 description={disconnectionMessage || "Connect your Google Calendar to see your schedule."}
                 action={{
-                  label: "Connect",
+                  label: isRevoked ? "Reauthorise" : "Connect",
                   onClick: () => signIn('google'),
                 }}
               />
@@ -397,126 +399,137 @@ export function ScheduleWidget() {
   const visibleDate = visibleDayKey ? parseISO(visibleDayKey) : new Date()
 
   return (
-    <div ref={ref} style={{ width: '100%', height: '100%' }}>
-      {isMini ? (
-        <WidgetContainer>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            height: '100%',
-            padding: '0 1rem',
-            gap: '1rem'
-          }}>
-            {/* Date */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
-              <span style={{ fontSize: '10px', fontWeight: 500, textTransform: 'uppercase', color: 'rgba(255, 255, 255, 0.4)' }}>{format(now, 'EEE')}</span>
-              <span style={{ fontSize: '18px', fontWeight: 600, color: '#c4c4c4' }}>{format(now, 'dd')}</span>
-            </div>
+    <div ref={ref} className={styles.modeWrapper}>
+      <AnimatePresence mode="wait" initial={false}>
+        {isMini ? (
+          <motion.div
+            key="mini"
+            className={styles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <WidgetContainer>
+              <div className={styles.miniContainer}>
+                {/* Date */}
+                <div className={styles.miniDateBadge}>
+                  <span className={styles.miniWeekday}>{format(now, 'EEE')}</span>
+                  <span className={styles.miniDayNumber}>{format(now, 'dd')}</span>
+                </div>
 
-            {/* Event Info */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              {nextEvent ? (
-                <>
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#c4c4c4', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{nextEvent.title}</span>
-                  <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.4)' }}>
-                    {nextEvent.allDay ? 'All day' : `${format(nextEvent.start.includes('T') ? parseISO(nextEvent.start) : new Date(parseInt(nextEvent.start)), 'h:mm a')}`}
-                  </span>
-                </>
-              ) : (
-                <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.4)' }}>No events today</span>
-              )}
-            </div>
-          </div>
-        </WidgetContainer>
-      ) : (
-        <WidgetContainer>
-          <div className={styles.container}>
-            {/* Left Sidebar */}
-            <div className={styles.sidebar}>
-              {/* Header matching other widgets' positioning */}
-              <div className={styles.sidebarHeader}>
-                <h2 className="widget-title">Schedule</h2>
+                {/* Event Info */}
+                <div className={styles.miniEventContent}>
+                  {nextEvent ? (
+                    <>
+                      <span className={styles.miniEventTitle}>{nextEvent.title}</span>
+                      <span className={styles.miniEventTime}>
+                        {nextEvent.allDay ? 'All day' : `${format(nextEvent.start.includes('T') ? parseISO(nextEvent.start) : new Date(parseInt(nextEvent.start)), 'h:mm a')}`}
+                      </span>
+                    </>
+                  ) : (
+                    <span className={styles.miniNoEvents}>No events today</span>
+                  )}
+                </div>
               </div>
+            </WidgetContainer>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="normal"
+            className={styles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <WidgetContainer>
+              <div className={styles.container}>
+                {/* Left Sidebar */}
+                <div className={styles.sidebar}>
+                  {/* Header matching other widgets' positioning */}
+                  <div className={styles.sidebarHeader}>
+                    <h2 className="widget-title">Schedule</h2>
+                  </div>
 
-              <div className={styles.sidebarContent}>
-                {/* Empty top spacer */}
-                <div></div>
+                  <div className={styles.sidebarContent}>
+                    {/* Empty top spacer */}
+                    <div></div>
 
-                {/* Center spacer */}
-                <div></div>
+                    {/* Center spacer */}
+                    <div></div>
 
-                {/* Footer with day/date stacked and month */}
-                <div
-                  className={styles.sidebarFooter}
-                  onClick={() => {
-                    // Scroll to today within container
-                    if (todayRef.current) {
-                      const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
-                        todayRef.current.closest('[class*="scrollContainer"]')
-                      if (scrollContainer) {
-                        const elementTop = todayRef.current.offsetTop
-                        scrollContainer.scrollTo({
-                          top: Math.max(0, elementTop - 50),
-                          behavior: 'smooth'
-                        })
-                      }
-                    }
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {/* Day and date stacked */}
-                  <div className={styles.dayDateContainer}>
-                    <div className={styles.dayText}>
-                      {isToday(visibleDate) && <div className={styles.todayDot} />}
-                      {format(visibleDate, 'EEE')}
-                    </div>
-                    <div className="bigNumber">
-                      {format(visibleDate, 'dd')}
+                    {/* Footer with day/date stacked and month */}
+                    <div
+                      className={styles.sidebarFooter}
+                      onClick={() => {
+                        // Scroll to today within container
+                        if (todayRef.current) {
+                          const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
+                            todayRef.current.closest('[class*="scrollContainer"]')
+                          if (scrollContainer) {
+                            const elementTop = todayRef.current.offsetTop
+                            scrollContainer.scrollTo({
+                              top: Math.max(0, elementTop - 50),
+                              behavior: 'smooth'
+                            })
+                          }
+                        }
+                      }}
+                    >
+                      {/* Day and date stacked */}
+                      <div className={styles.dayDateContainer}>
+                        <div className={styles.dayText}>
+                          {isToday(visibleDate) && <div className={styles.todayDot} />}
+                          {format(visibleDate, 'EEE')}
+                        </div>
+                        <div className="bigNumber">
+                          {format(visibleDate, 'dd')}
+                        </div>
+                      </div>
+                      {/* Month */}
+                      <div className={styles.monthText}>
+                        {format(visibleDate, 'MMMM')}
+                      </div>
                     </div>
                   </div>
-                  {/* Month */}
-                  <div className={styles.monthText}>
-                    {format(visibleDate, 'MMMM')}
+                </div>
+
+                {/* Right Content */}
+                <div className={styles.rightContent}>
+                  <div className={styles.scrollContainer}>
+                    {sortedDays.length === 0 ? (
+                      <EmptyState
+                        title="No events scheduled"
+                        description="Your calendar is clear for the next 30 days."
+                        className={styles.emptyStateContainer}
+                      />
+                    ) : (
+                      sortedDays.map(dayKey => {
+                        const dayEvents = groupedEvents[dayKey]
+                        const isCurrentDay = isToday(parseISO(dayKey))
+
+                        return (
+                          <DaySection
+                            key={dayKey}
+                            dayKey={dayKey}
+                            events={dayEvents}
+                            now={now}
+                            isCurrentDay={isCurrentDay}
+                            currentEvent={currentEvent}
+                            todayRef={isCurrentDay ? todayRef : null}
+                            onVisible={setVisibleDayKey}
+                          />
+                        )
+                      })
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Right Content */}
-            <div className={styles.rightContent}>
-              <div className={styles.scrollContainer}>
-                {sortedDays.length === 0 ? (
-                  <EmptyState
-                    title="No events scheduled"
-                    description="Your calendar is clear for the next 30 days."
-                    className={styles.emptyStateContainer}
-                  />
-                ) : (
-                  sortedDays.map(dayKey => {
-                    const dayEvents = groupedEvents[dayKey]
-                    const isCurrentDay = isToday(parseISO(dayKey))
-
-                    return (
-                      <DaySection
-                        key={dayKey}
-                        dayKey={dayKey}
-                        events={dayEvents}
-                        now={now}
-                        isCurrentDay={isCurrentDay}
-                        currentEvent={currentEvent}
-                        todayRef={isCurrentDay ? todayRef : null}
-                        onVisible={setVisibleDayKey}
-                      />
-                    )
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        </WidgetContainer>
-      )}
+            </WidgetContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

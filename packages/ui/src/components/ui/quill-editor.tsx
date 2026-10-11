@@ -140,7 +140,10 @@ export function QuillEditor({
     }
 
     // Handle changes - use ref to avoid reinitializing on callback change
-    quill.on("text-change", () => {
+    // Only report edits the user made. Loading a note calls setContents (source "api"),
+    // which used to count as an edit: opening a note re-saved it and bumped its modified date.
+    quill.on("text-change", (_delta, _oldDelta, source) => {
+      if (source !== "user") return;
       const content = quill.getContents();
       if (onChangeRef.current) {
         onChangeRef.current(content);

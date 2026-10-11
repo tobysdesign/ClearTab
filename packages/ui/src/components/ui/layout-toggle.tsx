@@ -3,7 +3,7 @@
 // Icons replaced with ASCII placeholders
 import { useLayout } from '@/hooks/use-layout'
 import { Button } from '../button/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 import styles from './layout-toggle.module.css'
 
 interface LayoutToggleProps {
@@ -15,27 +15,25 @@ export function LayoutToggle({ variant = 'dock' }: LayoutToggleProps) {
   
   if (variant === 'dock') {
     return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleLayout}
-              className={styles.dockButton}
-            >
-              {layout === 'two-row' ? (
-                <span className={styles.icon}>•</span>
-              ) : (
-                <span className={styles.icon}>•</span>
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            Switch to {layout === 'two-row' ? 'single-row' : 'two-row'} layout
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLayout}
+            className={styles.dockButton}
+          >
+            {layout === 'two-row' ? (
+              <span className={styles.icon}>•</span>
+            ) : (
+              <span className={styles.icon}>•</span>
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          Switch to {layout === 'two-row' ? 'single-row' : 'two-row'} layout
+        </TooltipContent>
+      </Tooltip>
     )
   }
 

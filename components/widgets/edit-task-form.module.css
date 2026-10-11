@@ -17,10 +17,11 @@
 
 .textInput {
     width: 100%;
+    box-sizing: border-box;
     padding: 0.5rem 0.75rem;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.375rem;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
     color: white;
     font-family: "Inter", system-ui, sans-serif;
     font-size: 14px;
@@ -29,15 +30,28 @@
 }
 
 .textInput::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-style: italic;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .textInput:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
     background-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Date picker trigger, matched to the panel inputs */
+.formFields .datePicker {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.formFields .datePicker:hover,
+.formFields .datePicker:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: none;
 }
 
 .dateInput {
@@ -76,7 +90,7 @@
 }
 
 .formContent {
-    padding: 1.5rem;
+    padding: 0;
 }
 
 .formFields {
@@ -100,6 +114,13 @@
 .taskEditor {
     width: 100%;
     min-height: 120px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.taskEditor:focus-within {
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .completedField {
@@ -248,21 +269,6 @@
     border-radius: 6px;
 }
 
-.buttonSkeleton {
-    display: flex;
-    gap: 12px;
-    padding: 1rem 1.5rem;
-}
-
-.skeletonButton {
-    flex: 1;
-    height: 40px;
-    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 8px;
-}
-
 @keyframes shimmer {
     0% {
         background-position: -200% 0;
@@ -274,9 +280,6 @@
 
 /* Mobile responsive layout */
 @media (max-height: 650px) {
-    .formContent {
-        padding: 1rem;
-    }
 
     .dateAndPriorityRow {
         display: flex;

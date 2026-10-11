@@ -327,6 +327,19 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     }
   }, [stopTimer])
 
+  // Throw away the in-progress recording without producing a blob, so nothing
+  // gets transcribed.
+  const discardRecording = useCallback(() => {
+    const recorder = mediaRecorderRef.current
+    if (recorder) {
+      recorder.onstop = null
+      if (recorder.state !== 'inactive') recorder.stop()
+      mediaRecorderRef.current = null
+    }
+    chunksRef.current = []
+    reset()
+  }, [reset])
+
   return {
     state,
     duration,
@@ -340,6 +353,7 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     toggleMute,
     transcribeAudio,
     saveAudioLocally,
-    reset
+    reset,
+    discardRecording
   }
 }

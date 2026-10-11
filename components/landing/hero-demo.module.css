@@ -1,0 +1,549 @@
+/*
+ * Hero demo. All sizes use cqw (1% of the frame width) so the
+ * scripted cursor path (in % of the screen) always lines up.
+ * One 14s loop drives every animation:
+ *   0–14%   cursor moves to the "Send invoice" checkbox, clicks
+ *   16%     task ticks and strikes through
+ *   24–34%  cursor moves into the note, the new line types out
+ *   58–70%  cursor moves to the dock's AI button, clicks
+ *   72–92%  chat pops up: question, thinking, answer
+ *   94–100% everything resets
+ */
+
+.frame {
+  --loop: 14s;
+  --tile: oklch(0.235 0.004 260);
+  --tile-line: oklch(1 0 0 / 0.07);
+  --row: oklch(0.275 0.004 260);
+  --ink: oklch(0.94 0.003 260);
+  --ink-2: oklch(0.72 0.004 260);
+  --ink-3: oklch(0.52 0.004 260);
+  --accent: oklch(0.72 0.13 355);
+
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid oklch(1 0 0 / 0.1);
+  background: oklch(0.17 0.003 260);
+  box-shadow: 0 30px 80px -30px oklch(0 0 0 / 0.7);
+}
+
+/* Browser chrome */
+.chrome {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  height: 3.6cqw;
+  padding: 0 1.4cqw;
+  border-bottom: 1px solid oklch(1 0 0 / 0.06);
+  background: oklch(0.2 0.003 260);
+}
+
+.lights {
+  display: flex;
+  gap: 0.6cqw;
+}
+
+.lights span {
+  width: 0.9cqw;
+  height: 0.9cqw;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.16);
+}
+
+.url {
+  margin: 0 auto;
+  padding: 0.4cqw 3cqw;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.06);
+  color: var(--ink-3);
+  font-size: 1.05cqw;
+}
+
+/* Screen */
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background:
+    radial-gradient(60% 50% at 70% 30%, oklch(0.24 0.004 260), transparent 70%),
+    oklch(0.165 0.003 260);
+}
+
+.grid {
+  position: absolute;
+  inset: 2.4cqw 2.4cqw 6.4cqw;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 1.15fr 1fr;
+  gap: 1.4cqw;
+}
+
+.tile {
+  min-width: 0;
+  padding: 1.3cqw;
+  border-radius: 1.4cqw;
+  border: 1px solid var(--tile-line);
+  background: var(--tile);
+  overflow: hidden;
+}
+
+.tileTitle {
+  margin: 0 0 1cqw;
+  font-size: 1.1cqw;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.tileMeta {
+  margin: 0;
+  font-size: 1cqw;
+  color: var(--ink-3);
+}
+
+.tileMeta strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Notes */
+.notes {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 38% 1fr;
+  padding: 0;
+}
+
+.noteList {
+  padding: 1.3cqw;
+  border-right: 1px solid var(--tile-line);
+}
+
+.noteItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2cqw;
+  margin-bottom: 0.6cqw;
+  padding: 0.8cqw 1cqw;
+  border-radius: 0.8cqw;
+  background: var(--row);
+}
+
+.noteItemActive {
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.14);
+}
+
+.noteName {
+  font-size: 1.1cqw;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.noteMeta {
+  font-size: 0.9cqw;
+  color: var(--ink-3);
+}
+
+.noteEditor {
+  padding: 1.3cqw 1.8cqw;
+}
+
+.noteHeading {
+  margin: 0 0 1.2cqw;
+  font-size: 1.4cqw;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.noteLine {
+  margin: 0 0 0.6cqw;
+  font-size: 1.15cqw;
+  line-height: 1.5;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.typedLine {
+  width: fit-content;
+  clip-path: inset(0 100% 0 0);
+  animation: typeLine var(--loop) infinite;
+}
+
+@keyframes typeLine {
+  0%, 34% { clip-path: inset(0 100% 0 0); }
+  52%, 93% { clip-path: inset(0 0 0 0); opacity: 1; }
+  97% { clip-path: inset(0 0 0 0); opacity: 0; }
+  100% { clip-path: inset(0 100% 0 0); opacity: 0; }
+}
+
+/* Tasks */
+.tasks {
+  grid-column: 3 / 5;
+  grid-row: 1;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 0.9cqw;
+  height: 3.3cqw;
+  margin-bottom: 0.6cqw;
+  padding: 0 1cqw;
+  border-radius: 0.8cqw;
+  background: var(--row);
+}
+
+.checkbox {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.5cqw;
+  height: 1.5cqw;
+  border-radius: 50%;
+  border: 1px solid oklch(1 0 0 / 0.3);
+}
+
+.checkMark {
+  width: 1cqw;
+  height: 1cqw;
+  color: var(--ink);
+  opacity: 0;
+}
+
+.taskText {
+  min-width: 0;
+  font-size: 1.2cqw;
+  color: var(--ink);
+  background: linear-gradient(currentColor, currentColor) 0 55% / 0 1px no-repeat;
+}
+
+.taskDate {
+  margin-left: auto;
+  font-size: 0.95cqw;
+  color: var(--ink-3);
+}
+
+.taskAnimated .checkMark {
+  animation: checkIn var(--loop) infinite;
+}
+
+.taskAnimated .checkbox {
+  animation: checkBox var(--loop) infinite;
+}
+
+.taskAnimated .taskText {
+  animation: strike var(--loop) infinite;
+}
+
+@keyframes checkIn {
+  0%, 15% { opacity: 0; transform: scale(0.4); }
+  18%, 93% { opacity: 1; transform: scale(1); }
+  97%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes checkBox {
+  0%, 15% { border-color: oklch(1 0 0 / 0.3); }
+  17%, 93% { border-color: oklch(1 0 0 / 0.55); }
+  97%, 100% { border-color: oklch(1 0 0 / 0.3); }
+}
+
+@keyframes strike {
+  0%, 16% { background-size: 0 1px; color: var(--ink); }
+  22%, 93% { background-size: 100% 1px; color: var(--ink-3); }
+  97%, 100% { background-size: 0 1px; color: var(--ink); }
+}
+
+/* Weather */
+.weather {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.temp {
+  margin: 0.6cqw 0 0.4cqw;
+  font-size: 4.4cqw;
+  font-weight: 100;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* Countdown */
+.countdown {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.dots {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.55cqw;
+  width: 80%;
+}
+
+.dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.1);
+}
+
+.dotFilled {
+  background: var(--accent);
+}
+
+.countNumber {
+  margin: 1cqw 0 0.2cqw;
+  font-size: 3.4cqw;
+  font-weight: 100;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* Schedule */
+.schedule {
+  grid-column: 3 / 5;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 22% 1fr;
+  gap: 1.2cqw;
+}
+
+.scheduleDay {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.scheduleWeekday {
+  font-size: 1cqw;
+  color: var(--ink-2);
+}
+
+.scheduleWeekday::before {
+  content: "";
+  display: inline-block;
+  width: 0.5cqw;
+  height: 0.5cqw;
+  margin-right: 0.4cqw;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+
+.scheduleDate {
+  font-size: 4cqw;
+  font-weight: 100;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6cqw;
+}
+
+.event {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2cqw;
+  padding: 0.8cqw 1cqw;
+  border-radius: 0.8cqw;
+  background: var(--row);
+}
+
+.eventNow {
+  box-shadow: inset 0.25cqw 0 0 var(--accent);
+}
+
+.eventName {
+  font-size: 1.15cqw;
+  color: var(--ink);
+}
+
+.eventTime {
+  font-size: 0.95cqw;
+  color: var(--ink-3);
+}
+
+/* Dock */
+.dock {
+  position: absolute;
+  left: 50%;
+  bottom: 1.2cqw;
+  display: flex;
+  align-items: center;
+  gap: 0.5cqw;
+  padding: 0.5cqw;
+  border-radius: 1.2cqw;
+  border: 1px solid var(--tile-line);
+  background: oklch(0.2 0.003 260);
+  transform: translateX(-50%);
+}
+
+.dockIcon {
+  display: grid;
+  place-items: center;
+  width: 3cqw;
+  height: 3cqw;
+  border-radius: 0.8cqw;
+  color: var(--ink-2);
+}
+
+.dockIcon svg {
+  width: 1.3cqw;
+  height: auto;
+}
+
+.dockAi {
+  animation: dockPress var(--loop) infinite;
+}
+
+.dockAi svg {
+  width: 2cqw;
+}
+
+@keyframes dockPress {
+  0%, 68% { background: transparent; color: var(--ink-2); }
+  70%, 93% { background: oklch(1 0 0 / 0.1); color: var(--ink); }
+  97%, 100% { background: transparent; color: var(--ink-2); }
+}
+
+/* Chat popover */
+.chat {
+  position: absolute;
+  left: 50%;
+  bottom: 6cqw;
+  width: 28cqw;
+  padding: 1.4cqw;
+  border-radius: 1.4cqw;
+  border: 1px solid oklch(1 0 0 / 0.1);
+  background: oklch(0.21 0.004 260);
+  box-shadow: 0 2cqw 4cqw -1cqw oklch(0 0 0 / 0.6);
+  transform-origin: 50% 100%;
+  animation: chatPop var(--loop) infinite;
+}
+
+@keyframes chatPop {
+  0%, 70% { opacity: 0; transform: translate(-50%, 1cqw) scale(0.96); }
+  73%, 93% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  97%, 100% { opacity: 0; transform: translate(-50%, 0.6cqw) scale(0.98); }
+}
+
+.chatQuestion {
+  width: fit-content;
+  margin: 0 0 1cqw auto;
+  padding: 0.5cqw 1cqw;
+  border-radius: 1cqw;
+  background: oklch(1 0 0 / 0.08);
+  font-size: 1.1cqw;
+  color: var(--ink);
+}
+
+.chatThinking {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.5cqw;
+  margin: 0;
+  font-size: 1.05cqw;
+  color: var(--ink-2);
+  animation: thinking var(--loop) infinite;
+}
+
+.chatThinking svg {
+  width: 1cqw;
+  height: 1cqw;
+}
+
+@keyframes thinking {
+  0%, 74% { opacity: 0; }
+  76%, 80% { opacity: 1; }
+  81%, 100% { opacity: 0; }
+}
+
+.chatAnswer {
+  margin: 0;
+  font-size: 1.15cqw;
+  line-height: 1.5;
+  color: var(--ink);
+  -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  -webkit-mask-size: 220% 100%;
+  mask-size: 220% 100%;
+  animation: stream var(--loop) infinite;
+}
+
+@keyframes stream {
+  0%, 80% { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  89%, 100% { -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+/* Cursor: the track spans the screen, so translate(x%, y%) = position on screen */
+.cursorTrack {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: cursorPath var(--loop) infinite cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.cursor {
+  display: block;
+  width: 1.5cqw;
+  height: auto;
+  filter: drop-shadow(0 0.2cqw 0.3cqw oklch(0 0 0 / 0.5));
+  transform-origin: 0 0;
+  animation: cursorClick var(--loop) infinite;
+}
+
+@keyframes cursorPath {
+  0% { transform: translate(78%, 78%); }
+  13%, 18% { transform: translate(var(--task-x), var(--task-y)); }
+  30%, 54% { transform: translate(var(--note-x), var(--note-y)); }
+  66%, 92% { transform: translate(var(--ai-x), var(--ai-y)); }
+  100% { transform: translate(78%, 78%); }
+}
+
+@keyframes cursorClick {
+  0%, 14% { transform: scale(1); }
+  15% { transform: scale(0.82); }
+  16.5%, 31% { transform: scale(1); }
+  32% { transform: scale(0.82); }
+  33.5%, 68% { transform: scale(1); }
+  69% { transform: scale(0.82); }
+  70.5%, 100% { transform: scale(1); }
+}
+
+.screen {
+  --task-x: 53.6%;
+  --task-y: 23.5%;
+  --note-x: 30%;
+  --note-y: 19%;
+  --ai-x: 50.4%;
+  --ai-y: 92%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursorTrack {
+    display: none;
+  }
+
+  .typedLine,
+  .taskAnimated .checkMark,
+  .taskAnimated .checkbox,
+  .taskAnimated .taskText,
+  .dockAi,
+  .chat,
+  .chatThinking,
+  .chatAnswer {
+    animation: none;
+  }
+
+  .typedLine {
+    clip-path: none;
+  }
+
+  .chat {
+    display: none;
+  }
+}

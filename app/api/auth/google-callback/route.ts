@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         // Redirect to dashboard with success indicator
         const cleanUrl = nextUrl.split('?')[0];
         const finalUrl = cleanUrl === '/settings' || cleanUrl === '/'
-          ? '/?calendar=connected'
+          ? '/tab?calendar=connected'
           : `${cleanUrl}?success=primary_calendar_connected`;
         return NextResponse.redirect(new URL(finalUrl, request.url));
       }

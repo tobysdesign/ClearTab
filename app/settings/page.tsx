@@ -21,7 +21,7 @@ export default function OpenSettingsAndRedirect() {
       window.dispatchEvent(
         new CustomEvent("openSettings", { detail: { tab: "Account" } }),
       );
-      router.replace("/");
+      router.replace("/tab");
     }
   }, [router, errorParam]);
 
@@ -156,7 +156,7 @@ export default function OpenSettingsAndRedirect() {
           </div>
         </div>
         <button
-          onClick={() => router.replace("/")}
+          onClick={() => router.replace("/tab")}
           className={styles.returnButton}
         >
           Return to Dashboard

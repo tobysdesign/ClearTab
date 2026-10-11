@@ -4,12 +4,10 @@ import React from "react";
 import {
   Drawer,
   DrawerContent,
-  DrawerClose,
   DrawerTitle,
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { EditTaskForm } from "@/components/widgets/edit-task-form";
-import { CloseIcon } from "@/components/icons";
 import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
@@ -29,6 +27,10 @@ export function TasksDrawer() {
   } = useTaskModal();
 
   const isOpen = !!(activeTaskId || newTaskText !== null || isCreatingNew);
+  const isEditing = !!(
+    (activeTask?.id && !activeTask.id.startsWith("draft-")) ||
+    (activeTaskId && !activeTaskId.startsWith("draft-"))
+  );
 
   return (
     <div className={styles.drawerContainer}>
@@ -40,43 +42,42 @@ export function TasksDrawer() {
           }
         }}
       >
-        <DrawerContent direction="right" overlayVariant="settings">
+        <DrawerContent direction="right" overlayVariant="settings" className={styles.panel}>
           <div className={styles.header}>
             <DrawerTitle className={styles.title}>
-              {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-                (activeTaskId && !activeTaskId.startsWith("draft-"))
-                ? "EDIT TASK"
-                : "CREATE TASK"}
+              {isEditing ? "Edit task" : "New task"}
             </DrawerTitle>
             <DrawerDescription className="sr-only">
-              {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-                (activeTaskId && !activeTaskId.startsWith("draft-"))
+              {isEditing
                 ? "Edit the selected task details"
                 : "Create a new task with title, description, and due date"}
             </DrawerDescription>
 
-            {/* Show actions menu for edit mode, X button for create mode */}
-            {(activeTask?.id && !activeTask.id.startsWith("draft-")) ||
-              (activeTaskId && !activeTaskId.startsWith("draft-")) ? (
-              <SimpleDropdown
-                trigger={
-                  <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
-                    ⋮
-                  </Button>
-                }
-                align="right"
-              >
-                <SimpleDropdownItem onClick={handleDeleteTask}>
-                  Delete
-                </SimpleDropdownItem>
-              </SimpleDropdown>
-            ) : (
-              <DrawerClose asChild>
-                <Button variant="ghost-icon" size="icon" aria-label="Close dialog" tooltipLabel="Close" shortcut="Esc">
-                  <CloseIcon size={16} />
+            <div className={styles.headerActions}>
+              {/* Actions menu for edit mode, Cancel (discards draft) for create mode */}
+              {isEditing ? (
+                <SimpleDropdown
+                  trigger={
+                    <Button variant="ghost" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
+                      ⋮
+                    </Button>
+                  }
+                  align="right"
+                >
+                  <SimpleDropdownItem onClick={handleDeleteTask}>
+                    Delete
+                  </SimpleDropdownItem>
+                </SimpleDropdown>
+              ) : (
+                <Button variant="ghost" onClick={handleCancelTask}>
+                  Cancel
                 </Button>
-              </DrawerClose>
-            )}
+              )}
+              <Button onClick={handleModalClose}>
+                <span>Done</span>
+                <kbd className={styles.escKey}>Esc</kbd>
+              </Button>
+            </div>
           </div>
           <EditTaskForm
             key="stable-task-form"

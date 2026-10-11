@@ -15,22 +15,25 @@ import {
   startOfDay,
   addMonths,
 } from "@/lib/date-utils";
-import { useQuery } from "@tanstack/react-query";
 // Payday settings deprecated - using local storage instead
 // import { WidgetActions } from "@/components/dashboard/widget-actions";
 import {
   WidgetContainer,
   WidgetContent,
   WidgetHeader,
+  AddButton,
   WidgetLoader,
   EmptyState,
 } from "@cleartab/ui";
-import { useEffect, useState, useLayoutEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { usePreferences, type Preferences } from "@/hooks/use-preferences";
+import { CountdownBreakdown } from "./countdown-breakdown";
 // import styles from "./widget.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
-import { ClientOnly } from "@/components/ui/safe-motion";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
-import { openSettings } from '@/lib/open-settings';
+import { CountdownSetupPanel } from "./countdown-setup-panel";
+
+const COUNTDOWN_ADD_DATE_TESTID = "countdown-add-date";
 // Icons replaced with ASCII placeholders
 
 interface CountdownWidgetProps {
@@ -47,105 +50,17 @@ const RECURRENCE_DAYS = {
 type PaydayFrequency = keyof typeof RECURRENCE_DAYS;
 type RecurrenceDays = (typeof RECURRENCE_DAYS)[PaydayFrequency];
 
-// DotGrid component defined outside to avoid recreation on every render
-function DotGrid({
-  count,
-  gap = 7,
-  elapsedDots,
-  totalDays,
-  isStartEndMode,
-  eventDurationDays
-}: {
-  count: number;
-  gap?: number;
-  elapsedDots: number;
-  totalDays: number;
-  isStartEndMode: boolean;
-  eventDurationDays: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current!;
-    const makeDot = (index: number) => {
-      const d = document.createElement("div");
-      d.className = getDotClass(index);
-      return d;
-    };
-
-    const getDotClass = (index: number) => {
-      if (index < elapsedDots) {
-        return countdownStyles.pastDot;
-      } else if (index === totalDays - 1) {
-        return countdownStyles.activeDot;
-      } else if (isStartEndMode && index >= totalDays - eventDurationDays) {
-        return countdownStyles.activeDot;
-      } else {
-        return countdownStyles.dot;
-      }
-    };
-
-    const ensureDotCount = (n: number) => {
-      const cur = el.children.length;
-      if (cur < n) {
-        for (let i = cur; i < n; i++) el.appendChild(makeDot(i));
-      } else {
-        while (el.children.length > n) el.lastChild?.remove();
-      }
-      // Update existing dot classes
-      for (let i = 0; i < el.children.length; i++) {
-        (el.children[i] as HTMLElement).className = getDotClass(i);
-      }
-    };
-
-    const bestGrid = (W: number, H: number, N: number, g: number) => {
-      let best = { rows: 1, cols: N, size: 0 };
-      for (let rows = 1; rows <= N; rows++) {
-        const cols = Math.ceil(N / rows);
-        const dotW = (W - g * (cols - 1)) / cols;
-        const dotH = (H - g * (rows - 1)) / rows;
-        const dot = Math.floor(Math.min(dotW, dotH));
-        if (dot > best.size) best = { rows, cols, size: dot };
-      }
-      return best;
-    };
-
-    const layout = () => {
-      const W = el.clientWidth;
-      const H = el.clientHeight;
-      if (!W || !H) return;
-      ensureDotCount(count);
-      const { cols, size } = bestGrid(W, H, count, gap);
-      el.style.gap = `${gap}px`;
-      el.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
-      el.style.setProperty("--dot-size", `${size}px`);
-    };
-
-    const ro = new ResizeObserver(layout);
-    ro.observe(el);
-    layout();
-    return () => ro.disconnect();
-  }, [count, gap, elapsedDots, totalDays, isStartEndMode, eventDurationDays]);
-
-  return (
-    <div
-      ref={ref}
-      className={countdownStyles.dotsGrid}
-      style={{
-        display: "grid",
-        justifyItems: "start",
-        alignItems: "start",
-        width: "100%",
-        height: "100%",
-      }}
-    />
-  );
-}
+const DEFAULT_COUNTDOWN_PREFERENCES: Preferences = {
+  countdownTitle: "Countdown",
+  countdownMode: "date-range",
+  paydayFrequency: "none",
+};
 
 export function CountdownWidget({
   variant = "vertical",
 }: CountdownWidgetProps) {
   const { ref, isMini } = useWidgetHeight();
+  const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [settings, setSettings] = useState<{
     nextPayday: Date;
     daysLeft: number;
@@ -156,34 +71,11 @@ export function CountdownWidget({
     recurrenceInDays: RECURRENCE_DAYS["fortnightly"],
   });
 
-  // Load settings from preferences API
-  const { data: paydayData, isLoading } = useQuery({
-    queryKey: ["preferences"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/preferences");
-        if (response.ok) {
-          const { data } = await response.json();
-          console.log("🎯 Widget received preferences:", data);
-          return (
-            data || {
-              countdownTitle: "Countdown",
-              countdownMode: "date-range",
-              paydayFrequency: "none",
-            }
-          );
-        }
-      } catch (error) {
-        console.error("Error loading preferences:", error);
-      }
-      // Fallback to defaults
-      return {
-        countdownTitle: "Countdown",
-        countdownMode: "date-range",
-        paydayFrequency: "none",
-      };
-    },
-  });
+  // Preferences are shared (one request for the whole page) and cached locally,
+  // so the countdown draws immediately on a new tab
+  const { data: preferences, isPending } = usePreferences();
+  const paydayData = preferences ?? (isPending ? undefined : DEFAULT_COUNTDOWN_PREFERENCES);
+  const isLoading = isPending && !preferences;
 
   // Calculate countdown based on mode
   useEffect(() => {
@@ -193,15 +85,6 @@ export function CountdownWidget({
     const endDate = (paydayData as any).endDate;
     const startDate = (paydayData as any).startDate;
     const paydayDate = (paydayData as any).paydayDate;
-
-    console.log("🧮 Calculating countdown with:", {
-      countdownMode,
-      paydayFrequency,
-      endDate,
-      startDate,
-      paydayDate,
-      manualCount,
-    });
 
     if (countdownMode === "manual-count") {
       // Manual count mode - just use the manual count
@@ -267,7 +150,7 @@ export function CountdownWidget({
   // Get the countdown title from settings
   const countdownTitle = paydayData?.countdownTitle || "Countdown";
 
-  const { daysLeft, recurrenceInDays } = settings;
+  const { daysLeft } = settings;
 
   // Check if no countdown is configured
   const hasCountdownConfigured =
@@ -276,9 +159,6 @@ export function CountdownWidget({
       paydayData.paydayDate ||
       (paydayData.startDate && paydayData.endDate));
 
-  // Calculate total days for dot display
-  const totalDays = Math.max(daysLeft, recurrenceInDays);
-  const elapsedDots = totalDays - daysLeft;
 
 
 
@@ -303,168 +183,136 @@ export function CountdownWidget({
     );
   }
 
-  // For start/end mode, calculate event duration
-  const isStartEndMode =
-    (paydayData as any)?.startDate && (paydayData as any)?.endDate;
-  const eventDurationDays = isStartEndMode
-    ? differenceInDays(
-      new Date((paydayData as any).endDate),
-      new Date((paydayData as any).startDate),
-    )
-    : 0;
-
   // Show empty state if no countdown is configured
   if (!hasCountdownConfigured) {
     return (
-      <div ref={ref} style={{ height: '100%', width: '100%' }}>
-        {isMini ? (
-          <WidgetContainer>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              width: '100%',
-              height: '100%',
-              padding: '0 1.25rem',
-              gap: '1rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
-                <span style={{
-                  fontSize: '14px',
-                  fontWeight: 400,
-                  color: '#555',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
-                  Counting the days?
-                </span>
-              </div>
+      <div ref={ref} className={countdownStyles.modeWrapper}>
+        <AnimatePresence mode="wait" initial={false}>
+          {isMini ? (
+            <motion.div
+              key="mini-empty"
+              className={countdownStyles.modeWrapper}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <WidgetContainer>
+                <div className={countdownStyles.miniContainer}>
+                  <div className={countdownStyles.miniEmptyLeft}>
+                  <button
+                    type="button"
+                    data-testid={COUNTDOWN_ADD_DATE_TESTID}
+                    onClick={() => setIsSetupOpen(true)}
+                    className={countdownStyles.miniSetDateButton}
+                  >
+                    Set date
+                  </button>
+                    <span className={countdownStyles.miniEmptyText}>
+                      Counting the days?
+                    </span>
+                  </div>
 
-              <button
-                onClick={() => openSettings("countdown")}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '6px',
-                  padding: '4px 12px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: '#c4c4c4',
-                  cursor: 'pointer',
-                  flexShrink: 0
-                }}
-              >
-                Set date
-              </button>
-            </div>
-          </WidgetContainer>
-        ) : (
-          <WidgetContainer>
-            <WidgetHeader title="Countdown" />
-            <WidgetContent scrollable={false} className={countdownStyles.content}>
-              <EmptyState
-                title="No Countdown"
-                description="Counting the days?"
-                action={{
-                  label: "Set date",
-                  onClick: () => openSettings("countdown"),
-                }}
-              />
-            </WidgetContent>
-          </WidgetContainer>
-        )}
+                  
+                </div>
+              </WidgetContainer>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="normal-empty"
+              className={countdownStyles.modeWrapper}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <WidgetContainer>
+                <WidgetHeader title="Counter" />
+                <WidgetContent scrollable={false} className={countdownStyles.content}>
+                  <EmptyState
+                    className={countdownStyles.emptyState}
+                    title="No Countdown"
+                    description="Counting the days?"
+                    action={{
+                      label: "Set date",
+                      onClick: () => setIsSetupOpen(true),
+                      testId: COUNTDOWN_ADD_DATE_TESTID,
+                    }}
+                  />
+                </WidgetContent>
+              </WidgetContainer>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <CountdownSetupPanel
+          isOpen={isSetupOpen}
+          onClose={() => setIsSetupOpen(false)}
+          anchorSelector={`[data-testid="${COUNTDOWN_ADD_DATE_TESTID}"]`}
+        />
       </div>
     );
   }
 
   return (
-    <div ref={ref} style={{ height: '100%', width: '100%' }}>
-      {isMini ? (
-        <WidgetContainer>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            width: '100%',
-            height: '100%',
-            padding: '0 1.25rem'
-          }}>
-            <span className={countdownStyles.eventLabel} style={{
-              fontSize: '14px',
-              fontWeight: 700,
-              color: '#c4c4c4',
-              margin: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}>
-              {countdownTitle}
-            </span>
+    <div ref={ref} className={countdownStyles.modeWrapper}>
+      <AnimatePresence mode="wait" initial={false}>
+        {isMini ? (
+          <motion.div
+            key="mini"
+            className={countdownStyles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <WidgetContainer>
+              <div className={countdownStyles.miniContainer}>
+                <span className={countdownStyles.miniEventLabel}>
+                  {countdownTitle}
+                </span>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                fontFamily: '"Inter Display", sans-serif',
-                fontSize: '20px',
-                fontWeight: 300,
-                color: '#c4c4c4'
-              }}>
-                {formattedDaysLeft}
-              </span>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: 400,
-                color: '#555'
-              }}>
-                days
-              </span>
-            </div>
-          </div>
-        </WidgetContainer>
-      ) : (
-        <WidgetContainer>
-          <WidgetHeader title="Countdown" />
-          <WidgetContent scrollable={false} className={countdownStyles.content}>
-            <div className={countdownStyles.mainContainer}>
-              {/* Row2: Dots Grid */}
-              <DotGrid
-                count={totalDays}
-                gap={7}
-                elapsedDots={elapsedDots}
-                totalDays={totalDays}
-                isStartEndMode={isStartEndMode}
-                eventDurationDays={eventDurationDays}
-              />
-
-              {/* Row3: Count and labels */}
-              <div className={countdownStyles.bottomSection}>
-                <div className={countdownStyles.numberSection}>
-                  <ClientOnly>
-                    <AnimatePresence mode="popLayout">
-                      <motion.div
-                        key={displayNumber}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        className={countdownStyles.number}
-                      >
-                        {formattedDaysLeft}
-                      </motion.div>
-                    </AnimatePresence>
-                  </ClientOnly>
-                  <div className={countdownStyles.labelRow}>
-                    <span className={countdownStyles.daysLabel}>Days until </span>
-                    <span className={countdownStyles.eventLabel}>
-                      {countdownTitle}
-                    </span>
-                  </div>
+                <div className={countdownStyles.miniRight}>
+                  <span className={countdownStyles.miniNumber}>
+                    {formattedDaysLeft}
+                  </span>
+                  <span className={countdownStyles.miniDaysLabel}>
+                    days
+                  </span>
                 </div>
               </div>
-            </div>
-          </WidgetContent>
-        </WidgetContainer>
-      )}
+            </WidgetContainer>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="normal"
+            className={countdownStyles.modeWrapper}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <WidgetContainer>
+              <WidgetHeader title="Counter">
+                <AddButton
+                  data-testid={COUNTDOWN_ADD_DATE_TESTID}
+                  onClick={() => setIsSetupOpen(true)}
+                  tooltip="Change countdown"
+                />
+              </WidgetHeader>
+              <WidgetContent scrollable={false} className={countdownStyles.content}>
+                <div className={countdownStyles.mainContainer}>
+                  <CountdownBreakdown daysLeft={daysLeft} title={countdownTitle} />
+                </div>
+              </WidgetContent>
+            </WidgetContainer>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <CountdownSetupPanel
+        isOpen={isSetupOpen}
+        onClose={() => setIsSetupOpen(false)}
+        anchorSelector={`[data-testid="${COUNTDOWN_ADD_DATE_TESTID}"]`}
+      />
     </div>
   );
 }

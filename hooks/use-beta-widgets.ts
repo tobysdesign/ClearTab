@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { usePreferences } from '@/hooks/use-preferences'
 import type { PanelNode, DropZone } from '@/lib/panel-tree'
 import { presetToTree, moveWidget } from '@/lib/panel-tree'
 
@@ -72,6 +73,13 @@ export const LAYOUT_PRESET_METADATA: Record<BetaPresetLayout, LayoutPresetMeta> 
   },
 }
 
+// Widget visibility maps compared by value, ignoring key order
+function sameWidgets(a: Record<string, boolean>, b: Record<string, boolean>) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)])
+  for (const key of keys) if (Boolean(a[key]) !== Boolean(b[key])) return false
+  return true
+}
+
 const PRESET_LAYOUT_KEY = 'cleartab-preset-layout-v4'
 const WIDGET_STATE_KEY = 'cleartab-beta-widgets-v4'
 const CUSTOM_LAYOUT_KEY = 'cleartab-custom-layout-v1'
@@ -121,33 +129,37 @@ export function useBetaWidgets() {
     return { tree: null }
   })
 
+  // Apply the saved layout once, from the first fresh (not cached placeholder) response.
+  // Later refetches follow our own saves, so re-applying them could only clobber edits.
+  const { data: preferences, isPlaceholderData } = usePreferences()
+  const appliedServerLayoutRef = useRef(false)
+  // What the server last had, so loading a tab doesn't write the same layout back
+  const lastSyncedLayoutRef = useRef<string | null>(null)
   useEffect(() => {
-    let cancelled = false
-    fetch('/api/preferences')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (cancelled || !json?.data) return
-        const data = json.data
-        if (
-          data.layout === 'notetaker' || data.layout === 'even' ||
-          data.layout === 'taskmaster' || data.layout === 'minimal' || data.layout === 'custom'
-        ) {
-          setPresetLayoutState(data.layout)
-        }
-        if (data.widgets && typeof data.widgets === 'object') {
-          setWidgets((prev) => ({ ...prev, ...data.widgets }))
-        }
-        if (data.customLayout && typeof data.customLayout === 'object') {
-          setCustomLayout(data.customLayout)
-        }
-      })
-      .catch((e) => console.warn('Failed to load beta layout preferences from DB', e))
-    return () => {
-      cancelled = true
-    }
-    // Intentionally runs once on mount only.
+    if (appliedServerLayoutRef.current || !preferences || isPlaceholderData) return
+    appliedServerLayoutRef.current = true
+    const data = preferences
+    const isPreset =
+      data.layout === 'notetaker' || data.layout === 'even' ||
+      data.layout === 'taskmaster' || data.layout === 'minimal' || data.layout === 'custom'
+    const nextLayout: BetaPresetLayout = isPreset ? data.layout : presetLayout
+    const nextWidgets = data.widgets && typeof data.widgets === 'object' ? { ...widgets, ...data.widgets } : widgets
+    const nextCustom = data.customLayout && typeof data.customLayout === 'object' ? data.customLayout : customLayout
+
+    // Only replace state that actually differs. New objects with the same content
+    // rebuilt the panel tree and re-laid out the whole dashboard (layout shift).
+    if (nextLayout !== presetLayout) setPresetLayoutState(nextLayout)
+    if (!sameWidgets(nextWidgets, widgets)) setWidgets(nextWidgets)
+    if (JSON.stringify(nextCustom) !== JSON.stringify(customLayout)) setCustomLayout(nextCustom)
+    // Same key order as the state that's compared in the save effect
+    lastSyncedLayoutRef.current = JSON.stringify({
+      layout: nextLayout,
+      widgets: sameWidgets(nextWidgets, widgets) ? widgets : nextWidgets,
+      customLayout: JSON.stringify(nextCustom) !== JSON.stringify(customLayout) ? nextCustom : customLayout,
+    })
+    // Runs once per page from the first server response; the closure values are the initial state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [preferences, isPlaceholderData])
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') return
@@ -161,7 +173,13 @@ export function useBetaWidgets() {
   }, [presetLayout, widgets, customLayout])
 
   useEffect(() => {
+    // Only sync real changes: skip until the server layout has loaded, and skip
+    // when nothing differs from what the server already has
+    if (!appliedServerLayoutRef.current) return
+    const snapshot = JSON.stringify({ layout: presetLayout, widgets, customLayout })
+    if (snapshot === lastSyncedLayoutRef.current) return
     const timeoutId = setTimeout(() => {
+      lastSyncedLayoutRef.current = snapshot
       fetch('/api/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

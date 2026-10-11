@@ -12,9 +12,9 @@ interface SettingsTriggerProps {
 
 export function SettingsTrigger({ className }: SettingsTriggerProps) {
   const handleClick = () => {
-    // Dispatch custom event to open settings
+    // Dispatch custom event to open settings (or close them if already open)
     const event = new CustomEvent('openSettings', {
-      detail: { tab: 'schedule' }
+      detail: { tab: 'schedule', toggle: true }
     })
     window.dispatchEvent(event)
   }
@@ -24,7 +24,7 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
       onClick={handleClick}
       className={cn(styles.settingsTrigger, className)}
       data-testid="settings-trigger"
-      title="Open Settings"
+      title="Settings"
       shortcut="⌘," 
     >
       <SettingsIcon size={16} className={styles.settingsIcon} />

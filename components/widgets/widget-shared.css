@@ -3,7 +3,7 @@
 :root {
   --widget-padding: 16px;
   --widget-list-spacing: 8px;
-  --widget-border-radius: 22px;
+  --widget-border-radius: 16px;
 }
 
 /* Add this to the top of the file */

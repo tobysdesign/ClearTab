@@ -4,6 +4,7 @@ import React, { useMemo, useCallback } from "react";
 import { ClientOnly } from "@cleartab/ui";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { format } from "@/lib/date-utils";
 import styles from './note-list-item.module.css';
 
 
@@ -72,6 +73,11 @@ export const NoteListItem = React.memo(function NoteListItem({
 
     return getContentPreview(note.content);
   }, [note.content]);
+
+  const createdLabel = useMemo(
+    () => format(note.createdAt, "d/M"),
+    [note.createdAt],
+  );
 
   // Memoized function to get initials
   const initials = useMemo(() => {
@@ -179,7 +185,10 @@ export const NoteListItem = React.memo(function NoteListItem({
           {isDeleting ? (
             <span className={styles.deletingSpinner}>×</span>
           ) : (
-            <span className={styles.collapsedInitials}>{initials}</span>
+            <>
+              <span className={styles.collapsedInitials}>{initials}</span>
+              <span className={styles.collapsedTitle}>{displayText}</span>
+            </>
           )}
         </motion.div>
       </ClientOnly>
@@ -234,6 +243,9 @@ export const NoteListItem = React.memo(function NoteListItem({
               </div>
             )}
           </div>
+          {createdLabel && (
+            <span className={styles.itemDate}>{createdLabel}</span>
+          )}
         </div>
         {/* Only show preview if we're showing a title (not content as title) */}
         {note.title && note.title.trim() !== "" && (

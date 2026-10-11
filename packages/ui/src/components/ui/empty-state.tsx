@@ -11,6 +11,7 @@ import styles from './empty-state.module.css';
   action?: {
     label: string;
     onClick: () => void;
+    testId?: string;
   };
   className?: string;
 }
@@ -30,9 +31,9 @@ export function EmptyState({ renderIcon, icon, title, description, action, class
 
       {action && (
         <Button
-          variant="outline"
           onClick={action.onClick}
           className={styles.actionButton}
+          data-testid={action.testId}
         >
           {action.label}
         </Button>

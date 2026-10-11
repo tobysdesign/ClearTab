@@ -97,6 +97,11 @@
 
   /* Widget Common Variables */
   --widget-header-height: 60px;
+  /* Widget text: secondary/greyed text and primary light text (both 14px / 500) */
+  --widget-text-muted: #555;
+  --widget-text-light: #c4c4c4;
+  --widget-text-size: 14px;
+  --widget-text-weight: 500;
   --widget-list-spacing: 0.5rem;
   --widget-padding: 1rem;
   --widget-sidebar-width: 250px;

@@ -9,6 +9,54 @@
   transition: padding 0.3s ease;
 }
 
+/* Hidden until the first layout settles (see useSettledLayout), then fades in */
+.dashboardContainer[data-settled="false"] {
+  visibility: hidden;
+}
+
+.dashboardContainer[data-settled="true"] {
+  animation: gridFadeIn 220ms ease-out;
+}
+
+@keyframes gridFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboardContainer[data-settled="true"] {
+    animation: none;
+  }
+}
+
+/* ── Stacked (narrow screens): one column, the page scrolls ── */
+.dashboardContainer[data-stacked="true"] {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* room to scroll the last widget clear of the dock */
+  padding-bottom: 24px;
+}
+
+.stackItem {
+  position: relative;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+/* Heights per widget: enough to be useful without filling the whole screen */
+.stack_notes { height: 440px; }
+.stack_tasks { height: 320px; }
+.stack_schedule { height: 380px; }
+.stack_weather { height: 220px; }
+.stack_countdown { height: 240px; }
+.stack_recorder { height: 240px; }
+
 .panelGroupFull {
   width: 100%;
   height: 100%;
@@ -22,7 +70,8 @@
   height: 100%;
   width: 100%;
   position: relative;
-  overflow: hidden;
+  /* visible so widget drop shadows aren't cut off at the panel edge */
+  overflow: visible;
 }
 
 /* Horizontal resize handle (resizing columns) */

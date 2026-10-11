@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePreferences } from "@/hooks/use-preferences";
 import { format } from "@/lib/date-utils";
 import { Button, Input, Select, SelectItem } from "@cleartab/ui";
 import {
@@ -65,38 +66,20 @@ export const CountdownWidgetSettings = React.forwardRef<
     setRecurrenceInput(next?.recurrence ?? "none");
   }, []);
 
+  // Shared preferences query (one request for the whole page); sync the form whenever
+  // fresh preferences arrive, e.g. after a save elsewhere invalidates them
+  const { data: preferences, isPlaceholderData, isFetched } = usePreferences();
   React.useEffect(() => {
-    let active = true;
+    if (!preferences || isPlaceholderData) return;
+    const parsed = parseCountdown(preferences as CountdownPreferences);
+    setSummary(parsed);
+    syncFormWithSummary(parsed);
+    setLoading(false);
+  }, [preferences, isPlaceholderData, syncFormWithSummary]);
 
-    const load = async () => {
-      try {
-        const response = await fetch("/api/preferences", { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error("Failed to load countdown settings");
-        }
-
-        const payload = await response.json();
-        const data = (payload?.data ?? {}) as CountdownPreferences;
-
-        if (!active) return;
-
-        const parsed = parseCountdown(data);
-        setSummary(parsed);
-        syncFormWithSummary(parsed);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
-
-    load();
-    return () => {
-      active = false;
-    };
-  }, [syncFormWithSummary]);
+  React.useEffect(() => {
+    if (isFetched) setLoading(false);
+  }, [isFetched]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

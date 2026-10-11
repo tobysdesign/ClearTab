@@ -1,62 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/auth/auth-provider'
-import { NotesWidget } from '@/components/widgets/notes-widget'
-import { TasksWidget } from '@/components/widgets/tasks-widget'
-import { SkipOnboardingHandler } from '@/components/skip-onboarding-handler'
-import { BetaDashboardClient } from '@/components/dashboard/beta/beta-dashboard-client'
-import { BrandedLoader } from '@cleartab/ui'
+import { LandingPage } from '@/components/landing/landing-page'
+import TabPage from './tab/page'
 
-import styles from '@/components/dashboard/dashboard-client.module.css'
-
-function AuthenticatedBetaDashboard() {
-  return (
-    <>
-      <SkipOnboardingHandler />
-      <main>
-        <BetaDashboardClient
-          notes={<NotesWidget />}
-          tasks={<TasksWidget searchQuery="" />}
-        />
-      </main>
-    </>
-  )
-}
+// The web root is the public landing page; the dashboard lives at /tab.
+// The Chrome extension's new tab loads index.html, so its build keeps the
+// dashboard at the root.
+const IS_EXTENSION = process.env.IS_EXTENSION === 'true'
 
 export default function Home() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  const [hasLoaded, setHasLoaded] = useState(false)
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    } else if (!loading && user) {
-      setHasLoaded(true)
-    }
-  }, [user, loading, router])
-
-  if (loading && !hasLoaded) {
-    return (
-      <div className={styles.loadingContainer}>
-        <BrandedLoader size="medium" />
-      </div>
-    )
-  }
-
-  if (!user && !hasLoaded) {
-    return (
-      <div className={styles.loadingContainer}>
-        <BrandedLoader size="medium" />
-      </div>
-    )
-  }
-
-  if (user) {
-    return <AuthenticatedBetaDashboard />
-  }
-
-  return null
+  return IS_EXTENSION ? <TabPage /> : <LandingPage />
 }

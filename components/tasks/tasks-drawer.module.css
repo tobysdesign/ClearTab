@@ -1,13 +1,49 @@
+/* Matches DockPanel (keyboard shortcuts / settings panels).
+   Doubled class beats the drawer's own .contentRight styles. */
+.panel.panel {
+    width: 400px;
+    min-width: 0;
+    max-width: calc(100vw - 48px);
+    padding: 20px;
+    background: #141416;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-shadow:
+        0 30px 60px -12px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(255, 255, 255, 0.08);
+    color: #fff;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1rem 0;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .title {
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #f4f4f5;
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.escKey {
+    opacity: 0.6;
+    font-size: 11px;
 }
 
 .drawerContainer

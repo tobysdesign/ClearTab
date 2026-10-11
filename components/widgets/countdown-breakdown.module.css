@@ -1,0 +1,239 @@
+/* Counter main view: months / weeks / days (Figma ClearTab 1607:4396 + widget mock).
+   Numbers and labels stay at design size; the dot grids reflow between 4, 3 and 2
+   rows (see chooseLayout) and --dot only drops below 24.73px as a last resort. */
+
+.breakdown {
+    /* --dot is set by CountdownBreakdown from the measured space */
+    --dot: 24.73px;
+    --dot-gap: 4px;
+
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+.body {
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.columns {
+    /* layout */
+    display: flex;
+    align-items: flex-end;
+}
+
+.column {
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* box model: room for the widest unit word ("Months") */
+    min-width: 52px;
+}
+
+/* Each number sits under its column's pink dot: the month grid's right column,
+   the week column, the day grid's left column */
+.monthsColumn {
+    align-items: flex-end;
+}
+
+.weeksColumn {
+    align-items: center;
+}
+
+.daysColumn {
+    align-items: flex-start;
+}
+
+/* ── Dots ── */
+.dots {
+    /* columns come from data-cols; rows from the parent's data-rows */
+    --cols: 1;
+    --rows: 4;
+
+    /* layout */
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dot-gap);
+
+    /* box model */
+    width: calc(var(--dot) * var(--cols) + var(--dot-gap) * (var(--cols) - 1));
+    height: calc(var(--dot) * var(--rows) + var(--dot-gap) * (var(--rows) - 1));
+}
+
+.dots[data-cols="2"] { --cols: 2; }
+.dots[data-cols="3"] { --cols: 3; }
+.dots[data-cols="4"] { --cols: 4; }
+.dots[data-cols="5"] { --cols: 5; }
+.dots[data-cols="6"] { --cols: 6; }
+.dots[data-cols="7"] { --cols: 7; }
+.dots[data-cols="8"] { --cols: 8; }
+.dots[data-cols="9"] { --cols: 9; }
+.dots[data-cols="10"] { --cols: 10; }
+.dots[data-cols="11"] { --cols: 11; }
+
+.body[data-rows="3"] .dots { --rows: 3; }
+.body[data-rows="2"] .dots { --rows: 2; }
+.body[data-rows="1"] .dots { --rows: 1; }
+
+/* Months: last row right-aligned */
+.monthsDots {
+    justify-content: flex-end;
+    align-content: flex-start;
+}
+
+/* Weeks: fill from the bottom so the pink dots sit on the number */
+.weeksDots {
+    justify-content: flex-end;
+    align-content: flex-end;
+}
+
+/* Days: sit on the bottom row, last row left-aligned */
+.daysDots {
+    align-content: flex-end;
+}
+
+/* Compact (small sizes): only the remaining dots, all sitting on the bottom row */
+.body[data-compact="true"] .dots {
+    align-content: flex-end;
+}
+
+/* ...and each number centres under its group of dots */
+.body[data-compact="true"] .column {
+    align-items: center;
+}
+
+.body[data-compact="true"] .dots {
+    justify-content: center;
+}
+
+.dot,
+.dotFilled {
+    /* box model */
+    flex-shrink: 0;
+    width: var(--dot);
+    height: var(--dot);
+    border-radius: 50%;
+
+    /* visual */
+    background-color: #201f1f;
+}
+
+.monthsDots .dot {
+    background-color: #222121;
+}
+
+.dotFilled {
+    background-color: #c57b93;
+}
+
+/* ── Numbers (fixed design size) ── */
+.label {
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    /* box model: one dot wide so the number centres on its dot; the unit word
+       overhangs evenly (columns reserve room for it, see .column) */
+    width: var(--dot);
+}
+
+.value {
+    /* typography: design is Inter Display ExtraLight 36px; Thin is the closest weight
+       the app ships (the other widget numbers use it too) */
+    font-size: 36px;
+    font-weight: 100;
+    line-height: 32px;
+    letter-spacing: 0.01em;
+    font-feature-settings: "dlig" 1;
+    color: #c4c4c4;
+}
+
+.unit {
+    /* typography: shared widget muted text */
+    font-size: var(--widget-text-size);
+    font-weight: var(--widget-text-weight);
+    line-height: 14px;
+    white-space: nowrap;
+    color: var(--widget-text-muted);
+}
+
+/* "+" between units, level with the numbers */
+.plus {
+    /* layout */
+    align-self: flex-end;
+
+    /* box model */
+    width: 28px;
+    margin-bottom: 24px;
+
+    /* typography */
+    font-size: 22px;
+    font-weight: 100;
+    line-height: 1;
+    text-align: center;
+    color: var(--widget-text-muted);
+}
+
+/* ── Until <title> ── */
+.until {
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    /* box model */
+    margin: 0;
+    max-width: 100%;
+
+    /* typography */
+    text-align: center;
+}
+
+/* Short widgets: "until Birthday" on one line */
+.until[data-inline="true"] {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+}
+
+/* Long titles truncate; "until" never squashes */
+.until[data-inline="true"] .untilLabel {
+    flex-shrink: 0;
+}
+
+.until[data-inline="true"] .title {
+    min-width: 0;
+}
+
+.untilLabel {
+    font-size: var(--widget-text-size);
+    font-weight: var(--widget-text-weight);
+    line-height: 16px;
+    color: var(--widget-text-muted);
+}
+
+.title {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--widget-text-size);
+    font-weight: var(--widget-text-weight);
+    line-height: 22px;
+    color: var(--widget-text-light);
+}

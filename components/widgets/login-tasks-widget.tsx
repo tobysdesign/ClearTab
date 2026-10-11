@@ -7,6 +7,7 @@ import { WidgetHeader, WidgetContainer, WidgetContent } from "@cleartab/ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDateSmart } from "@/lib/date-utils";
+import { LabelImportantIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import { AddButton } from "@/components/ui/add-button";
@@ -100,6 +101,12 @@ function TaskItem({ task }: { task: Task }) {
           </h3>
         </div>
         <div className={tasksStyles.tasksContentRight}>
+          {task.isHighPriority && (
+            <LabelImportantIcon
+              size={16}
+              className={tasksStyles.taskPriorityIndicator}
+            />
+          )}
           {task.dueDate && (
             <span
               className={cn(
@@ -110,9 +117,6 @@ function TaskItem({ task }: { task: Task }) {
             >
               {formatDateSmart(task.dueDate)}
             </span>
-          )}
-          {task.isHighPriority && (
-            <span className={tasksStyles.taskPriorityIndicator}>!</span>
           )}
         </div>
       </div>
@@ -127,7 +131,7 @@ export function LoginTasksWidget() {
         <AddButton onClick={() => {}} tooltip="Add task" />
       </WidgetHeader>
       <WidgetContent>
-        <div className={cn(tasksStyles.tasksContainer, "custom-scrollbar")}>
+        <div className={tasksStyles.tasksContainer}>
           <div className="ListContent">
             <ClientOnly>
               <motion.div

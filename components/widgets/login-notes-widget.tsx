@@ -6,7 +6,6 @@ import { WidgetContainer, WidgetHeader } from "@cleartab/ui";
 
 import type { Note } from "@/shared/schema";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
@@ -284,7 +283,7 @@ export function LoginNotesWidget() {
           <WidgetHeader title="Notes">
             <AddButton onClick={() => {}} tooltip="Add note" />
           </WidgetHeader>
-          <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
+          <div className={notesStyles.notesListScroll}>
             <div className="ListContent">
               <ClientOnly>
                 <motion.div

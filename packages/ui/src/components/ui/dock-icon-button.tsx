@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 import styles from './dock-icon-button.module.css'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip'
+import { Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from './tooltip'
 
 interface DockIconButtonProps {
   children: React.ReactNode
@@ -26,7 +26,7 @@ export function DockIconButton({
     <button
       onClick={onClick}
       className={cn(styles.dockIconButton, className)}
-      title={title}
+      aria-label={title}
       data-testid={dataTestId}
     >
       {children}
@@ -36,14 +36,12 @@ export function DockIconButton({
   if (!title && !shortcut) return btn
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{btn}</TooltipTrigger>
-        <TooltipContent>
-          <span>{title}</span>
-          {shortcut ? <span style={{ marginLeft: 8, opacity: 0.8 }}>{shortcut}</span> : null}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>{btn}</TooltipTrigger>
+      <TooltipContent>
+        <span>{title}</span>
+        {shortcut ? <TooltipShortcut>{shortcut}</TooltipShortcut> : null}
+      </TooltipContent>
+    </Tooltip>
   )
 }

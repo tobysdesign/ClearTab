@@ -6,11 +6,13 @@ import React, {
   useCallback,
   useRef,
   useMemo,
+  useLayoutEffect,
 } from "react";
 // import { Input } from "@/components/ui/input";
 
 import { AddButton, Button } from "@cleartab/ui";
 import dynamic from "next/dynamic";
+import { flushSync } from "react-dom";
 import type { Note } from "@/shared/schema";
 import { useNotes } from "@/hooks/use-notes";
 import { EMPTY_QUILL_CONTENT } from "@/lib/quill-utils";
@@ -32,7 +34,28 @@ import { cn } from "@/lib/utils";
 import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { useToast } from "@cleartab/ui";
 import { toast as sonnerToast } from "sonner";
-import { MoreActionsIcon } from "@/components/icons";
+import { MoreActionsIcon, ChevronLeftIcon } from "@/components/icons";
+import { useChatContext } from "@/hooks/use-chat-context";
+import { useIsStacked } from "@/hooks/use-stacked-layout";
+
+// "Today, 4:12 am", "Yesterday, 9:03 pm", "5 Oct, 3:10 pm" (year only when it isn't this year)
+function formatNoteDate(value: Date | string | null | undefined) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (date.toDateString() === today.toDateString()) return `Today, ${time}`;
+  if (date.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+  const day = date.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    ...(date.getFullYear() !== today.getFullYear() && { year: "numeric" }),
+  });
+  return `${day}, ${time}`;
+}
 // import { useDebounce } from "@/hooks/use-debounce";
 // import { api } from "@/lib/api-client";
 
@@ -44,6 +67,8 @@ interface ResizablePanelsProps {
   collapsed?: boolean;
   onToggleCollapse: () => void;
   onWidthChange?: (width: number) => void;
+  /** Narrow screens: show only the list or only the editor, full width */
+  stackedView?: "list" | "editor";
 }
 
 function ResizablePanels({
@@ -54,12 +79,45 @@ function ResizablePanels({
   collapsed = false,
   onToggleCollapse,
   onWidthChange,
+  stackedView,
 }: ResizablePanelsProps) {
   const [currentWidth, setCurrentWidth] = useState(defaultWidth);
   const [containerWidth, setContainerWidth] = useState(0);
   const isResizing = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const collapseTriggered = useRef(false);
+  // Animate width only for collapse/expand; automatic resizes (mount, window,
+  // dashboard layout) snap, or every animation frame counts as a layout shift
+  const [animateWidth, setAnimateWidth] = useState(false);
+  // Compare with the previous value (not "first run"): StrictMode runs effects twice
+  const previousCollapsed = useRef(collapsed);
+  useEffect(() => {
+    if (previousCollapsed.current === collapsed) return;
+    previousCollapsed.current = collapsed;
+    setAnimateWidth(true);
+    const timer = setTimeout(() => setAnimateWidth(false), 200);
+    return () => clearTimeout(timer);
+  }, [collapsed]);
+
+  // List gets 1/3 of the widget, capped at 40% so the editor keeps 60%
+  const proportionalWidthFor = useCallback(
+    (width: number) => Math.max(minWidth, Math.min(width / 3, Math.min(maxWidth, width * 0.4))),
+    [minWidth, maxWidth],
+  );
+
+  // Size the list before the first paint. Waiting for the ResizeObserver painted it at
+  // the 300px default first, then shrank it: the editor slid over and the header
+  // re-wrapped, which was most of the dashboard's layout shift (CLS).
+  useLayoutEffect(() => {
+    const width = containerRef.current?.clientWidth ?? 0;
+    if (width <= 0) return;
+    const proportional = proportionalWidthFor(width);
+    setContainerWidth(width);
+    setCurrentWidth(proportional);
+    onWidthChange?.(proportional);
+    // Mount only; the ResizeObserver below handles later size changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!collapsed) {
@@ -81,28 +139,28 @@ function ResizablePanels({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // ResizeObserver callbacks run after layout but before paint. flushSync renders
+    // the new width in that same frame; a normal state update painted the old
+    // width first (e.g. 300px when the dashboard first became visible), then shifted.
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newContainerWidth = entry.contentRect.width;
-        setContainerWidth(newContainerWidth);
+        flushSync(() => {
+          setContainerWidth(newContainerWidth);
 
-        // Update currentWidth proportionally if not currently resizing
-        if (!isResizing.current && newContainerWidth > 0) {
-          // Ensure right panel gets at least 60% by limiting left panel to max 40%
-          const maxAllowedWidth = Math.min(maxWidth, newContainerWidth * 0.4);
-          const proportionalWidth = Math.max(
-            minWidth,
-            Math.min(newContainerWidth / 3, maxAllowedWidth),
-          );
-          setCurrentWidth(proportionalWidth);
-          onWidthChange?.(proportionalWidth);
-        }
+          // Update currentWidth proportionally if not currently resizing
+          if (!isResizing.current && newContainerWidth > 0) {
+            const proportionalWidth = proportionalWidthFor(newContainerWidth);
+            setCurrentWidth(proportionalWidth);
+            onWidthChange?.(proportionalWidth);
+          }
+        });
       }
     });
 
     resizeObserver.observe(containerRef.current);
     return () => resizeObserver.disconnect();
-  }, [minWidth, maxWidth, onWidthChange]);
+  }, [proportionalWidthFor, onWidthChange]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -130,11 +188,24 @@ function ResizablePanels({
     onWidthChange?.(newWidth);
   };
 
+  if (stackedView) {
+    // Both stay mounted (the editor keeps autosaving); CSS shows one at a time
+    return (
+      <div className={notesStyles.stackedPanels} data-view={stackedView} ref={containerRef}>
+        <div className={notesStyles.stackedPane}>{children[0]}</div>
+        <div className={notesStyles.stackedPane}>{children[1]}</div>
+      </div>
+    );
+  }
+
   return (
     <div className={notesStyles.resizablePanels} ref={containerRef}>
       <div
-        style={{ width: currentWidth }}
+        // Until measured, CSS sizes the list with the same formula (no 300px first paint)
+        style={containerWidth > 0 ? { width: currentWidth } : undefined}
         className={`${notesStyles.resizableLeft} ${currentWidth < 100 ? "collapsed" : ""}`}
+        data-animate={animateWidth}
+        data-settle
       >
         {children[0]}
       </div>
@@ -697,6 +768,41 @@ export function NotesWidget() {
     [setDisplayTitleSafe, saveCurrentNote],
   );
 
+  const pendingSelectNoteIdRef = useRef<string | null>(null);
+
+  // Listen for select-note events (e.g. from recorder widget "View note")
+  useEffect(() => {
+    const handleSelectNoteEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ id: string }>).detail;
+      if (!detail?.id) return;
+      console.log('📣 NotesWidget: Received select-note event for note:', detail.id);
+      const noteToSelect = notes.find((n) => n.id === detail.id);
+      if (noteToSelect) {
+        handleSelectNote(noteToSelect);
+      } else {
+        pendingSelectNoteIdRef.current = detail.id;
+        loadNotes();
+      }
+    };
+
+    window.addEventListener('select-note', handleSelectNoteEvent as EventListener);
+    return () => {
+      window.removeEventListener('select-note', handleSelectNoteEvent as EventListener);
+    };
+  }, [notes, handleSelectNote, loadNotes]);
+
+  // If a note was pending selection after loading
+  useEffect(() => {
+    if (pendingSelectNoteIdRef.current && notes.length > 0) {
+      const targetId = pendingSelectNoteIdRef.current;
+      const found = notes.find((n) => n.id === targetId);
+      if (found) {
+        pendingSelectNoteIdRef.current = null;
+        handleSelectNote(found);
+      }
+    }
+  }, [notes, handleSelectNote]);
+
   // Save handler is now handled by individual blur events
   const handleSaveOnBlur = useCallback(() => {
     // No-op - saving is now handled by onBlur events
@@ -845,11 +951,107 @@ export function NotesWidget() {
     ],
   );
 
+  const { askAboutText, suggestTasks, createTasks } = useChatContext();
+
+  // Plain text of the open note (title + body) for the AI
+  const getActiveNoteText = useCallback(() => {
+    const note = activeNoteRef.current ?? activeNote;
+    const content = note?.content as unknown;
+    const body =
+      typeof content === "string"
+        ? content
+        : ((content as { ops?: Array<{ insert?: unknown }> })?.ops ?? [])
+            .map((op) => (typeof op.insert === "string" ? op.insert : ""))
+            .join("");
+    return [note?.title, body.trim()].filter(Boolean).join("\n");
+  }, [activeNote]);
+
+  // Editor toolbar "+ Task": the highlighted text becomes a task
+  const handleCreateTaskFromSelection = useCallback(
+    async (text: string) => {
+      try {
+        const title = text.charAt(0).toUpperCase() + text.slice(1);
+        await createTasks([{ title }]);
+        sonnerToast.success("Task added", { description: text.slice(0, 80), duration: 2500 });
+      } catch (error) {
+        console.error("NotesWidget: creating task from selection failed", error);
+        sonnerToast.error("Couldn't add that task");
+      }
+    },
+    [createTasks],
+  );
+
+  const handleMakeTasksWithAi = useCallback(() => {
+    const text = getActiveNoteText();
+    if (!text) return;
+    const title = activeNoteRef.current?.title || activeNote?.title;
+    suggestTasks(text, title ? `Make tasks from “${title}”` : "Make tasks from this note");
+  }, [getActiveNoteText, suggestTasks, activeNote?.title]);
+
+  // Latest saved copy of the open note, so "Modified" reflects the last save
+  const activeNoteDates = useMemo(() => {
+    const saved = notes.find((n) => n.id === activeNote?.id) ?? activeNote;
+    return {
+      created: formatNoteDate(saved?.createdAt as Date | string | undefined),
+      modified: formatNoteDate((saved?.updatedAt ?? saved?.createdAt) as Date | string | undefined),
+    };
+  }, [notes, activeNote]);
+
+  // Narrow screens: list first, then a full-width editor with a back button
+  const isStacked = useIsStacked();
+  const [stackedView, setStackedView] = useState<"list" | "editor">("list");
+
+  // Opening the editor adds a history entry, so the browser back button / Android back
+  // gesture returns to the list instead of leaving the page. Next.js reloads on history
+  // entries it doesn't recognise, so the entry keeps Next's state and adds a flag.
+  const editorHistoryEntryRef = useRef(false);
+
+  const showEditor = useCallback(() => {
+    setStackedView("editor");
+    if (isStacked && !editorHistoryEntryRef.current) {
+      window.history.pushState({ ...window.history.state, cleartabNotesEditor: true }, "");
+      editorHistoryEntryRef.current = true;
+    }
+  }, [isStacked]);
+
+  // In-app back: go through history so the entry we added is used up
+  const showList = useCallback(() => {
+    if (editorHistoryEntryRef.current) {
+      window.history.back();
+    } else {
+      setStackedView("list");
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (!editorHistoryEntryRef.current) return;
+      editorHistoryEntryRef.current = false;
+      setStackedView("list");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const openNote = useCallback(
+    (note: Note) => {
+      handleSelectNote(note);
+      showEditor();
+    },
+    [handleSelectNote, showEditor],
+  );
+
+  const createAndOpenNote = useCallback(() => {
+    handleCreateNew();
+    showEditor();
+  }, [handleCreateNew, showEditor]);
+
   const handleDeleteActiveNote = useCallback(() => {
     if (activeNote?.id) {
       handleDeleteNote(activeNote.id as string);
+      if (isStacked) showList();
     }
-  }, [activeNote?.id, handleDeleteNote]);
+  }, [activeNote?.id, handleDeleteNote, isStacked, showList]);
 
   const handleToggleCollapse = useCallback(
     () => setIsCollapsed((prev) => !prev),
@@ -886,13 +1088,14 @@ export function NotesWidget() {
         collapsed={isCollapsed}
         onToggleCollapse={handleToggleCollapse}
         onWidthChange={setPanelWidth}
+        stackedView={isStacked ? stackedView : undefined}
       >
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
           <WidgetHeader title="Notes">
-            <AddButton onClick={handleCreateNew} tooltip="Add note" />
+            <AddButton onClick={createAndOpenNote} tooltip="Add note" />
           </WidgetHeader>
-          <div className={cn(notesStyles.notesListScroll, "custom-scrollbar")}>
+          <div className={notesStyles.notesListScroll}>
             {isLoadingNotes ? (
               <WidgetLoader />
             ) : notes.length > 0 || activeNote ? (
@@ -913,11 +1116,11 @@ export function NotesWidget() {
                           } as Note
                         }
                         isSelected={true}
-                        onClick={() => {}} // Already selected
+                        onClick={showEditor} // Already selected
                         onDelete={() =>
                           handleDeleteNote(activeNote.id as string)
                         }
-                        collapsed={panelWidth < 100}
+                        collapsed={!isStacked && panelWidth < 100}
                         isEditing={isEditing}
                         isDeleting={deletingNoteId === activeNote.id}
                       />
@@ -936,9 +1139,9 @@ export function NotesWidget() {
                         key={note.id}
                         note={note}
                         isSelected={isActive}
-                        onClick={() => handleSelectNote(note)}
+                        onClick={() => openNote(note)}
                         onDelete={() => handleDeleteNote(note.id as string)}
-                        collapsed={panelWidth < 100}
+                        collapsed={!isStacked && panelWidth < 100}
                         isEditing={isActive && isEditing}
                         isDeleting={deletingNoteId === note.id}
                       />
@@ -961,6 +1164,19 @@ export function NotesWidget() {
               {/* Header with Title and Actions - Fixed */}
               <div className={notesStyles.notesEditorHeader}>
                 <div className={notesStyles.notesHeaderContent}>
+                  {isStacked && (
+                    <div className={notesStyles.notesBack}>
+                      <Button
+                        variant="ghost-icon"
+                        size="icon"
+                        tooltipLabel="All notes"
+                        aria-label="Back to all notes"
+                        onClick={showList}
+                      >
+                        <ChevronLeftIcon size={18} />
+                      </Button>
+                    </div>
+                  )}
                   {/* Title Input - Tab Index 1 */}
                   <div className={notesStyles.notesTitleContainer}>
                     <textarea
@@ -989,17 +1205,36 @@ export function NotesWidget() {
                   <div tabIndex={2} className={notesStyles.notesActions}>
                     <SimpleDropdown
                       trigger={
-                        <Button variant="ghost-icon" size="icon">
+                        <Button variant="ghost-icon" size="icon" tooltipLabel="More actions">
                           <MoreActionsIcon size={16} />
                         </Button>
                       }
                     >
+                      <SimpleDropdownItem onClick={handleMakeTasksWithAi}>
+                        Make tasks with AI
+                      </SimpleDropdownItem>
                       <SimpleDropdownItem
                         onClick={handleDeleteActiveNote}
                         disabled={isNewNote}
                       >
                         Delete
                       </SimpleDropdownItem>
+                      <div className={notesStyles.noteMetaMenu}>
+                        {activeNoteDates.created ? (
+                          <>
+                            <div className={notesStyles.noteMetaRow}>
+                              <span className={notesStyles.noteMetaLabel}>Created</span>
+                              <span>{activeNoteDates.created}</span>
+                            </div>
+                            <div className={notesStyles.noteMetaRow}>
+                              <span className={notesStyles.noteMetaLabel}>Modified</span>
+                              <span>{activeNoteDates.modified}</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className={notesStyles.noteMetaRow}>Not saved yet</div>
+                        )}
+                      </div>
                     </SimpleDropdown>
                   </div>
                 </div>
@@ -1102,6 +1337,8 @@ export function NotesWidget() {
                     scheduleBackgroundSave();
                   }}
                   editable={true}
+                  onOpenAiChat={askAboutText}
+                  onCreateTask={handleCreateTaskFromSelection}
                   className={notesStyles.notesEditorContainer}
                 />
               </div>

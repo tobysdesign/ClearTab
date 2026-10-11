@@ -29,6 +29,7 @@ const nextConfig = {
   },
   turbopack: {},
   reactStrictMode: true,
+  devIndicators: false,
   env: {
     DATABASE_URL: process.env.DATABASE_URL || "",
     GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
