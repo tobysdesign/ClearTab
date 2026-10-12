@@ -14,11 +14,48 @@ import {
   BrowserTabIcon,
   ShieldIcon,
   AddIcon,
+  LockIcon,
+  HomeIcon,
+  SparkleIcon,
+  CheckIcon,
 } from '@/components/icons'
 import { HeroDemo } from './hero-demo'
 import { AppIcon } from './app-icon'
+import { WorksAnywhere } from './works-anywhere'
 import { NotesDemo, TasksDemo, ScheduleDemo, AskDemo, LayoutsDemo, CalendarsDemo, DockDemo } from './demos'
 import styles from './landing-page.module.css'
+
+const PROOF_POINTS = [
+  { icon: LockIcon, text: 'Private, on-device AI' },
+  { icon: CalendarIcon, text: 'Every calendar, one view' },
+  { icon: LayoutIcon, text: 'Your priorities first' },
+  { icon: HomeIcon, text: 'Any browser, any device' },
+]
+
+const AI_POINTS = [
+  {
+    icon: LockIcon,
+    title: 'Private by design.',
+    body: 'It runs on Gemini Nano, the model built into Chrome on your computer. No AI account, no API key, nothing sent to an AI company.',
+  },
+  {
+    icon: CheckIcon,
+    title: 'Back on track in one question.',
+    body: "Ask what's next and it answers from your own tasks, notes and calendar.",
+  },
+  {
+    icon: SparkleIcon,
+    title: 'Notes into tasks.',
+    body: 'Turn a messy note into tasks with priorities and due dates, then keep the ones you want.',
+  },
+]
+
+const ANYWHERE_CARDS = [
+  { title: 'Chrome new tab.', body: 'With the ClearTab extension, every new tab opens on your dashboard. Coming soon to the Chrome Web Store.' },
+  { title: 'Your homepage.', body: 'Set cleartab.app/tab as the start page in Chrome, Safari, Firefox or Edge. Safari can open it in every new tab too.' },
+  { title: 'Your phone.', body: 'Add it to your home screen and it opens like an app, stacked into one column.' },
+  { title: 'Your work computer.', body: 'Nothing to install. Sign in with Google in the browser and your day is there.' },
+]
 
 const FEATURES = [
   { icon: CalendarIcon, title: 'Every calendar.', body: 'Connect more than one Google account and see work and personal events in one schedule. Read-only, always.' },
@@ -35,7 +72,7 @@ const FEATURES = [
 const FAQS = [
   {
     q: 'What is ClearTab?',
-    a: 'A calm dashboard for your new tab: notes, tasks, your Google Calendar, the weather, countdowns and voice memos in one place, with an AI chat that knows what you wrote down.',
+    a: 'A calm starting point for every new tab: your tasks, notes and schedule, arranged in the order you choose, so when you drift you land straight back on what matters. It also has a private AI assistant, weather, countdowns and voice memos.',
   },
   {
     q: 'What does ClearTab do with my Google Calendar?',
@@ -67,7 +104,15 @@ const FAQS = [
   },
   {
     q: 'Which browsers does it work in?',
-    a: 'Any modern browser for the web app. The AI chat needs desktop Chrome, and the Chrome extension is coming soon.',
+    a: 'Any modern browser, on a computer or a phone. The AI assistant needs desktop Chrome 138 or later. The Chrome extension, which opens ClearTab in every new tab, is coming soon.',
+  },
+  {
+    q: 'Can I make it my homepage?',
+    a: 'Yes. Set cleartab.app/tab as your homepage or start-up page in Chrome, Safari, Firefox or Edge. Safari can also open it in every new tab. The steps for each browser are in Works anywhere, above.',
+  },
+  {
+    q: 'Does it work on my phone?',
+    a: "Yes. Open cleartab.app/tab and add it to your home screen, and it opens like an app with everything in one column. The AI assistant needs desktop Chrome, so it isn't on phones yet.",
   },
   {
     q: 'How do I delete my data?',
@@ -158,9 +203,9 @@ export function LandingPage() {
             <span>cleartab.</span>
           </Link>
           <div className={styles.navLinks}>
+            <a href="#ask" className={styles.navLink}>AI assistant</a>
             <a href="#customise" className={styles.navLink}>Customise</a>
-            <a href="#features" className={styles.navLink}>Features</a>
-            <a href="#ask" className={styles.navLink}>AI chat</a>
+            <a href="#anywhere" className={styles.navLink}>Anywhere</a>
             <a href="#faq" className={styles.navLink}>FAQ</a>
             {user ? (
               <Link href="/tab" className={styles.navButton}>Open ClearTab</Link>
@@ -176,16 +221,24 @@ export function LandingPage() {
         <section className={styles.hero}>
           <AppIcon size={72} className={`${styles.heroMark} ${styles.enter1}`} />
           <h1 className={styles.heroTitle}>
-            <span className={`${styles.strong} ${styles.enter1}`}>Your new tab, finally useful. </span>
+            <span className={`${styles.strong} ${styles.enter1}`}>Drift off. Land back on track. </span>
             <span className={`${styles.muted} ${styles.enter2}`}>
-              Notes, tasks and every calendar you use, in one calm dashboard you can arrange however you like.
+              Every new tab opens on your tasks, notes and all your calendars, in your order, with a private AI assistant
+              that runs on your device.
             </span>
           </h1>
           <div className={`${styles.heroActions} ${styles.enter3}`}>
             {primaryCta}
-            <a href="#features" className={styles.secondaryButton}>See how it works</a>
+            <a href="#anywhere" className={styles.secondaryButton}>Make it your homepage</a>
           </div>
-          <p className={`${styles.heroNote} ${styles.enter3}`}>Chrome extension coming soon</p>
+          <ul className={`${styles.proofList} ${styles.enter3}`}>
+            {PROOF_POINTS.map(({ icon: Icon, text }) => (
+              <li key={text} className={styles.proofChip}>
+                <Icon size={15} className={styles.proofIcon} />
+                {text}
+              </li>
+            ))}
+          </ul>
 
           <div className={`${styles.heroStage} ${styles.enter4}`}>
             <div className={styles.heroDemo}>
@@ -197,8 +250,10 @@ export function LandingPage() {
         {/* Make it yours */}
         <section id="customise" className={styles.section}>
           <h2 className={`${styles.sectionTitle} ${styles.reveal}`} data-reveal>
-            <span className={styles.strong}>Make it yours. </span>
-            <span className={styles.muted}>Five layouts, every calendar you use, and a dock that goes wherever you want it.</span>
+            <span className={styles.strong}>Your priorities, first. </span>
+            <span className={styles.muted}>
+              Pick a layout or build your own, so whatever gets you back on track is the first thing you see.
+            </span>
           </h2>
           <figure className={`${styles.demo} ${styles.wideDemo} ${styles.reveal}`} data-reveal>
             <LayoutsDemo />
@@ -216,7 +271,8 @@ export function LandingPage() {
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>All your calendars. </span>
                 <span className={styles.muted}>
-                  Connect work and personal Google accounts and see every event in one schedule. Hide any account with a switch.
+                  Connect your work, personal and family Google accounts and every calendar in them lands in one schedule.
+                  Hide any account with a switch.
                 </span>
               </figcaption>
             </figure>
@@ -227,6 +283,52 @@ export function LandingPage() {
                 <span className={styles.muted}>Drag the dock to the bottom, the top or either side, wherever your hand goes first.</span>
               </figcaption>
             </figure>
+          </div>
+        </section>
+
+        {/* AI assistant */}
+        <section id="ask" className={`${styles.section} ${styles.askSection}`}>
+          <div className={`${styles.askCopy} ${styles.reveal}`} data-reveal>
+            <div className={styles.keys} aria-hidden="true">
+              <kbd className={styles.key}>⌘</kbd>
+              <kbd className={styles.key}>K</kbd>
+            </div>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.strong}>An assistant that knows your day. </span>
+              <span className={styles.muted}>
+                Press ⌘K and ask what&apos;s next, what&apos;s due or what you noted last week. It runs on your device,
+                so your questions and the notes it reads to answer them stay there.
+              </span>
+            </h2>
+            <ul className={styles.askPoints}>
+              {AI_POINTS.map(({ icon: Icon, title, body }) => (
+                <li key={title} className={styles.askPoint}>
+                  <Icon size={20} className={styles.askPointIcon} />
+                  <p className={styles.askPointText}>
+                    <span className={styles.strong}>{title} </span>
+                    <span className={styles.muted}>{body}</span>
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.askNote}>Needs desktop Chrome 138 or later. Everything else works in any browser.</p>
+          </div>
+          <div className={`${styles.askDemo} ${styles.reveal}`} data-reveal>
+            <AskDemo />
+          </div>
+        </section>
+
+        {/* Works anywhere */}
+        <section id="anywhere" className={styles.section}>
+          <h2 className={`${styles.sectionTitle} ${styles.reveal}`} data-reveal>
+            <span className={styles.strong}>Wherever you wander, it&apos;s there. </span>
+            <span className={styles.muted}>
+              Make ClearTab the page you land on: in any browser, on your phone, and on the work computer you can&apos;t
+              install things on.
+            </span>
+          </h2>
+          <div className={styles.reveal} data-reveal>
+            <WorksAnywhere cards={ANYWHERE_CARDS} homepageIntro="Make it your homepage. Pick your browser for the steps." />
           </div>
         </section>
 
@@ -255,29 +357,9 @@ export function LandingPage() {
               <ScheduleDemo />
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>Schedule. </span>
-                <span className={styles.muted}>Today from your Google Calendar, with what&apos;s on now right where you look.</span>
+                <span className={styles.muted}>Every calendar from every Google account you connect, with what&apos;s on now right where you look.</span>
               </figcaption>
             </figure>
-          </div>
-        </section>
-
-        {/* AI chat */}
-        <section id="ask" className={`${styles.section} ${styles.askSection}`}>
-          <div className={`${styles.askCopy} ${styles.reveal}`} data-reveal>
-            <div className={styles.keys} aria-hidden="true">
-              <kbd className={styles.key}>⌘</kbd>
-              <kbd className={styles.key}>K</kbd>
-            </div>
-            <h2 className={styles.sectionTitle}>
-              <span className={styles.strong}>Ask your dashboard. </span>
-              <span className={styles.muted}>
-                Press ⌘K and ask what&apos;s due, what&apos;s next or what you wrote down last week. It runs on the AI
-                built into Chrome, so your questions never leave your device.
-              </span>
-            </h2>
-          </div>
-          <div className={`${styles.askDemo} ${styles.reveal}`} data-reveal>
-            <AskDemo />
           </div>
         </section>
 
@@ -313,7 +395,7 @@ export function LandingPage() {
         {/* Closing CTA */}
         <section className={`${styles.section} ${styles.closing} ${styles.reveal}`} data-reveal>
           <h2 className={styles.closingTitle}>
-            <span className={styles.strong}>Make every new tab count.</span>
+            <span className={styles.strong}>Next time you drift, land here.</span>
           </h2>
           <div className={styles.heroActions}>{primaryCta}</div>
         </section>
@@ -329,7 +411,8 @@ export function LandingPage() {
             <p className={styles.footerHeading}>ClearTab</p>
             <Link href="/tab">Open the app</Link>
             <a href="#features">Features</a>
-            <a href="#ask">AI chat</a>
+            <a href="#ask">AI assistant</a>
+            <a href="#anywhere">Set as homepage</a>
           </div>
           <div className={styles.footerColumn}>
             <p className={styles.footerHeading}>Information</p>

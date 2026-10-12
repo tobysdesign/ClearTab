@@ -479,6 +479,29 @@
   89%, 100% { -webkit-mask-position: 0 0; mask-position: 0 0; }
 }
 
+/* Under the answer: the on-device AI never sent anything anywhere */
+.chatPrivate {
+  display: flex;
+  align-items: center;
+  gap: 0.45cqw;
+  margin: 0.9cqw 0 0;
+  padding-top: 0.8cqw;
+  border-top: 1px solid oklch(1 0 0 / 0.08);
+  font-size: 0.95cqw;
+  color: var(--ink-2);
+  animation: privateIn var(--loop) infinite;
+}
+
+.chatPrivate svg {
+  width: 1cqw;
+  height: 1cqw;
+}
+
+@keyframes privateIn {
+  0%, 86% { opacity: 0; }
+  89%, 100% { opacity: 1; }
+}
+
 /* Cursor: the track spans the screen, so translate(x%, y%) = position on screen */
 .cursorTrack {
   position: absolute;

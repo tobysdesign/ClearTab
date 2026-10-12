@@ -1,4 +1,4 @@
-import { CheckIcon, SparkleIcon, EyesMarkIcon, SearchIcon, SettingsIcon } from '@/components/icons'
+import { CheckIcon, SparkleIcon, EyesMarkIcon, SearchIcon, SettingsIcon, LockIcon } from '@/components/icons'
 import styles from './hero-demo.module.css'
 
 /*
@@ -115,6 +115,10 @@ export function HeroDemo() {
             <span>Thinking</span>
           </p>
           <p className={styles.chatAnswer}>Just two: renew your passport and book the dentist.</p>
+          <p className={styles.chatPrivate}>
+            <LockIcon size={9} />
+            <span>Answered on your device</span>
+          </p>
         </div>
 
         <div className={styles.dock}>
