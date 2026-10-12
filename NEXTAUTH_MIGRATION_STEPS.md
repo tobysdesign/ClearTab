@@ -30,7 +30,7 @@ https://t0by-toby-skyrings-projects.vercel.app/api/auth/callback/google
 Add these to your Vercel project:
 
 ```
-NEXTAUTH_SECRET=YMZ7zX2OvPqLesBGYjIjS++NHGg1kJ0anZ9Ws2QFiPo=
+NEXTAUTH_SECRET=<generate your own: openssl rand -base64 32>
 NEXTAUTH_URL=https://t0by-toby-skyrings-projects.vercel.app
 AUTH_TRUST_HOST=true
 ```
