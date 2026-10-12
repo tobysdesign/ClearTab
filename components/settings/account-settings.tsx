@@ -11,9 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
 import { apiFetch } from "@/lib/api-fetch";
+import { useCalendarVisibility } from "@/hooks/use-calendar-visibility";
 import { IS_EXTENSION, siteUrl } from "@/lib/platform";
-
-type VisibilityState = Record<string, boolean>;
 
 interface AccountSettingsProps {
   sectionId: string;
@@ -25,7 +24,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
   function AccountSettings({ sectionId, heading, description }, ref) {
     const { user, loading, signIn } = useAuth();
     const queryClient = useQueryClient();
-    const [visibility, setVisibility] = React.useState<VisibilityState>({});
+    // Shared with the Schedule widget, which hides the accounts switched off here
+    const { isVisible, setVisible } = useCalendarVisibility();
     const { toast } = useToast();
 
     const { data: connectedAccounts = [], isLoading: accountsLoading } = useQuery({
@@ -134,33 +134,6 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
       },
     });
 
-    React.useEffect(() => {
-      setVisibility((prev) => {
-        let changed = false;
-        const next: VisibilityState = { ...prev };
-
-        if (user?.id) {
-          const primaryKey = `primary-${user.id}`;
-          if (next[primaryKey] === undefined) {
-            next[primaryKey] = true;
-            changed = true;
-          }
-        }
-
-        for (const account of connectedAccounts) {
-          if (next[account.id] === undefined) {
-            next[account.id] = true;
-            changed = true;
-          }
-        }
-
-        return changed ? next : prev;
-      });
-    }, [connectedAccounts, user?.id]);
-
-    const handleVisibilityToggle = (key: string, value: boolean) => {
-      setVisibility((prev) => ({ ...prev, [key]: value }));
-    };
 
     const renderHeading = (actions?: React.ReactNode) => (
       <div className={sharedStyles.rowListHeader}>
@@ -246,8 +219,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             <div className={sharedStyles.toggleGroup}>
               <span className={sharedStyles.label}>Visible</span>
               <Switch
-                checked={visibility[primaryKey] ?? true}
-                onCheckedChange={(value) => handleVisibilityToggle(primaryKey, value)}
+                checked={isVisible(primaryKey)}
+                onCheckedChange={(value) => setVisible(primaryKey, value)}
                 aria-label="Toggle primary calendar visibility"
               />
             </div>
@@ -267,8 +240,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
               <div className={sharedStyles.toggleGroup}>
                 <span className={sharedStyles.label}>Visible</span>
                 <Switch
-                  checked={visibility[account.id] ?? true}
-                  onCheckedChange={(value) => handleVisibilityToggle(account.id, value)}
+                  checked={isVisible(account.id)}
+                  onCheckedChange={(value) => setVisible(account.id, value)}
                   aria-label={`Toggle visibility for ${account.email}`}
                 />
               </div>

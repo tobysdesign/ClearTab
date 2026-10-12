@@ -14,6 +14,7 @@ import { useAuth } from '@/components/auth/auth-provider'
 import { isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
 import { useWidgetHeight } from '@/hooks/use-widget-height'
+import { useCalendarVisibility } from '@/hooks/use-calendar-visibility'
 
 // Interfaces
 interface CalendarEvent {
@@ -28,6 +29,8 @@ interface CalendarEvent {
   calendarId?: string
   calendarName?: string
   source: 'google' | 'local'
+  /** Which account it came from, for hiding accounts in Settings */
+  accountId?: string
 }
 
 interface ScheduleQueryResult {
@@ -148,6 +151,7 @@ function DaySection({
 export function ScheduleWidget() {
   // Use auth
   const { loading, signIn } = useAuth()
+  const { isVisible } = useCalendarVisibility()
   const { ref, isMini } = useWidgetHeight()
 
   // Check if calendar was just connected (from URL param)
@@ -226,6 +230,7 @@ export function ScheduleWidget() {
           calendarId: event.calendarId || '',
           calendarName: event.calendarName || '',
           source: (event.source as 'google' | 'local') || 'google',
+          accountId: event.accountId,
         }));
         console.log('Mapped events:', mappedEvents);
         return { events: mappedEvents, needsReconnection: false, message: json.message };
@@ -258,6 +263,8 @@ export function ScheduleWidget() {
     const twoWeeksAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000))
     const eventsArray = Array.isArray(events) ? events : []
     return [...eventsArray]
+      // Accounts switched off in Settings
+      .filter(event => !event.accountId || isVisible(event.accountId))
       .filter(event => {
         // Include events from 2 weeks ago onwards
         try {
@@ -291,7 +298,7 @@ export function ScheduleWidget() {
         }
         return acc
       }, {} as { [key: string]: CalendarEvent[] })
-  }, [events])
+  }, [events, isVisible])
 
   const sortedDays = useMemo(() => Object.keys(groupedEvents).sort(), [groupedEvents])
 

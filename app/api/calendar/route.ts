@@ -5,6 +5,71 @@ import { dbMinimal } from "@/lib/db-minimal";
 import { user as userTable, connectedAccounts } from "@/shared/schema-tables";
 import { googleApiService } from "@/lib/google-api-service";
 
+type ReconnectState = { reason: "revoked" | "not_connected"; message: string };
+
+// Events from the extra Google accounts connected in Settings (work, personal...), tagged with
+// the account they came from. A broken account is skipped rather than failing the schedule.
+async function connectedAccountEvents(userId: string) {
+  const accounts = await dbMinimal
+    .select()
+    .from(connectedAccounts)
+    .where(eq(connectedAccounts.userId, userId));
+
+  const perAccount = await Promise.all(
+    accounts.map(async (account) => {
+      if (!account.accessToken && !account.refreshToken) return [];
+      // providerAccountId is the account's Google email, saved when it was connected
+      const email = account.providerAccountId;
+      const fetchWith = (accessToken: string) =>
+        googleApiService.getCalendarEvents({ accessToken, refreshToken: account.refreshToken || undefined }, email);
+      const refresh = async () => {
+        const refreshed = await googleApiService.refreshAccessToken(account.refreshToken!);
+        await dbMinimal
+          .update(connectedAccounts)
+          .set({
+            accessToken: refreshed.access_token,
+            tokenExpiry: new Date(Date.now() + refreshed.expires_in * 1000),
+          } as any)
+          .where(eq(connectedAccounts.id, account.id));
+        return refreshed.access_token;
+      };
+
+      try {
+        // Refresh first if the stored token has (nearly) expired, saving a failed request
+        const expired =
+          !account.accessToken || (account.tokenExpiry !== null && account.tokenExpiry.getTime() < Date.now() + 60_000);
+        const accessToken = expired && account.refreshToken ? await refresh() : account.accessToken!;
+        let events;
+        try {
+          events = await fetchWith(accessToken);
+        } catch (error) {
+          if (!account.refreshToken || expired) throw error;
+          events = await fetchWith(await refresh());
+        }
+        return events.map((event) => ({ ...event, accountId: account.id }));
+      } catch (error) {
+        console.error(
+          `❌ Calendar fetch failed for connected account ${account.id}:`,
+          error instanceof Error ? error.message : error,
+        );
+        return [];
+      }
+    }),
+  );
+  return perAccount.flat();
+}
+
+// The same meeting can be on more than one account's calendar: show it once
+function dedupeEvents<T extends { id: string }>(events: T[]) {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    if (!event.id) return true;
+    if (seen.has(event.id)) return false;
+    seen.add(event.id);
+    return true;
+  });
+}
+
 export async function GET(_request: NextRequest) {
   console.log('🔵 CALENDAR ROUTE HIT - Request received at:', new Date().toISOString());
   try {
@@ -56,6 +121,7 @@ export async function GET(_request: NextRequest) {
     // this handles cases where the flag is out of sync but tokens are valid.
 
     let events: any[] = [];
+    let reconnect: ReconnectState | null = null;
     const sessionAccessToken = session.accessToken;
     const sessionRefreshToken = session.refreshToken;
 
@@ -140,28 +206,34 @@ export async function GET(_request: NextRequest) {
             .set({ googleCalendarConnected: false } as any)
             .where(eq(userTable.id, authUser.id));
 
-          return NextResponse.json({
-            success: true,
-            data: [],
-            needsReconnection: true,
+          reconnect = {
             reason: "revoked",
             message: "Google paused calendar access. This happens if access was removed in your Google account, your password changed, or it went unused for a while."
-          });
+          };
         }
       }
     } else {
       console.warn('⚠️ No tokens available (session or DB). Prompting reconnection.');
-      return NextResponse.json({
-        success: true,
-        data: [],
-        needsReconnection: true,
+      reconnect = {
         reason: "not_connected",
         message: "Google Calendar not connected. Please sign in to sync your schedule."
-      });
+      };
     }
 
-    console.log('📤 Returning', events.length, 'total events');
-    return NextResponse.json({ success: true, data: events });
+    // Your own calendars, then the Google accounts connected in Settings. Each event says which
+    // account it came from (`primary-<userId>` or the connected account's id), so the schedule
+    // can hide the accounts switched off in Settings.
+    const allEvents = dedupeEvents([
+      ...events.map((event) => ({ ...event, accountId: `primary-${authUser.id}` })),
+      ...(await connectedAccountEvents(authUser.id)),
+    ]);
+
+    if (reconnect) {
+      return NextResponse.json({ success: true, data: allEvents, needsReconnection: true, ...reconnect });
+    }
+
+    console.log('📤 Returning', allEvents.length, 'total events');
+    return NextResponse.json({ success: true, data: allEvents });
 
   } catch (error) {
     console.error("Calendar API error:", error);

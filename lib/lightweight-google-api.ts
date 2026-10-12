@@ -20,6 +20,8 @@ export interface CalendarEvent {
   calendarId: string;
   calendarName: string;
   source: "google";
+  /** Which signed-in account it came from; set by /api/calendar */
+  accountId?: string;
 }
 
 interface GoogleApiError {
