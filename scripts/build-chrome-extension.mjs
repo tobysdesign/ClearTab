@@ -4,7 +4,8 @@
  *
  *   npm run build-extension                  dist/chrome-extension/, talks to https://cleartab.app
  *   npm run build-extension:local            same, but talks to http://localhost:3000 (npm run dev)
- *   npm run package-extension                + dist/cleartab-extension-<version>.zip for the Web Store
+ *   npm run package-extension                dist/chrome-extension-store/ + dist/cleartab-extension-<version>.zip
+ *                                            for the Web Store (separate folder, so the unpacked dev build is untouched)
  *
  * Options: --api=<origin> (server the extension calls), --zip (store package: no "key").
  *
@@ -30,7 +31,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const STAGE = path.join(os.tmpdir(), "cleartab-extension-build");
-const DIST = path.join(ROOT, "dist", "chrome-extension");
+const DIST = path.join(ROOT, "dist", process.argv.includes("--zip") ? "chrome-extension-store" : "chrome-extension");
 const DEV_KEY_FILE = path.join(ROOT, "scripts", "chrome-extension-dev-key.txt");
 
 const args = process.argv.slice(2);
