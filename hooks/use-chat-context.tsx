@@ -67,8 +67,10 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
 // Chat runs entirely on Chrome's built-in Prompt API (Gemini Nano). Chrome 138+ exposes a
-// global `LanguageModel`; earlier builds used `window.ai.languageModel`.
-function getLanguageModelApi(): { api: any; legacy: boolean } | null {
+// global `LanguageModel`; earlier builds used `window.ai.languageModel`. A provider can pass
+// its own model instead (the landing page demo scripts its answers this way).
+function getLanguageModelApi(override?: unknown): { api: any; legacy: boolean } | null {
+  if (override) return { api: override, legacy: false }
   if (typeof window === 'undefined') return null
   const g = globalThis as any
   if (g.LanguageModel) return { api: g.LanguageModel, legacy: false }
@@ -76,8 +78,8 @@ function getLanguageModelApi(): { api: any; legacy: boolean } | null {
   return null
 }
 
-async function isLocalAiAvailable(): Promise<boolean> {
-  const found = getLanguageModelApi()
+async function isLocalAiAvailable(override?: unknown): Promise<boolean> {
+  const found = getLanguageModelApi(override)
   if (!found) return false
   try {
     if (!found.legacy) return (await found.api.availability()) !== 'unavailable'
@@ -162,7 +164,9 @@ function parseTaskSuggestions(raw: string): TaskSuggestion[] {
   }
 }
 
-export function ChatProvider({ children }: { children: ReactNode }) {
+export function ChatProvider({ children, languageModel }: { children: ReactNode; languageModel?: unknown }) {
+  // Stable for the provider's lifetime, so a ref keeps it out of every dependency list
+  const languageModelRef = useRef(languageModel)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isThinking, setIsThinking] = useState(false)
@@ -203,7 +207,7 @@ ${dbContext || 'No context available.'}
 Be concise. Do not answer questions unrelated to the user's data or productivity.
     `.trim();
 
-    const found = getLanguageModelApi();
+    const found = getLanguageModelApi(languageModelRef.current);
     if (!found) throw new Error("Local AI not supported");
 
     const session = found.legacy
@@ -235,6 +239,8 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     }
     console.log('ChatProvider: created', created, 'tasks')
     queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    // The Tasks widget keeps its own list; this makes it reload so the new tasks show
+    window.dispatchEvent(new CustomEvent('tasks-changed'))
     return created
   }, [queryClient])
 
@@ -253,8 +259,10 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       if (!response.ok) throw new Error('Failed to create note')
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['notes'] })
+      // The Notes widget reloads on this (it keeps its own list)
+      window.dispatchEvent(new CustomEvent('note-created', { detail: result }))
       toast({
         title: 'Note created',
         description: 'Your note has been created successfully.',
@@ -287,7 +295,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     try {
       if (await handleHashtagCommand(userMessage)) return
 
-      if (!(await isLocalAiAvailable())) {
+      if (!(await isLocalAiAvailable(languageModelRef.current))) {
         console.warn('ChatProvider: Prompt API unavailable in this browser')
         setMessages(prev => [...prev, { role: 'assistant', content: LOCAL_AI_UNAVAILABLE_MESSAGE }])
         return
@@ -307,7 +315,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       }
 
       // The current API streams deltas; the legacy one streamed the cumulative text.
-      const legacy = getLanguageModelApi()?.legacy ?? false
+      const legacy = getLanguageModelApi(languageModelRef.current)?.legacy ?? false
       let fullText = ''
       let started = false
 
@@ -381,7 +389,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
   useEffect(() => {
     if (!isChatOpen || warmedRef.current) return
     warmedRef.current = true
-    const found = getLanguageModelApi()
+    const found = getLanguageModelApi(languageModelRef.current)
     if (!found || found.legacy) return
     found.api
       .create()
@@ -417,11 +425,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     abortControllerRef.current = controller
 
     try {
-      if (!(await isLocalAiAvailable())) {
+      if (!(await isLocalAiAvailable(languageModelRef.current))) {
         setMessages(prev => [...prev, { role: 'assistant', content: LOCAL_AI_UNAVAILABLE_MESSAGE }])
         return
       }
-      const found = getLanguageModelApi()!
+      const found = getLanguageModelApi(languageModelRef.current)!
       const today = new Date()
       const systemPrompt = [
         'You turn notes into a to-do list.',

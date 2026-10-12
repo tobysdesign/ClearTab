@@ -15,8 +15,9 @@ import { DownloadIcon, MoreActionsIcon } from "@/components/icons";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
 import { apiFetch } from "@/lib/api-fetch";
+import { deltaToPlainText, migrateToQuillDelta } from "@/lib/quill-utils";
 
-type DataDomain = "notes" | "tasks" | "voice";
+type DataDomain = "notes" | "tasks";
 
 interface ConfirmState {
   domain: DataDomain | null;
@@ -37,10 +38,95 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     domain: null,
   });
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [exportingDomain, setExportingDomain] = React.useState<DataDomain | null>(null);
 
-  const handleExport = (domain: DataDomain) => {
-    console.log(`Exporting ${domain}…`);
-    // TODO: replace with actual export implementation.
+  const handleExport = async (domain: DataDomain) => {
+    setExportingDomain(domain);
+    try {
+      const endpoint = domain === "notes" ? "/api/notes" : "/api/tasks";
+      const res = await apiFetch(endpoint, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to download ${domain}`);
+      }
+
+      const payload = await res.json();
+      const rawItems: Array<Record<string, any>> = Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+
+      const exportedItems =
+        domain === "notes"
+          ? rawItems.map((note) => ({
+              id: note.id,
+              title: note.title ?? "Untitled",
+              text: deltaToPlainText(migrateToQuillDelta(note.content)),
+              createdAt: note.createdAt ?? null,
+              updatedAt: note.updatedAt ?? null,
+              content: note.content,
+            }))
+          : rawItems.map((task) => ({
+              id: task.id,
+              title: task.title ?? "Untitled Task",
+              text: deltaToPlainText(migrateToQuillDelta(task.content)),
+              isCompleted: Boolean(task.isCompleted),
+              isHighPriority: Boolean(task.isHighPriority),
+              dueDate: task.dueDate ?? null,
+              createdAt: task.createdAt ?? null,
+              updatedAt: task.updatedAt ?? null,
+              content: task.content,
+            }));
+
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const fileName = `cleartab-${domain}-${dateStamp}.json`;
+      const blob = new Blob(
+        [
+          JSON.stringify(
+            {
+              exportedAt: new Date().toISOString(),
+              type: domain,
+              count: exportedItems.length,
+              items: exportedItems,
+            },
+            null,
+            2,
+          ),
+        ],
+        { type: "application/json;charset=utf-8" },
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: `Downloaded ${domain}`,
+        description: `Exported ${exportedItems.length} ${exportedItems.length === 1 ? domain.slice(0, -1) : domain} to ${fileName}`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error(`Export error:`, error);
+      toast({
+        title: `Failed to download ${domain}`,
+        description:
+          error instanceof Error
+            ? error.message
+            : "An error occurred. Please try again",
+        variant: "destructive",
+        duration: 4000,
+      });
+    } finally {
+      setExportingDomain(null);
+    }
   };
 
   const handleDelete = async (domain: DataDomain) => {
@@ -49,7 +135,6 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     const endpointMap: Record<DataDomain, string> = {
       notes: "/api/notes/delete-all",
       tasks: "/api/tasks/delete-all",
-      voice: "/api/voice/delete-all",
     };
 
     const progressToast = toast({
@@ -120,12 +205,7 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     {
       key: "notes",
       title: "Notes",
-      description: "Download or reset your written notes.",
-    },
-    {
-      key: "voice",
-      title: "Voice memo",
-      description: "Manage recordings captured from the voice widget.",
+      description: "Download or reset your written and transcribed voice notes.",
     },
     {
       key: "tasks",
@@ -164,11 +244,12 @@ export const NotesVoiceTasksSettings = React.forwardRef<
             <Button
               className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
               onClick={() => handleExport(item.key)}
+              disabled={exportingDomain === item.key}
               tooltipLabel={`Download ${item.title.toLowerCase()}`}
               shortcut="⌘S"
             >
               <DownloadIcon size={16} aria-hidden />
-              Download
+              {exportingDomain === item.key ? "Downloading…" : "Download"}
             </Button>
             <SimpleDropdown
               key={`dropdown-${item.key}`}

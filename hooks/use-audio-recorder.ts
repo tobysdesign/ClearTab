@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { isExtension, saveAudioToExtensionStorage, getEnvironmentConfig } from '@/lib/chrome-extension-utils'
 import { apiFetch } from '@/lib/api-fetch'
+import { getDemoAudio } from '@/lib/demo/mode'
 
 export type RecordingState = 'idle' | 'requesting-permission' | 'permission-denied' | 'recording' | 'paused' | 'processing'
 
@@ -41,7 +42,9 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     setState('requesting-permission')
     
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // The landing page demo records a synthetic signal instead of the microphone
+      const demoAudio = getDemoAudio()
+      const stream = demoAudio ? demoAudio.createStream() : await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
       return true
     } catch (error: any) {
@@ -114,12 +117,20 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
       
       lastUpdateTime = timestamp
       
+      // Sample more bars from the frequency data for higher fidelity
+      const numBars = 50
+
+      // Demo: an audio context started without a click is silent, so draw synthetic levels
+      const demoAudio = getDemoAudio()
+      if (demoAudio) {
+        setAudioData(demoAudio.levels(timestamp, numBars))
+        animationFrameRef.current = requestAnimationFrame(updateAudioData)
+        return
+      }
+
       const bufferLength = analyser.frequencyBinCount
       const dataArray = new Uint8Array(bufferLength)
       analyserRef.current.getByteFrequencyData(dataArray)
-      
-      // Sample more bars from the frequency data for higher fidelity
-      const numBars = 50
       const sampledData = new Uint8Array(numBars)
       
       // Focus on lower frequencies where voice is most prominent

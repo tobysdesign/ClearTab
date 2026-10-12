@@ -54,6 +54,11 @@ function subscribe(listener: () => void) {
   }
 }
 
+// Outside React (the landing page demo flips an account off and on)
+export function setCalendarVisible(accountKey: string, visible: boolean) {
+  write({ ...read(), [accountKey]: visible })
+}
+
 export function useCalendarVisibility() {
   const visibility = useSyncExternalStore(subscribe, read, () => EMPTY)
 

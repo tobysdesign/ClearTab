@@ -18,7 +18,7 @@ export function useMobileCompact() {
 }
 
 interface MobileCompactLayoutProps {
-  notes?: ReactNode // Not used, we use NotesListMobile instead
+  notes?: ReactNode
   tasks: ReactNode
 }
 
@@ -79,7 +79,7 @@ export function MobileCompactLayout({ notes, tasks }: MobileCompactLayoutProps) 
           onToggle={() => setExpandedSection('notes')}
         >
           <div className={styles.listWrapper}>
-            <NotesListMobile />
+            {notes ?? <NotesListMobile />}
           </div>
         </CollapsibleSection>
 

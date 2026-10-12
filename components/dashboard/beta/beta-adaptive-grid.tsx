@@ -286,7 +286,7 @@ export function BetaAdaptiveGrid({
   const renderPanelNode = (node: PanelNode | null): React.ReactNode => {
     if (!node) return null
     if (node.type === 'widget') {
-      return <div className={styles.widgetPanel}>{renderWidget(node.id)}</div>
+      return <div className={styles.widgetPanel} data-widget-id={node.id}>{renderWidget(node.id)}</div>
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>

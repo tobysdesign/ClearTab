@@ -22,7 +22,7 @@ import {
 import { HeroDemo } from './hero-demo'
 import { AppIcon } from './app-icon'
 import { WorksAnywhere } from './works-anywhere'
-import { NotesDemo, TasksDemo, ScheduleDemo, AskDemo, LayoutsDemo, CalendarsDemo, DockDemo } from './demos'
+import { DemoEmbed } from './demo-embed'
 import styles from './landing-page.module.css'
 
 const PROOF_POINTS = [
@@ -256,7 +256,9 @@ export function LandingPage() {
             </span>
           </h2>
           <figure className={`${styles.demo} ${styles.wideDemo} ${styles.reveal}`} data-reveal>
-            <LayoutsDemo />
+            <div className={styles.liveDemo}>
+              <DemoEmbed story="layouts" title="ClearTab: widgets swapping places and switching off and on" />
+            </div>
             <figcaption className={`${styles.caption} ${styles.wideCaption}`}>
               <span className={styles.strong}>Layouts. </span>
               <span className={styles.muted}>
@@ -267,7 +269,9 @@ export function LandingPage() {
           </figure>
           <div className={`${styles.pairGrid} ${styles.reveal}`} data-reveal>
             <figure className={styles.demo}>
-              <CalendarsDemo />
+              <div className={styles.liveDemo}>
+                <DemoEmbed story="calendars" size="half" title="ClearTab: work and personal calendars in one schedule, the personal one hidden and shown again" />
+              </div>
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>All your calendars. </span>
                 <span className={styles.muted}>
@@ -277,7 +281,9 @@ export function LandingPage() {
               </figcaption>
             </figure>
             <figure className={styles.demo}>
-              <DockDemo />
+              <div className={styles.liveDemo}>
+                <DemoEmbed story="dock" size="half" title="ClearTab: the dock moving to each edge of the screen" />
+              </div>
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>Dock anywhere. </span>
                 <span className={styles.muted}>Drag the dock to the bottom, the top or either side, wherever your hand goes first.</span>
@@ -314,7 +320,9 @@ export function LandingPage() {
             <p className={styles.askNote}>Needs desktop Chrome 138 or later. Everything else works in any browser.</p>
           </div>
           <div className={`${styles.askDemo} ${styles.reveal}`} data-reveal>
-            <AskDemo />
+            <div className={styles.liveDemo}>
+              <DemoEmbed story="ask" size="half" title="ClearTab's AI assistant answering questions about the day" />
+            </div>
           </div>
         </section>
 
@@ -340,21 +348,27 @@ export function LandingPage() {
           </h2>
           <div className={`${styles.demoGrid} ${styles.reveal}`} data-reveal>
             <figure className={styles.demo}>
-              <NotesDemo />
+              <div className={styles.liveDemo}>
+                <DemoEmbed story="notes" size="card" title="ClearTab notes: a new note being written" />
+              </div>
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>Notes. </span>
                 <span className={styles.muted}>Catch the thought before it goes. Everything saves as you type.</span>
               </figcaption>
             </figure>
             <figure className={styles.demo}>
-              <TasksDemo />
+              <div className={styles.liveDemo}>
+                <DemoEmbed story="tasks" size="card" title="ClearTab tasks: one ticked off and two added" />
+              </div>
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>Tasks. </span>
                 <span className={styles.muted}>Turn a note into tasks with on-device AI, or highlight a line and make it one. Priorities and due dates included.</span>
               </figcaption>
             </figure>
             <figure className={styles.demo}>
-              <ScheduleDemo />
+              <div className={styles.liveDemo}>
+                <DemoEmbed story="schedule" size="card" title="ClearTab schedule: today's events from every calendar" />
+              </div>
               <figcaption className={styles.caption}>
                 <span className={styles.strong}>Schedule. </span>
                 <span className={styles.muted}>Every calendar from every Google account you connect, with what&apos;s on now right where you look.</span>

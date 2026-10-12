@@ -1,0 +1,21 @@
+/* Demo pointer: positioned from JS through --x / --y, gliding over --move */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  transform: translate(var(--x, 60vw), var(--y, 70vh));
+  transition: transform var(--move, 700ms) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.arrow {
+  display: block;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.45));
+  transform-origin: 0 0;
+  transition: transform 120ms ease;
+}
+
+.cursor[data-pressed="true"] .arrow {
+  transform: scale(0.82);
+}

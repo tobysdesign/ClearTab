@@ -18,6 +18,11 @@ export default function OpenSettingsAndRedirect() {
 
   useEffect(() => {
     if (!errorParam) {
+      try {
+        window.sessionStorage.setItem("cleartab-open-settings", "schedule");
+      } catch {
+        // Ignore storage errors
+      }
       window.dispatchEvent(
         new CustomEvent("openSettings", { detail: { tab: "Account" } }),
       );

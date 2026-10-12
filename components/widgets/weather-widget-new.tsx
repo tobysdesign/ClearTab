@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePreferences } from "@/hooks/use-preferences";
+import { useWeatherUnit } from "@/hooks/use-weather-unit";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./weather-widget-new.module.css";
@@ -24,28 +25,35 @@ export function WeatherWidgetNew() {
 
   const { ref, isMini } = useWidgetHeight();
 
-  // 1. Fetch preferences to get location
+  // 1. Fetch preferences to get location and display unit
   const { data: prefs } = usePreferences();
+  const { unit } = useWeatherUnit();
 
   const location = prefs?.location || "Sydney, NSW";
+  const units = unit === "fahrenheit" ? "IMPERIAL" : "METRIC";
 
   // 2. Fetch real weather data
-  const { isLoading, error } = useQuery({
-    queryKey: ["weather", location],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["weather", location, units],
     queryFn: async () => {
-      const response = await apiFetch(`/api/weather?${new URLSearchParams({ location })}`);
+      const response = await apiFetch(`/api/weather?${new URLSearchParams({ location, units })}`);
       const result: { success?: boolean; data?: WeatherData[]; error?: string } = await response
         .json()
         .catch(() => ({}));
 
       if (response.ok && result.success && result.data) {
-        setCards(result.data);
         return result.data;
       }
       throw new Error(result.error || "Failed to fetch weather");
     },
     enabled: !!location,
   });
+
+  // The card stack is local (clicking rotates it), seeded from the query. Seeding inside
+  // queryFn left it empty whenever the widget remounted with the data already cached.
+  useEffect(() => {
+    if (data) setCards(data);
+  }, [data]);
 
   // A piece of state to hold the card we're removing, to add it back later
   const [exitingCard, setExitingCard] = useState<WeatherData | null>(null);

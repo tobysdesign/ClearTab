@@ -2,14 +2,13 @@
 
 import * as React from "react";
 import { usePreferences } from "@/hooks/use-preferences";
+import { useWeatherUnit, type TemperatureUnit } from "@/hooks/use-weather-unit";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
 import { SearchIcon } from "@/components/icons";
 import { Select, SelectItem, useToast } from "@cleartab/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
-
-type TemperatureUnit = "celsius" | "fahrenheit";
 
 interface WeatherSettingsProps {
   sectionId: string;
@@ -24,17 +23,15 @@ export const WeatherSettings = React.forwardRef<
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [query, setQuery] = React.useState("");
-  const [unit, setUnit] = React.useState<TemperatureUnit>("celsius");
+  const { unit, setUnit } = useWeatherUnit();
 
   // Load current preferences
   const { data: prefs, isLoading } = usePreferences();
 
   // Sync state with loaded preferences
   React.useEffect(() => {
-    if (prefs) {
-      if (prefs.location) setQuery(prefs.location);
-      // Note: we might want to support unit preference in the DB too
-      // But for now, we'll just stick to location
+    if (prefs?.location) {
+      setQuery(prefs.location);
     }
   }, [prefs]);
 
@@ -113,9 +110,15 @@ export const WeatherSettings = React.forwardRef<
           <Select
             id="weather-units"
             value={unit}
-            onValueChange={(val) => setUnit(val as TemperatureUnit)}
+            onValueChange={(val) => {
+              const nextUnit = val as TemperatureUnit;
+              setUnit(nextUnit);
+              toast({
+                title: "Display unit updated",
+                description: `Weather will now show in ${nextUnit === "fahrenheit" ? "Fahrenheit (°F)" : "Celsius (°C)"}.`,
+              });
+            }}
             className={sharedStyles.selectAuto}
-            disabled={true} // Units coming soon or handled globally
           >
             <SelectItem value="celsius">Celsius</SelectItem>
             <SelectItem value="fahrenheit">Fahrenheit</SelectItem>

@@ -11,7 +11,8 @@ import { usePathname } from "next/navigation";
 
 function ChatOverlayWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/login";
+  // The /demo page renders its own chat, wired to a scripted model
+  const isAuthPage = pathname === "/login" || pathname === "/demo";
   
   return (
     <>

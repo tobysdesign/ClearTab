@@ -41,7 +41,7 @@ const sections: SectionConfig[] = [
   {
     id: "data",
     label: "Your Data",
-    description: "Export or clear your notes, tasks, and voice recordings.",
+    description: "Export or clear your notes and tasks.",
     component: NotesVoiceTasksSettings,
   },
   {
@@ -170,6 +170,22 @@ export function SettingsDrawer({
       "openSettings",
       handleOpenSettings as EventListener,
     );
+
+    try {
+      const pendingTab = window.sessionStorage.getItem("cleartab-open-settings");
+      if (pendingTab) {
+        window.sessionStorage.removeItem("cleartab-open-settings");
+        const targetSection = mapToSection(pendingTab);
+        setActiveSection(targetSection);
+        setIsOpen(true);
+        requestAnimationFrame(() => {
+          scrollToSection(targetSection, "auto");
+        });
+      }
+    } catch {
+      // Ignore storage errors
+    }
+
     return () =>
       window.removeEventListener(
         "openSettings",

@@ -12,13 +12,24 @@ import { KeyboardShortcutsModal } from './keyboard-shortcuts-modal'
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
-import { useBetaWidgets } from '@/hooks/use-beta-widgets'
+import {
+  useBetaWidgets,
+  type BetaPresetLayout,
+  type CustomLayoutState,
+  type WidgetVisibilityState,
+} from '@/hooks/use-beta-widgets'
 import styles from '../dashboard-client.module.css'
 import betaStyles from './beta-dashboard-client.module.css'
 
 interface BetaDashboardClientProps {
   notes: ReactNode
   tasks: ReactNode
+  /** The landing page demo drives the layout itself instead of the saved one */
+  layoutOverride?: {
+    presetLayout: BetaPresetLayout
+    visibleWidgets: WidgetVisibilityState
+    customLayout: CustomLayoutState
+  }
 }
 
 interface DropZone {
@@ -39,7 +50,7 @@ function LoadingState() {
 
 type DockPosition = 'top' | 'left' | 'right' | 'bottom'
 
-export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) {
+export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashboardClientProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const controls = useAnimationControls()
   const [showSearch, setShowSearch] = useState(false)
@@ -304,9 +315,9 @@ export function BetaDashboardClient({ notes, tasks }: BetaDashboardClientProps) 
           <BetaAdaptiveGrid
             notes={notes}
             tasks={tasks}
-            presetLayout={presetLayout}
-            visibleWidgets={widgets}
-            customLayout={customLayout}
+            presetLayout={layoutOverride?.presetLayout ?? presetLayout}
+            visibleWidgets={layoutOverride?.visibleWidgets ?? widgets}
+            customLayout={layoutOverride?.customLayout ?? customLayout}
             dockPosition={position}
             searchQuery={searchQuery}
           />

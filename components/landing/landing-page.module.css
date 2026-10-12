@@ -350,6 +350,14 @@
   margin: 0;
 }
 
+/* A live demo (the real dashboard in an iframe, see demo-embed) */
+.liveDemo {
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 80px -30px oklch(0 0 0 / 0.7);
+}
+
 .wideDemo {
   margin-bottom: clamp(40px, 5vw, 64px);
 }

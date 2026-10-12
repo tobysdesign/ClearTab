@@ -1,7 +1,7 @@
 "use client";
 
 // Icons replaced with ASCII placeholders
-import { useState, useEffect, memo, useMemo, useCallback, useId } from "react";
+import { useState, useEffect, memo, useMemo, useCallback, useId, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckIcon, PauseIcon, TrashIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -301,13 +301,16 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     },
   });
 
-  // Watch for when audio blob is ready and automatically transcribe
+  // Transcribe each recording once, as soon as it's ready. Keyed on the recording itself:
+  // keying on the success panel re-ran this when "View note" closed it, saving a duplicate.
+  const transcribedBlobRef = useRef<Blob | null>(null);
   useEffect(() => {
-    if (state === "processing" && audioBlob && !showSuccess) {
+    if (state === "processing" && audioBlob && audioBlob !== transcribedBlobRef.current) {
+      transcribedBlobRef.current = audioBlob;
       console.log("Audio blob ready, starting transcription...");
       transcribeAudio();
     }
-  }, [state, audioBlob, showSuccess, transcribeAudio]);
+  }, [state, audioBlob, transcribeAudio]);
 
   // Update waveform history for scrolling effect
   useEffect(() => {

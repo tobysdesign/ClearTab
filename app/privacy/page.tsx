@@ -8,10 +8,9 @@ export const metadata: Metadata = {
   description: 'What ClearTab collects, why, and how to remove it.',
 }
 
-// TODO before publishing: fill in who runs ClearTab and where to reach them.
-const OPERATOR = '[Your name or business name]'
-const CONTACT_EMAIL = '[contact email]'
-const LAST_UPDATED = '10 October 2026'
+const OPERATOR = 'Tobys Design'
+const CONTACT_EMAIL = 'admin@tobys.design'
+const LAST_UPDATED = '13 October 2026'
 
 export default function PrivacyPage() {
   return (
@@ -69,7 +68,8 @@ export default function PrivacyPage() {
         <p>
           The AI chat runs on Gemini Nano, the model built into Google Chrome. Your questions, and the notes, tasks and
           schedule it reads to answer them, are processed on your device and aren&apos;t sent to us or to an AI provider.
-          Chat conversations aren&apos;t saved.
+          Chat conversations aren&apos;t saved. Voice memos use Google Gemini to transcribe your recording into text, which is
+          saved as a note; the audio itself isn&apos;t kept.
         </p>
 
         <h2>Who processes your data</h2>
@@ -94,13 +94,14 @@ export default function PrivacyPage() {
 
         <h2>How long we keep it</h2>
         <p>
-          We keep your data while your account is active. Deleted notes and tasks are removed from our database. If you ask
-          us to delete your account, we delete your data within 30 days.
+          We keep your data while your account is active. When you delete a note or task, it&apos;s removed from our database
+          immediately (your browser holds a temporary copy for a few seconds so you can undo an accidental delete, after which
+          it&apos;s gone). If you ask us to delete your account, we delete your data within 30 days.
         </p>
 
         <h2>Your choices</h2>
         <ul>
-          <li>Delete all your notes or tasks from Settings at any time.</li>
+          <li>Download your notes and tasks from Settings to use outside ClearTab, or delete all of them at any time.</li>
           <li>
             Disconnect Google Calendar in Settings, or remove ClearTab&apos;s access from your{' '}
             <a href="https://myaccount.google.com/permissions" target="_blank" rel="noreferrer">Google Account permissions</a>.

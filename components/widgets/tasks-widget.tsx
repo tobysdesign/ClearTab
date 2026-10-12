@@ -154,6 +154,12 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     return () => window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
   }, [loadTasks]);
 
+  // Tasks created elsewhere (the AI chat, a note's "+ Task") reload the list
+  useEffect(() => {
+    window.addEventListener('tasks-changed', loadTasks);
+    return () => window.removeEventListener('tasks-changed', loadTasks);
+  }, [loadTasks]);
+
   // Handle granular task updates from modal
   const handleTaskUpdate = useCallback(
     (updatedTask: Task, operation: "update" | "create" | "delete") => {

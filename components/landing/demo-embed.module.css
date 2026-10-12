@@ -1,0 +1,42 @@
+/* The demo's window (--w x --h px, per size), scaled to the container's width (--demo-scale,
+   set from JS). The aspect ratio is plain CSS so the page doesn't shift when it loads. */
+.embed {
+  --w: 1440;
+  --h: 860;
+
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--w) / var(--h);
+  overflow: hidden;
+  background: oklch(0.165 0.003 260);
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--w) * 1px);
+  height: calc(var(--h) * 1px);
+  border: 0;
+  color-scheme: dark;
+  transform: scale(var(--demo-scale, 0.5));
+  transform-origin: 0 0;
+  /* Watch only: the story drives it */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.embed[data-size="half"] {
+  --w: 1100;
+  --h: 760;
+}
+
+.embed[data-size="card"] {
+  --w: 720;
+  --h: 640;
+}
+
+.embed[data-loaded="true"] .frame {
+  opacity: 1;
+}

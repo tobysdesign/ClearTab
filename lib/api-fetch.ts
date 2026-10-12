@@ -1,3 +1,4 @@
+import { getDemoApi } from "@/lib/demo/mode";
 import { authorizedFetch } from "@/lib/extension/auth";
 import { API_BASE_URL, IS_EXTENSION } from "@/lib/platform";
 
@@ -10,5 +11,8 @@ import { API_BASE_URL, IS_EXTENSION } from "@/lib/platform";
  * through without CORS.
  */
 export function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  // The /demo page answers from sample data (lib/demo)
+  const demoApi = getDemoApi();
+  if (demoApi) return demoApi(path, init);
   return IS_EXTENSION ? authorizedFetch(`${API_BASE_URL}${path}`, init) : fetch(path, init);
 }
