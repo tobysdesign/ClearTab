@@ -5,12 +5,31 @@ import * as schema from '@/shared/schema'
 // Use connection string from environment variable
 const connectionString = process.env.DATABASE_URL
 
-if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is not set')
+function createWrappedClient(options: postgres.Options<{}>) {
+  if (connectionString) {
+    return postgres(connectionString, options)
+  }
+
+  const baseClient = postgres('postgresql://placeholder:placeholder@localhost:5432/placeholder', options)
+  const throwMissingEnv = () => {
+    throw new Error('DATABASE_URL environment variable is not set')
+  }
+
+  return new Proxy(baseClient, {
+    apply() {
+      return throwMissingEnv()
+    },
+    get(target, prop, receiver) {
+      if (prop === 'unsafe' || prop === 'begin' || prop === 'file') {
+        return throwMissingEnv
+      }
+      return Reflect.get(target, prop, receiver)
+    },
+  })
 }
 
 // Create postgres connection with proper pooling and timeouts
-const client = postgres(connectionString, {
+const client = createWrappedClient({
   max: 5,                 // Reduced connection pool size for Supabase
   idle_timeout: 20,       // Close idle connections after 20 seconds
   connect_timeout: 30,    // Increased connection timeout for Supabase
@@ -24,7 +43,7 @@ const client = postgres(connectionString, {
 export const db = drizzle(client, { schema })
 
 // Export the client for use in migrations
-export const migrationClient = postgres(connectionString, { max: 1 })
+export const migrationClient = createWrappedClient({ max: 1 })
 
 // Run migrations (only used in development/deployment)
 export async function runMigrations() {

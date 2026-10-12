@@ -31,11 +31,6 @@ const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   env: {
-    DATABASE_URL: process.env.DATABASE_URL || "",
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
-    SESSION_SECRET: process.env.SESSION_SECRET || "your-secret-key",
     IS_EXTENSION: String(isExtensionBuild),
   },
   compress: true,
