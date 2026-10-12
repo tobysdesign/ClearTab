@@ -19,10 +19,11 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import styles from './edit-task-form.module.css'
+import { apiFetch } from '@/lib/api-fetch'
 // API functions for tasks
 async function updateTaskAPI(task: Partial<Task> & { id: string }): Promise<Task> {
   console.log('updateTaskAPI called with:', task);
-  const res = await fetch(`/api/tasks`, {
+  const res = await apiFetch(`/api/tasks`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task),
@@ -42,7 +43,7 @@ async function updateTaskAPI(task: Partial<Task> & { id: string }): Promise<Task
 
 async function createTaskAPI(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>): Promise<Task> {
   console.log('createTaskAPI called with:', taskData);
-  const res = await fetch('/api/tasks', {
+  const res = await apiFetch('/api/tasks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(taskData),

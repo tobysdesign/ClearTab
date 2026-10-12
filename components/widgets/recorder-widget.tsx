@@ -17,7 +17,7 @@ import { useToast } from "@cleartab/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useAudioRecorder } from "@/hooks/use-audio-recorder";
 import { isExtensionEnvironment } from "@/lib/extension-utils";
-import { createNote } from "@/lib/actions/notes";
+import { apiFetch } from "@/lib/api-fetch";
 import { stringToQuillDelta } from "@/lib/quill-utils";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
 
@@ -232,31 +232,34 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
         console.log("Saving note for user:", user.id);
 
-        // Save note using server action
-        const result = await createNote({
-          title: "Voice Note",
-          content: stringToQuillDelta(text),
+        // Save note through the notes API
+        const response = await apiFetch("/api/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: "Voice Note", content: stringToQuillDelta(text) }),
         });
+        const result: { success?: boolean; data?: { id?: string }; error?: string } = await response
+          .json()
+          .catch(() => ({}));
 
-        if (!result?.data?.success) {
-          console.error("Error saving note:", result?.data?.error);
+        if (!response.ok || !result.success) {
+          console.error("Error saving note:", result.error);
           toast({
             title: "Error",
-            description: result?.data?.error || "Failed to save voice note",
+            description: result.error || "Failed to save voice note",
             variant: "destructive",
           });
           return;
         }
 
-        console.log("Note saved successfully:", result.data);
+        console.log("Note saved successfully:", result);
 
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("note-created", { detail: result.data }));
+          window.dispatchEvent(new CustomEvent("note-created", { detail: result }));
         }
 
         // Extract saved note id
-        const savedNote = (result.data as any)?.data || result.data;
-        const noteId = savedNote?.id;
+        const noteId = result.data?.id;
         if (noteId) {
           setCreatedNoteId(noteId);
         }

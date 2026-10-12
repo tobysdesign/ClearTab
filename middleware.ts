@@ -37,5 +37,7 @@ export default auth((req) => {
 export const config = {
   // Exclude ALL Next.js internals and public assets from middleware to avoid intercepting chunk/flight requests.
   // 'icon' also covers icons/, icon.svg and icon-192/512.png so favicons and bookmarks work signed out.
-  matcher: ['/((?!_next/|favicon.ico|icon|apple-icon|manifest.json|manifest.webmanifest|assets|robots.txt).*)'],
+  // api/extension/ is skipped too: the session check here sets a default authjs.callback-url
+  // cookie, which could override the one /api/extension/authorize sets before going to Google.
+  matcher: ['/((?!_next/|api/extension/|favicon.ico|icon|apple-icon|manifest.json|manifest.webmanifest|assets|robots.txt).*)'],
 }

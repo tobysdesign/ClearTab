@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from "@/lib/db-minimal";
 import { tasks } from "@/shared/schema-tables";
 import { eq, desc, and } from "drizzle-orm";
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.error("❌ Session or user ID missing in GET /api/tasks");
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.error("❌ Session or user ID missing in POST /api/tasks");
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
@@ -137,7 +137,7 @@ export async function PUT(request: NextRequest) {
     let userId = '00000000-0000-4000-8000-000000000000';
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.log('PUT /api/tasks - No user ID found, unauthorized');
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
@@ -218,7 +218,7 @@ export async function DELETE(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.error("❌ Session or user ID missing in DELETE /api/tasks");
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });

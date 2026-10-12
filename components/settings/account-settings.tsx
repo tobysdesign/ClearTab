@@ -10,6 +10,8 @@ import { AddIcon, MoreActionsIcon } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
+import { apiFetch } from "@/lib/api-fetch";
+import { IS_EXTENSION, siteUrl } from "@/lib/platform";
 
 type VisibilityState = Record<string, boolean>;
 
@@ -21,7 +23,7 @@ interface AccountSettingsProps {
 
 export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProps>(
   function AccountSettings({ sectionId, heading, description }, ref) {
-    const { user, loading } = useAuth();
+    const { user, loading, signIn } = useAuth();
     const queryClient = useQueryClient();
     const [visibility, setVisibility] = React.useState<VisibilityState>({});
     const { toast } = useToast();
@@ -36,7 +38,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
         const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
-          const res = await fetch("/api/settings/accounts", {
+          const res = await apiFetch("/api/settings/accounts", {
             credentials: "include",
             signal: controller.signal,
           });
@@ -58,7 +60,14 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
 
     const addAccountMutation = useMutation({
       mutationFn: async () => {
-        const response = await fetch("/api/auth/google-link-url?next=/settings", {
+        // Linking a Google account runs on the website (it needs the website's session), so
+        // the extension opens the account settings there
+        if (IS_EXTENSION) {
+          window.open(siteUrl("/settings"), "_blank", "noopener");
+          return;
+        }
+
+        const response = await apiFetch("/api/auth/google-link-url?next=/settings", {
           credentials: "include",
         });
 
@@ -112,7 +121,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
 
     const removeAccountMutation = useMutation({
       mutationFn: async (accountId: string) => {
-        const res = await fetch(`/api/settings/accounts?id=${accountId}`, {
+        const res = await apiFetch(`/api/settings/accounts?id=${accountId}`, {
           method: "DELETE",
           credentials: "include",
         });
@@ -183,7 +192,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             {renderHeading(
               <Button
                 className={`${sharedStyles.button} ${sharedStyles.buttonPill}`}
-                onClick={() => (window.location.href = "/login")}
+                onClick={() => (IS_EXTENSION ? void signIn("google") : (window.location.href = "/login"))}
                 tooltipLabel="Sign in"
                 shortcut="⌘S"
               >

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { isExtension, saveAudioToExtensionStorage, getEnvironmentConfig } from '@/lib/chrome-extension-utils'
+import { apiFetch } from '@/lib/api-fetch'
 
 export type RecordingState = 'idle' | 'requesting-permission' | 'permission-denied' | 'recording' | 'paused' | 'processing'
 
@@ -215,18 +216,10 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
       const formData = new FormData()
       formData.append('audio', audioBlob, `recording-${Date.now()}.webm`)
 
-      const config = getEnvironmentConfig()
-      const apiUrl = config.isExtension 
-        ? `${config.baseUrl}/api/transcribe`
-        : '/api/transcribe'
-
-      const response = await fetch(apiUrl, {
+      // No Content-Type header: fetch sets the multipart boundary itself
+      const response = await apiFetch('/api/transcribe', {
         method: 'POST',
         body: formData,
-        // Add extension ID header if in extension context
-        headers: config.isExtension && config.extensionId ? {
-          'X-Extension-ID': config.extensionId
-        } : {}
       })
 
       console.log('Transcription response status:', response.status)

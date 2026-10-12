@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getApiSession } from "@/lib/auth/api-session";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getApiSession();
 
     if (!session?.user?.id) {
       return NextResponse.json(

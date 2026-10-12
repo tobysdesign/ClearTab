@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, ReactNode, useCallback, use
 import { useSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiFetch } from '@/lib/api-fetch'
 
 export interface Message {
   content: string
@@ -183,7 +184,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const resolvedUserName = userName || "User";
 
     try {
-      const res = await fetch('/api/ai-context');
+      const res = await apiFetch('/api/ai-context');
       if (res.ok) {
         const body = await res.json();
         if (body.success) {
@@ -219,7 +220,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     for (const item of items) {
       const title = item.title.trim().slice(0, 200)
       if (!title) continue
-      const response = await fetch('/api/tasks', {
+      const response = await apiFetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -240,7 +241,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
   // Create note mutation
   const createNoteMutation = useMutation({
     mutationFn: async (content: string) => {
-      const response = await fetch('/api/notes', {
+      const response = await apiFetch('/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // The editor stores Quill deltas, so wrap the text; the first line becomes the title

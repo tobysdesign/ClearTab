@@ -9,6 +9,7 @@ import React, {
   useCallback,
 } from "react";
 import type { Task } from "@/shared/schema";
+import { apiFetch } from "@/lib/api-fetch";
 
 interface TaskModalContextValue {
   setActiveTaskId: (id: string | null) => void;
@@ -70,7 +71,7 @@ export function TaskModalProvider({ children }: TaskModalProviderProps) {
       try {
         console.log("Fetching task with ID:", taskId);
         // Fetch single task instead of all tasks for better performance
-        const response = await fetch(`/api/tasks?id=${taskId}`);
+        const response = await apiFetch(`/api/tasks?id=${taskId}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Task from API:", data.data);
@@ -165,7 +166,7 @@ export function TaskModalProvider({ children }: TaskModalProviderProps) {
 
     // Delete in background
     try {
-      const res = await fetch(`/api/tasks?id=${taskToDelete.id}`, {
+      const res = await apiFetch(`/api/tasks?id=${taskToDelete.id}`, {
         method: "DELETE",
       });
 
@@ -181,7 +182,7 @@ export function TaskModalProvider({ children }: TaskModalProviderProps) {
     // For create mode - if it's a draft task, delete it
     if (activeTask?.id && activeTask.id.startsWith("draft-")) {
       try {
-        const res = await fetch(`/api/tasks?id=${activeTask.id}`, {
+        const res = await apiFetch(`/api/tasks?id=${activeTask.id}`, {
           method: "DELETE",
         });
 

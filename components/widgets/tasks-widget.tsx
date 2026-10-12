@@ -23,6 +23,7 @@ import { formatDateSmart } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 import { toast as sonnerToast } from "sonner";
+import { apiFetch } from "@/lib/api-fetch";
 
 interface TasksWidgetProps {
   searchQuery?: string;
@@ -85,7 +86,7 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
     const title =
       lines[0].length > 50 ? lines[0].substring(0, 50) + "..." : lines[0];
 
-    const res = await fetch("/api/tasks", {
+    const res = await apiFetch("/api/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

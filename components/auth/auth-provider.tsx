@@ -1,53 +1,17 @@
 "use client"
 
-import { SessionProvider, useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from "next-auth/react"
-import { createContext, useContext, useMemo } from "react"
-import type { Session } from "next-auth"
+import { IS_EXTENSION } from "@/lib/platform"
+import { ExtensionAuthProvider } from "./extension-auth-provider"
+import { WebAuthProvider } from "./web-auth-provider"
 
-interface AuthContextType {
-  user: Session["user"] | null
-  session: Session | null
-  signIn: (provider: "google") => Promise<void>
-  signOut: () => Promise<void>
-  loading: boolean
-}
+export { useAuth } from "./auth-context"
+export type { AuthContextType } from "./auth-context"
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
-}
-
-function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
-
-  const value = useMemo<AuthContextType>(() => ({
-    user: session?.user || null,
-    session: session || null,
-    signIn: async (provider: "google") => {
-      await nextAuthSignIn(provider, { callbackUrl: "/tab" })
-    },
-    signOut: async () => {
-      await nextAuthSignOut({ callbackUrl: "/login" })
-    },
-    loading: status === "loading",
-  }), [session, status])
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
-}
-
+// The website signs in with NextAuth's cookie session; the Chrome extension with a bearer token
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <AuthContextProvider>{children}</AuthContextProvider>
-    </SessionProvider>
+  return IS_EXTENSION ? (
+    <ExtensionAuthProvider>{children}</ExtensionAuthProvider>
+  ) : (
+    <WebAuthProvider>{children}</WebAuthProvider>
   )
 }

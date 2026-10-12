@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { auth } from "@/auth";
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from "@/lib/db-minimal";
 import { user as userTable, connectedAccounts } from "@/shared/schema-tables";
 import { googleApiService } from "@/lib/google-api-service";
@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for accounts API');
       userId = '00000000-0000-4000-8000-000000000000';
     } else {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.error("❌ Session or user ID missing in GET /api/settings/accounts");
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
@@ -37,6 +37,8 @@ export async function GET(_request: NextRequest) {
 
     for (const account of accounts) {
       if (!account.accessToken) continue;
+      // Google tokens stay on the server; the settings UI only needs the account itself
+      const { accessToken: _accessToken, refreshToken: _refreshToken, ...publicAccount } = account;
 
       try {
         const authInfo = {
@@ -46,14 +48,14 @@ export async function GET(_request: NextRequest) {
 
         const email = await googleApiService.getUserInfo(authInfo);
         accountsWithEmail.push({
-          ...account,
+          ...publicAccount,
           email,
         });
       } catch (error) {
         console.error(`Failed to get email for account ${account.id}:`, error);
         // Include account even without email
         accountsWithEmail.push({
-          ...account,
+          ...publicAccount,
           email: 'Unknown',
         });
       }
@@ -90,7 +92,7 @@ export async function DELETE(request: NextRequest) {
       console.log('🔧 Development mode: Bypassing auth for account deletion');
       userId = '00000000-0000-4000-8000-000000000000';
     } else {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user?.id) {
         console.error("❌ Session or user ID missing in DELETE /api/settings/accounts");
         return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });

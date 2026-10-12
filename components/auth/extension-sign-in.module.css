@@ -1,0 +1,124 @@
+/* Extension new tab while signed out: the app icon and one sign-in button, centred */
+.page {
+  /* layout */
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+
+  /* box model */
+  padding: 16px;
+}
+
+.card {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  /* box model */
+  width: 100%;
+  max-width: 320px;
+
+  /* typography */
+  text-align: center;
+}
+
+.title {
+  /* box model */
+  margin: 8px 0 0;
+
+  /* typography */
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #e6e6e6;
+}
+
+.subtitle {
+  /* box model */
+  margin: 0 0 12px;
+
+  /* typography */
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--widget-text-light);
+}
+
+.primaryButton {
+  /* layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  /* box model */
+  width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+
+  /* typography */
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+
+  /* visual */
+  background: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.linkButton {
+  /* box model */
+  padding: 4px 8px;
+  border: none;
+
+  /* typography */
+  font-size: 13px;
+  color: var(--widget-text-light);
+
+  /* visual */
+  background: none;
+  cursor: pointer;
+}
+
+.linkButton:hover:not(:disabled) {
+  color: white;
+}
+
+.primaryButton:disabled,
+.linkButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  /* box model */
+  margin: 4px 0 0;
+
+  /* typography */
+  font-size: 13px;
+  line-height: 18px;
+  color: #f87171;
+}
+
+.footerLink {
+  /* typography */
+  font-size: 12px;
+  color: var(--widget-text-muted);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  color: var(--widget-text-light);
+}

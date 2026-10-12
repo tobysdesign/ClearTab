@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/auth/auth-provider'
+import { ExtensionSignIn } from '@/components/auth/extension-sign-in'
 import { NotesWidget } from '@/components/widgets/notes-widget'
 import { TasksWidget } from '@/components/widgets/tasks-widget'
 import { SkipOnboardingHandler } from '@/components/skip-onboarding-handler'
 import { BetaDashboardClient } from '@/components/dashboard/beta/beta-dashboard-client'
 import { BrandedLoader } from '@cleartab/ui'
+import { IS_EXTENSION } from '@/lib/platform'
 
 import styles from '@/components/dashboard/dashboard-client.module.css'
 
@@ -32,7 +34,8 @@ export default function TabPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login')
+      // The extension has no /login page: it shows its own sign-in screen below
+      if (!IS_EXTENSION) router.push('/login')
     } else if (!loading && user) {
       setHasLoaded(true)
     }
@@ -44,6 +47,10 @@ export default function TabPage() {
         <BrandedLoader size="medium" />
       </div>
     )
+  }
+
+  if (!user && IS_EXTENSION) {
+    return <ExtensionSignIn />
   }
 
   if (!user && !hasLoaded) {

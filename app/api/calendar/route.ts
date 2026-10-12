@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from "@/lib/db-minimal";
 import { user as userTable, connectedAccounts } from "@/shared/schema-tables";
 import { googleApiService } from "@/lib/google-api-service";
@@ -8,7 +8,7 @@ import { googleApiService } from "@/lib/google-api-service";
 export async function GET(_request: NextRequest) {
   console.log('🔵 CALENDAR ROUTE HIT - Request received at:', new Date().toISOString());
   try {
-    const session = await auth();
+    const session = await getApiSession();
     console.log('🔵 CALENDAR ROUTE - Auth session:', session?.user?.email);
 
     if (!session?.user?.id) {

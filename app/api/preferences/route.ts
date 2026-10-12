@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from "@/lib/db-minimal";
 import { userPreferences } from "@/shared/schema-tables";
 import { eq } from "drizzle-orm";
@@ -18,7 +18,7 @@ export async function GET() {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
@@ -67,8 +67,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     console.log("🔍 API saving for user:", userId.slice(0, 8));
 
-    // Convert ISO string dates back to Date objects for database
-    const processedBody = { ...body };
+    // Convert ISO string dates back to Date objects for database. The row's identity comes
+    // from the session only: a body userId must never pick whose preferences are written.
+    const { id: _id, userId: _userId, createdAt: _createdAt, ...processedBody } = body ?? {};
     if (processedBody.startDate && typeof processedBody.startDate === "string") {
       processedBody.startDate = new Date(processedBody.startDate);
     }

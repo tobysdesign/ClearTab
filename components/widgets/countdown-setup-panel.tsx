@@ -11,6 +11,7 @@ import {
   useToast,
 } from "@cleartab/ui";
 import styles from "./countdown-setup-panel.module.css";
+import { apiFetch } from "@/lib/api-fetch";
 
 type Recurrence = "none" | "weekly" | "fortnightly" | "monthly" | "annual";
 
@@ -87,7 +88,7 @@ export function CountdownSetupPanel({
     };
 
     try {
-      const response = await fetch("/api/preferences", {
+      const response = await apiFetch("/api/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

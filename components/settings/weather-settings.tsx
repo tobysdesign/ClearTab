@@ -7,6 +7,7 @@ import drawerStyles from "./settings-drawer.module.css";
 import { SearchIcon } from "@/components/icons";
 import { Select, SelectItem, useToast } from "@cleartab/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api-fetch";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 
@@ -39,7 +40,7 @@ export const WeatherSettings = React.forwardRef<
 
   const saveMutation = useMutation({
     mutationFn: async (newLocation: string) => {
-      const res = await fetch("/api/preferences", {
+      const res = await apiFetch("/api/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ location: newLocation }),

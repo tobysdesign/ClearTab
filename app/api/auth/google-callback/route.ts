@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
     if (state) {
       try {
         const parsedState = JSON.parse(state);
-        nextUrl = parsedState.nextUrl || '/settings';
+        // Same-site paths only: state isn't signed, so an absolute URL here would be an open redirect
+        if (typeof parsedState.nextUrl === 'string' && /^\/(?![/\\])/.test(parsedState.nextUrl)) {
+          nextUrl = parsedState.nextUrl;
+        }
         isPrimary = parsedState.isPrimary === true;
         stateUserId = parsedState.userId || null;
       } catch (e) {

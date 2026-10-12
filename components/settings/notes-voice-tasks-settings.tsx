@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DownloadIcon, MoreActionsIcon } from "@/components/icons";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
+import { apiFetch } from "@/lib/api-fetch";
 
 type DataDomain = "notes" | "tasks" | "voice";
 
@@ -60,7 +61,7 @@ export const NotesVoiceTasksSettings = React.forwardRef<
     try {
       console.log(`Attempting to delete ${domain} at ${endpointMap[domain]}`);
 
-      const res = await fetch(endpointMap[domain], {
+      const res = await apiFetch(endpointMap[domain], {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // Ensure cookies are sent

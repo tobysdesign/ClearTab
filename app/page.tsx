@@ -1,13 +1,7 @@
-'use client'
-
 import { LandingPage } from '@/components/landing/landing-page'
-import TabPage from './tab/page'
 
-// The web root is the public landing page; the dashboard lives at /tab.
-// The Chrome extension's new tab loads index.html, so its build keeps the
-// dashboard at the root.
-const IS_EXTENSION = process.env.IS_EXTENSION === 'true'
-
+// The public landing page. The dashboard lives at /tab; the Chrome extension build serves
+// it as its new tab page instead (scripts/build-extension.mjs).
 export default function Home() {
-  return IS_EXTENSION ? <TabPage /> : <LandingPage />
+  return <LandingPage />
 }

@@ -8,7 +8,8 @@ import styles from "./weather-widget-new.module.css";
 import { getWeatherIcon } from "./WeatherIcons";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
 import { WidgetContainer, WidgetLoader } from "@cleartab/ui";
-import { fetchWeather, type WeatherData } from "@/lib/actions/weather";
+import { apiFetch } from "@/lib/api-fetch";
+import type { WeatherData } from "@/lib/weather-service";
 
 // "Sydney NSW, Australia" -> "Sydney NSW": the card leads with the place
 // name alone (like iOS Weather), so drop the trailing country.
@@ -32,13 +33,16 @@ export function WeatherWidgetNew() {
   const { isLoading, error } = useQuery({
     queryKey: ["weather", location],
     queryFn: async () => {
-      const result = await fetchWeather({ location });
+      const response = await apiFetch(`/api/weather?${new URLSearchParams({ location })}`);
+      const result: { success?: boolean; data?: WeatherData[]; error?: string } = await response
+        .json()
+        .catch(() => ({}));
 
-      if (result?.data?.success && result.data.data) {
-        setCards(result.data.data);
-        return result.data.data;
+      if (response.ok && result.success && result.data) {
+        setCards(result.data);
+        return result.data;
       }
-      throw new Error(result?.data?.error || "Failed to fetch weather");
+      throw new Error(result.error || "Failed to fetch weather");
     },
     enabled: !!location,
   });

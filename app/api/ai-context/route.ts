@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getApiSession } from "@/lib/auth/api-session";
 import { getAiContext } from '@/lib/ai/context-service';
 import { dbMinimal } from '@/lib/db-minimal';
 import { userPreferences } from '@/shared/schema-tables';
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
+    const session = await getApiSession();
     
     // Development bypass
     const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';

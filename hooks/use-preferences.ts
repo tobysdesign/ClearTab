@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { apiFetch } from '@/lib/api-fetch'
 
 /*
  * Single source for /api/preferences (layout, widgets, weather location, countdown).
@@ -29,7 +30,7 @@ function readCachedPreferences(): Preferences | undefined {
 }
 
 async function fetchPreferences(): Promise<Preferences | null> {
-  const response = await fetch('/api/preferences')
+  const response = await apiFetch('/api/preferences')
   if (!response.ok) throw new Error(`Failed to load preferences (${response.status})`)
   const { data } = await response.json()
   try {
@@ -38,6 +39,15 @@ async function fetchPreferences(): Promise<Preferences | null> {
     // Storage full or blocked: the cache is only a speed-up
   }
   return data ?? null
+}
+
+// On sign-out, so the next account to sign in doesn't briefly see these
+export function clearPreferencesCache() {
+  try {
+    window.localStorage.removeItem(CACHE_KEY)
+  } catch {
+    // Storage blocked: nothing cached anyway
+  }
 }
 
 export function usePreferences() {

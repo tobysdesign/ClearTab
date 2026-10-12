@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eq, desc } from 'drizzle-orm';
-import { auth } from '@/auth';
+import { and, eq, desc } from 'drizzle-orm';
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from '@/lib/db-minimal';
 import { notes } from '@/shared/schema-tables';
 
@@ -44,7 +44,7 @@ export async function GET(_request: NextRequest) {
     } else {
       // Production mode: full auth check
       const authStart = Date.now();
-      const session = await auth();
+      const session = await getApiSession();
       console.log(`⏱️ Auth check took: ${Date.now() - authStart}ms`);
 
       if (!session?.user) {
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       userId = '00000000-0000-4000-8000-000000000000';
       console.log('🔧 Development mode: Bypassing auth for notes POST');
     } else {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
@@ -139,7 +139,7 @@ export async function PUT(request: NextRequest) {
       userId = '00000000-0000-4000-8000-000000000000';
       console.log('🔧 Development mode: Bypassing auth for notes PUT');
     } else {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
@@ -162,7 +162,7 @@ export async function PUT(request: NextRequest) {
     const [updatedNote] = await dbMinimal
       .update(notes)
       .set(updateValues)
-      .where(eq(notes.id, noteId))
+      .where(and(eq(notes.id, noteId), eq(notes.userId, userId)))
       .returning();
 
     if (!updatedNote) {
@@ -194,7 +194,7 @@ export async function DELETE(request: NextRequest) {
       userId = '00000000-0000-4000-8000-000000000000';
       console.log('🔧 Development mode: Bypassing auth for notes DELETE');
     } else {
-      const session = await auth();
+      const session = await getApiSession();
       if (!session?.user) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
       }
@@ -211,7 +211,9 @@ export async function DELETE(request: NextRequest) {
     // Delete from database using Drizzle
     await dbMinimal
       .delete(notes)
-      .where(eq(notes.id, id));
+      .where(and(eq(notes.id, id), eq(notes.userId, userId)));
+
+    notesCache.delete(userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

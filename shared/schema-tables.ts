@@ -422,3 +422,26 @@ export const appSettings = pgTable(
     }),
   }),
 ).enableRLS();
+
+// Chrome extension sign-ins. The extension can't use the web session cookie, so it holds an
+// opaque bearer token (see lib/auth/extension-tokens.ts). Only the token's SHA-256 hash is
+// stored. Server-only: RLS is on with no policies, so Supabase's public API can't read it.
+export const extensionTokens = pgTable(
+  "extension_tokens",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => generateUUID()),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    extensionId: text("extension_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    lastUsedAt: timestamp("last_used_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+  },
+  (table) => ({
+    userIdx: index("extension_tokens_user_id_idx").on(table.userId),
+  }),
+).enableRLS();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { getApiSession } from "@/lib/auth/api-session";
 import { dbMinimal } from '@/lib/db-minimal';
 import { notes } from '@/shared/schema-tables';
 import { eq } from 'drizzle-orm';
@@ -16,7 +16,7 @@ export async function DELETE(_request: NextRequest) {
     let userId = defaultUserId;
 
     if (!devBypass) {
-      const session = await auth();
+      const session = await getApiSession();
 
       if (!session?.user) {
         return NextResponse.json(

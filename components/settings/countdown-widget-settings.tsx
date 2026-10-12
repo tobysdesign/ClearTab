@@ -14,6 +14,7 @@ import { useToast } from "@cleartab/ui";
 import { MoreActionsIcon } from "@/components/icons";
 import sharedStyles from "./settings-shared.module.css";
 import drawerStyles from "./settings-drawer.module.css";
+import { apiFetch } from "@/lib/api-fetch";
 
 type Recurrence = "none" | "weekly" | "fortnightly" | "monthly" | "annual";
 
@@ -105,7 +106,7 @@ export const CountdownWidgetSettings = React.forwardRef<
     };
 
     try {
-      const response = await fetch("/api/preferences", {
+      const response = await apiFetch("/api/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -142,7 +143,7 @@ export const CountdownWidgetSettings = React.forwardRef<
   const handleClear = async () => {
     setClearing(true);
     try {
-      const response = await fetch("/api/preferences", {
+      const response = await apiFetch("/api/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

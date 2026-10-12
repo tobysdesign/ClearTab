@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { usePreferences } from '@/hooks/use-preferences'
 import type { PanelNode, DropZone } from '@/lib/panel-tree'
 import { presetToTree, moveWidget } from '@/lib/panel-tree'
+import { apiFetch } from '@/lib/api-fetch'
 
 export type BetaPresetLayout = 'notetaker' | 'even' | 'taskmaster' | 'minimal' | 'custom'
 
@@ -180,7 +181,7 @@ export function useBetaWidgets() {
     if (snapshot === lastSyncedLayoutRef.current) return
     const timeoutId = setTimeout(() => {
       lastSyncedLayoutRef.current = snapshot
-      fetch('/api/preferences', {
+      apiFetch('/api/preferences', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ layout: presetLayout, widgets, customLayout }),
