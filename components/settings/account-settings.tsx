@@ -131,8 +131,22 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["connectedAccounts"] });
+        // Removed account's events should disappear without a reload
+        queryClient.invalidateQueries({ queryKey: ["schedule"] });
       },
     });
+
+    // When accounts are added (after the connect redirect) or removed, refresh the schedule
+    // so the change shows up without a manual reload.
+    const prevAccountCount = React.useRef<number | null>(null);
+    React.useEffect(() => {
+      if (accountsLoading) return;
+      const count = connectedAccounts.length;
+      if (prevAccountCount.current !== null && prevAccountCount.current !== count) {
+        queryClient.invalidateQueries({ queryKey: ["schedule"] });
+      }
+      prevAccountCount.current = count;
+    }, [connectedAccounts, accountsLoading, queryClient]);
 
 
     const renderHeading = (actions?: React.ReactNode) => (
