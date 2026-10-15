@@ -5,8 +5,8 @@
 .composer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 12px 14px;
   background: rgba(18, 18, 18, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
@@ -20,13 +20,13 @@
 
 .input {
   width: 100%;
-  min-height: 18px;
+  min-height: 40px;
   padding: 0;
   background: transparent;
   border: none;
   outline: none;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.4;
 }
 

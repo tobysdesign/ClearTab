@@ -2,7 +2,7 @@
    Header/close button/kbd styles mirror keyboard-shortcuts-modal so every
    dock panel reads the same. */
 .container {
-  width: 380px;
+  width: 440px;
   max-width: calc(100vw - 48px);
   padding: 20px;
   display: flex;
@@ -49,12 +49,6 @@
   margin: 0;
 }
 
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .closeButton {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -80,81 +74,12 @@
   font-size: 11px;
 }
 
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.iconButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-.expandedContent {
-  max-height: 280px;
+.messagesArea {
+  max-height: min(440px, 55vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin-bottom: 12px;
-}
-
-.collapsedIndicator {
-  align-self: flex-start;
-  margin-bottom: 12px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: #71717a;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.collapsedIndicator:hover {
-  color: #d4d4d8;
-}
-
-.hints {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.shortcut {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: #d4d4d8;
 }
 
 /* Shown while follow-up questions are about a note selection */
