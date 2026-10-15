@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
-import { DockPanel } from '@cleartab/ui'
+import React, { useCallback, useEffect, useState } from 'react'
+import { DockPanel, Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from '@cleartab/ui'
 import { AddIcon, ChevronLeftIcon, CloseIcon, TrashIcon } from '@/components/icons'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { ChatMessages } from './chat-messages'
@@ -53,6 +53,19 @@ export function AiChat() {
     })
   }, [])
 
+  // Cmd/Ctrl+B toggles the conversations sidebar while the chat is open
+  useEffect(() => {
+    if (!isChatOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault()
+        toggleSidebar()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isChatOpen, toggleSidebar])
+
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInputValue(e.target.value)
   }, [setInputValue])
@@ -79,7 +92,7 @@ export function AiChat() {
       isOpen={isChatOpen}
       onClose={closeChat}
       anchorSelector='[data-testid="ai-chat-trigger"]'
-      className={`${styles.container} ${sidebarOpen ? styles.withSidebar : ''}`}
+      className={styles.container}
     >
       <div className={styles.layout}>
         {sidebarOpen && (
@@ -116,14 +129,21 @@ export function AiChat() {
         <div className={styles.main}>
           <div className={styles.modalHeader}>
             <div className={styles.headerLeft}>
-              <button
-                type="button"
-                className={styles.sidebarToggle}
-                onClick={toggleSidebar}
-                aria-label={sidebarOpen ? 'Hide conversations' : 'Show conversations'}
-              >
-                <ChevronLeftIcon size={16} className={sidebarOpen ? undefined : styles.toggleCollapsed} />
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className={styles.sidebarToggle}
+                    onClick={toggleSidebar}
+                    aria-label={sidebarOpen ? 'Hide conversations' : 'Show conversations'}
+                  >
+                    <ChevronLeftIcon size={16} className={sidebarOpen ? undefined : styles.toggleCollapsed} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {sidebarOpen ? 'Hide conversations' : 'Show conversations'} <TooltipShortcut>⌘B</TooltipShortcut>
+                </TooltipContent>
+              </Tooltip>
               <h2 className={styles.modalTitle}>AI Chat</h2>
             </div>
             <button type="button" onClick={closeChat} className={styles.closeButton}>

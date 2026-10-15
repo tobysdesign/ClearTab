@@ -89,11 +89,12 @@
   transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
 }
 
-.sendButton:active:not(:disabled) {
+.sendButton:active:not(:disabled):not([aria-disabled="true"]) {
   transform: scale(0.96);
 }
 
-.sendButton:disabled {
+.sendButton:disabled,
+.sendButton[aria-disabled="true"] {
   background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;

@@ -2,17 +2,14 @@
    Header/close button/kbd styles mirror keyboard-shortcuts-modal so every
    dock panel reads the same. */
 .container {
-  width: 460px;
+  /* Fixed width: minimising the sidebar hands its space to the chat rather than
+     shrinking the window. */
+  width: 640px;
   max-width: calc(100vw - 48px);
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-/* Wider when the conversations sidebar is showing */
-.withSidebar {
-  width: 640px;
 }
 
 .layout {
