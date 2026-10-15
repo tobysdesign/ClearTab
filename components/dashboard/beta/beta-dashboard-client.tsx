@@ -94,6 +94,29 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
   })
   const [dropZones, setDropZones] = useState<DropZone[]>([])
 
+  // The dock is fit-content, so measure it rather than hardcoding a width. `dockLength` is the
+  // icon run, `dockThickness` the bar's depth; both drive centring at every edge.
+  const dockRef = useRef<HTMLDivElement>(null)
+  const [dockLength, setDockLength] = useState(150)
+  const [dockThickness, setDockThickness] = useState(52)
+
+  useEffect(() => {
+    const el = dockRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const measure = () => {
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      if (w && h) {
+        setDockLength(Math.round(Math.max(w, h)))
+        setDockThickness(Math.round(Math.min(w, h)))
+      }
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   const initialPosition = position
 
   const initialCurrentZoneState =
@@ -143,7 +166,9 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       }
       if ((e.metaKey || e.ctrlKey) && e.key === ',') {
         e.preventDefault()
-        setShowSettings((prev) => !prev)
+        // Open/toggle the settings drawer, same as the dock's settings button.
+        // (setShowSettings alone did nothing — the dock no longer reads that state.)
+        window.dispatchEvent(new CustomEvent('openSettings', { detail: { tab: 'schedule', toggle: true } }))
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
         e.preventDefault()
@@ -168,47 +193,46 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
 
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
-    const isVertical = position === 'left' || position === 'right'
-    const DOCK_WIDTH_HORIZONTAL = 150
-    const DOCK_HEIGHT = 52
-    const width = isVertical ? DOCK_HEIGHT : DOCK_WIDTH_HORIZONTAL
-    const height = isVertical ? DOCK_WIDTH_HORIZONTAL : DOCK_HEIGHT
+    // Each zone uses the dock's dimensions for its own orientation, so the pill is centred on
+    // its true size whichever edge it's on. `long` = the icon run, `short` = the bar depth.
+    const long = dockLength
+    const short = dockThickness
     const margin = 10
 
     const newZones: DropZone[] = [
       {
         id: 'bottom',
-        x: (windowWidth - width) / 2,
-        y: windowHeight - height - margin,
-        width,
-        height,
+        x: (windowWidth - long) / 2,
+        y: windowHeight - short - margin,
+        width: long,
+        height: short,
       },
       {
         id: 'top',
-        x: (windowWidth - width) / 2,
+        x: (windowWidth - long) / 2,
         y: margin,
-        width,
-        height,
+        width: long,
+        height: short,
       },
       {
         id: 'left',
         x: margin,
-        y: (windowHeight - width) / 2,
-        width,
-        height,
+        y: (windowHeight - long) / 2,
+        width: short,
+        height: long,
       },
       {
         id: 'right',
-        x: windowWidth - width - margin,
-        y: (windowHeight - width) / 2,
-        width,
-        height,
+        x: windowWidth - short - margin,
+        y: (windowHeight - long) / 2,
+        width: short,
+        height: long,
       },
     ]
 
     setDropZones(newZones)
     return newZones
-  }, [position])
+  }, [position, dockLength, dockThickness])
 
   useEffect(() => {
     calculateDropZones()
@@ -255,12 +279,8 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     _info: PanInfo
   ) => {
     setIsDragging(true)
-    if (currentZone) {
-      setDragOrigin({
-        x: currentZone.x + currentZone.width / 2,
-        y: currentZone.y + currentZone.height / 2,
-      })
-    }
+    // The drop guide sits at the centre of the screen, not on the dock
+    setDragOrigin({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
   }
 
   const handleDrag = (
@@ -273,8 +293,11 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     const validZones = dropZones.filter((z) => z.id !== position)
 
     for (const zone of validZones) {
+      // Measure to each zone's centre, so a drag toward any edge picks that edge reliably
+      const zoneCenterX = zone.x + zone.width / 2
+      const zoneCenterY = zone.y + zone.height / 2
       const distance = Math.sqrt(
-        Math.pow(_info.point.x - zone.x, 2) + Math.pow(_info.point.y - zone.y, 2)
+        Math.pow(_info.point.x - zoneCenterX, 2) + Math.pow(_info.point.y - zoneCenterY, 2)
       )
 
       if (distance < minDistance) {
@@ -295,12 +318,12 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     if (nearestZoneId) {
       setPosition(nearestZoneId)
     } else if (currentZone) {
+      // Animate position only — leave width/height to the content (fit-content), so the
+      // pill background always covers the whole dock, handle included.
       controls.start(
         {
           x: currentZone.x,
           y: currentZone.y,
-          width: currentZone.width,
-          height: currentZone.height,
         },
         { type: 'spring', stiffness: 500, damping: 40 }
       )
@@ -357,6 +380,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       {typeof window !== 'undefined' &&
         createPortal(
           <motion.div
+            ref={dockRef}
             drag
             dragConstraints={{
               left: 0,
