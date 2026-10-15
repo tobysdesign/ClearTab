@@ -6,13 +6,14 @@ import { CloseIcon } from "@/components/icons";
 import { Button, DockPanel } from "@cleartab/ui";
 import { CountdownWidgetSettings } from "./countdown-widget-settings";
 import { NotesVoiceTasksSettings } from "./notes-voice-tasks-settings";
+import { TranscriptionSettings } from "./transcription-settings";
 import { WeatherSettings } from "./weather-settings";
 import { AccountSettings } from "./account-settings";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/auth/auth-provider";
 import styles from "./settings-drawer.module.css";
 
-type SectionId = "schedule" | "data" | "weather" | "countdown";
+type SectionId = "schedule" | "data" | "transcription" | "weather" | "countdown";
 
 interface SectionProps {
   sectionId: SectionId;
@@ -45,6 +46,12 @@ const sections: SectionConfig[] = [
     component: NotesVoiceTasksSettings,
   },
   {
+    id: "transcription",
+    label: "Transcription",
+    description: "Choose how your voice memos are transcribed.",
+    component: TranscriptionSettings,
+  },
+  {
     id: "weather",
     label: "Weather",
     description: "Configure your location and weather unit preferences.",
@@ -68,6 +75,8 @@ const legacyTabMap: Record<string, SectionId> = {
   Countdown: "countdown",
   schedule: "schedule",
   data: "data",
+  transcription: "transcription",
+  Transcription: "transcription",
   weather: "weather",
   countdown: "countdown",
 };

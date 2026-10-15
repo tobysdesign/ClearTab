@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { isExtension, saveAudioToExtensionStorage, getEnvironmentConfig } from '@/lib/chrome-extension-utils'
 import { apiFetch } from '@/lib/api-fetch'
 import { getDemoAudio } from '@/lib/demo/mode'
+import { getTranscriptionConfig } from '@/lib/transcription-config'
 
 export type RecordingState = 'idle' | 'requesting-permission' | 'permission-denied' | 'recording' | 'paused' | 'processing'
 
@@ -227,18 +228,40 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
       const formData = new FormData()
       formData.append('audio', audioBlob, `recording-${Date.now()}.webm`)
 
+      const config = await getTranscriptionConfig()
+
       // No Content-Type header: fetch sets the multipart boundary itself
-      const response = await apiFetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      })
+      let response: Response
+      if (config.mode === 'proxy' && config.proxyUrl) {
+        // Straight to the user's own transcription endpoint (their server holds the key)
+        response = await fetch(config.proxyUrl, {
+          method: 'POST',
+          body: formData,
+        })
+      } else {
+        // Built-in or BYOK: both go through ClearTab's /api/transcribe. BYOK adds the user's
+        // key as a header so the route uses it instead of the server's key.
+        const headers: Record<string, string> = {}
+        if (config.mode === 'byok' && config.geminiKey) {
+          headers['x-user-gemini-key'] = config.geminiKey
+        }
+        response = await apiFetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+          headers,
+        })
+      }
 
       console.log('Transcription response status:', response.status)
 
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Transcription API error:', errorText)
-        onError?.(`Transcription failed: ${response.statusText}`)
+        if (response.status === 401 && config.mode === 'byok') {
+          onError?.('Your Gemini API key was rejected. Check it in Settings → Transcription.')
+        } else {
+          onError?.(`Transcription failed: ${response.statusText}`)
+        }
         setState('idle')
         return
       }

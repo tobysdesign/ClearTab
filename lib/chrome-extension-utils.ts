@@ -95,6 +95,43 @@ export const setStorage = (key: string, value: unknown): Promise<void> => {
   });
 };
 
+/**
+ * Ask Chrome for permission to call an arbitrary origin at runtime (for "bring your own backend"
+ * transcription). The origin pattern must be covered by `optional_host_permissions` in the
+ * manifest. Must be called from a user gesture (e.g. a click handler) — so invoke it before any
+ * other `await` in that handler. Resolves true when granted (or when not running as an extension,
+ * where the normal web fetch/CORS applies and no permission is needed).
+ */
+export const requestHostPermission = (url: string): Promise<boolean> => {
+  const chrome = getChromeApi();
+  if (!isExtension() || !chrome?.permissions?.request) {
+    return Promise.resolve(true);
+  }
+
+  let originPattern: string;
+  try {
+    originPattern = `${new URL(url).origin}/*`;
+  } catch {
+    return Promise.resolve(false);
+  }
+
+  // Call request() synchronously inside the executor so the user gesture is still active.
+  // If the origin is already granted, Chrome resolves true without showing a prompt.
+  return new Promise<boolean>((resolve) => {
+    try {
+      chrome.permissions.request({ origins: [originPattern] }, (granted: boolean) => {
+        if (chrome.runtime?.lastError) {
+          resolve(false);
+          return;
+        }
+        resolve(Boolean(granted));
+      });
+    } catch {
+      resolve(false);
+    }
+  });
+};
+
 export const openOptionsPage = (): void => {
   const chrome = getChromeApi();
   if (chrome?.runtime?.openOptionsPage) {
