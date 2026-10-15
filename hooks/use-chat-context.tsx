@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api-fetch'
 import { getDemoApi } from '@/lib/demo/mode'
+import { type ChatThread, newThreadId, deriveThreadTitle, loadChatThreads, saveChatThreads } from '@/lib/chat-threads'
 
 export interface Message {
   content: string
@@ -63,6 +64,12 @@ interface ChatContextType {
   toggleStreamingMode: () => void
   cancelMessage: () => void
   canCancel: boolean
+  /** saved conversations, newest first */
+  threads: ChatThread[]
+  activeThreadId: string | null
+  newThread: () => void
+  selectThread: (id: string) => void
+  deleteThread: (id: string) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -225,10 +232,139 @@ export function ChatProvider({ children, languageModel }: { children: ReactNode;
   const [isStreamingMode, setIsStreamingMode] = useState(true)
   const [contextText, setContextText] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  // Set when we abort because the user switched threads, so no "cancelled" toast is shown
+  const suppressCancelToastRef = useRef(false)
   const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const localAiSessionRef = useRef<any>(null)
+
+  // Conversation threads (saved per-device; see lib/chat-threads). `messages` is the live copy of
+  // the active thread; a settled change is written back into that thread and persisted.
+  const [threads, setThreads] = useState<ChatThread[]>([])
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+  const threadsRef = useRef<ChatThread[]>([])
+  threadsRef.current = threads
+  const activeThreadIdRef = useRef<string | null>(null)
+  activeThreadIdRef.current = activeThreadId
+  const threadsLoadedRef = useRef(false)
+
+  const welcomeMessage = useCallback((): Message => ({
+    role: 'assistant',
+    content: hasSeenOnboarding
+      ? 'Welcome back! What can I help you with?'
+      : `Hi, I'm ${agentName || 'Alex'}. Ask me about your notes, tasks or schedule, or use #task and #note to add things.`,
+  }), [hasSeenOnboarding, agentName])
+
+  const createThread = useCallback((): ChatThread => {
+    const now = Date.now()
+    return { id: newThreadId(), title: 'New chat', messages: [welcomeMessage()], createdAt: now, updatedAt: now }
+  }, [welcomeMessage])
+
+  // A thread keeps the model's conversation history inside its session, so switching threads must
+  // start a fresh session (the next prompt rebuilds it with up-to-date context).
+  const resetModelSession = useCallback(() => {
+    try { localAiSessionRef.current?.destroy?.() } catch {}
+    localAiSessionRef.current = null
+  }, [])
+
+  // Abort any streaming reply before switching away, so its tokens don't land in another thread
+  const stopActiveGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      suppressCancelToastRef.current = true
+      abortControllerRef.current.abort()
+    }
+    setIsThinking(false)
+  }, [])
+
+  // Load saved threads once. The scripted /demo keeps its own in-memory thread and never persists.
+  useEffect(() => {
+    if (getDemoApi()) {
+      const t = createThread()
+      setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+      threadsLoadedRef.current = true
+      return
+    }
+    let active = true
+    loadChatThreads()
+      .then(({ threads: loaded, activeThreadId: savedActive }) => {
+        if (!active) return
+        if (loaded.length) {
+          setThreads(loaded)
+          const current = loaded.find(t => t.id === savedActive) ?? loaded[0]
+          setActiveThreadId(current.id)
+          setMessages(current.messages)
+        } else {
+          const t = createThread()
+          setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+        }
+      })
+      .catch(() => {
+        if (!active) return
+        const t = createThread()
+        setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+      })
+      .finally(() => { threadsLoadedRef.current = true })
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Write the live messages back into the active thread once streaming has settled, and persist.
+  useEffect(() => {
+    if (!threadsLoadedRef.current || !activeThreadId || getDemoApi()) return
+    if (isThinking || messages.some(m => m.isStreaming)) return
+    const prev = threadsRef.current
+    if (!prev.some(t => t.id === activeThreadId)) return
+    const next = prev.map(t => (t.id === activeThreadId
+      ? { ...t, messages, title: deriveThreadTitle(messages), updatedAt: Date.now() }
+      : t))
+    setThreads(next)
+    saveChatThreads(next, activeThreadId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isThinking, activeThreadId])
+
+  const newThread = useCallback(() => {
+    stopActiveGeneration()
+    const t = createThread()
+    const next = [t, ...threadsRef.current]
+    setThreads(next)
+    setActiveThreadId(t.id)
+    setMessages(t.messages)
+    setContextText(null)
+    resetModelSession()
+    if (!getDemoApi()) saveChatThreads(next, t.id)
+  }, [createThread, resetModelSession, stopActiveGeneration])
+
+  const selectThread = useCallback((id: string) => {
+    const target = threadsRef.current.find(t => t.id === id)
+    if (!target || id === activeThreadIdRef.current) return
+    stopActiveGeneration()
+    setActiveThreadId(id)
+    setMessages(target.messages)
+    setContextText(null)
+    resetModelSession()
+    if (!getDemoApi()) saveChatThreads(threadsRef.current, id)
+  }, [resetModelSession, stopActiveGeneration])
+
+  const deleteThread = useCallback((id: string) => {
+    const remaining = threadsRef.current.filter(t => t.id !== id)
+    const wasActive = id === activeThreadIdRef.current
+    if (wasActive) stopActiveGeneration()
+    if (remaining.length === 0) {
+      const t = createThread()
+      setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages); resetModelSession()
+      if (!getDemoApi()) saveChatThreads([t], t.id)
+      return
+    }
+    setThreads(remaining)
+    const nextActiveId = wasActive ? remaining[0].id : activeThreadIdRef.current
+    if (wasActive) {
+      setActiveThreadId(remaining[0].id)
+      setMessages(remaining[0].messages)
+      resetModelSession()
+    }
+    if (!getDemoApi()) saveChatThreads(remaining, nextActiveId)
+  }, [createThread, resetModelSession, stopActiveGeneration])
 
   const initLocalAiSession = useCallback(async () => {
     if (localAiSessionRef.current) return localAiSessionRef.current;
@@ -477,7 +613,10 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       })
     } catch (error: any) {
       if (error?.name === 'AbortError') {
-        toast({ title: 'Message cancelled', description: 'The message was cancelled.' })
+        if (!suppressCancelToastRef.current) {
+          toast({ title: 'Message cancelled', description: 'The message was cancelled.' })
+        }
+        suppressCancelToastRef.current = false
       } else {
         console.error('Error processing message:', error)
         toast({
@@ -650,19 +789,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
 
   const openChat = useCallback(() => {
     setIsChatOpen(true)
-    if (messages.length === 0) {
-      // The old server-driven onboarding chat no longer exists, so finish onboarding on first open
-      if (!hasSeenOnboarding) {
-        completeOnboarding({ userName, agentName })
-      }
-      setMessages([{
-        role: 'assistant',
-        content: hasSeenOnboarding
-          ? 'Welcome back! What can I help you with?'
-          : `Hi, I'm ${agentName}. Ask me about your notes, tasks or schedule, or use #task and #note to add things.`,
-      }])
+    // The active thread already carries its welcome / history (see the thread-loading effect)
+    if (!hasSeenOnboarding) {
+      completeOnboarding({ userName, agentName })
     }
-  }, [hasSeenOnboarding, completeOnboarding, userName, agentName, messages])
+  }, [hasSeenOnboarding, completeOnboarding, userName, agentName])
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false)
@@ -710,6 +841,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         toggleStreamingMode,
         cancelMessage,
         canCancel,
+        threads,
+        activeThreadId,
+        newThread,
+        selectThread,
+        deleteThread,
       }}
     >
       {children}

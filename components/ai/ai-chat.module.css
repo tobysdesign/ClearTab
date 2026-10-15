@@ -2,11 +2,167 @@
    Header/close button/kbd styles mirror keyboard-shortcuts-modal so every
    dock panel reads the same. */
 .container {
-  width: 440px;
+  width: 460px;
   max-width: calc(100vw - 48px);
-  padding: 20px;
+  padding: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Wider when the conversations sidebar is showing */
+.withSidebar {
+  width: 640px;
+}
+
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* Conversations sidebar */
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.newChatButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.newChatButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.threadList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.threadItem {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+
+.threadItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.threadItem[data-active="true"] {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.threadButton {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 7px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #a1a1aa;
+  font-size: 12.5px;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.threadItem[data-active="true"] .threadButton {
+  color: #f4f4f5;
+}
+
+.threadDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #71717a;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.threadItem:hover .threadDelete,
+.threadItem[data-active="true"] .threadDelete {
+  opacity: 1;
+}
+
+.threadDelete:hover {
+  color: #f87171;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebarToggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.toggleCollapsed {
+  transform: rotate(180deg);
 }
 
 @keyframes aiSpotlightPulse {
@@ -75,7 +231,7 @@
 }
 
 .messagesArea {
-  max-height: min(440px, 55vh);
+  max-height: min(520px, 60vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
