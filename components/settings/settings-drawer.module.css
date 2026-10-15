@@ -240,7 +240,9 @@
 .sections {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 16px 24px;
+    /* Generous bottom space so the last section (Countdown) can scroll up to the
+       active position — otherwise the sidebar can't reach/highlight it. */
+    padding: 20px 16px 60vh;
     display: flex;
     flex-direction: column;
     gap: 14px;
