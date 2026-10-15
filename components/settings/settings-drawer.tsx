@@ -263,22 +263,15 @@ export function SettingsDrawer({
       anchorSelector='[data-testid="settings-trigger"]'
       className={styles.drawerContent}
     >
-        <div className={styles.container}>
-          <Button
-            onClick={() => setIsOpen(false)}
-            className={styles.closeButtonFloating}
-            tooltipLabel="Close settings"
-          >
-            <span>Done</span>
+        <div className={styles.topBar}>
+          <h2 className={styles.topBarTitle}>Settings</h2>
+          <Button onClick={() => setIsOpen(false)} tooltipLabel="Close settings">
+            <span>Close</span>
             <kbd className={styles.escKey}>Esc</kbd>
           </Button>
-
+        </div>
+        <div className={styles.container}>
           <aside className={styles.sidebar}>
-            <div className={styles.sidebarHeader}>
-              <h2 className={styles.sidebarLabel}>Settings</h2>
-              <div className={styles.sidebarDivider} />
-            </div>
-
             <nav className={styles.nav}>
               <ul className={styles.navList}>
                 {sections.map((section) => (

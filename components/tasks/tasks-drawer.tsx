@@ -33,6 +33,19 @@ export function TasksDrawer() {
     (activeTaskId && !activeTaskId.startsWith("draft-"))
   );
 
+  // Cmd/Ctrl+Enter finishes (the editor uses plain Enter for newlines)
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleModalClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, handleModalClose]);
+
   return (
     <div className={styles.drawerContainer}>
       <Drawer
@@ -70,6 +83,10 @@ export function TasksDrawer() {
                   </SimpleDropdownItem>
                 </SimpleDropdown>
               )}
+              <Button variant="ghost" onClick={handleModalClose}>
+                <span>Close</span>
+                <kbd className={styles.escKey}>Esc</kbd>
+              </Button>
             </div>
           </div>
           <EditTaskForm
@@ -83,14 +100,9 @@ export function TasksDrawer() {
             isLoadingTask={isLoadingTask}
           />
           <div className={footerStyles.footer}>
-            {!isEditing && (
-              <Button variant="outline" onClick={handleCancelTask}>
-                Cancel
-              </Button>
-            )}
             <Button onClick={handleModalClose}>
               <span>Done</span>
-              <kbd className={footerStyles.kbd}>Esc</kbd>
+              <kbd className={footerStyles.kbd}>⌘⏎</kbd>
             </Button>
           </div>
         </DrawerContent>

@@ -440,7 +440,7 @@ export function VisualLayoutModal({
 
           </div>
           <button type="button" onClick={onClose} className={styles.closeButton}>
-            <span>Done</span>
+            <span>Close</span>
             <kbd className={styles.escKey}>Esc</kbd>
           </button>
         </div>

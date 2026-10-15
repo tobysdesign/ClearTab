@@ -147,7 +147,7 @@ export function AiChat() {
               <h2 className={styles.modalTitle}>AI Chat</h2>
             </div>
             <button type="button" onClick={closeChat} className={styles.closeButton}>
-              <span>Done</span>
+              <span>Close</span>
               <kbd className={styles.escKey}>Esc</kbd>
             </button>
           </div>

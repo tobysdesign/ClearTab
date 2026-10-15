@@ -11,14 +11,29 @@
     display: none !important;
 }
 
+/* Proper header bar: title left, Close right — so the Close no longer floats over content */
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topBarTitle {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f4f4f5;
+    margin: 0;
+}
+
 .container {
     display: grid;
     grid-template-columns: 240px 1fr;
     flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
-    position: relative;
-
 }
 
 .sidebar {
@@ -218,8 +233,8 @@
     margin-left: 6px;
     padding: 2px 5px;
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.18);
-    color: rgba(0, 0, 0, 0.55);
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .sections {
