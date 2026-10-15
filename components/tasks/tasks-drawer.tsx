@@ -12,6 +12,7 @@ import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
+import footerStyles from "@/components/ui/modal-actions.module.css";
 
 export function TasksDrawer() {
   const {
@@ -54,8 +55,8 @@ export function TasksDrawer() {
             </DrawerDescription>
 
             <div className={styles.headerActions}>
-              {/* Actions menu for edit mode, Cancel (discards draft) for create mode */}
-              {isEditing ? (
+              {/* Edit mode keeps the actions menu (Delete) in the header */}
+              {isEditing && (
                 <SimpleDropdown
                   trigger={
                     <Button variant="ghost" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
@@ -68,15 +69,7 @@ export function TasksDrawer() {
                     Delete
                   </SimpleDropdownItem>
                 </SimpleDropdown>
-              ) : (
-                <Button variant="ghost" onClick={handleCancelTask}>
-                  Cancel
-                </Button>
               )}
-              <Button onClick={handleModalClose}>
-                <span>Done</span>
-                <kbd className={styles.escKey}>Esc</kbd>
-              </Button>
             </div>
           </div>
           <EditTaskForm
@@ -89,6 +82,17 @@ export function TasksDrawer() {
             isCreating={isCreatingNew}
             isLoadingTask={isLoadingTask}
           />
+          <div className={footerStyles.footer}>
+            {!isEditing && (
+              <Button variant="outline" onClick={handleCancelTask}>
+                Cancel
+              </Button>
+            )}
+            <Button onClick={handleModalClose}>
+              <span>Done</span>
+              <kbd className={footerStyles.kbd}>Esc</kbd>
+            </Button>
+          </div>
         </DrawerContent>
       </Drawer>
     </div>

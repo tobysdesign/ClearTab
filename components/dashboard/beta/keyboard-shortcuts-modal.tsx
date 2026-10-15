@@ -1,8 +1,9 @@
 'use client'
 
 import React from 'react'
-import { DockPanel } from '@cleartab/ui'
+import { Button, DockPanel } from '@cleartab/ui'
 import styles from './keyboard-shortcuts-modal.module.css'
+import footerStyles from '@/components/ui/modal-actions.module.css'
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean
@@ -28,10 +29,6 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
     <DockPanel isOpen={isOpen} onClose={onClose} anchorSelector='[data-testid="shortcuts-trigger"]' className={styles.panelContent}>
       <div className={styles.modalHeader}>
         <h2 className={styles.modalTitle}>Keyboard Shortcuts</h2>
-        <button type="button" onClick={onClose} className={styles.closeButton}>
-          <span>Done</span>
-          <kbd className={styles.escKey}>Esc</kbd>
-        </button>
       </div>
       <div className={styles.shortcutList}>
         {SHORTCUTS.map((shortcut) => (
@@ -44,6 +41,12 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
             </span>
           </div>
         ))}
+      </div>
+      <div className={footerStyles.footer}>
+        <Button onClick={onClose}>
+          <span>Done</span>
+          <kbd className={footerStyles.kbd}>Esc</kbd>
+        </Button>
       </div>
     </DockPanel>
   )

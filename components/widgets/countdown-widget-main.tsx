@@ -26,6 +26,7 @@ import {
   EmptyState,
 } from "@cleartab/ui";
 import { useEffect, useState } from "react";
+import { PenIcon } from "@/components/icons";
 import { usePreferences, type Preferences } from "@/hooks/use-preferences";
 import { CountdownBreakdown } from "./countdown-breakdown";
 // import styles from "./widget.module.css";
@@ -294,8 +295,10 @@ export function CountdownWidget({
                 <AddButton
                   data-testid={COUNTDOWN_ADD_DATE_TESTID}
                   onClick={() => setIsSetupOpen(true)}
-                  tooltip="Change countdown"
-                />
+                  tooltip="Edit countdown"
+                >
+                  <PenIcon size={16} />
+                </AddButton>
               </WidgetHeader>
               <WidgetContent scrollable={false} className={countdownStyles.content}>
                 <div className={countdownStyles.mainContainer}>

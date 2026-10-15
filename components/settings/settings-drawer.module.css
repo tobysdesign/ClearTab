@@ -200,34 +200,26 @@
     border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Positioning only — the label/pill styling comes from the shared Button */
 .closeButtonFloating {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 14px;
+    right: 14px;
     z-index: 100;
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.7);
-    transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.closeButtonFloating:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.9);
-    transform: scale(1.05);
-}
-
-.closeIcon {
-    width: 14px;
-    height: 14px;
-    color: currentColor;
+.escKey {
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+    margin-left: 6px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.18);
+    color: rgba(0, 0, 0, 0.55);
 }
 
 .sections {

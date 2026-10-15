@@ -148,6 +148,8 @@ html {
 .drop-zone {
   /* layout */
   position: fixed;
+  /* Above the widgets, just below the dock (z-index 50) */
+  z-index: 45;
 
   /* box model */
   width: 150px;

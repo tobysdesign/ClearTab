@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { CloseIcon } from "@/components/icons";
 import { Button, DockPanel } from "@cleartab/ui";
 import { CountdownWidgetSettings } from "./countdown-widget-settings";
 import { NotesVoiceTasksSettings } from "./notes-voice-tasks-settings";
@@ -266,15 +265,12 @@ export function SettingsDrawer({
     >
         <div className={styles.container}>
           <Button
-            variant="ghost-icon"
-            size="icon"
             onClick={() => setIsOpen(false)}
             className={styles.closeButtonFloating}
             tooltipLabel="Close settings"
-            shortcut="Esc"
           >
-            <span className="sr-only">Close</span>
-            <CloseIcon size={14} className={styles.closeIcon} />
+            <span>Done</span>
+            <kbd className={styles.escKey}>Esc</kbd>
           </Button>
 
           <aside className={styles.sidebar}>

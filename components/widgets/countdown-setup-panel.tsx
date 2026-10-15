@@ -11,6 +11,7 @@ import {
   useToast,
 } from "@cleartab/ui";
 import styles from "./countdown-setup-panel.module.css";
+import footerStyles from "@/components/ui/modal-actions.module.css";
 import { apiFetch } from "@/lib/api-fetch";
 
 type Recurrence = "none" | "weekly" | "fortnightly" | "monthly" | "annual";
@@ -127,10 +128,6 @@ export function CountdownSetupPanel({
     >
       <div className={styles.header}>
         <h2 className={styles.title}>New countdown</h2>
-        <button type="button" onClick={onClose} className={styles.closeButton}>
-          <span>Cancel</span>
-          <kbd className={styles.escKey}>Esc</kbd>
-        </button>
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -172,13 +169,12 @@ export function CountdownSetupPanel({
           </div>
         </div>
 
-        <div className={styles.actions}>
-          <Button
-            type="submit"
-            disabled={saving}
-            tooltipLabel="Save countdown"
-            shortcut="⌘S"
-          >
+        <div className={footerStyles.footer}>
+          <Button type="button" variant="outline" onClick={onClose}>
+            <span>Cancel</span>
+            <kbd className={footerStyles.kbd}>Esc</kbd>
+          </Button>
+          <Button type="submit" disabled={saving} tooltipLabel="Save countdown">
             {saving ? "Saving…" : "Save"}
           </Button>
         </div>
