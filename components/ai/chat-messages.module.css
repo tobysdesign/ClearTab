@@ -324,8 +324,13 @@
   display: flex;
   flex-direction: column;
   align-self: stretch;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 10px;
+  /* Encapsulate the suggested tasks + action in one card */
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
 }
 
 .suggestionList {
@@ -374,8 +379,9 @@
 }
 
 .suggestionCheck[aria-pressed="true"] {
-  border-color: #f4f4f5;
-  background: #f4f4f5;
+  border-color: rgba(56, 189, 248, 0.9);
+  background: rgba(56, 189, 248, 0.9);
+  color: #0b1620;
 }
 
 .suggestionTitle {
@@ -424,18 +430,19 @@
   align-self: flex-start;
   height: 30px;
   padding: 0 14px;
-  border: none;
+  border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 8px;
-  background: white;
-  color: #1a1a1a;
+  background: rgba(56, 189, 248, 0.15);
+  color: #bae6fd;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 150ms ease, transform 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
 }
 
 .addTasksButton:hover:not(:disabled) {
-  background: #f0f0f0;
+  background: rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.6);
 }
 
 .addTasksButton:active:not(:disabled) {
@@ -443,8 +450,9 @@
 }
 
 .addTasksButton:disabled {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
   cursor: not-allowed;
 }
 
