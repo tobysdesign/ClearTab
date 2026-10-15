@@ -9,6 +9,8 @@
   min-width: 0;
   padding: 0 0.5rem;
   box-sizing: border-box;
+  /* Match the full-view card gap (.widget-list-item has margin-bottom: 8px) */
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
