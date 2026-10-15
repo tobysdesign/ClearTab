@@ -54,48 +54,81 @@ export async function createExtensionToken(userId: string, extensionId: string) 
   return { token, expiresAt };
 }
 
+type VerifiedTokenResult = { user: ExtensionUser; expiresAt: Date };
+
+const VERIFIED_CACHE_TTL_MS = 60_000; // 60s cache avoids 5x duplicate DB lookups when a new tab opens
+const verifiedCache = new Map<string, { value: VerifiedTokenResult; cachedUntil: number }>();
+const inflightVerifications = new Map<string, Promise<VerifiedTokenResult | null>>();
+
 export async function verifyExtensionToken(
   token: string,
-): Promise<{ user: ExtensionUser; expiresAt: Date } | null> {
+): Promise<VerifiedTokenResult | null> {
   if (!isExtensionToken(token)) return null;
 
-  // Joining on user also means a deleted account's tokens stop working at once
-  const [row] = await dbMinimal
-    .select({
-      id: extensionTokens.id,
-      expiresAt: extensionTokens.expiresAt,
-      lastUsedAt: extensionTokens.lastUsedAt,
-      user: { id: user.id, email: user.email, name: user.name, image: user.image },
-    })
-    .from(extensionTokens)
-    .innerJoin(user, eq(user.id, extensionTokens.userId))
-    .where(eq(extensionTokens.tokenHash, hashToken(token)))
-    .limit(1);
-
+  const hashed = hashToken(token);
   const now = Date.now();
-  if (!row || row.expiresAt.getTime() <= now) return null;
-
-  let expiresAt = row.expiresAt;
-  if (now - row.lastUsedAt.getTime() > TOUCH_INTERVAL_MS) {
-    expiresAt = new Date(now + TOKEN_TTL_MS);
-    try {
-      await dbMinimal
-        .update(extensionTokens)
-        .set({ lastUsedAt: new Date(now), expiresAt } as Partial<ExtensionTokenRow>)
-        .where(eq(extensionTokens.id, row.id));
-    } catch (error) {
-      // Not fatal: the token just keeps its old expiry
-      console.error("Extension token touch failed:", error);
-      expiresAt = row.expiresAt;
-    }
+  const cached = verifiedCache.get(hashed);
+  if (cached && cached.cachedUntil > now && cached.value.expiresAt.getTime() > now) {
+    return cached.value;
   }
 
-  return { user: row.user, expiresAt };
+  const existing = inflightVerifications.get(hashed);
+  if (existing) return existing;
+
+  const lookup = (async (): Promise<VerifiedTokenResult | null> => {
+    try {
+      // Joining on user also means a deleted account's tokens stop working at once
+      const [row] = await dbMinimal
+        .select({
+          id: extensionTokens.id,
+          expiresAt: extensionTokens.expiresAt,
+          lastUsedAt: extensionTokens.lastUsedAt,
+          user: { id: user.id, email: user.email, name: user.name, image: user.image },
+        })
+        .from(extensionTokens)
+        .innerJoin(user, eq(user.id, extensionTokens.userId))
+        .where(eq(extensionTokens.tokenHash, hashed))
+        .limit(1);
+
+      const currentNow = Date.now();
+      if (!row || row.expiresAt.getTime() <= currentNow) {
+        verifiedCache.delete(hashed);
+        return null;
+      }
+
+      let expiresAt = row.expiresAt;
+      if (currentNow - row.lastUsedAt.getTime() > TOUCH_INTERVAL_MS) {
+        expiresAt = new Date(currentNow + TOKEN_TTL_MS);
+        try {
+          await dbMinimal
+            .update(extensionTokens)
+            .set({ lastUsedAt: new Date(currentNow), expiresAt } as Partial<ExtensionTokenRow>)
+            .where(eq(extensionTokens.id, row.id));
+        } catch (error) {
+          // Not fatal: the token just keeps its old expiry
+          console.error("Extension token touch failed:", error);
+          expiresAt = row.expiresAt;
+        }
+      }
+
+      const result: VerifiedTokenResult = { user: row.user, expiresAt };
+      verifiedCache.set(hashed, { value: result, cachedUntil: currentNow + VERIFIED_CACHE_TTL_MS });
+      return result;
+    } finally {
+      inflightVerifications.delete(hashed);
+    }
+  })();
+
+  inflightVerifications.set(hashed, lookup);
+  return lookup;
 }
 
 export async function revokeExtensionToken(token: string) {
   if (!isExtensionToken(token)) return;
-  await dbMinimal.delete(extensionTokens).where(eq(extensionTokens.tokenHash, hashToken(token)));
+  const hashed = hashToken(token);
+  verifiedCache.delete(hashed);
+  inflightVerifications.delete(hashed);
+  await dbMinimal.delete(extensionTokens).where(eq(extensionTokens.tokenHash, hashed));
 }
 
 const EXTENSION_ID = /^[a-p]{32}$/;

@@ -74,58 +74,89 @@
   overflow: visible;
 }
 
-/* Horizontal resize handle (resizing columns) */
-.resizeHandleHorizontal {
-  width: 2px;
-  margin: 0 4px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  transition: all 0.2s ease;
-  position: relative;
-  cursor: col-resize;
-  flex-shrink: 0;
+@keyframes spotlightPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.08),
+      0 0 16px rgba(56, 189, 248, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(56, 189, 248, 0.15),
+      0 0 22px rgba(56, 189, 248, 0.2);
+  }
 }
 
+.widgetPanel[data-demo-spotlight="true"]::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  border: 1.5px solid rgba(56, 189, 248, 0.45);
+  pointer-events: none;
+  z-index: 30;
+  animation: spotlightPulse 2.6s ease-in-out infinite;
+}
+
+
+/* Horizontal resize handle (resizing columns) */
+.resizeHandleHorizontal {
+  width: 4px;
+  margin: 0 7px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  position: relative;
+  cursor: ew-resize;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+/* Large hit target for easy grabbing */
 .resizeHandleHorizontal::after {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -6px;
-  right: -6px;
+  left: -14px;
+  right: -14px;
+  z-index: 25;
 }
 
 .resizeHandleHorizontal:hover,
 .resizeHandleHorizontal[data-resize-handle-active] {
-  background-color: #6366f1;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+  background-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
 /* Vertical resize handle (resizing rows) */
 .resizeHandleVertical {
-  height: 2px;
-  margin: 4px 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  transition: all 0.2s ease;
+  height: 4px;
+  margin: 7px 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   position: relative;
-  cursor: row-resize;
+  cursor: ns-resize;
   flex-shrink: 0;
+  z-index: 20;
 }
 
+/* Large hit target for easy grabbing */
 .resizeHandleVertical::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  top: -6px;
-  bottom: -6px;
+  top: -14px;
+  bottom: -14px;
+  z-index: 25;
 }
 
 .resizeHandleVertical:hover,
 .resizeHandleVertical[data-resize-handle-active] {
-  background-color: #6366f1;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+  background-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
 @media (max-width: 768px) {

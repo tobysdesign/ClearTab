@@ -24,7 +24,7 @@ import styles from './beta-adaptive-grid.module.css'
 // lets panels overflow off-screen.
 //
 // A vertical group floors its panels by HEIGHT (>= 48px each); a horizontal
-// group floors them by WIDTH (>= a quarter of the viewport each). The floor is
+// group floors them by WIDTH (>= an eighth of the viewport each). The floor is
 // always the floor of a panel's WHOLE subtree, not a single widget: a panel
 // holding two stacked widgets must reserve 2x the height, and one holding two
 // side-by-side widgets must reserve 2x the width, or a parent drag could squeeze
@@ -33,7 +33,8 @@ import styles from './beta-adaptive-grid.module.css'
 const STACK_ORDER: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'countdown', 'recorder']
 
 const MIN_WIDGET_HEIGHT_PX = 48
-const MIN_WIDGET_WIDTH_FRACTION = 1 / 4 // of the viewport width
+const MIN_WIDGET_WIDTH_FRACTION = 1 / 8 // of the viewport width (12.5%)
+const RESIZE_HIT_MARGINS = { fine: 14, coarse: 20 }
 
 // Min height (px) a subtree needs so every leaf stays >= MIN_WIDGET_HEIGHT_PX.
 function nodeMinHeightPx(node: PanelNode | null): number {
@@ -95,7 +96,7 @@ function AdaptivePanelGroup({
 }
 
 // In a vertical group a panel's floor is `minHeightPx`; in a horizontal group it
-// is `minWidthUnits` quarters-of-the-viewport wide. Either is converted to a
+// is `minWidthUnits` eighths-of-the-viewport wide. Either is converted to a
 // percentage of the measured group. `minSize` is the fallback before measuring.
 function AdaptivePanel({
   minSize,
@@ -104,7 +105,11 @@ function AdaptivePanel({
   ...rest
 }: React.ComponentProps<typeof Panel> & { minHeightPx?: number; minWidthUnits?: number }) {
   const group = React.useContext(GroupBoxContext)
-  let effectiveMin = minSize
+  const defaultMin =
+    group?.dir === 'horizontal'
+      ? minWidthUnits * (100 * MIN_WIDGET_WIDTH_FRACTION)
+      : minSize ?? 10
+  let effectiveMin = minSize !== undefined ? minSize : defaultMin
   if (group?.dir === 'vertical' && group.height > 0) {
     effectiveMin = Math.min(100, (minHeightPx / group.height) * 100)
   } else if (group?.dir === 'horizontal' && group.width > 0) {
@@ -249,7 +254,7 @@ export function BetaAdaptiveGrid({
                 {renderWidget(id)}
               </AdaptivePanel>
               {index < active.length - 1 && (
-                <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
               )}
             </React.Fragment>
           )
@@ -271,7 +276,7 @@ export function BetaAdaptiveGrid({
           <AdaptivePanel defaultSize={50} minSize={20} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
             {renderHorizontalCluster(r1, `${prefix}-r1`)}
           </AdaptivePanel>
-          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
           <AdaptivePanel defaultSize={50} minSize={20} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
             {renderHorizontalCluster(r2, `${prefix}-r2`)}
           </AdaptivePanel>
@@ -290,13 +295,14 @@ export function BetaAdaptiveGrid({
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>
-        <AdaptivePanel defaultSize={node.sizes[0]} minSize={15} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[0]} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} className={styles.widgetPanel}>
           {renderPanelNode(node.children[0])}
         </AdaptivePanel>
         <PanelResizeHandle
+          hitAreaMargins={RESIZE_HIT_MARGINS}
           className={node.direction === 'row' ? styles.resizeHandleHorizontal : styles.resizeHandleVertical}
         />
-        <AdaptivePanel defaultSize={node.sizes[1]} minSize={15} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[1]} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} className={styles.widgetPanel}>
           {renderPanelNode(node.children[1])}
         </AdaptivePanel>
       </AdaptivePanelGroup>
@@ -327,7 +333,7 @@ export function BetaAdaptiveGrid({
             <AdaptivePanel defaultSize={34} minSize={15} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
               {renderWidget('tasks')}
             </AdaptivePanel>
-            <PanelResizeHandle className={styles.resizeHandleVertical} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
             <AdaptivePanel defaultSize={66} minSize={25} minHeightPx={(hasRow1 ? MIN_WIDGET_HEIGHT_PX : 0) + (hasRow2 ? MIN_WIDGET_HEIGHT_PX : 0)} className={styles.widgetPanel}>
               {render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'notetaker')}
             </AdaptivePanel>
@@ -342,9 +348,9 @@ export function BetaAdaptiveGrid({
     if (hasNotes && hasRight) {
       return (
         <AdaptivePanelGroup key="notetaker-layout" direction="horizontal" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={48} minSize={25} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('notes')}</AdaptivePanel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <AdaptivePanel defaultSize={52} minSize={25} minWidthUnits={Math.max(hasTasks ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
+          <AdaptivePanel defaultSize={48} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('notes')}</AdaptivePanel>
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
+          <AdaptivePanel defaultSize={52} minWidthUnits={Math.max(hasTasks ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
         </AdaptivePanelGroup>
       )
     }
@@ -377,7 +383,7 @@ export function BetaAdaptiveGrid({
             <AdaptivePanel defaultSize={34} minSize={15} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
               {renderWidget('notes')}
             </AdaptivePanel>
-            <PanelResizeHandle className={styles.resizeHandleVertical} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
             <AdaptivePanel defaultSize={66} minSize={25} minHeightPx={(hasRow1 ? MIN_WIDGET_HEIGHT_PX : 0) + (hasRow2 ? MIN_WIDGET_HEIGHT_PX : 0)} className={styles.widgetPanel}>
               {render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'taskmaster')}
             </AdaptivePanel>
@@ -392,9 +398,9 @@ export function BetaAdaptiveGrid({
     if (hasTasks && hasRight) {
       return (
         <AdaptivePanelGroup key="taskmaster-layout" direction="horizontal" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={48} minSize={25} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('tasks')}</AdaptivePanel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
-          <AdaptivePanel defaultSize={52} minSize={25} minWidthUnits={Math.max(hasNotes ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
+          <AdaptivePanel defaultSize={48} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('tasks')}</AdaptivePanel>
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
+          <AdaptivePanel defaultSize={52} minWidthUnits={Math.max(hasNotes ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
         </AdaptivePanelGroup>
       )
     }
@@ -423,7 +429,7 @@ export function BetaAdaptiveGrid({
           <AdaptivePanel defaultSize={topDefaultSize} minSize={topMinSize} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
             {renderHorizontalCluster(topWidgets, `${keyPrefix}-top`)}
           </AdaptivePanel>
-          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
           <AdaptivePanel defaultSize={bottomDefaultSize} minSize={bottomMinSize} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
             {renderHorizontalCluster(bottomWidgets, `${keyPrefix}-bottom`)}
           </AdaptivePanel>

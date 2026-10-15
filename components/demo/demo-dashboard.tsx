@@ -134,7 +134,7 @@ function Scene({ story, onLoopEnd }: { story: Story; onLoopEnd: () => void }) {
         layoutOverride={{ presetLayout: 'custom', visibleWidgets: layout.visible, customLayout: { tree: layout.tree } }}
       />
       <AiChat />
-      {WITH_CURSOR.includes(story) && <DemoCursor ref={cursorRef} />}
+      <DemoCursor ref={cursorRef} showPointer={WITH_CURSOR.includes(story)} />
     </>
   )
 }

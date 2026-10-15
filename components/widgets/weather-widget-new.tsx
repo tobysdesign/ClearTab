@@ -20,8 +20,20 @@ function placeName(location?: string) {
   return i === -1 ? location : location.slice(0, i).trim();
 }
 
+function getInitialCachedWeather(): WeatherData[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const cachedRaw = window.localStorage.getItem("cleartab_cached_weather_v1");
+    if (cachedRaw) {
+      const parsed = JSON.parse(cachedRaw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return [];
+}
+
 export function WeatherWidgetNew() {
-  const [cards, setCards] = useState<WeatherData[]>([]);
+  const [cards, setCards] = useState<WeatherData[]>(getInitialCachedWeather);
 
   const { ref, isMini } = useWidgetHeight();
 
@@ -42,17 +54,25 @@ export function WeatherWidgetNew() {
         .catch(() => ({}));
 
       if (response.ok && result.success && result.data) {
+        try {
+          window.localStorage.setItem("cleartab_cached_weather_v1", JSON.stringify(result.data));
+        } catch {}
         return result.data;
       }
       throw new Error(result.error || "Failed to fetch weather");
     },
+    initialData: () => {
+      const initial = getInitialCachedWeather();
+      return initial.length > 0 ? initial : undefined;
+    },
+    initialDataUpdatedAt: () => 0,
     enabled: !!location,
   });
 
   // The card stack is local (clicking rotates it), seeded from the query. Seeding inside
   // queryFn left it empty whenever the widget remounted with the data already cached.
   useEffect(() => {
-    if (data) setCards(data);
+    if (data && data.length > 0) setCards(data);
   }, [data]);
 
   // A piece of state to hold the card we're removing, to add it back later
@@ -76,23 +96,23 @@ export function WeatherWidgetNew() {
 
   const currentData = cards[cards.length - 1]; // The visible card (top of stack)
 
-  if (isLoading || cards.length === 0) {
-    return (
-      <div ref={ref} className={styles.container}>
-        <WidgetContainer>
-          <WidgetLoader className="Weather" />
-        </WidgetContainer>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && cards.length === 0) {
     return (
       <div ref={ref} className={styles.container}>
         <WidgetContainer>
           <div className={styles.errorState}>
             <p>Weather unavailable</p>
           </div>
+        </WidgetContainer>
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div ref={ref} className={styles.container}>
+        <WidgetContainer>
+          <WidgetLoader className="Weather" />
         </WidgetContainer>
       </div>
     );

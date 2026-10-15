@@ -27,7 +27,12 @@ function AuthenticatedDashboard() {
 export default function ClassicDashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     // Only redirect if we're not loading and there's no user
@@ -40,7 +45,7 @@ export default function ClassicDashboardPage() {
   }, [user, loading, router])
 
   // Only show full-screen loader on initial load
-  if (loading && !hasLoaded) {
+  if (!mounted || (loading && !hasLoaded)) {
     return (
       <div
         style={{

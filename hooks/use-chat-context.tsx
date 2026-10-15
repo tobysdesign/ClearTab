@@ -5,6 +5,7 @@ import { useSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api-fetch'
+import { getDemoApi } from '@/lib/demo/mode'
 
 export interface Message {
   content: string
@@ -31,7 +32,7 @@ export interface TaskSuggestion {
 }
 
 export const MAKE_TASKS_REPLY = 'Make tasks from this'
-const SUMMARISE_REPLY = 'Summarise this'
+export const SUMMARISE_REPLY = 'Summarise this'
 
 interface ChatContextType {
   isChatOpen: boolean
@@ -221,6 +222,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
   // Creates tasks via the API. The API reads `title` (sending `content` saved them as "Untitled Task").
   const createTasks = useCallback(async (items: Array<Partial<TaskSuggestion> & { title: string }>) => {
     let created = 0
+    const createdIds: string[] = []
     for (const item of items) {
       const title = item.title.trim().slice(0, 200)
       if (!title) continue
@@ -235,12 +237,14 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         }),
       })
       if (!response.ok) throw new Error('Failed to create task')
+      const body = await response.json().catch(() => ({}))
+      if (body?.data?.id) createdIds.push(body.data.id)
       created += 1
     }
     console.log('ChatProvider: created', created, 'tasks')
     queryClient.invalidateQueries({ queryKey: ['tasks'] })
-    // The Tasks widget keeps its own list; this makes it reload so the new tasks show
-    window.dispatchEvent(new CustomEvent('tasks-changed'))
+    // The Tasks widget keeps its own list; this makes it reload and highlight the new tasks
+    window.dispatchEvent(new CustomEvent('tasks-changed', { detail: { createdIds, count: created } }))
     return created
   }, [queryClient])
 
@@ -263,10 +267,12 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       queryClient.invalidateQueries({ queryKey: ['notes'] })
       // The Notes widget reloads on this (it keeps its own list)
       window.dispatchEvent(new CustomEvent('note-created', { detail: result }))
-      toast({
-        title: 'Note created',
-        description: 'Your note has been created successfully.',
-      })
+      if (!getDemoApi()) {
+        toast({
+          title: 'Note created',
+          description: 'Your note has been created successfully.',
+        })
+      }
     },
   })
 
@@ -308,9 +314,20 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         ? `Here is some text from my notes:\n"""\n${contextText}\n"""\n\n${userMessage}`
         : userMessage
 
+      const followUpReplies =
+        contextText && userMessage === SUMMARISE_REPLY ? [MAKE_TASKS_REPLY] : undefined
+
       if (!streaming) {
         const responseText = await session.prompt(prompt, { signal: controller.signal })
-        setMessages(prev => [...prev, { role: 'assistant', content: responseText, thoughtMs: Date.now() - startedAt }])
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: responseText,
+            thoughtMs: Date.now() - startedAt,
+            quickReplies: followUpReplies,
+          },
+        ])
         return
       }
 
@@ -342,7 +359,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       setMessages(prev => {
         if (!started) return prev
         const updated = [...prev]
-        updated[updated.length - 1] = { ...updated[updated.length - 1], isStreaming: false }
+        updated[updated.length - 1] = {
+          ...updated[updated.length - 1],
+          isStreaming: false,
+          quickReplies: followUpReplies,
+        }
         return updated
       })
     } catch (error: any) {
@@ -486,6 +507,12 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     try {
       const created = await createTasks(tasks)
       setMessages(prev => prev.map((m, i) => (i === messageIndex ? { ...m, tasksAdded: created } : m)))
+      // Pause so "Added N tasks to Tasks" reads clearly before revealing the Tasks widget
+      setTimeout(() => {
+        setIsChatOpen(false)
+        setContextText(null)
+        window.dispatchEvent(new CustomEvent('tasks-focus'))
+      }, 1100)
     } catch (error) {
       console.error('ChatProvider: adding suggested tasks failed', error)
       toast({ title: 'Error', description: "Couldn't add those tasks. Please try again.", variant: 'destructive' })

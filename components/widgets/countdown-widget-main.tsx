@@ -56,20 +56,80 @@ const DEFAULT_COUNTDOWN_PREFERENCES: Preferences = {
   paydayFrequency: "none",
 };
 
+function calculateCountdownSettings(paydayData?: Preferences | null) {
+  const defaultSettings = {
+    nextPayday: new Date(),
+    daysLeft: RECURRENCE_DAYS["fortnightly"],
+    recurrenceInDays: RECURRENCE_DAYS["fortnightly"] as RecurrenceDays,
+  };
+  if (!paydayData) return defaultSettings;
+
+  const { countdownMode, manualCount, paydayFrequency } = paydayData;
+  const endDate = (paydayData as any).endDate;
+  const startDate = (paydayData as any).startDate;
+  const paydayDate = (paydayData as any).paydayDate;
+
+  if (countdownMode === "manual-count") {
+    return {
+      nextPayday: new Date(),
+      daysLeft: manualCount || 0,
+      recurrenceInDays: 14 as RecurrenceDays,
+    };
+  } else if (countdownMode === "date-range" || paydayDate) {
+    const today = startOfDay(new Date());
+
+    if (paydayFrequency === "none") {
+      const targetDateValue = endDate || paydayDate;
+      if (!targetDateValue) return defaultSettings;
+
+      const targetDate = new Date(targetDateValue);
+      const daysLeft = differenceInDays(startOfDay(targetDate), today);
+
+      return {
+        nextPayday: targetDate,
+        daysLeft: Math.max(0, daysLeft),
+        recurrenceInDays: Math.max(14, Math.abs(daysLeft)) as RecurrenceDays,
+      };
+    } else if (paydayFrequency && (endDate || paydayDate)) {
+      const lastPaydayValue = startDate || paydayDate;
+      if (!lastPaydayValue) return defaultSettings;
+
+      const lastPayday = new Date(lastPaydayValue);
+      const recurrenceInDays = (RECURRENCE_DAYS[paydayFrequency as PaydayFrequency] || 14) as RecurrenceDays;
+
+      let nextPayday = new Date(lastPayday);
+      while (
+        isBefore(nextPayday, today) ||
+        nextPayday.getTime() === today.getTime()
+      ) {
+        if (paydayFrequency === "monthly") {
+          nextPayday = addMonths(nextPayday, 1);
+        } else if (paydayFrequency === "annual") {
+          nextPayday = new Date(
+            nextPayday.setFullYear(nextPayday.getFullYear() + 1),
+          );
+        } else {
+          nextPayday = addDays(nextPayday, recurrenceInDays);
+        }
+      }
+
+      const daysLeft = differenceInDays(nextPayday, today);
+
+      return {
+        nextPayday,
+        daysLeft,
+        recurrenceInDays,
+      };
+    }
+  }
+  return defaultSettings;
+}
+
 export function CountdownWidget({
   variant = "vertical",
 }: CountdownWidgetProps) {
   const { ref, isMini } = useWidgetHeight();
   const [isSetupOpen, setIsSetupOpen] = useState(false);
-  const [settings, setSettings] = useState<{
-    nextPayday: Date;
-    daysLeft: number;
-    recurrenceInDays: RecurrenceDays;
-  }>({
-    nextPayday: new Date(),
-    daysLeft: RECURRENCE_DAYS["fortnightly"],
-    recurrenceInDays: RECURRENCE_DAYS["fortnightly"],
-  });
 
   // Preferences are shared (one request for the whole page) and cached locally,
   // so the countdown draws immediately on a new tab
@@ -77,74 +137,12 @@ export function CountdownWidget({
   const paydayData = preferences ?? (isPending ? undefined : DEFAULT_COUNTDOWN_PREFERENCES);
   const isLoading = isPending && !preferences;
 
+  const [settings, setSettings] = useState(() => calculateCountdownSettings(paydayData));
+
   // Calculate countdown based on mode
   useEffect(() => {
     if (!paydayData) return;
-
-    const { countdownMode, manualCount, paydayFrequency } = paydayData;
-    const endDate = (paydayData as any).endDate;
-    const startDate = (paydayData as any).startDate;
-    const paydayDate = (paydayData as any).paydayDate;
-
-    if (countdownMode === "manual-count") {
-      // Manual count mode - just use the manual count
-      setSettings({
-        nextPayday: new Date(),
-        daysLeft: manualCount || 0,
-        recurrenceInDays: 14, // Default for dot display
-      });
-    } else if (countdownMode === "date-range" || paydayDate) {
-      // Date-based mode
-      const today = startOfDay(new Date());
-
-      if (paydayFrequency === "none") {
-        // One-time countdown to end date
-        const targetDateValue = endDate || paydayDate;
-        if (!targetDateValue) return; // No date set
-
-        // Parse date from ISO string timestamp
-        const targetDate = new Date(targetDateValue);
-        const daysLeft = differenceInDays(startOfDay(targetDate), today);
-
-        setSettings({
-          nextPayday: targetDate,
-          daysLeft: Math.max(0, daysLeft),
-          recurrenceInDays: Math.max(14, Math.abs(daysLeft)) as RecurrenceDays, // Use days left or default
-        });
-      } else if (paydayFrequency && (endDate || paydayDate)) {
-        // Recurring countdown
-        const lastPaydayValue = startDate || paydayDate;
-        if (!lastPaydayValue) return; // No date set
-
-        const lastPayday = new Date(lastPaydayValue);
-        const recurrenceInDays = RECURRENCE_DAYS[paydayFrequency];
-
-        // Calculate next occurrence
-        let nextPayday = new Date(lastPayday);
-        while (
-          isBefore(nextPayday, today) ||
-          nextPayday.getTime() === today.getTime()
-        ) {
-          if (paydayFrequency === "monthly") {
-            nextPayday = addMonths(nextPayday, 1);
-          } else if (paydayFrequency === "annual") {
-            nextPayday = new Date(
-              nextPayday.setFullYear(nextPayday.getFullYear() + 1),
-            );
-          } else {
-            nextPayday = addDays(nextPayday, recurrenceInDays);
-          }
-        }
-
-        const daysLeft = differenceInDays(nextPayday, today);
-
-        setSettings({
-          nextPayday,
-          daysLeft,
-          recurrenceInDays,
-        });
-      }
-    }
+    setSettings(calculateCountdownSettings(paydayData));
   }, [paydayData]);
 
   // Get the countdown title from settings

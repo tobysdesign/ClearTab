@@ -650,12 +650,68 @@
 .transcribingTitle {
     /* typography */
     color: #ddd;
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 13px;
+    font-weight: 500;
     letter-spacing: -0.02em;
 
     /* box model */
     margin-bottom: 6px;
+}
+
+.transcribingProgressTrack {
+    width: 100%;
+    max-width: 220px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 8px 0 10px;
+    position: relative;
+}
+
+.transcribingProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+    border-radius: 9999px;
+    animation: transcribingProgress 2.2s ease-in-out infinite;
+}
+
+@keyframes transcribingProgress {
+    0% {
+        width: 20%;
+        transform: translateX(-100%);
+    }
+    50% {
+        width: 65%;
+        transform: translateX(60%);
+    }
+    100% {
+        width: 100%;
+        transform: translateX(120%);
+    }
+}
+
+.miniProcessingWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.miniProgressTrack {
+    width: 90px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.miniProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    border-radius: 9999px;
+    animation: transcribingProgress 1.8s ease-in-out infinite;
 }
 
 .transcribingSubtitle {
@@ -978,8 +1034,17 @@
 /* Transcription Complete States */
 .transcriptionCompleteContainer {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 12px;
+    width: 100%;
+}
+
+.successActionButtons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .transcriptionCompleteMessage {

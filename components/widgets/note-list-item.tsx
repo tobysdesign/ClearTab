@@ -52,6 +52,12 @@ export const NoteListItem = React.memo(function NoteListItem({
 
         // Handle Quill delta format
         if (parsedContent.ops && Array.isArray(parsedContent.ops)) {
+          if (parsedContent.status === "transcribing") {
+            return "Transcribing voice note...";
+          }
+          if (parsedContent.status === "out_of_credits") {
+            return "Out of transcription credits";
+          }
           const previewText = parsedContent.ops
             .map((op: any) => (typeof op.insert === "string" ? op.insert : ""))
             .join("")
@@ -208,7 +214,7 @@ export const NoteListItem = React.memo(function NoteListItem({
           "widget-list-item widget-list-item--notes",
           styles.expandedItem,
           isSelected && "widget-list-item--active",
-          isRecentlyUpdated && "animate-highlight",
+          isRecentlyUpdated && styles.itemHighlighted,
           isDeleting && styles.itemDeleting,
         )}
         onClick={handleClick}
@@ -237,6 +243,9 @@ export const NoteListItem = React.memo(function NoteListItem({
             >
               {displayText}
             </div>
+            {isRecentlyUpdated && !isDeleting && (
+              <span className={styles.newBadge}>New</span>
+            )}
             {isEditing && !isDeleting && (
               <div className={styles.editingIndicator}>
                 <div className={styles.editingDot} />

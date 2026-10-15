@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AddButton } from "@cleartab/ui";
 import type { Task } from "@/shared/schema";
 import {
@@ -109,6 +109,18 @@ export async function createTaskFromText(text: string): Promise<Task | null> {
   }
 }
 
+function getInitialCachedTasks(): Task[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const cachedRaw = window.localStorage.getItem("cleartab_cached_tasks_v1");
+    if (cachedRaw) {
+      const parsed = JSON.parse(cachedRaw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return [];
+}
+
 export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   const {
     setActiveTaskId,
@@ -117,18 +129,77 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     registerTaskUpdateCallback,
     unregisterTaskUpdateCallback,
   } = useTaskModal();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>(getInitialCachedTasks);
+  const initialHadTasks = useRef(tasks.length > 0);
+  const [isLoading, setIsLoading] = useState(!initialHadTasks.current);
   const [isError, setIsError] = useState(false);
+  const [highlightedTaskIds, setHighlightedTaskIds] = useState<Set<string>>(new Set());
+  const [addedNotice, setAddedNotice] = useState<string | null>(null);
+  const [isWidgetHighlighted, setIsWidgetHighlighted] = useState(false);
+  const hasLoadedOnceRef = useRef(initialHadTasks.current);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Create a stable loadTasks function
+  const triggerTasksHighlight = useCallback((createdIds?: string[], count?: number) => {
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    if (createdIds && createdIds.length > 0) {
+      setHighlightedTaskIds(new Set(createdIds));
+    }
+    const total = count ?? createdIds?.length ?? 0;
+    if (total > 0) {
+      setAddedNotice(`+${total} added`);
+    }
+    setIsWidgetHighlighted(false);
+    requestAnimationFrame(() => {
+      setIsWidgetHighlighted(true);
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = 0;
+      }
+    });
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedTaskIds(new Set());
+      setAddedNotice(null);
+      setIsWidgetHighlighted(false);
+    }, 7500);
+  }, []);
+
+  // Create a stable loadTasks function (silent once loaded so new tasks animate in smoothly)
   const loadTasks = useCallback(async () => {
     try {
-      setIsLoading(true);
-      const data = await fetchTasks();
+      if (!hasLoadedOnceRef.current) {
+        setIsLoading(true);
+      }
+      let data: Task[];
+      try {
+        data = await fetchTasks();
+      } catch {
+        // Retry once after a short delay on transient network / DB timeout
+        await new Promise((resolve) => setTimeout(resolve, 900));
+        data = await fetchTasks();
+      }
       setTasks(data);
+      hasLoadedOnceRef.current = true;
       setIsError(false);
+      try {
+        window.localStorage.setItem("cleartab_cached_tasks_v1", JSON.stringify(data));
+      } catch {
+        // Ignore storage errors
+      }
     } catch {
+      try {
+        const cachedRaw = window.localStorage.getItem("cleartab_cached_tasks_v1");
+        if (cachedRaw) {
+          const cachedTasks = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedTasks)) {
+            setTasks(cachedTasks);
+            hasLoadedOnceRef.current = true;
+            setIsError(false);
+            return;
+          }
+        }
+      } catch {
+        // Ignore cache read errors
+      }
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -154,11 +225,33 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     return () => window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
   }, [loadTasks]);
 
-  // Tasks created elsewhere (the AI chat, a note's "+ Task") reload the list
+  // Tasks created elsewhere (the AI chat, a note's "+ Task") reload the list and highlight
   useEffect(() => {
-    window.addEventListener('tasks-changed', loadTasks);
-    return () => window.removeEventListener('tasks-changed', loadTasks);
-  }, [loadTasks]);
+    const handleTasksChanged = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ createdIds?: string[]; count?: number }>
+      ).detail;
+      void loadTasks();
+      triggerTasksHighlight(detail?.createdIds, detail?.count);
+    };
+
+    const handleTasksFocus = () => {
+      triggerTasksHighlight();
+    };
+
+    window.addEventListener('tasks-changed', handleTasksChanged as EventListener);
+    window.addEventListener('tasks-focus', handleTasksFocus as EventListener);
+    return () => {
+      window.removeEventListener('tasks-changed', handleTasksChanged as EventListener);
+      window.removeEventListener('tasks-focus', handleTasksFocus as EventListener);
+    };
+  }, [loadTasks, triggerTasksHighlight]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
+  }, []);
 
   // Handle granular task updates from modal
   const handleTaskUpdate = useCallback(
@@ -332,24 +425,49 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   // Removed activeTask calculation from here, it's now handled by the context
 
   if (isLoading) {
-    return <WidgetLoader minHeight="280px" />;
+    return (
+      <WidgetContainer className="tasks-widget">
+        <WidgetLoader />
+      </WidgetContainer>
+    );
   }
 
   if (isError) {
     return (
-      <div className={tasksStyles.tasksError}>
-        Failed to load tasks. Please try again later.
-      </div>
+      <WidgetContainer className="tasks-widget">
+        <WidgetHeader title="Tasks">
+          <AddButton onClick={handleAddTask} tooltip="Add task" />
+        </WidgetHeader>
+        <WidgetContent scrollable={false}>
+          <EmptyState
+            title="Couldn't load tasks"
+            description="Couldn't reach your tasks right now."
+            action={{
+              label: "Try again",
+              onClick: () => {
+                void loadTasks();
+              },
+            }}
+          />
+        </WidgetContent>
+      </WidgetContainer>
     );
   }
 
   return (
-    <WidgetContainer className="tasks-widget">
+    <WidgetContainer
+      className={cn("tasks-widget", isWidgetHighlighted && tasksStyles.widgetHighlighted)}
+    >
       <WidgetHeader title="Tasks">
+        {addedNotice && (
+          <span className={tasksStyles.arrivalBadge} role="status">
+            ✓ {addedNotice}
+          </span>
+        )}
         <AddButton onClick={handleAddTask} tooltip="Add task" />
       </WidgetHeader>
       <WidgetContent>
-        <div className={tasksStyles.tasksContainer}>
+        <div ref={scrollContainerRef} className={tasksStyles.tasksContainer}>
           <div className="ListContent">
             <div className={tasksStyles.tasksEmpty}>
               {tasks.length === 0 ? (
@@ -378,6 +496,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                     <AnimatePresence>
                       {tasks.map((task) => {
                         const isActive = activeTask?.id === task.id;
+                        const isNewlyAdded = highlightedTaskIds.has(task.id);
                         return (
                           <motion.div
                             key={task.id}
@@ -394,6 +513,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                             className={cn(
                               "widget-list-item widget-list-item--tasks",
                               isActive && "active",
+                              isNewlyAdded && tasksStyles.taskItemHighlighted,
                             )}
                           >
                             {/* Pink dot for active item */}
@@ -428,6 +548,11 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                                 </h3>
                               </div>
                               <div className={tasksStyles.tasksContentRight}>
+                                {isNewlyAdded && (
+                                  <span className={tasksStyles.newTaskBadge}>
+                                    New
+                                  </span>
+                                )}
                                 {task.isHighPriority && (
                                   <LabelImportantIcon
                                     size={16}

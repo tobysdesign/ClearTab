@@ -197,3 +197,26 @@
     transform: rotate(360deg);
   }
 }
+
+.itemHighlighted {
+  border-color: rgba(56, 189, 248, 0.55) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.14) 0%,
+    rgba(56, 189, 248, 0.04) 100%
+  ) !important;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.16);
+}
+
+.newBadge {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  color: #7dd3fc;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}

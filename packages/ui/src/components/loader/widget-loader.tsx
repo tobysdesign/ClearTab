@@ -12,7 +12,7 @@ export interface WidgetLoaderProps extends React.HTMLAttributes<HTMLDivElement> 
 export function WidgetLoader({
   className,
   style,
-  minHeight = "16rem",
+  minHeight,
   loaderSize = "small",
   ...props
 }: WidgetLoaderProps) {
@@ -22,7 +22,10 @@ export function WidgetLoader({
   return (
     <div
       className={cn(styles.container, className)}
-      style={{ minHeight: computedMinHeight, ...style }}
+      style={{
+        ...(computedMinHeight !== undefined ? { minHeight: computedMinHeight } : {}),
+        ...style,
+      }}
       {...props}
     >
       <BrandedLoader size={loaderSize} />

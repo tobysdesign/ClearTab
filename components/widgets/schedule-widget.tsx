@@ -171,6 +171,20 @@ export function ScheduleWidget() {
   // Check if we have session cookies as a workaround for auth loading issues
   const hasSessionCookies = typeof document !== 'undefined' && document.cookie.includes('sb-qclvzjiyglvxtctauyhb-auth-token')
 
+function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const cachedRaw = window.localStorage.getItem('cleartab_cached_schedule_v1');
+    if (cachedRaw) {
+      const cachedEvents = JSON.parse(cachedRaw);
+      if (Array.isArray(cachedEvents) && cachedEvents.length > 0) {
+        return { events: cachedEvents, needsReconnection: false };
+      }
+    }
+  } catch {}
+  return undefined;
+}
+
   const {
     data,
     isLoading,
@@ -178,22 +192,23 @@ export function ScheduleWidget() {
     refetch
   } = useQuery({
     queryKey: ['schedule'],
+    initialData: getInitialCachedSchedule,
+    initialDataUpdatedAt: () => 0,
     enabled: !loading || hasSessionCookies, // Enable query if not loading OR if we have session cookies
     retry: (failureCount, error) => {
       const errorWithMeta = error as Error & { errorType?: string; status?: number };
-      // Retry auth errors up to 2 times (token refresh might fix it)
-      if (errorWithMeta.errorType === 'AUTH_EXPIRED' && failureCount < 2) {
-        return true;
+      if (errorWithMeta.status === 401 || errorWithMeta.status === 403) {
+        return errorWithMeta.errorType === 'AUTH_EXPIRED' && failureCount < 2;
       }
-      // Don't retry other errors
-      return false;
+      // Automatically retry transient network / 5xx errors up to 2 times
+      return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 5000),
     queryFn: async (): Promise<ScheduleQueryResult> => {
       try {
         const res = await api.get('/api/calendar')
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData = await res.json().catch(() => ({}));
           const error = new Error(errorData.error || 'Failed to fetch schedule') as Error & {
             errorType?: string;
             userMessage?: string;
@@ -233,9 +248,25 @@ export function ScheduleWidget() {
           accountId: event.accountId,
         }));
         console.log('Mapped events:', mappedEvents);
+        try {
+          window.localStorage.setItem('cleartab_cached_schedule_v1', JSON.stringify(mappedEvents))
+        } catch {
+          // Ignore storage quota / sandboxed errors
+        }
         return { events: mappedEvents, needsReconnection: false, message: json.message };
       } catch (error) {
         console.error('Error fetching schedule:', error)
+        try {
+          const cachedRaw = window.localStorage.getItem('cleartab_cached_schedule_v1')
+          if (cachedRaw) {
+            const cachedEvents = JSON.parse(cachedRaw)
+            if (Array.isArray(cachedEvents) && cachedEvents.length > 0) {
+              return { events: cachedEvents, needsReconnection: false }
+            }
+          }
+        } catch {
+          // Ignore cache read errors
+        }
         throw error
       }
     },
@@ -384,19 +415,22 @@ export function ScheduleWidget() {
       )
     }
 
-    // Generic error fallback
-    console.log('Schedule widget error:', error);
+    // Graceful error state with Try again button
     return (
       <div ref={ref} style={{ width: '100%', height: '100%' }}>
         <WidgetContainer>
           <WidgetHeader title="Schedule" />
           <WidgetContent scrollable={false}>
-            <div className="p-4 text-sm text-red-400">
-              <p className="font-bold mb-2">Error loading schedule</p>
-              <pre className="whitespace-pre-wrap text-xs opacity-70">
-                {error instanceof Error ? error.message : 'Unknown error'}
-              </pre>
-            </div>
+            <EmptyState
+              title="Couldn't load schedule"
+              description="Couldn't reach your calendar right now."
+              action={{
+                label: "Try again",
+                onClick: () => {
+                  void refetch()
+                },
+              }}
+            />
           </WidgetContent>
         </WidgetContainer>
       </div>

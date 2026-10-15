@@ -9,6 +9,29 @@
   flex-direction: column;
 }
 
+@keyframes aiSpotlightPulse {
+  0%,
+  100% {
+    border-color: rgba(56, 189, 248, 0.42);
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(56, 189, 248, 0.08),
+      0 0 18px rgba(56, 189, 248, 0.14);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.58);
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.65),
+      0 0 0 2px rgba(56, 189, 248, 0.15),
+      0 0 24px rgba(56, 189, 248, 0.22);
+  }
+}
+
+.container[data-demo-spotlight="true"] {
+  border: 1.5px solid rgba(56, 189, 248, 0.45) !important;
+  animation: aiSpotlightPulse 2.6s ease-in-out infinite;
+}
+
 .modalHeader {
   display: flex;
   align-items: center;

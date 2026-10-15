@@ -49,24 +49,47 @@ const STORAGE_KEY = "cleartab-auth";
 
 const chromeApi = () => (globalThis as unknown as { chrome?: ChromeApi }).chrome;
 
-const isStoredAuth = (value: unknown): value is StoredAuth =>
+export const isStoredAuth = (value: unknown): value is StoredAuth =>
   typeof value === "object" &&
   value !== null &&
   typeof (value as StoredAuth).token === "string" &&
   typeof (value as StoredAuth).user?.id === "string";
 
-// undefined until first read
-let cached: StoredAuth | null | undefined;
+export function readLocalStoredAuth(): StoredAuth | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return isStoredAuth(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// Seed cached from localStorage synchronously so frame-0 callers get it without waiting on async chrome.storage
+let cached: StoredAuth | null | undefined = typeof window !== "undefined" ? (readLocalStoredAuth() ?? undefined) : undefined;
 
 export async function getStoredAuth(): Promise<StoredAuth | null> {
   if (cached !== undefined) return cached;
   const stored = (await chromeApi()?.storage?.local.get(STORAGE_KEY))?.[STORAGE_KEY];
   cached = isStoredAuth(stored) ? stored : null;
+  if (cached && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
+    } catch {}
+  }
   return cached;
 }
 
 async function setStoredAuth(auth: StoredAuth | null) {
   cached = auth;
+  if (typeof window !== "undefined") {
+    try {
+      if (auth) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+      else window.localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  }
   const storage = chromeApi()?.storage?.local;
   if (!storage) return;
   if (auth) await storage.set({ [STORAGE_KEY]: auth });
@@ -87,6 +110,12 @@ export function onStoredAuthChange(listener: (auth: StoredAuth | null) => void) 
     if (areaName !== "local" || !(STORAGE_KEY in changes)) return;
     const next = changes[STORAGE_KEY].newValue;
     cached = isStoredAuth(next) ? next : null;
+    if (typeof window !== "undefined") {
+      try {
+        if (cached) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
+        else window.localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+    }
     listener(cached);
   };
   events.addListener(handle);

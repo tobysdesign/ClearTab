@@ -238,8 +238,8 @@ export async function GET(_request: NextRequest) {
   } catch (error) {
     console.error("Calendar API error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch calendar", success: false, data: [] },
-      { status: 500 }
+      { error: "Couldn't load your schedule right now. Please try again.", success: false, data: [] },
+      { status: 503 }
     );
   }
 }

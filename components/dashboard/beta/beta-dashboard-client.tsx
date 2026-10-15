@@ -7,8 +7,18 @@ import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
 import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
-import { VisualLayoutModal } from './visual-layout-modal'
-import { KeyboardShortcutsModal } from './keyboard-shortcuts-modal'
+import dynamic from 'next/dynamic'
+
+const VisualLayoutModal = dynamic(
+  () => import('./visual-layout-modal').then((mod) => ({ default: mod.VisualLayoutModal })),
+  { ssr: false }
+)
+
+const KeyboardShortcutsModal = dynamic(
+  () => import('./keyboard-shortcuts-modal').then((mod) => ({ default: mod.KeyboardShortcutsModal })),
+  { ssr: false }
+)
+
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
 import { BrandedLoader } from '@cleartab/ui'
@@ -395,23 +405,27 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
           document.body
         )}
 
-      <VisualLayoutModal
-        isOpen={isLayoutModalOpen}
-        onClose={() => setIsLayoutModalOpen(false)}
-        presetLayout={presetLayout}
-        setPresetLayout={setPresetLayout}
-        widgets={widgets}
-        toggleWidget={toggleWidget}
-        activeCount={activeCount}
-        totalCount={totalCount}
-        customLayout={customLayout}
-        onMoveWidget={moveWidgetInCustomLayout}
-      />
+      {isLayoutModalOpen && (
+        <VisualLayoutModal
+          isOpen={isLayoutModalOpen}
+          onClose={() => setIsLayoutModalOpen(false)}
+          presetLayout={presetLayout}
+          setPresetLayout={setPresetLayout}
+          widgets={widgets}
+          toggleWidget={toggleWidget}
+          activeCount={activeCount}
+          totalCount={totalCount}
+          customLayout={customLayout}
+          onMoveWidget={moveWidgetInCustomLayout}
+        />
+      )}
 
-      <KeyboardShortcutsModal
-        isOpen={isShortcutsModalOpen}
-        onClose={() => setIsShortcutsModalOpen(false)}
-      />
+      {isShortcutsModalOpen && (
+        <KeyboardShortcutsModal
+          isOpen={isShortcutsModalOpen}
+          onClose={() => setIsShortcutsModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

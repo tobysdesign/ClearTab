@@ -5,8 +5,8 @@ import authConfig from "@/auth.config"
 
 const { auth } = NextAuth(authConfig)
 
-// /demo: the real dashboard with sample data, embedded in the landing page
-const PUBLIC_PAGES = ['/', '/privacy', '/demo']
+// /demo and /tab: public pages handled by client/extension auth
+const PUBLIC_PAGES = ['/', '/privacy', '/demo', '/tab']
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth

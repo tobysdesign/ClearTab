@@ -166,6 +166,29 @@
   color: #f4f4f5;
 }
 
+.tasksAddedBanner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  font-size: 12.5px;
+  animation: popIn 250ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.tasksAddedIcon {
+  flex-shrink: 0;
+  color: #38bdf8;
+}
+
+.tasksAddedLabel {
+  font-weight: 600;
+  color: #e0f2fe;
+}
+
 .toolChip {
   min-width: 0;
   overflow: hidden;

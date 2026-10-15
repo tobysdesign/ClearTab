@@ -3,7 +3,13 @@
 import { TooltipProvider } from "@cleartab/ui";
 import { ChatProvider } from "@/hooks/use-chat-context";
 import React from "react";
-import { AiChat } from "@/components/ai";
+import dynamic from "next/dynamic";
+
+const AiChat = dynamic(
+  () => import("@/components/ai").then((mod) => ({ default: mod.AiChat })),
+  { ssr: false }
+);
+
 import QueryProvider from "@/app/query-provider";
 import { LayoutProvider } from "@/hooks/use-layout";
 import { AuthProvider } from "@/components/auth/auth-provider";
