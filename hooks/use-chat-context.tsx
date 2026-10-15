@@ -165,6 +165,55 @@ function parseTaskSuggestions(raw: string): TaskSuggestion[] {
   }
 }
 
+// When a plain message might be asking to create something, a structured call decides whether to
+// actually make a task/note. Kept conservative so ordinary chat is never hijacked.
+const CREATE_INTENT_HINT = /\b(add|create|make|new|set up|jot|note down|take a note|remind me)\b/i
+
+const CREATE_INTENT_SCHEMA = {
+  type: 'object',
+  properties: {
+    action: { type: 'string', enum: ['create_task', 'create_note', 'none'] },
+    task: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        important: { type: 'boolean' },
+        due: { type: ['string', 'null'] },
+      },
+    },
+    note: {
+      type: 'object',
+      properties: { text: { type: 'string' } },
+    },
+  },
+  required: ['action'],
+}
+
+type CreateIntent =
+  | { action: 'create_task'; task: { title: string; important: boolean; due: string | null } }
+  | { action: 'create_note'; note: { text: string } }
+  | { action: 'none' }
+
+function parseCreateIntent(raw: string): CreateIntent {
+  const match = raw.match(/\{[\s\S]*\}/)
+  if (!match) return { action: 'none' }
+  try {
+    const parsed = JSON.parse(match[0])
+    if (parsed?.action === 'create_task' && typeof parsed?.task?.title === 'string' && parsed.task.title.trim()) {
+      return {
+        action: 'create_task',
+        task: { title: parsed.task.title.trim(), important: parsed.task.important === true, due: parsed.task.due ?? null },
+      }
+    }
+    if (parsed?.action === 'create_note' && typeof parsed?.note?.text === 'string' && parsed.note.text.trim()) {
+      return { action: 'create_note', note: { text: parsed.note.text.trim() } }
+    }
+    return { action: 'none' }
+  } catch {
+    return { action: 'none' }
+  }
+}
+
 export function ChatProvider({ children, languageModel }: { children: ReactNode; languageModel?: unknown }) {
   // Stable for the provider's lifetime, so a ref keeps it out of every dependency list
   const languageModelRef = useRef(languageModel)
@@ -276,17 +325,74 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     },
   })
 
-  // Handles #task / #note commands. Returns true when the message was a command.
+  // Handles #task / #note commands. The tag can sit anywhere in the message ("buy milk #task" or
+  // "#task buy milk"); the rest of the text becomes the task/note. Returns true when it ran.
   const handleHashtagCommand = useCallback(async (userMessage: string) => {
-    const taskMatch = userMessage.match(/#task\s+(.+)/)
-    const noteMatch = userMessage.match(/#note\s+(.+)/)
-    const match = taskMatch ? { kind: 'task' as const, text: taskMatch[1] } : noteMatch ? { kind: 'note' as const, text: noteMatch[1] } : null
+    const strip = (tag: RegExp) => userMessage.replace(tag, '').replace(/\s+/g, ' ').trim()
+    let match: { kind: 'task' | 'note'; text: string } | null = null
+    if (/#task\b/i.test(userMessage)) {
+      const text = strip(/#task\b/gi)
+      if (text) match = { kind: 'task', text }
+    } else if (/#note\b/i.test(userMessage)) {
+      const text = strip(/#note\b/gi)
+      if (text) match = { kind: 'note', text }
+    }
     if (!match) return false
 
     if (match.kind === 'task') await createTasks([{ title: match.text }])
     else await createNoteMutation.mutateAsync(match.text)
     setMessages(prev => [...prev, { role: 'assistant', content: '', tool: match }])
     return true
+  }, [createTasks, createNoteMutation])
+
+  // Natural-language "add a task…" / "make a note…": a structured call decides whether the message
+  // is really a create request, and creates the object if so. Returns true when it handled it, so
+  // the caller skips the normal chat reply. Plain chat (action "none") falls through untouched.
+  const handleCreateIntent = useCallback(async (userMessage: string) => {
+    if (!CREATE_INTENT_HINT.test(userMessage)) return false
+    const found = getLanguageModelApi(languageModelRef.current)
+    if (!found) return false
+
+    const today = new Date()
+    const systemPrompt = [
+      'Decide whether the user wants to CREATE a task or a note, or is just chatting.',
+      `Today is ${today.toLocaleDateString('en-AU', { weekday: 'long' })} ${localDateISO(today)}.`,
+      'Reply with JSON matching the schema.',
+      '- action "create_task": they want to add a to-do, task or reminder. Give task.title (imperative, reusing their words, at most 12 words), task.important (true only if urgent/ASAP), task.due (YYYY-MM-DD if a day or date is mentioned, otherwise null).',
+      '- action "create_note": they want to save or jot a note. Give note.text (the note content, in their words).',
+      '- action "none": anything else, including questions about existing tasks, notes or schedule.',
+      'Only choose create when they clearly want something saved.',
+    ].join('\n')
+
+    let session: any
+    try {
+      session = found.legacy
+        ? await found.api.create({ systemPrompt })
+        : await found.api.create({ initialPrompts: [{ role: 'system', content: systemPrompt }] })
+      const raw: string = await session.prompt(
+        userMessage,
+        found.legacy ? undefined : { responseConstraint: CREATE_INTENT_SCHEMA },
+      )
+      session.destroy?.()
+
+      const intent = parseCreateIntent(raw)
+      if (intent.action === 'create_task') {
+        await createTasks([{ title: intent.task.title, isHighPriority: intent.task.important, dueDate: normaliseDue(intent.task.due) }])
+        setMessages(prev => [...prev, { role: 'assistant', content: '', tool: { kind: 'task', text: intent.task.title } }])
+        return true
+      }
+      if (intent.action === 'create_note') {
+        await createNoteMutation.mutateAsync(intent.note.text)
+        const title = intent.note.text.split('\n')[0].slice(0, 60)
+        setMessages(prev => [...prev, { role: 'assistant', content: '', tool: { kind: 'note', text: title } }])
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('ChatProvider: create-intent detection failed', error)
+      try { session?.destroy?.() } catch {}
+      return false
+    }
   }, [createTasks, createNoteMutation])
 
   const runLocalAi = useCallback(async (userMessage: string, streaming: boolean) => {
@@ -306,6 +412,9 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         setMessages(prev => [...prev, { role: 'assistant', content: LOCAL_AI_UNAVAILABLE_MESSAGE }])
         return
       }
+
+      // "add a task…" / "make a note…" create the object instead of a chat reply
+      if (await handleCreateIntent(userMessage)) return
 
       const session = await withWarmUpNotice(initLocalAiSession(), setThinkingContent)
       const startedAt = Date.now()
@@ -382,7 +491,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       setThinkingContent('')
       abortControllerRef.current = null
     }
-  }, [handleHashtagCommand, initLocalAiSession, toast, contextText])
+  }, [handleHashtagCommand, handleCreateIntent, initLocalAiSession, toast, contextText])
 
   const processMessage = useCallback(async (initialMessage?: string) => {
     const userMessage = (initialMessage || inputValue).trim()
