@@ -52,7 +52,9 @@
   color: #c4c4c4;
 }
 
-@container (min-width: 64px) {
+/* Keep the full title until the pill gets quite small; only then fall back to
+   initials. */
+@container (min-width: 40px) {
   .collapsedInitials {
     display: none;
   }
