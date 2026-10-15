@@ -230,7 +230,9 @@
 
 .row {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) auto auto;
+    /* Fixed last column so the Visible toggle lines up whether or not a row has
+       an actions (⋮) button. */
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) auto 40px;
     gap: 2px;
     align-items: center;
     padding: 12px;
@@ -288,11 +290,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 8px;
-    border-radius: 3px;
-    background: rgba(125, 125, 125, 0.3);
-    color: #c4c4c4;
-    font-size: 8npx;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #a1a1aa;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }

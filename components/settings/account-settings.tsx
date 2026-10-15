@@ -249,7 +249,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
               </div>
               <div>
                 <div className={sharedStyles.label}>Email</div>
-                <div className={sharedStyles.rowTitle}>{account.email}</div>
+                <div className={sharedStyles.rowDescription}>{account.email}</div>
               </div>
               <div className={sharedStyles.toggleGroup}>
                 <span className={sharedStyles.label}>Visible</span>
