@@ -11,7 +11,7 @@ import {
   useToast,
 } from "@cleartab/ui";
 import styles from "./countdown-setup-panel.module.css";
-import footerStyles from "@/components/ui/modal-actions.module.css";
+import footerStyles from "../ui/modal-actions.module.css";
 import { apiFetch } from "@/lib/api-fetch";
 
 type Recurrence = "none" | "weekly" | "fortnightly" | "monthly" | "annual";

@@ -12,7 +12,7 @@ import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
-import footerStyles from "@/components/ui/modal-actions.module.css";
+import footerStyles from "../ui/modal-actions.module.css";
 
 export function TasksDrawer() {
   const {

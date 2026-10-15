@@ -3,7 +3,7 @@
 import React from 'react'
 import { Button, DockPanel } from '@cleartab/ui'
 import styles from './keyboard-shortcuts-modal.module.css'
-import footerStyles from '@/components/ui/modal-actions.module.css'
+import footerStyles from '../../ui/modal-actions.module.css'
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean
