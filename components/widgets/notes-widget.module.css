@@ -117,10 +117,10 @@
     }
 
     .ListContent {
-        padding: 0 0.5rem;
+        padding: 0 0.25rem;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         gap: 0.5rem;
     }
 }
@@ -150,7 +150,7 @@
 }
 
 .resizablePanels .resizableLeft:global(.collapsed) .ListContent {
-    padding: 0 0.5rem;
+    padding: 0 0.25rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;
