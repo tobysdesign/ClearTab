@@ -227,8 +227,8 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
               </div>
             </div>
             <div>
-              <div className={sharedStyles.label}>Address</div>
-              <div className={sharedStyles.rowDescription}>{user.email ?? "No email"}</div>
+              <div className={sharedStyles.label}>Email</div>
+              <div className={sharedStyles.rowValueMuted}>{user.email ?? "No email"}</div>
             </div>
             <div className={sharedStyles.toggleGroup}>
               <span className={sharedStyles.label}>Visible</span>
@@ -244,12 +244,12 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
           {connectedAccounts.map((account) => (
             <div key={account.id} className={sharedStyles.row}>
               <div>
-                <div className={sharedStyles.label}>Account</div>
+                <div className={sharedStyles.label}>Name</div>
                 <div className={sharedStyles.rowTitle}>{account.email.split("@")[0]}</div>
               </div>
               <div>
                 <div className={sharedStyles.label}>Email</div>
-                <div className={sharedStyles.rowDescription}>{account.email}</div>
+                <div className={sharedStyles.rowValueMuted}>{account.email}</div>
               </div>
               <div className={sharedStyles.toggleGroup}>
                 <span className={sharedStyles.label}>Visible</span>

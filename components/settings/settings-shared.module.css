@@ -86,10 +86,10 @@
 .label {
     display: inline-flex;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5a5a5a;
+    color: #71717a;
     margin-bottom: 4px;
 }
 
@@ -248,9 +248,9 @@
 }
 
 .rowTitle {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: #c4c4c4;
+    color: #e4e4e7;
 }
 
 .rowDescription {
@@ -397,7 +397,16 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    align-items: flex-start;
+    /* Right-aligned so the Visible toggle lines up across rows, with or without a ⋮ */
+    align-items: flex-end;
+}
+
+/* A readable but secondary value (e.g. an email under a name) — same size as the
+   title, just dimmer, so values don't look tiny. */
+.rowValueMuted {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .compactNotice {
