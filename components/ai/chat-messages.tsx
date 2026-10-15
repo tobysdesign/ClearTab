@@ -172,6 +172,7 @@ function TaskSuggestions({ tasks, added, onAdd }: {
 
   return (
     <div className={styles.suggestions}>
+      <span className={styles.suggestionsLabel}>Suggested tasks</span>
       <ul className={styles.suggestionList}>
         {items.map((item, i) => (
           <li key={`${item.title}-${i}`} className={styles.suggestion} data-selected={item.selected}>

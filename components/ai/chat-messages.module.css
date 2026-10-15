@@ -333,6 +333,14 @@
   border-radius: 12px;
 }
 
+.suggestionsLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .suggestionList {
   display: flex;
   flex-direction: column;
