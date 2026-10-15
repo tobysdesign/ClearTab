@@ -252,27 +252,33 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       window.removeEventListener('dock-position-change', handleDockPositionChange as EventListener)
   }, [])
 
-  const defaultZone: DropZone = {
-    id: position,
-    x: typeof window !== 'undefined' ? (window.innerWidth - 150) / 2 : 0,
-    y: typeof window !== 'undefined' ? window.innerHeight - 62 : 0,
-    width: 150,
-    height: 52,
-  }
-
-  const currentZone = dropZones.find((z) => z.id === position) || defaultZone
+  // Resting x/y for an edge, from a LIVE measurement of the dock (it's fit-content), so it's
+  // exactly centred regardless of icon count, search state, or when the ResizeObserver settles.
+  const getRestingPosition = useCallback((pos: DockPosition) => {
+    const margin = 10
+    const ww = typeof window !== 'undefined' ? window.innerWidth : 0
+    const wh = typeof window !== 'undefined' ? window.innerHeight : 0
+    const el = dockRef.current
+    const w = el?.offsetWidth || dockLength
+    const h = el?.offsetHeight || dockThickness
+    switch (pos) {
+      case 'top': return { x: (ww - w) / 2, y: margin }
+      case 'left': return { x: margin, y: (wh - h) / 2 }
+      case 'right': return { x: ww - w - margin, y: (wh - h) / 2 }
+      case 'bottom':
+      default: return { x: (ww - w) / 2, y: wh - h - margin }
+    }
+  }, [dockLength, dockThickness])
 
   useEffect(() => {
-    if (currentZone) {
-      controls.start(
-        {
-          x: currentZone.x,
-          y: currentZone.y,
-        },
-        { type: 'spring', stiffness: 500, damping: 40 }
-      )
+    const place = () => {
+      const { x, y } = getRestingPosition(position)
+      controls.start({ x, y }, { type: 'spring', stiffness: 500, damping: 40 })
     }
-  }, [currentZone, controls, position])
+    place()
+    window.addEventListener('resize', place)
+    return () => window.removeEventListener('resize', place)
+  }, [position, controls, getRestingPosition])
 
   const handleDragStart = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -317,16 +323,11 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     setIsDragging(false)
     if (nearestZoneId) {
       setPosition(nearestZoneId)
-    } else if (currentZone) {
-      // Animate position only — leave width/height to the content (fit-content), so the
-      // pill background always covers the whole dock, handle included.
-      controls.start(
-        {
-          x: currentZone.x,
-          y: currentZone.y,
-        },
-        { type: 'spring', stiffness: 500, damping: 40 }
-      )
+    } else {
+      // Snap back to the centred resting position (width/height stay fit-content, so the
+      // pill background always covers the whole dock, handle included).
+      const { x, y } = getRestingPosition(position)
+      controls.start({ x, y }, { type: 'spring', stiffness: 500, damping: 40 })
     }
     setNearestZoneId(null)
     setDragOrigin(null)
@@ -394,7 +395,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
             dragMomentum={false}
             className="dock-container"
             animate={controls}
-            initial={currentZone ? { x: currentZone.x, y: currentZone.y } : undefined}
+            initial={getRestingPosition(position)}
             style={{ position: 'fixed', top: 0, left: 0, zIndex: 50 }}
           >
             <div
