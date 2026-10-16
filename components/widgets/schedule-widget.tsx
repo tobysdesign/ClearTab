@@ -225,10 +225,10 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
         console.log('API response:', json);
 
         // Check if calendar needs reconnection - handle gracefully without throwing
-        if (json.success && json.needsReconnection) {
-          console.warn('Google Calendar disconnection detected');
-          return { events: [], needsReconnection: true, reconnectReason: json.reason, message: json.message };
-        }
+        // Keep whatever events the server returned (e.g. healthy connected accounts) even when
+        // one account needs reconnecting — don't blank the whole schedule.
+        const needsReconnection = Boolean(json.success && json.needsReconnection)
+        if (needsReconnection) console.warn('Google Calendar reconnection needed for an account')
 
         const eventsFromServer = json.data || []
         console.log('Events from server:', eventsFromServer);
@@ -253,7 +253,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
         } catch {
           // Ignore storage quota / sandboxed errors
         }
-        return { events: mappedEvents, needsReconnection: false, message: json.message };
+        return { events: mappedEvents, needsReconnection, reconnectReason: json.reason, message: json.message };
       } catch (error) {
         console.error('Error fetching schedule:', error)
         try {

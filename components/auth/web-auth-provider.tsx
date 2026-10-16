@@ -58,7 +58,14 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
       try {
         window.localStorage.removeItem(WEB_SESSION_CACHE_KEY)
       } catch {}
-      await nextAuthSignOut({ callbackUrl: "/login" })
+      // Clear the session without relying on NextAuth's own redirect (unreliable in the
+      // app router on v5 beta), then hard-navigate so all client state is dropped.
+      try {
+        await nextAuthSignOut({ redirect: false })
+      } catch (error) {
+        console.error("signOut failed, forcing navigation to /login", error)
+      }
+      window.location.href = "/login"
     },
     loading: isLoading,
   }), [effectiveUser, session, cachedUser, isLoading])
