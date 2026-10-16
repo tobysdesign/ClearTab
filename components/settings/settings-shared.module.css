@@ -17,7 +17,7 @@
 }
 
 .cardNote {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.55);
     max-width: 420px;
     line-height: 1.45;
@@ -94,7 +94,7 @@
 }
 
 .fieldDescription {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.45);
     line-height: 1.45;
 }
@@ -240,6 +240,27 @@
     background: #222;
 }
 
+/* Grouped rows: a single rounded surface with hairline dividers between rows,
+   instead of separate floating pills. */
+.rowGroup {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    background: #222;
+    overflow: hidden;
+}
+
+.rowGroup .row {
+    border-radius: 0;
+    background: transparent;
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rowGroup .row:first-child {
+    border-top: none;
+}
+
 .rowMeta {
     display: flex;
     align-items: center;
@@ -254,7 +275,7 @@
 }
 
 .rowDescription {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.45);
     margin-top: 2px;
 }

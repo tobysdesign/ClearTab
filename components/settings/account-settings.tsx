@@ -212,26 +212,27 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             </Button>,
           )}
 
+          <div className={sharedStyles.rowGroup}>
           <div className={sharedStyles.row}>
-            <div>
-              <div className={sharedStyles.rowLabelLine}>
-                <div className={sharedStyles.label}>Name</div>
-                <span className={`${sharedStyles.badge} ${sharedStyles.primaryBadge}`}>
-                  Primary
-                </span>
-              </div>
-              <div className={sharedStyles.rowTitle}>
-                {user.name ||
-                  user.email?.split("@")[0] ||
-                  "Primary account"}
+            <div className={sharedStyles.rowMeta}>
+              <div>
+                <div className={sharedStyles.rowLabelLine}>
+                  <div className={sharedStyles.rowTitle}>
+                    {user.name ||
+                      user.email?.split("@")[0] ||
+                      "Primary account"}
+                  </div>
+                  <span className={`${sharedStyles.badge} ${sharedStyles.primaryBadge}`}>
+                    Primary
+                  </span>
+                </div>
+                <div className={sharedStyles.rowDescription}>
+                  {user.email ?? "No email"}
+                </div>
               </div>
             </div>
-            <div>
-              <div className={sharedStyles.label}>Email</div>
-              <div className={sharedStyles.rowValueMuted}>{user.email ?? "No email"}</div>
-            </div>
+            <span />
             <div className={sharedStyles.toggleGroup}>
-              <span className={sharedStyles.label}>Visible</span>
               <Switch
                 checked={isVisible(primaryKey)}
                 onCheckedChange={(value) => setVisible(primaryKey, value)}
@@ -243,16 +244,16 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
 
           {connectedAccounts.map((account) => (
             <div key={account.id} className={sharedStyles.row}>
-              <div>
-                <div className={sharedStyles.label}>Name</div>
-                <div className={sharedStyles.rowTitle}>{account.email.split("@")[0]}</div>
+              <div className={sharedStyles.rowMeta}>
+                <div>
+                  <div className={sharedStyles.rowTitle}>
+                    {account.email.split("@")[0]}
+                  </div>
+                  <div className={sharedStyles.rowDescription}>{account.email}</div>
+                </div>
               </div>
-              <div>
-                <div className={sharedStyles.label}>Email</div>
-                <div className={sharedStyles.rowValueMuted}>{account.email}</div>
-              </div>
+              <span />
               <div className={sharedStyles.toggleGroup}>
-                <span className={sharedStyles.label}>Visible</span>
                 <Switch
                   checked={isVisible(account.id)}
                   onCheckedChange={(value) => setVisible(account.id, value)}
@@ -273,6 +274,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
               </div>
             </div>
           ))}
+          </div>
 
           {accountsLoading && (
             <p className={sharedStyles.compactNotice}>Checking for additional calendars…</p>

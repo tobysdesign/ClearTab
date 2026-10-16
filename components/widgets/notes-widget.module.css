@@ -423,7 +423,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 
     /* typography */
-    font-size: 12px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.55);
     white-space: nowrap;
     cursor: default;
@@ -630,7 +630,7 @@
 
 .inNoteSubtitle {
     margin: 0;
-    font-size: 12px;
+    font-size: 14px;
     color: #94a3b8;
 }
 
@@ -689,4 +689,3 @@
     gap: 10px;
     padding-top: 4px;
 }
-

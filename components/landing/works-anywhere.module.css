@@ -179,7 +179,7 @@
   border-radius: 50%;
   background: oklch(1 0 0 / 0.08);
   color: var(--ink);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1;
   transform: translateY(-1px);

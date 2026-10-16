@@ -47,7 +47,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: #c4c4c4;
 }
@@ -90,7 +90,7 @@
 .itemDate {
   flex-shrink: 0;
   font-family: "Inter Display", sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   color: #8d8d8d;
   font-variant-numeric: tabular-nums;
@@ -127,7 +127,7 @@
 
 .titleContent {
   font-weight: 400;
-  font-size: 12px;
+  font-size: 14px;
   color: #c4c4c4;
 }
 
@@ -146,7 +146,7 @@
 .itemPreview {
   font-family: "Inter Display", sans-serif;
   font-weight: 400;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 15px;
   color: #8D8D8D;
   width: 100%;
