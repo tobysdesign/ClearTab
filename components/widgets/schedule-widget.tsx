@@ -505,6 +505,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
                     {/* Footer with day/date stacked and month */}
                     <div
                       className={styles.sidebarFooter}
+                      title="Goto todays date"
                       onClick={() => {
                         // Scroll to today within container
                         if (todayRef.current) {

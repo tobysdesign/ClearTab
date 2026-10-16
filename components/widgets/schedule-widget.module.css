@@ -90,6 +90,13 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    /* Clickable: scrolls the agenda to today */
+    cursor: pointer;
+}
+
+/* Schedule events aren't clickable, so don't show the list-item pointer cursor */
+.container :global(.widget-list-item--schedule) {
+    cursor: default;
 }
 
 .dayDateContainer {
