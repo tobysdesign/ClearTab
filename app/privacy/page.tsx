@@ -39,9 +39,11 @@ export default function PrivacyPage() {
             profile picture. We use them to create your account and show who&apos;s signed in.
           </li>
           <li>
-            <strong>Google Calendar access.</strong> With your permission we get read-only access to your calendars. We store
-            the access tokens Google gives us so your schedule keeps working, and the list of your calendars so you can choose
-            which ones to show. We fetch events when you open your dashboard and don&apos;t keep a copy of them.
+            <strong>Google Calendar access.</strong> With your permission we use the read-only Google Calendar scope
+            (<code>calendar.readonly</code>) to show your own upcoming events in the schedule widget. We only read your
+            calendar — we never create, change or delete events. We store the access tokens Google gives us so your schedule
+            keeps working, and the list of your calendars so you can choose which ones to show. We fetch events when you open
+            your dashboard and don&apos;t keep a copy of them.
           </li>
           <li>
             <strong>Things you create.</strong> Your notes, tasks, countdowns and settings (such as your layout and weather
@@ -87,9 +89,10 @@ export default function PrivacyPage() {
           <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noreferrer">
             Google API Services User Data Policy
           </a>
-          , including the Limited Use requirements. We only use Google Calendar data to show your schedule in ClearTab.
-          We don&apos;t transfer it to others except as needed to provide that feature, for security, or to comply with the
-          law, and people don&apos;t read it unless you ask us to for support.
+          , including the Limited Use requirements. We request read-only access (the <code>calendar.readonly</code> scope)
+          and use your Google Calendar data solely to show your own upcoming events in ClearTab&apos;s schedule widget. We
+          never sell this data or use it for advertising, and we don&apos;t transfer it to others except as needed to provide
+          that feature, for security, or to comply with the law; no human reads it unless you ask us to for support.
         </p>
 
         <h2>How long we keep it</h2>
