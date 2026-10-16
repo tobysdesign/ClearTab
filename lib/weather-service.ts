@@ -125,7 +125,8 @@ export async function getWeather(location: string, units: WeatherUnits): Promise
       forecast: mappedForecast,
     },
     {
-      label: 'Tomorrow',
+      // The day's 3-letter weekday (e.g. "Thu") rather than the word "Tomorrow"
+      label: mappedForecast[1]?.day || 'Tomorrow',
       location: coords.formatted_address,
       temperature: mappedForecast[1]?.high || '0',
       condition: mappedForecast[1]?.condition || 'Sunny',

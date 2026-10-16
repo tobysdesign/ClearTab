@@ -115,8 +115,8 @@
     font-weight: var(--widget-text-weight);
     /* Fade the end instead of an ellipsis ("..." ate too much width). The mask only
        shows when the text actually reaches the edge; short text ends before it. */
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
 }
 
 .date {
@@ -354,8 +354,8 @@
     color: var(--widget-text-light);
     font-size: var(--widget-text-size);
     font-weight: 500;
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
 }
 
 .miniLocation {
@@ -364,8 +364,8 @@
     color: var(--widget-text-muted);
     font-size: var(--widget-text-size);
     font-weight: var(--widget-text-weight);
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
-    mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
 }
 
 .miniRight {

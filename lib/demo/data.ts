@@ -200,7 +200,7 @@ export function demoWeather(units: 'METRIC' | 'IMPERIAL' = 'METRIC') {
   const location = 'Sydney NSW, Australia'
   return [
     { label: '5 Day Forecast', location, isForecast: true, condition: 'Forecast', forecast },
-    { label: 'Tomorrow', location, temperature: forecast[1].high, condition: forecast[1].condition, high: forecast[1].high, low: forecast[1].low },
+    { label: forecast[1].day, location, temperature: forecast[1].high, condition: forecast[1].condition, high: forecast[1].high, low: forecast[1].low },
     { label: 'Today', location, temperature: toUnit('21'), condition: forecast[0].condition, high: forecast[0].high, low: forecast[0].low },
   ]
 }
