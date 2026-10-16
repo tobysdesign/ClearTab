@@ -1,3 +1,54 @@
+/* Fills the widget box so useWidgetHeight can measure, and the container can fill it */
+.modeWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Mini view (short widgets): next open task + remaining count on one line.
+   Matches the Counter/Schedule mini layouts. */
+.tasksMiniContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 24px;
+    gap: 16px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.tasksMiniTitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: #c4c4c4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.tasksMiniEmpty {
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.tasksMiniCount {
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+    flex-shrink: 0;
+}
+
 /* Tasks Widget: Error State */
 .tasksError {
     /* layout */
@@ -236,4 +287,3 @@
 }
 
 /* Responsive layout uses viewport-based scaling from widget-components.css */
-

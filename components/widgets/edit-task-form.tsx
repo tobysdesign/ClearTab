@@ -112,6 +112,9 @@ export function EditTaskForm({
   const createdTaskIdRef = React.useRef<string | null>(null);
   const hasInitializedRef = React.useRef<boolean>(false);
   const backgroundSaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  // Set when a brand-new task is closed while still empty but its initial create
+  // is still in flight -- the create's .then discards it instead of keeping it.
+  const discardOnEmptyCloseRef = React.useRef<boolean>(false);
 
   // Initialize content with either the task content or the selected text from editor
   const initialContent = React.useMemo(() => {
@@ -223,11 +226,18 @@ export function EditTaskForm({
 
       createTaskAPI(initialData)
         .then((result) => {
-          createdTaskIdRef.current = result.id;
-          console.log('✅ Initial task created with ID:', result.id);
-
           // Clean up the form key from the Set
           creatingForms.delete(formKey);
+
+          // The form was already closed while empty -- discard this task instead of keeping it
+          if (discardOnEmptyCloseRef.current) {
+            createdTaskIdRef.current = null;
+            apiFetch(`/api/tasks?id=${result.id}`, { method: 'DELETE' }).catch(() => {});
+            return;
+          }
+
+          createdTaskIdRef.current = result.id;
+          console.log('✅ Initial task created with ID:', result.id);
 
           // Notify parent
           if (onSave) {
@@ -254,14 +264,41 @@ export function EditTaskForm({
     }
 
     return () => {
+      const createdId = createdTaskIdRef.current;
+      const hadPendingSave = !!backgroundSaveTimeoutRef.current;
+
       initializedTaskId.current = null;
       createdTaskIdRef.current = null;
       hasInitializedRef.current = false;
+      if (backgroundSaveTimeoutRef.current) {
+        clearTimeout(backgroundSaveTimeoutRef.current);
+        backgroundSaveTimeoutRef.current = null;
+      }
+
+      // A brand-new task the user never actually filled in shouldn't be saved.
+      const contentText = (taskDataRef.current.content?.ops || [])
+        .map((op: any) => (typeof op.insert === 'string' ? op.insert : ''))
+        .join('')
+        .trim();
+      const isEmptyNew =
+        isCreating && !taskDataRef.current.title?.trim() && !contentText;
+
+      if (isEmptyNew) {
+        if (createdId && !createdId.startsWith('creating-')) {
+          // Already created on the server: delete it and drop it from the list
+          console.log('🗑️ EditTaskForm - Discarding empty new task on close');
+          apiFetch(`/api/tasks?id=${createdId}`, { method: 'DELETE' }).catch(() => {});
+          onSave?.({ id: createdId } as Task, 'delete');
+        } else {
+          // Initial create still in flight: tell its .then to discard the result
+          discardOnEmptyCloseRef.current = true;
+        }
+        return;
+      }
 
       // CRITICAL: Flush any pending changes on unmount
-      if (backgroundSaveTimeoutRef.current) {
+      if (hadPendingSave) {
         console.log('🔧 EditTaskForm - Flushing pending save on unmount');
-        clearTimeout(backgroundSaveTimeoutRef.current);
         onSubmit();
       }
     };

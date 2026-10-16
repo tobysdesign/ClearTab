@@ -94,6 +94,17 @@ export function WeatherWidgetNew() {
     setExitingCard(null); // Clear the exiting card state
   };
 
+  // Mini mode has no card-exit animation, so it can't use the exitingCard dance
+  // (which leaves pointerEvents disabled forever when onExitComplete never fires).
+  // Rotate the stack synchronously instead.
+  const handleMiniClick = () => {
+    if (exitingCard || cards.length === 0) return;
+    setCards((prev) => {
+      const top = prev[prev.length - 1];
+      return [top, ...prev.slice(0, -1)];
+    });
+  };
+
   const currentData = cards[cards.length - 1]; // The visible card (top of stack)
 
   if (error && cards.length === 0) {
@@ -138,13 +149,18 @@ export function WeatherWidgetNew() {
             transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <WidgetContainer
-              onClick={handleCardClick}
+              onClick={handleMiniClick}
               className={styles.miniButton}
             >
               <div className={styles.miniContainer}>
-                <span className={styles.miniLocation}>
-                  {currentData.location || "Loading..."}
-                </span>
+                <div className={styles.miniLeft}>
+                  <span className={styles.miniDay}>
+                    {currentData.label || "Today"}
+                  </span>
+                  <span className={styles.miniLocation}>
+                    {currentData.location || "Loading..."}
+                  </span>
+                </div>
 
                 <div className={styles.miniRight}>
                   <span className={styles.miniTemp}>

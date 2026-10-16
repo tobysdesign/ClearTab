@@ -11,6 +11,7 @@ import {
 } from "@cleartab/ui";
 import { EmptyState } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
+import { useWidgetHeight } from "@/hooks/use-widget-height";
 import { EMPTY_QUILL_CONTENT, type QuillDelta } from "@/shared/schema";
 import { Checkbox } from "@cleartab/ui";
 import { motion, AnimatePresence } from "framer-motion";
@@ -129,6 +130,7 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     registerTaskUpdateCallback,
     unregisterTaskUpdateCallback,
   } = useTaskModal();
+  const { ref, isMini } = useWidgetHeight();
   const [tasks, setTasks] = useState<Task[]>(getInitialCachedTasks);
   const initialHadTasks = useRef(tasks.length > 0);
   const [isLoading, setIsLoading] = useState(!initialHadTasks.current);
@@ -424,37 +426,68 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
 
   // Removed activeTask calculation from here, it's now handled by the context
 
+  // Mini view (short widgets): the next open task + how many more are waiting
+  const openTasks = tasks.filter((task) => !task.isCompleted);
+  const nextTask = openTasks[0];
+
   if (isLoading) {
     return (
-      <WidgetContainer className="tasks-widget">
-        <WidgetLoader />
-      </WidgetContainer>
+      <div ref={ref} className={tasksStyles.modeWrapper}>
+        <WidgetContainer className="tasks-widget">
+          <WidgetLoader />
+        </WidgetContainer>
+      </div>
     );
   }
 
   if (isError) {
     return (
-      <WidgetContainer className="tasks-widget">
-        <WidgetHeader title="Tasks">
-          <AddButton onClick={handleAddTask} tooltip="Add task" />
-        </WidgetHeader>
-        <WidgetContent scrollable={false}>
-          <EmptyState
-            title="Couldn't load tasks"
-            description="Couldn't reach your tasks right now."
-            action={{
-              label: "Try again",
-              onClick: () => {
-                void loadTasks();
-              },
-            }}
-          />
-        </WidgetContent>
-      </WidgetContainer>
+      <div ref={ref} className={tasksStyles.modeWrapper}>
+        <WidgetContainer className="tasks-widget">
+          <WidgetHeader title="Tasks">
+            <AddButton onClick={handleAddTask} tooltip="Add task" />
+          </WidgetHeader>
+          <WidgetContent scrollable={false}>
+            <EmptyState
+              title="Couldn't load tasks"
+              description="Couldn't reach your tasks right now."
+              action={{
+                label: "Try again",
+                onClick: () => {
+                  void loadTasks();
+                },
+              }}
+            />
+          </WidgetContent>
+        </WidgetContainer>
+      </div>
+    );
+  }
+
+  if (isMini) {
+    return (
+      <div ref={ref} className={tasksStyles.modeWrapper}>
+        <WidgetContainer className="tasks-widget">
+          <div className={tasksStyles.tasksMiniContainer}>
+            {nextTask ? (
+              <span
+                className={tasksStyles.tasksMiniTitle}
+                onClick={() => setActiveTaskId(nextTask.id)}
+              >
+                {nextTask.title || "Untitled Task"}
+              </span>
+            ) : (
+              <span className={tasksStyles.tasksMiniEmpty}>No tasks</span>
+            )}
+            <AddButton onClick={handleAddTask} tooltip="Add task" />
+          </div>
+        </WidgetContainer>
+      </div>
     );
   }
 
   return (
+    <div ref={ref} className={tasksStyles.modeWrapper}>
     <WidgetContainer
       className={cn("tasks-widget", isWidgetHighlighted && tasksStyles.widgetHighlighted)}
     >
@@ -584,5 +617,6 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
         </div>
       </WidgetContent>
     </WidgetContainer>
+    </div>
   );
 }

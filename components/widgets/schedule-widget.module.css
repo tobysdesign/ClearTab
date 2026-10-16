@@ -10,7 +10,7 @@
 
 .eventTime {
     color: rgba(255, 255, 255, 0.4);
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .daySection {
@@ -56,7 +56,6 @@
 .container {
     display: flex;
     height: 100%;
-    container-type: inline-size;
 }
 
 .sidebar {
@@ -73,7 +72,7 @@
 .sidebarHeader {
     display: flex;
     align-items: center;
-    padding: 1rem 18px;
+    padding: 14px 18px;
     min-height: 60px;
 }
 
@@ -84,11 +83,7 @@
     flex-direction: column;
     justify-content: space-between;
     flex: 1;
-    padding: 0 24px;
-}
-
-.todayContent {
-    cursor: pointer;
+    padding: 0 18px;
 }
 
 .sidebarFooter {
@@ -125,7 +120,7 @@
 /* Removed - using global bigNumber class directly */
 
 .monthText {
-    color: #555;
+    color: #5a5a5a;
     font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 400;
@@ -176,14 +171,90 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
+/* Narrow (small width, tall enough it's not the height-mini): reflow to a column —
+   the agenda list fills the top, and the date rail becomes a compact full-width strip
+   pinned to the bottom. The fixed 120px side rail otherwise starves the agenda and the
+   event text wraps one word per line. */
+@container (max-width: 260px) {
+    .container {
+        flex-direction: column;
+    }
+
+    /* Agenda fills the space above the rail */
+    .rightContent {
+        order: -1;
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* Rail becomes a horizontal strip pinned to the bottom, full width */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-shrink: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        border-right: none;
+        border-top: 1px solid #323235;
+        padding: 10px 16px;
+    }
+
+    /* The vertical title header isn't needed in the strip */
+    .sidebarHeader {
+        display: none;
+    }
+
+    .sidebarContent {
+        flex-direction: row;
+        align-items: center;
+        flex: none;
+        padding: 0;
+    }
+
+    /* Drop the vertical justify-between spacer divs */
+    .sidebarContent > div:empty {
+        display: none;
+    }
+
+    /* "SAT 17 October" laid out inline */
+    .sidebarFooter {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 8px;
+    }
+
+    .dayDateContainer {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 6px;
+        margin-bottom: 0;
+    }
+
+    .dayText {
+        margin-bottom: 0;
+    }
+
+    .sidebarFooter :global(.bigNumber) {
+        font-size: 22px;
+        margin-bottom: 0;
+    }
+}
+
 /* Responsive layout uses viewport-based scaling from widget-components.css */
 
+/* Wraps the whole widget so it fills its panel and useWidgetHeight can measure it.
+   Referenced by schedule-widget.tsx; without it the widget collapses. */
 .modeWrapper {
     width: 100%;
     height: 100%;
     position: relative;
+    /* Query container for the narrow reflow below. Lives here (not on .container)
+       so .container itself can respond and flip to a column. */
+    container-type: inline-size;
 }
 
+/* Mini view (short widgets): date badge + next event on one line */
 .miniContainer {
     display: flex;
     align-items: center;

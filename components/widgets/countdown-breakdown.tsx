@@ -1,6 +1,61 @@
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { addDays, addMonths, differenceInDays, startOfDay } from "@/lib/date-utils";
 import styles from "./countdown-breakdown.module.css";
+import countdownStyles from "./countdown-widget-main.module.css";
+
+// Days-only dot grid for the narrow counter: one pink dot per remaining day (capped so
+// a long countdown stays a tidy grid), auto-sized to fill its box like the main dot grid.
+const MAX_DAY_DOTS = 49;
+function DaysDotGrid({ count, gap = 6 }: { count: number; gap?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const n = Math.max(1, Math.min(count, MAX_DAY_DOTS));
+    const ensure = () => {
+      while (el.children.length < n) {
+        const d = document.createElement("div");
+        d.className = countdownStyles.dot;
+        el.appendChild(d);
+      }
+      while (el.children.length > n) el.lastChild?.remove();
+    };
+    const bestGrid = (W: number, H: number, N: number, g: number) => {
+      let best = { cols: N, size: 0 };
+      for (let rows = 1; rows <= N; rows++) {
+        const cols = Math.ceil(N / rows);
+        const dotW = (W - g * (cols - 1)) / cols;
+        const dotH = (H - g * (rows - 1)) / rows;
+        const size = Math.floor(Math.min(dotW, dotH));
+        if (size > best.size) best = { cols, size };
+      }
+      return best;
+    };
+    const layout = () => {
+      const W = el.clientWidth;
+      const H = el.clientHeight;
+      if (!W || !H) return;
+      ensure();
+      const { cols, size } = bestGrid(W, H, n, gap);
+      const s = Math.max(2, size);
+      el.style.gap = `${gap}px`;
+      el.style.gridTemplateColumns = `repeat(${cols}, ${s}px)`;
+      el.style.setProperty("--dot-size", `${s}px`);
+    };
+    const ro = new ResizeObserver(layout);
+    ro.observe(el);
+    layout();
+    return () => ro.disconnect();
+  }, [count, gap]);
+  return (
+    <div
+      ref={ref}
+      className={countdownStyles.dotsGrid}
+      style={{ display: "grid", placeItems: "center", width: "100%", height: "100%" }}
+      aria-hidden="true"
+    />
+  );
+}
 
 /*
  * The counter's main view (Figma: ClearTab, node 1607:4396 + widget mock):
@@ -81,8 +136,23 @@ function bestRows(width: number, height: number, units: Unit[], compact: boolean
   return best;
 }
 
-// Full grids if they fit at design size; otherwise only the remaining dots
+// Narrowest the side-by-side columns can get: each column is at least a unit
+// word wide ("Months"), plus the "+" between them.
+function minRowWidth(units: Unit[]) {
+  return units.length * LABEL_WIDTH + PLUS_WIDTH * (units.length - 1);
+}
+
+// Full grids if they fit at design size; otherwise only the remaining dots.
+// Too narrow for even the columns -> stack the numbers vertically, drop the dots.
 function chooseLayout(width: number, height: number, units: Unit[]) {
+  if (width < minRowWidth(units)) {
+    // Numbers stack top-to-bottom: value+unit per row, "+" between, then the title
+    const STACK_ROW = LABEL_HEIGHT; // number + unit
+    const STACK_PLUS = 24; // the "+" line between units
+    const used =
+      units.length * STACK_ROW + (units.length - 1) * STACK_PLUS + BODY_GAP + TITLE_HEIGHT;
+    return { rows: 1 as Rows, dot: DOT, compact: true, stacked: true, showUntil: height - used >= UNTIL_HEIGHT };
+  }
   let compact = false;
   let best = bestRows(width, height, units, false);
   if (best.dot < DOT - 0.1) {
@@ -91,7 +161,7 @@ function chooseLayout(width: number, height: number, units: Unit[]) {
   }
   const used =
     best.rows * best.dot + (best.rows - 1) * DOT_GAP + LABEL_HEIGHT + COLUMN_GAP + BODY_GAP + TITLE_HEIGHT;
-  return { ...best, compact, showUntil: height - used >= UNTIL_HEIGHT };
+  return { ...best, compact, stacked: false, showUntil: height - used >= UNTIL_HEIGHT };
 }
 
 function Dots({ unit, rows, compact }: { unit: Unit; rows: Rows; compact: boolean }) {
@@ -129,10 +199,11 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     .join(", ");
 
   const ref = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; showUntil: boolean }>({
+  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; stacked: boolean; showUntil: boolean }>({
     rows: 4,
     dot: DOT,
     compact: false,
+    stacked: false,
     showUntil: true,
   });
 
@@ -147,6 +218,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
       setLayout((prev) =>
         prev.rows === next.rows &&
         prev.compact === next.compact &&
+        prev.stacked === next.stacked &&
         Math.abs(prev.dot - next.dot) < 0.1 &&
         prev.showUntil === next.showUntil
           ? prev
@@ -166,12 +238,34 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     ref.current?.style.setProperty("--dot", `${layout.dot}px`);
   }, [layout.dot]);
 
+  // Too narrow for the side-by-side breakdown: show the total days left as a single
+  // number with a dot grid on top (chosen over stacking the months/weeks/days).
+  if (layout.stacked) {
+    return (
+      <div ref={ref} className={styles.breakdown}>
+        <div
+          className={styles.daysOnly}
+          role="img"
+          aria-label={`${daysLeft} day${daysLeft === 1 ? "" : "s"} until ${title}`}
+        >
+          <DaysDotGrid count={daysLeft} />
+          <div className={styles.daysNumber}>{daysLeft}</div>
+          <p className={styles.daysCaption}>
+            <span className={styles.untilLabel}>Day{daysLeft === 1 ? "" : "s"} until</span>
+            <span className={styles.title}>{title}</span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div ref={ref} className={styles.breakdown}>
       <div
         className={styles.body}
         data-rows={layout.rows}
         data-compact={layout.compact}
+        data-stacked={layout.stacked}
         role="img"
         aria-label={`${spoken || "0 days"} until ${title}`}
       >
