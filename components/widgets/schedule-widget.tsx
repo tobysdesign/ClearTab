@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
-import { WidgetLoader, WidgetContainer, WidgetHeader, WidgetContent } from "@cleartab/ui";
+import { WidgetLoader, WidgetContainer, WidgetHeader, WidgetContent, Tooltip, TooltipTrigger, TooltipContent } from "@cleartab/ui";
 import { useAuth } from '@/components/auth/auth-provider'
 import { isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
@@ -503,39 +503,43 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
                     <div></div>
 
                     {/* Footer with day/date stacked and month */}
-                    <div
-                      className={styles.sidebarFooter}
-                      title="Goto todays date"
-                      onClick={() => {
-                        // Scroll to today within container
-                        if (todayRef.current) {
-                          const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
-                            todayRef.current.closest('[class*="scrollContainer"]')
-                          if (scrollContainer) {
-                            const elementTop = todayRef.current.offsetTop
-                            scrollContainer.scrollTo({
-                              top: Math.max(0, elementTop - 50),
-                              behavior: 'smooth'
-                            })
-                          }
-                        }
-                      }}
-                    >
-                      {/* Day and date stacked */}
-                      <div className={styles.dayDateContainer}>
-                        <div className={styles.dayText}>
-                          {isToday(visibleDate) && <div className={styles.todayDot} />}
-                          {format(visibleDate, 'EEE')}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={styles.sidebarFooter}
+                          onClick={() => {
+                            // Scroll to today within container
+                            if (todayRef.current) {
+                              const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
+                                todayRef.current.closest('[class*="scrollContainer"]')
+                              if (scrollContainer) {
+                                const elementTop = todayRef.current.offsetTop
+                                scrollContainer.scrollTo({
+                                  top: Math.max(0, elementTop - 50),
+                                  behavior: 'smooth'
+                                })
+                              }
+                            }
+                          }}
+                        >
+                          {/* Day and date stacked */}
+                          <div className={styles.dayDateContainer}>
+                            <div className={styles.dayText}>
+                              {isToday(visibleDate) && <div className={styles.todayDot} />}
+                              {format(visibleDate, 'EEE')}
+                            </div>
+                            <div className="bigNumber">
+                              {format(visibleDate, 'dd')}
+                            </div>
+                          </div>
+                          {/* Month */}
+                          <div className={styles.monthText}>
+                            {format(visibleDate, 'MMMM')}
+                          </div>
                         </div>
-                        <div className="bigNumber">
-                          {format(visibleDate, 'dd')}
-                        </div>
-                      </div>
-                      {/* Month */}
-                      <div className={styles.monthText}>
-                        {format(visibleDate, 'MMMM')}
-                      </div>
-                    </div>
+                      </TooltipTrigger>
+                      <TooltipContent>Goto todays date</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
