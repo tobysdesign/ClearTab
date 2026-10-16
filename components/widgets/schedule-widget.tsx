@@ -389,7 +389,9 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
     )
   }
 
-  if (error || needsReconnection) {
+  // Only take over the whole widget with the reconnect prompt when there are no events to show;
+  // if other (healthy) accounts returned events, keep showing them.
+  if (error || (needsReconnection && events.length === 0)) {
     // Show connection UI for reconnection state or specific auth errors
     const isConnectionError = needsReconnection ||
       error?.message?.includes('not connected') ||
