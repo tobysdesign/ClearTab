@@ -1,7 +1,7 @@
 'use client'
 
 // Icons replaced with ASCII placeholders
-import React, { useMemo, useRef, useState, useEffect } from 'react'
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -152,7 +152,7 @@ export function ScheduleWidget() {
   // Use auth
   const { loading, signIn } = useAuth()
   const { isVisible } = useCalendarVisibility()
-  const { ref, isMini } = useWidgetHeight()
+  const { ref, isMini, height } = useWidgetHeight()
 
   // Check if calendar was just connected (from URL param)
   useEffect(() => {
@@ -373,6 +373,31 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
     }
   }, [isLoading])
 
+  // Keep the agenda centred on today on load AND whenever the widget is resized
+  // (the layout reflows at narrow/short sizes). A ResizeObserver on the scroll
+  // area fires both when it mounts and on every size change.
+  const scrollContainerElRef = useRef<HTMLDivElement | null>(null)
+  const scrollResizeObserverRef = useRef<ResizeObserver | null>(null)
+  const scrollToTodayNow = useCallback(() => {
+    const node = scrollContainerElRef.current
+    const todayEl = todayRef.current
+    if (node && todayEl) node.scrollTop = Math.max(0, todayEl.offsetTop - 50)
+  }, [])
+  const setScrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    scrollResizeObserverRef.current?.disconnect()
+    scrollResizeObserverRef.current = null
+    scrollContainerElRef.current = node
+    if (!node) return
+    const ro = new ResizeObserver(() => requestAnimationFrame(scrollToTodayNow))
+    ro.observe(node)
+    scrollResizeObserverRef.current = ro
+  }, [scrollToTodayNow])
+
+  // Re-centre on today whenever the widget is resized (height from useWidgetHeight)
+  useEffect(() => {
+    requestAnimationFrame(scrollToTodayNow)
+  }, [height, isMini, scrollToTodayNow])
+
   // Find next upcoming event for mini view - Moved here to follow Rules of Hooks
   const nextEvent = useMemo(() => {
     return todayEvents.find(e => {
@@ -545,7 +570,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
 
                 {/* Right Content */}
                 <div className={styles.rightContent}>
-                  <div className={styles.scrollContainer}>
+                  <div ref={setScrollContainerRef} className={styles.scrollContainer}>
                     {sortedDays.length === 0 ? (
                       <EmptyState
                         title="No events scheduled"
