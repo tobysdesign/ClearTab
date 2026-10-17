@@ -6,6 +6,7 @@ import { motion, PanInfo, useAnimationControls } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
 import { BetaDockContent } from './beta-dock-content'
+import { LayoutPopover } from './layout-popover'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
 import dynamic from 'next/dynamic'
 
@@ -55,6 +56,14 @@ function LoadingState() {
 
 type DockPosition = 'top' | 'left' | 'right' | 'bottom'
 
+// Popover opens away from the dock edge
+const POPOVER_SIDE: Record<DockPosition, 'top' | 'bottom' | 'left' | 'right'> = {
+  top: 'bottom',
+  bottom: 'top',
+  left: 'right',
+  right: 'left',
+}
+
 export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashboardClientProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const controls = useAnimationControls()
@@ -65,6 +74,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
   const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(null)
   const [editMode, setEditMode] = useState(false)
+  const [layoutPopoverOpen, setLayoutPopoverOpen] = useState(false)
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false)
 
   const {
@@ -424,7 +434,21 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
-                onOpenLayoutModal={() => setEditMode((prev) => !prev)}
+                onToggleLayout={() => setLayoutPopoverOpen((prev) => !prev)}
+                wrapLayoutButton={(button) => (
+                  <LayoutPopover
+                    open={layoutPopoverOpen}
+                    onOpenChange={setLayoutPopoverOpen}
+                    side={POPOVER_SIDE[position]}
+                    presetLayout={presetLayout}
+                    setPresetLayout={setPresetLayout}
+                    widgets={widgets}
+                    toggleWidget={toggleWidget}
+                    onEnterEdit={() => setEditMode(true)}
+                  >
+                    {button}
+                  </LayoutPopover>
+                )}
                 onOpenShortcuts={() => setIsShortcutsModalOpen((prev) => !prev)}
               />
 

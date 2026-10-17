@@ -18,7 +18,9 @@ interface BetaDockContentProps {
   setShowSettings: (show: boolean) => void
   setShowSearch: (show: boolean) => void
   isVertical: boolean
-  onOpenLayoutModal: () => void
+  onToggleLayout: () => void
+  /** Wraps the layout button so a popover can anchor to it. */
+  wrapLayoutButton: (button: React.ReactNode) => React.ReactNode
   onOpenShortcuts: () => void
 }
 
@@ -30,7 +32,8 @@ export function BetaDockContent({
   setShowSettings: _setShowSettings,
   setShowSearch: _setShowSearch,
   isVertical,
-  onOpenLayoutModal,
+  onToggleLayout,
+  wrapLayoutButton,
   onOpenShortcuts,
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
@@ -50,17 +53,19 @@ export function BetaDockContent({
         isVertical ? styles.containerVertical : styles.containerHorizontal
       )}
     >
-      <DockIconButton
-        onClick={onOpenLayoutModal}
-        title="Dashboard layout"
-        shortcut="⌘L"
-        data-testid="layout-trigger"
-      >
-        <LayoutToggleIcon
-          isToggled={false}
-          size={16}
-        />
-      </DockIconButton>
+      {wrapLayoutButton(
+        <DockIconButton
+          onClick={onToggleLayout}
+          title="Dashboard layout"
+          shortcut="⌘L"
+          data-testid="layout-trigger"
+        >
+          <LayoutToggleIcon
+            isToggled={false}
+            size={16}
+          />
+        </DockIconButton>
+      )}
 
       <ShinyAiButton
         data-testid="ai-chat-trigger"
