@@ -337,6 +337,9 @@
 .waveformBar {
     /* box model */
     width: 2px;
+    /* Keep the bar width when the row is narrow -- otherwise flex shrinks every bar
+       to 0 and the waveform disappears. The container clips the oldest (left) bars. */
+    flex-shrink: 0;
     min-height: 3px;
     border-radius: 9999px;
 
@@ -1130,15 +1133,19 @@
 }
 
 @container (max-width: 230px) {
-    /* Too narrow for four controls: drop Mute (least critical) so Pause, Delete and
-       Complete stay visible. The delete-confirm (a div) is excluded. */
-    .recordingControls > :first-child:not([class*="deleteConfirm"]) {
-        display: none;
-    }
-
+    /* Too narrow for four full-size controls: shrink the buttons (keep Mute) so all
+       of Mute/Pause/Delete/Complete stay visible. */
     .recordingControls,
     .miniControlsGroup {
-        gap: 6px;
+        gap: 5px;
+    }
+
+    .recordingControls button,
+    .miniControlsGroup button {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        padding: 0;
     }
 }
 
