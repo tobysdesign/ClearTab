@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   BetaPresetLayout,
   WidgetId,
@@ -98,8 +98,28 @@ interface WidgetFlankProps {
   orientation: Orientation
 }
 
+// Highlight a widget's live tile on the board (found by its data-widget-id) while
+// its toggle is hovered/focused, so users see which widget a toggle controls.
+function setWidgetHighlight(id: WidgetId, on: boolean) {
+  if (typeof document === 'undefined') return
+  const el = document.querySelector(`[data-widget-id="${id}"]`)
+  if (!el) return
+  if (on) el.setAttribute('data-layout-highlight', 'true')
+  else el.removeAttribute('data-layout-highlight')
+}
+
+function clearAllHighlights() {
+  if (typeof document === 'undefined') return
+  document
+    .querySelectorAll('[data-layout-highlight]')
+    .forEach((el) => el.removeAttribute('data-layout-highlight'))
+}
+
 /** Widget show/hide toggles, flanking the other side of the dock. */
 export function WidgetFlank({ widgets, toggleWidget, activeCount, orientation }: WidgetFlankProps) {
+  // Clear any lingering highlight when the flank unmounts (e.g. exiting edit mode).
+  useEffect(() => clearAllHighlights, [])
+
   return (
     <div
       className={cn(styles.flank, orientation === 'vertical' ? styles.flankVertical : styles.flankHorizontal)}
@@ -118,6 +138,10 @@ export function WidgetFlank({ widgets, toggleWidget, activeCount, orientation }:
             disabled={isLastVisible}
             title={isLastVisible ? 'At least one widget must stay visible' : WIDGET_METADATA[id].name}
             onClick={() => toggleWidget(id)}
+            onMouseEnter={() => setWidgetHighlight(id, true)}
+            onMouseLeave={() => setWidgetHighlight(id, false)}
+            onFocus={() => setWidgetHighlight(id, true)}
+            onBlur={() => setWidgetHighlight(id, false)}
             data-testid={`edit-widget-${id}`}
           >
             {WIDGET_METADATA[id].name}

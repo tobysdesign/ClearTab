@@ -291,9 +291,12 @@ export function BetaAdaptiveGrid({
       data-settled={settled}
       data-stacked={isStacked}
       style={{
-        paddingTop: `${padding.paddingTop}px`,
+        // In edit mode, split the vertical dock padding evenly so the board is
+        // centered vertically (same total padding — no compression), then the
+        // center-origin zoom keeps it centered.
+        paddingTop: `${editMode && !isStacked ? (padding.paddingTop + padding.paddingBottom) / 2 : padding.paddingTop}px`,
+        paddingBottom: `${editMode && !isStacked ? (padding.paddingTop + padding.paddingBottom) / 2 : padding.paddingBottom}px`,
         paddingRight: `${padding.paddingRight}px`,
-        paddingBottom: `${padding.paddingBottom}px`,
         paddingLeft: `${padding.paddingLeft}px`,
         // Zoom the board out while editing (see EDIT_ZOOM).
         transform: editMode && !isStacked ? `scale(${EDIT_ZOOM})` : undefined,
