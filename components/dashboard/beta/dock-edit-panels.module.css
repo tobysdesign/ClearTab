@@ -79,28 +79,44 @@
 /* --- Widget show/hide chips --- */
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
   border: 1px solid #4e4e4e;
   background: #131313;
-  color: rgba(255, 255, 255, 0.55);
+  /* "Hidden" widgets read as dimmed, but still legible. */
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .chip:hover:not(:disabled) {
-  border-color: #6e6e6e;
-  background: #252525;
+  border-color: #8a8a8a;
+  background: #2a2a2a;
+  color: #ffffff;
 }
 
 .chipOn {
   background: #ffffff;
   border-color: #ffffff;
   color: #1a1a1a;
+}
+
+.chipOn:hover:not(:disabled) {
+  background: #ececec;
+  border-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.chipIcon {
+  font-size: 15px;
+  line-height: 1;
 }
 
 .chip:disabled {
