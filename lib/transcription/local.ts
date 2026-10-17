@@ -3,8 +3,8 @@ import { pipeline, env, type AutomaticSpeechRecognitionPipeline } from '@hugging
 export type LocalModel = 'local-en' | 'local-multi'
 
 export const MODEL_IDS: Record<LocalModel, string> = {
-  'local-en': 'Xenova/whisper-tiny.en',
-  'local-multi': 'Xenova/whisper-base',
+  'local-en': 'onnx-community/whisper-tiny.en',
+  'local-multi': 'onnx-community/whisper-base',
 }
 
 export type LocalProgress =

@@ -22,8 +22,8 @@ describe('local transcription engine', () => {
   beforeEach(() => pipelineMock.mockReset())
 
   it('maps engine ids to the correct HF model ids', () => {
-    expect(MODEL_IDS['local-en']).toBe('Xenova/whisper-tiny.en')
-    expect(MODEL_IDS['local-multi']).toBe('Xenova/whisper-base')
+    expect(MODEL_IDS['local-en']).toBe('onnx-community/whisper-tiny.en')
+    expect(MODEL_IDS['local-multi']).toBe('onnx-community/whisper-base')
   })
 
   it('loads the pipeline for the chosen model and returns its text', async () => {
@@ -33,7 +33,7 @@ describe('local transcription engine', () => {
     const out = await transcribeLocal(blob, { model: 'local-en' })
     expect(pipelineMock).toHaveBeenCalledWith(
       'automatic-speech-recognition',
-      'Xenova/whisper-tiny.en',
+      'onnx-community/whisper-tiny.en',
       expect.objectContaining({ dtype: 'q8' }),
     )
     expect(out.text).toBe('hello world')
