@@ -19,6 +19,7 @@ interface BetaDockContentProps {
   setShowSearch: (show: boolean) => void
   isVertical: boolean
   onToggleLayout: () => void
+  layoutOpen: boolean
   /** Wraps the layout button so a popover can anchor to it. */
   wrapLayoutButton: (button: React.ReactNode) => React.ReactNode
   onOpenShortcuts: () => void
@@ -33,6 +34,7 @@ export function BetaDockContent({
   setShowSearch: _setShowSearch,
   isVertical,
   onToggleLayout,
+  layoutOpen,
   wrapLayoutButton,
   onOpenShortcuts,
 }: BetaDockContentProps) {
@@ -57,7 +59,8 @@ export function BetaDockContent({
         <DockIconButton
           onClick={onToggleLayout}
           title="Dashboard layout"
-          shortcut="⌘L"
+          aria-expanded={layoutOpen}
+          aria-haspopup="dialog"
           data-testid="layout-trigger"
         >
           <LayoutToggleIcon

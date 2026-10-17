@@ -77,6 +77,10 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
   const [layoutPopoverOpen, setLayoutPopoverOpen] = useState(false)
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false)
 
+  useEffect(() => {
+    if (editMode) setLayoutPopoverOpen(false)
+  }, [editMode])
+
   const {
     presetLayout,
     setPresetLayout,
@@ -434,6 +438,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
+                layoutOpen={layoutPopoverOpen}
                 onToggleLayout={() => setLayoutPopoverOpen((prev) => !prev)}
                 wrapLayoutButton={(button) => (
                   <LayoutPopover
@@ -444,6 +449,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                     setPresetLayout={setPresetLayout}
                     widgets={widgets}
                     toggleWidget={toggleWidget}
+                    activeCount={activeCount}
                     onEnterEdit={() => setEditMode(true)}
                   >
                     {button}

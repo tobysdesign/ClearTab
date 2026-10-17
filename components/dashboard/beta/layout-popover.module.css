@@ -143,3 +143,29 @@
   background: #252525;
   border-color: #6E6E6E;
 }
+
+.preset:focus-visible,
+.chip:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.primaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.kbd {
+  font-family: inherit;
+  font-size: 12px;
+  opacity: 0.55;
+}

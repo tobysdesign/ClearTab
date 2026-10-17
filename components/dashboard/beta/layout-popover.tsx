@@ -26,6 +26,7 @@ interface LayoutPopoverProps {
   setPresetLayout: (layout: BetaPresetLayout) => void
   widgets: WidgetVisibilityState
   toggleWidget: (id: WidgetId) => void
+  activeCount: number
   onEnterEdit: () => void
 }
 
@@ -38,6 +39,7 @@ export function LayoutPopover({
   setPresetLayout,
   widgets,
   toggleWidget,
+  activeCount,
   onEnterEdit,
 }: LayoutPopoverProps) {
   const anchorRef = useRef<HTMLDivElement>(null)
@@ -65,6 +67,7 @@ export function LayoutPopover({
           // The dock button toggles the popover itself; don't let the outside-click close it first.
           if (anchorRef.current?.contains(e.target as Node)) e.preventDefault()
         }}
+        aria-label="Dashboard layout"
         data-testid="layout-popover"
       >
         <div className={styles.panel}>
@@ -107,12 +110,15 @@ export function LayoutPopover({
             <div className={styles.chipList}>
               {WIDGET_ORDER.map((id) => {
                 const on = widgets[id]
+                const isLastVisible = on && activeCount <= 1
                 return (
                   <button
                     key={id}
                     type="button"
                     className={cn(styles.chip, on && styles.chipOn)}
                     aria-pressed={on}
+                    disabled={isLastVisible}
+                    title={isLastVisible ? 'At least one widget must stay visible' : undefined}
                     onClick={() => toggleWidget(id)}
                   >
                     {WIDGET_METADATA[id].name}
@@ -125,6 +131,7 @@ export function LayoutPopover({
           {!isStacked && (
             <button type="button" className={styles.primaryButton} onClick={handleEnterEdit}>
               Edit layout
+              <kbd className={styles.kbd}>⌘L</kbd>
             </button>
           )}
         </div>
