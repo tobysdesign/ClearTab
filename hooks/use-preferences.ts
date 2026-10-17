@@ -54,8 +54,12 @@ export function usePreferences() {
   return useQuery({
     queryKey: PREFERENCES_QUERY_KEY,
     queryFn: fetchPreferences,
-    initialData: readCachedPreferences,
-    initialDataUpdatedAt: () => 0,
+    // The localStorage snapshot is a *placeholder* only — it renders instantly
+    // (countdown, weather) but reports isPlaceholderData=true, so consumers that
+    // apply server state once (the beta layout) can wait for the genuinely fresh
+    // fetch instead of clobbering freshly-edited local state with a stale cache.
+    // NOTE: do not add `initialData` here — initialData is treated as real data
+    // (isPlaceholderData=false), which reintroduces the custom-layout revert bug.
     placeholderData: readCachedPreferences,
   })
 }
