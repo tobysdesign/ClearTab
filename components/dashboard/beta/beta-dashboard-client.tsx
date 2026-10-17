@@ -381,6 +381,24 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
         </button>
       )}
 
+      {editingEnabled && editMode && (
+        <div className={betaStyles.editInstructions}>
+          <span className={betaStyles.editInstructionsText}>
+            Drag a widget onto another to rearrange
+          </span>
+          <span className={betaStyles.editLegend}>
+            <span className={betaStyles.editLegendItem}>
+              <span className={cn(betaStyles.editSwatch, betaStyles.editSwatchSwap)} />
+              Swap
+            </span>
+            <span className={betaStyles.editLegendItem}>
+              <span className={cn(betaStyles.editSwatch, betaStyles.editSwatchJoin)} />
+              Join
+            </span>
+          </span>
+        </div>
+      )}
+
       {isDragging &&
         dropZones.map((zone) => {
           if (zone.id === position) return null
