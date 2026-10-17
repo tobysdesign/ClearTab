@@ -43,6 +43,14 @@
     transform: translateX(-50%);
 }
 
+/* Open above the trigger (near the bottom of the viewport) */
+.directionUp {
+    top: auto;
+    bottom: 100%;
+    margin-top: 0;
+    margin-bottom: 4px;
+}
+
 /* SimpleDropdown: Item */
 .item {
     /* layout */

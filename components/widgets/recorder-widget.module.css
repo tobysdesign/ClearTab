@@ -1037,6 +1037,35 @@
     flex-shrink: 0;
 }
 
+.miniControlsFull {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Shown only when the mini is too narrow for the full control row (see @container) */
+.miniControlsCollapsed {
+    display: none;
+    align-items: center;
+    gap: 6px;
+}
+
+.miniMenuDots {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Too narrow for four controls: collapse the bar to a drop-up menu + Complete */
+@container (max-width: 270px) {
+    .miniControlsFull {
+        display: none;
+    }
+
+    .miniControlsCollapsed {
+        display: flex;
+    }
+}
+
 /* Transcription Complete States */
 .transcriptionCompleteContainer {
     display: flex;

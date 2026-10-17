@@ -12,13 +12,16 @@ interface SimpleDropdownProps {
   children: React.ReactNode
   className?: string
   align?: 'left' | 'right' | 'center'
+  /** Which way the menu opens. 'up' is useful near the bottom of the viewport. */
+  direction?: 'up' | 'down'
 }
 
 export function SimpleDropdown({
   trigger,
   children,
   className,
-  align = 'right'
+  align = 'right',
+  direction = 'down'
 }: SimpleDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -80,6 +83,7 @@ export function SimpleDropdown({
             className={cn(
               styles.dropdownContent,
               getAlignClass(),
+              direction === 'up' && styles.directionUp,
               className
             )}
             onClick={(e) => e.stopPropagation()}

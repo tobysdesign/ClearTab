@@ -12,6 +12,8 @@ import {
   BrandedLoader,
   WidgetContainer,
   ClientOnly,
+  SimpleDropdown,
+  SimpleDropdownItem,
 } from "@cleartab/ui";
 import { useToast } from "@cleartab/ui";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -685,30 +687,67 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             />
                           ) : (
                             <>
-                              <Button
-                                size="icon"
-                                onClick={toggleMute}
-                                tooltipLabel={isMuted ? "Unmute" : "Mute"}
-                              >
-                                <img
-                                  src={
-                                    isMuted
-                                      ? "/icons/si_micMute-fill.svg"
-                                      : "/icons/si_mic-fill.svg"
-                                  }
-                                  alt=""
-                                  className={styles.controlIcon}
+                              {/* Wide enough: all controls in a row */}
+                              <div className={styles.miniControlsFull}>
+                                <Button
+                                  size="icon"
+                                  onClick={toggleMute}
+                                  tooltipLabel={isMuted ? "Unmute" : "Mute"}
+                                >
+                                  <img
+                                    src={
+                                      isMuted
+                                        ? "/icons/si_micMute-fill.svg"
+                                        : "/icons/si_mic-fill.svg"
+                                    }
+                                    alt=""
+                                    className={styles.controlIcon}
+                                  />
+                                </Button>
+                                <PauseResumeButton
+                                  state={state}
+                                  onPause={pauseRecording}
+                                  onResume={resumeRecording}
                                 />
-                              </Button>
-                              <PauseResumeButton
-                                state={state}
-                                onPause={pauseRecording}
-                                onResume={resumeRecording}
-                              />
-                              <DeleteButton
-                                onClick={() => setConfirmingDelete(true)}
-                              />
-                              <TranscribeButton onClick={handleStopRecording} />
+                                <DeleteButton
+                                  onClick={() => setConfirmingDelete(true)}
+                                />
+                                <TranscribeButton onClick={handleStopRecording} />
+                              </div>
+
+                              {/* Too narrow: collapse the secondary actions into a
+                                  drop-up menu, keep Complete as a button */}
+                              <div className={styles.miniControlsCollapsed}>
+                                <SimpleDropdown
+                                  align="right"
+                                  direction="up"
+                                  trigger={
+                                    <Button size="icon" tooltipLabel="More actions">
+                                      <span className={styles.miniMenuDots}>⋮</span>
+                                    </Button>
+                                  }
+                                >
+                                  <SimpleDropdownItem onClick={toggleMute}>
+                                    {isMuted ? "Unmute" : "Mute"}
+                                  </SimpleDropdownItem>
+                                  <SimpleDropdownItem
+                                    onClick={
+                                      state === "paused"
+                                        ? resumeRecording
+                                        : pauseRecording
+                                    }
+                                  >
+                                    {state === "paused" ? "Resume" : "Pause"}
+                                  </SimpleDropdownItem>
+                                  <SimpleDropdownItem
+                                    variant="danger"
+                                    onClick={() => setConfirmingDelete(true)}
+                                  >
+                                    Delete
+                                  </SimpleDropdownItem>
+                                </SimpleDropdown>
+                                <TranscribeButton onClick={handleStopRecording} />
+                              </div>
                             </>
                           ))}
                       </div>
