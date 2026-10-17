@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { CloseIcon, LayoutTreeIcon } from '@/components/icons'
+import { CloseIcon } from '@/components/icons'
+import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
 import { DockIconButton, ShinyAiButton, Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
@@ -90,7 +91,7 @@ export function BetaDockContent({
             shortcut="⌘L"
             data-testid="layout-trigger"
           >
-            <LayoutTreeIcon size={16} />
+            <LayoutToggleIcon isToggled={false} size={16} />
           </DockIconButton>
         )}
 

@@ -40,6 +40,18 @@
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* Custom preset: an icon placeholder instead of a wireframe. */
+.presetCustom {
+  align-items: center;
+  justify-content: center;
+}
+
+.presetIcon {
+  font-size: 20px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .preset:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.6);
   outline-offset: 2px;

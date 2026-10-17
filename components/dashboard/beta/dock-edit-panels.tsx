@@ -70,6 +70,23 @@ export function PresetFlank({ presetLayout, setPresetLayout, orientation }: Pres
           </Tooltip>
         )
       })}
+
+      {/* Custom has no fixed shape, so it shows the "tactic" icon rather than a wireframe. */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className={cn(styles.preset, styles.presetCustom, presetLayout === 'custom' && styles.presetActive)}
+            aria-pressed={presetLayout === 'custom'}
+            aria-label="Custom layout"
+            onClick={() => setPresetLayout('custom')}
+            data-testid="edit-preset-custom"
+          >
+            <span className={cn('material-symbols-outlined', styles.presetIcon)}>dashboard_customize</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>{LAYOUT_PRESET_METADATA.custom.name}</TooltipContent>
+      </Tooltip>
     </div>
   )
 }
