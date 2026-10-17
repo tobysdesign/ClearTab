@@ -12,6 +12,8 @@ interface DockIconButtonProps {
   title?: string
   'data-testid'?: string
   shortcut?: string
+  'aria-expanded'?: boolean
+  'aria-haspopup'?: React.AriaAttributes['aria-haspopup']
 }
 
 export function DockIconButton({
@@ -20,13 +22,17 @@ export function DockIconButton({
   className,
   title,
   shortcut,
-  'data-testid': dataTestId
+  'data-testid': dataTestId,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHasPopup,
 }: DockIconButtonProps) {
   const btn = (
     <button
       onClick={onClick}
       className={cn(styles.dockIconButton, className)}
       aria-label={title}
+      aria-expanded={ariaExpanded}
+      aria-haspopup={ariaHasPopup}
       data-testid={dataTestId}
     >
       {children}

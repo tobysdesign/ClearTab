@@ -6,7 +6,7 @@
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  transition: padding 0.3s ease;
+  transition: padding 0.3s ease, transform 0.3s ease;
 }
 
 /* Hidden until the first layout settles (see useSettledLayout), then fades in */

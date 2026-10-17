@@ -9,11 +9,6 @@ import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
 import dynamic from 'next/dynamic'
 
-const VisualLayoutModal = dynamic(
-  () => import('./visual-layout-modal').then((mod) => ({ default: mod.VisualLayoutModal })),
-  { ssr: false }
-)
-
 const KeyboardShortcutsModal = dynamic(
   () => import('./keyboard-shortcuts-modal').then((mod) => ({ default: mod.KeyboardShortcutsModal })),
   { ssr: false }
@@ -69,7 +64,17 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
   const [isDragging, setIsDragging] = useState(false)
   const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(null)
-  const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false)
+  // Layout editing writes to the real user's prefs, so it is disabled on
+  // demo/landing surfaces that drive the layout via layoutOverride.
+  const editingEnabled = !layoutOverride
+  const [editMode, setEditModeRaw] = useState(false)
+  const setEditMode = useCallback(
+    (next: boolean | ((prev: boolean) => boolean)) => {
+      if (!editingEnabled) return
+      setEditModeRaw(next)
+    },
+    [editingEnabled]
+  )
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false)
 
   const {
@@ -78,7 +83,6 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     widgets,
     toggleWidget,
     activeCount,
-    totalCount,
     customLayout,
     moveWidgetInCustomLayout,
   } = useBetaWidgets()
@@ -170,9 +174,14 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
         // (setShowSettings alone did nothing — the dock no longer reads that state.)
         window.dispatchEvent(new CustomEvent('openSettings', { detail: { tab: 'schedule', toggle: true } }))
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l' && editingEnabled) {
         e.preventDefault()
-        setIsLayoutModalOpen((prev) => !prev)
+        setEditMode((prev) => !prev)
+      }
+      if (e.key === 'Escape') {
+        const target = e.target as HTMLElement
+        const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+        if (!isTyping) setEditMode(false)
       }
       if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
         const target = e.target as HTMLElement
@@ -186,7 +195,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [editingEnabled, setEditMode])
 
   const calculateDropZones = useCallback(() => {
     if (typeof window === 'undefined') return []
@@ -354,9 +363,41 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
             customLayout={layoutOverride?.customLayout ?? customLayout}
             dockPosition={position}
             searchQuery={searchQuery}
+            editMode={editingEnabled && editMode}
+            onMoveWidget={editingEnabled ? moveWidgetInCustomLayout : undefined}
           />
         </Suspense>
       </div>
+
+      {editingEnabled && editMode && (
+        <button
+          type="button"
+          className={betaStyles.editCloseButton}
+          onClick={() => setEditMode(false)}
+          aria-label="Close layout editing"
+        >
+          <span>Close</span>
+          <kbd className={betaStyles.editCloseKbd}>Esc</kbd>
+        </button>
+      )}
+
+      {editingEnabled && editMode && (
+        <div className={betaStyles.editInstructions}>
+          <span className={betaStyles.editInstructionsText}>
+            Drag onto a widget&apos;s edge (top / bottom / left / right) to join, or its center to swap
+          </span>
+          <span className={betaStyles.editLegend}>
+            <span className={betaStyles.editLegendItem}>
+              <span className={cn(betaStyles.editSwatch, betaStyles.editSwatchSwap)} />
+              Swap
+            </span>
+            <span className={betaStyles.editLegendItem}>
+              <span className={cn(betaStyles.editSwatch, betaStyles.editSwatchJoin)} />
+              Join
+            </span>
+          </span>
+        </div>
+      )}
 
       {isDragging &&
         dropZones.map((zone) => {
@@ -412,7 +453,13 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
-                onOpenLayoutModal={() => setIsLayoutModalOpen((prev) => !prev)}
+                editMode={editingEnabled && editMode}
+                onToggleEdit={() => setEditMode((prev) => !prev)}
+                presetLayout={presetLayout}
+                setPresetLayout={setPresetLayout}
+                widgets={widgets}
+                toggleWidget={toggleWidget}
+                activeCount={activeCount}
                 onOpenShortcuts={() => setIsShortcutsModalOpen((prev) => !prev)}
               />
 
@@ -429,21 +476,6 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
           </motion.div>,
           document.body
         )}
-
-      {isLayoutModalOpen && (
-        <VisualLayoutModal
-          isOpen={isLayoutModalOpen}
-          onClose={() => setIsLayoutModalOpen(false)}
-          presetLayout={presetLayout}
-          setPresetLayout={setPresetLayout}
-          widgets={widgets}
-          toggleWidget={toggleWidget}
-          activeCount={activeCount}
-          totalCount={totalCount}
-          customLayout={customLayout}
-          onMoveWidget={moveWidgetInCustomLayout}
-        />
-      )}
 
       {isShortcutsModalOpen && (
         <KeyboardShortcutsModal

@@ -54,14 +54,14 @@
 }
 
 .success {
-    background: linear-gradient(180deg, #1f7a45 0%, #17633a 100%);
-    border-color: rgba(120, 255, 170, 0.22);
+    background: linear-gradient(rgb(15 66 36) 0%, rgb(12 48 28) 100%);
+    border-color: rgba(120, 255, 170, 0.18);
     color: #ffffff;
 }
 
 .success:hover {
-    background: linear-gradient(180deg, #248c50 0%, #1b7043 100%);
-    border-color: rgba(120, 255, 170, 0.32);
+    background: linear-gradient(rgb(20 82 46) 0%, rgb(16 60 36) 100%);
+    border-color: rgba(120, 255, 170, 0.3);
     color: #ffffff;
 }
 

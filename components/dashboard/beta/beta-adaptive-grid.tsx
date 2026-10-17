@@ -11,9 +11,10 @@ import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import { BetaPresetLayout, WidgetVisibilityState, WidgetId, CustomLayoutState } from '@/hooks/use-beta-widgets'
-import { PanelNode, collapseForVisibility } from '@/lib/panel-tree'
+import { PanelNode, DropZone, collapseForVisibility, presetToTree } from '@/lib/panel-tree'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useIsStacked } from '@/hooks/use-stacked-layout'
+import { EditOverlay } from './edit-overlay'
 import styles from './beta-adaptive-grid.module.css'
 
 // --- Pixel-aware resizing ---------------------------------------------------
@@ -35,6 +36,10 @@ const STACK_ORDER: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'count
 const MIN_WIDGET_HEIGHT_PX = 48
 const MIN_WIDGET_WIDTH_FRACTION = 1 / 8 // of the viewport width (12.5%)
 const RESIZE_HIT_MARGINS = { fine: 14, coarse: 20 }
+// While editing, the whole board zooms out so the instructions panel has room and
+// the layout reads as an editable "board". Transform (not padding) keeps widget
+// proportions; the cursor-based hit-test + dragSnapToOrigin stay correct under scale.
+const EDIT_ZOOM = 0.9
 
 // Min height (px) a subtree needs so every leaf stays >= MIN_WIDGET_HEIGHT_PX.
 function nodeMinHeightPx(node: PanelNode | null): number {
@@ -141,6 +146,8 @@ interface BetaAdaptiveGridProps {
   customLayout?: CustomLayoutState
   dockPosition: 'top' | 'left' | 'right' | 'bottom'
   searchQuery?: string
+  editMode?: boolean
+  onMoveWidget?: (draggedId: WidgetId, targetId: WidgetId, zone: DropZone) => void
 }
 
 /*
@@ -198,6 +205,8 @@ export function BetaAdaptiveGrid({
   customLayout = { tree: null },
   dockPosition,
   searchQuery: _searchQuery,
+  editMode = false,
+  onMoveWidget,
 }: BetaAdaptiveGridProps) {
   const padding = useDockPadding(dockPosition)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -223,75 +232,17 @@ export function BetaAdaptiveGrid({
     }
   }
 
-  // Helper to render an array of widgets horizontally
-  const renderHorizontalCluster = (
-    widgetIds: WidgetId[],
-    keyPrefix: string
-  ) => {
-    const active = widgetIds.filter(isVisible)
-    if (active.length === 0) return null
-
-    if (active.length === 1) {
-      return (
-        <div className={styles.widgetPanel} key={`${keyPrefix}-${active[0]}`}>
-          {renderWidget(active[0])}
-        </div>
-      )
-    }
-
-    const equalSize = Math.round(100 / active.length)
-
-    return (
-      <AdaptivePanelGroup
-        key={`${keyPrefix}-${active.join('-')}`}
-        direction="horizontal"
-        className={styles.panelGroupFull}
-      >
-        {active.map((id, index) => {
-          return (
-            <React.Fragment key={id}>
-              <AdaptivePanel defaultSize={equalSize} minSize={10} className={styles.widgetPanel}>
-                {renderWidget(id)}
-              </AdaptivePanel>
-              {index < active.length - 1 && (
-                <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
-              )}
-            </React.Fragment>
-          )
-        })}
-      </AdaptivePanelGroup>
-    )
-  }
-
-  const render2x2Grid = (
-    hR1: boolean,
-    hR2: boolean,
-    r1: WidgetId[],
-    r2: WidgetId[],
-    prefix: string
-  ) => {
-    if (hR1 && hR2) {
-      return (
-        <AdaptivePanelGroup direction="vertical" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={50} minSize={20} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-            {renderHorizontalCluster(r1, `${prefix}-r1`)}
-          </AdaptivePanel>
-          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
-          <AdaptivePanel defaultSize={50} minSize={20} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-            {renderHorizontalCluster(r2, `${prefix}-r2`)}
-          </AdaptivePanel>
-        </AdaptivePanelGroup>
-      )
-    }
-    if (hR1) return renderHorizontalCluster(r1, `${prefix}-r1`)
-    if (hR2) return renderHorizontalCluster(r2, `${prefix}-r2`)
-    return null
-  }
-
+  const noopMove = () => {}
   const renderPanelNode = (node: PanelNode | null): React.ReactNode => {
     if (!node) return null
     if (node.type === 'widget') {
-      return <div className={styles.widgetPanel} data-widget-id={node.id}>{renderWidget(node.id)}</div>
+      // EditOverlay is ALWAYS the wrapper so renderWidget's subtree keeps a stable tree
+      // position across edit-mode toggles (no remount of editors / recorder state).
+      return (
+        <EditOverlay widgetId={node.id} active={!!(editMode && onMoveWidget)} className={styles.widgetPanel} onMove={onMoveWidget ?? noopMove}>
+          {renderWidget(node.id)}
+        </EditOverlay>
+      )
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>
@@ -309,138 +260,6 @@ export function BetaAdaptiveGrid({
     )
   }
 
-  // =========================================================================
-  // 1. Notetaker (Default)
-  // Left: Notes (full-height tall card)
-  // Right: Top Tasks, Bottom 2x2 grid (Schedule | Weather / Count | Voice)
-  // =========================================================================
-  const renderNotetaker = () => {
-    const hasNotes = isVisible('notes')
-    const hasTasks = isVisible('tasks')
-
-    const row1Widgets: WidgetId[] = (['schedule', 'weather'] as WidgetId[]).filter(isVisible)
-    const row2Widgets: WidgetId[] = (['countdown', 'recorder'] as WidgetId[]).filter(isVisible)
-
-    const hasRow1 = row1Widgets.length > 0
-    const hasRow2 = row2Widgets.length > 0
-    const hasGrid2x2 = hasRow1 || hasRow2
-    const hasRight = hasTasks || hasGrid2x2
-
-    const renderRightColumn = () => {
-      if (hasTasks && hasGrid2x2) {
-        return (
-          <AdaptivePanelGroup direction="vertical" className={styles.panelGroupFull}>
-            <AdaptivePanel defaultSize={34} minSize={15} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-              {renderWidget('tasks')}
-            </AdaptivePanel>
-            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
-            <AdaptivePanel defaultSize={66} minSize={25} minHeightPx={(hasRow1 ? MIN_WIDGET_HEIGHT_PX : 0) + (hasRow2 ? MIN_WIDGET_HEIGHT_PX : 0)} className={styles.widgetPanel}>
-              {render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'notetaker')}
-            </AdaptivePanel>
-          </AdaptivePanelGroup>
-        )
-      }
-      if (hasTasks && !hasGrid2x2) return <div className={styles.widgetPanel}>{renderWidget('tasks')}</div>
-      if (!hasTasks && hasGrid2x2) return render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'notetaker')
-      return null
-    }
-
-    if (hasNotes && hasRight) {
-      return (
-        <AdaptivePanelGroup key="notetaker-layout" direction="horizontal" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={48} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('notes')}</AdaptivePanel>
-          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
-          <AdaptivePanel defaultSize={52} minWidthUnits={Math.max(hasTasks ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
-        </AdaptivePanelGroup>
-      )
-    }
-    if (hasNotes) return <div className={styles.widgetPanel}>{renderWidget('notes')}</div>
-    if (hasRight) return renderRightColumn()
-    return null
-  }
-
-  // =========================================================================
-  // 2. Taskmaster (Inverse of Notetaker)
-  // Left: Tasks (full-height tall card)
-  // Right: Top Notes, Bottom 2x2 grid (Schedule | Weather / Count | Voice)
-  // =========================================================================
-  const renderTaskmaster = () => {
-    const hasTasks = isVisible('tasks')
-    const hasNotes = isVisible('notes')
-
-    const row1Widgets: WidgetId[] = (['schedule', 'weather'] as WidgetId[]).filter(isVisible)
-    const row2Widgets: WidgetId[] = (['countdown', 'recorder'] as WidgetId[]).filter(isVisible)
-
-    const hasRow1 = row1Widgets.length > 0
-    const hasRow2 = row2Widgets.length > 0
-    const hasGrid2x2 = hasRow1 || hasRow2
-    const hasRight = hasNotes || hasGrid2x2
-
-    const renderRightColumn = () => {
-      if (hasNotes && hasGrid2x2) {
-        return (
-          <AdaptivePanelGroup direction="vertical" className={styles.panelGroupFull}>
-            <AdaptivePanel defaultSize={34} minSize={15} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-              {renderWidget('notes')}
-            </AdaptivePanel>
-            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
-            <AdaptivePanel defaultSize={66} minSize={25} minHeightPx={(hasRow1 ? MIN_WIDGET_HEIGHT_PX : 0) + (hasRow2 ? MIN_WIDGET_HEIGHT_PX : 0)} className={styles.widgetPanel}>
-              {render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'taskmaster')}
-            </AdaptivePanel>
-          </AdaptivePanelGroup>
-        )
-      }
-      if (hasNotes && !hasGrid2x2) return <div className={styles.widgetPanel}>{renderWidget('notes')}</div>
-      if (!hasNotes && hasGrid2x2) return render2x2Grid(hasRow1, hasRow2, row1Widgets, row2Widgets, 'taskmaster')
-      return null
-    }
-
-    if (hasTasks && hasRight) {
-      return (
-        <AdaptivePanelGroup key="taskmaster-layout" direction="horizontal" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={48} minWidthUnits={1} className={styles.widgetPanel}>{renderWidget('tasks')}</AdaptivePanel>
-          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
-          <AdaptivePanel defaultSize={52} minWidthUnits={Math.max(hasNotes ? 1 : 0, row1Widgets.length, row2Widgets.length)} className={styles.widgetPanel}>{renderRightColumn()}</AdaptivePanel>
-        </AdaptivePanelGroup>
-      )
-    }
-    if (hasTasks) return <div className={styles.widgetPanel}>{renderWidget('tasks')}</div>
-    if (hasRight) return renderRightColumn()
-    return null
-  }
-
-  // Parameterized Two-Row Layout Helper (for Even & Minimal)
-  const renderTwoRowSplit = (
-    topDefaultSize: number,
-    topMinSize: number,
-    bottomDefaultSize: number,
-    bottomMinSize: number,
-    keyPrefix: string
-  ) => {
-    const topWidgets: WidgetId[] = (['notes', 'tasks'] as WidgetId[]).filter(isVisible)
-    const bottomWidgets: WidgetId[] = (['schedule', 'weather', 'countdown', 'recorder'] as WidgetId[]).filter(isVisible)
-
-    const hasTop = topWidgets.length > 0
-    const hasBottom = bottomWidgets.length > 0
-
-    if (hasTop && hasBottom) {
-      return (
-        <AdaptivePanelGroup key={`${keyPrefix}-layout`} direction="vertical" className={styles.panelGroupFull}>
-          <AdaptivePanel defaultSize={topDefaultSize} minSize={topMinSize} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-            {renderHorizontalCluster(topWidgets, `${keyPrefix}-top`)}
-          </AdaptivePanel>
-          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
-          <AdaptivePanel defaultSize={bottomDefaultSize} minSize={bottomMinSize} minHeightPx={MIN_WIDGET_HEIGHT_PX} className={styles.widgetPanel}>
-            {renderHorizontalCluster(bottomWidgets, `${keyPrefix}-bottom`)}
-          </AdaptivePanel>
-        </AdaptivePanelGroup>
-      )
-    }
-    if (hasTop) return renderHorizontalCluster(topWidgets, `${keyPrefix}-top`)
-    if (hasBottom) return renderHorizontalCluster(bottomWidgets, `${keyPrefix}-bottom`)
-    return null
-  }
-
   // Narrow screens: every visible widget in one column, scrolled as a page
   const renderStacked = () => (
     <div className={styles.stack}>
@@ -452,19 +271,17 @@ export function BetaAdaptiveGrid({
     </div>
   )
 
+  const currentTree = (): PanelNode | null => {
+    const base = presetLayout === 'custom' ? customLayout.tree : presetToTree(presetLayout)
+    return base ? collapseForVisibility(base, isVisible) : null
+  }
+
+  // Every layout (presets and custom) renders through the panel tree in BOTH edit and
+  // non-edit modes, so toggling edit mode only flips EditOverlay's `active` flag and
+  // widgets reconcile in place (no remount).
   const renderActiveLayout = () => {
     if (isStacked) return renderStacked()
-    switch (presetLayout) {
-      case 'notetaker': return renderNotetaker()
-      case 'even': return renderTwoRowSplit(60, 20, 40, 20, 'even')
-      case 'taskmaster': return renderTaskmaster()
-      case 'minimal': return renderTwoRowSplit(75, 20, 25, 15, 'minimal')
-      case 'custom': {
-        const visibleTree = customLayout.tree ? collapseForVisibility(customLayout.tree, isVisible) : null
-        return visibleTree ? renderPanelNode(visibleTree) : renderNotetaker()
-      }
-      default: return renderNotetaker()
-    }
+    return renderPanelNode(currentTree())
   }
 
   return (
@@ -474,10 +291,16 @@ export function BetaAdaptiveGrid({
       data-settled={settled}
       data-stacked={isStacked}
       style={{
-        paddingTop: `${padding.paddingTop}px`,
+        // In edit mode, split the vertical dock padding evenly so the board is
+        // centered vertically (same total padding — no compression), then the
+        // center-origin zoom keeps it centered.
+        paddingTop: `${editMode && !isStacked ? (padding.paddingTop + padding.paddingBottom) / 2 : padding.paddingTop}px`,
+        paddingBottom: `${editMode && !isStacked ? (padding.paddingTop + padding.paddingBottom) / 2 : padding.paddingBottom}px`,
         paddingRight: `${padding.paddingRight}px`,
-        paddingBottom: `${padding.paddingBottom}px`,
         paddingLeft: `${padding.paddingLeft}px`,
+        // Zoom the board out while editing (see EDIT_ZOOM).
+        transform: editMode && !isStacked ? `scale(${EDIT_ZOOM})` : undefined,
+        transformOrigin: 'center center',
       }}
     >
       {renderActiveLayout()}
