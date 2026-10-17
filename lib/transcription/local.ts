@@ -65,6 +65,11 @@ export async function transcribeLocal(
   blob: Blob,
   opts: { model: LocalModel; onProgress?: (p: LocalProgress) => void },
 ): Promise<{ text: string }> {
+  // e2e hook: skip the model download entirely and return a canned transcript
+  if ((globalThis as unknown as { __CLEARTAB_FAKE_LOCAL_ASR__?: boolean }).__CLEARTAB_FAKE_LOCAL_ASR__) {
+    opts.onProgress?.({ stage: 'transcribe' })
+    return { text: 'fake local transcript' }
+  }
   const asr = await getPipeline(opts.model, opts.onProgress)
   const audio = await blobToFloat32(blob)
   opts.onProgress?.({ stage: 'transcribe' })

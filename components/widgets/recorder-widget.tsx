@@ -23,6 +23,13 @@ import { apiFetch } from "@/lib/api-fetch";
 import { stringToQuillDelta } from "@/lib/quill-utils";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
 import { getDemoApi } from "@/lib/demo/mode";
+import {
+  getTranscriptionConfig,
+  setTranscriptionConfig,
+  isValidGeminiKey,
+  type TranscriptionEngine,
+} from "@/lib/transcription-config";
+import { TranscriptionChoice, ENGINE_LABELS } from "./transcription-choice";
 
 // Waveform frames kept while recording (10fps); also the mini bar count
 const MAX_WAVEFORM_FRAMES = 160;
@@ -206,6 +213,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
   const activeVoiceNoteIdRef = useRef<string | null>(null);
 
+  // Transcription engine choice: pendingBlob = a recording is waiting on the
+  // first-run choice; choiceOpen = the choice card is showing.
+  const [pendingBlob, setPendingBlob] = useState(false);
+  const [choiceOpen, setChoiceOpen] = useState(false);
+  const [engineLabel, setEngineLabel] = useState<string | null>(null);
+  const [savedEngine, setSavedEngine] = useState<TranscriptionEngine | undefined>(undefined);
+  const [hasKey, setHasKey] = useState(false);
+
   const {
     state,
     duration,
@@ -218,6 +233,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     stopRecording,
     toggleMute,
     transcribeAudio,
+    localProgress,
     saveAudioLocally,
     reset,
     discardRecording,
@@ -332,6 +348,97 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   // When recording stops and audio is ready, immediately create note and switch to notes widget.
   // Transcription then proceeds in the background with progress displayed in the note itself.
   const transcribedBlobRef = useRef<Blob | null>(null);
+
+  // Show "saved" on the recorder right away (not blocking further recordings),
+  // then run transcription in the background with the chosen engine.
+  const startWithEngine = useCallback(
+    (engine: TranscriptionEngine) => {
+      setEngineLabel("Transcribing with " + ENGINE_LABELS[engine]);
+      setSavedEngine(engine);
+      setChoiceOpen(false);
+      setPendingBlob(false);
+
+      setShowSuccess(true);
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+      successTimerRef.current = setTimeout(() => {
+        setShowSuccess(false);
+        setIsFlipped(false);
+        reset();
+        setCreatedNoteId(null);
+      }, 2000);
+
+      transcribeAudio(engine);
+    },
+    [transcribeAudio, reset],
+  );
+
+  const handleChoose = useCallback(
+    async (engine: TranscriptionEngine, geminiKey?: string) => {
+      let prevKey: string | undefined;
+      try {
+        prevKey = (await getTranscriptionConfig()).geminiKey;
+      } catch {
+        prevKey = undefined;
+      }
+      const key = geminiKey ?? prevKey;
+      await setTranscriptionConfig({ engine, geminiKey: key });
+      setHasKey(isValidGeminiKey(key));
+      if (pendingBlob) {
+        startWithEngine(engine);
+      } else {
+        // Just changing the default for future recordings
+        setSavedEngine(engine);
+        setEngineLabel("Transcribing with " + ENGINE_LABELS[engine]);
+        setChoiceOpen(false);
+      }
+    },
+    [pendingBlob, startWithEngine],
+  );
+
+  // Load the remembered engine so the label is visible before the first save
+  useEffect(() => {
+    let cancelled = false;
+    getTranscriptionConfig()
+      .then((cfg) => {
+        if (cancelled) return;
+        setSavedEngine(cfg.engine);
+        setHasKey(isValidGeminiKey(cfg.geminiKey));
+        if (cfg.engine) setEngineLabel("Transcribing with " + ENGINE_LABELS[cfg.engine]);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const downloadingModel = localProgress?.stage === "download";
+  const engineLabelRow = engineLabel ? (
+    <p className={styles.engineLabel}>
+      {engineLabel} ·{" "}
+      <button
+        type="button"
+        className={styles.changeLink}
+        onClick={() => setChoiceOpen(true)}
+        data-testid="change-engine"
+      >
+        change
+      </button>
+      {downloadingModel
+        ? ` · Downloading model (one time)… ${Math.round(localProgress.ratio * 100)}%`
+        : null}
+    </p>
+  ) : null;
+
+  const choiceCard = (
+    <div className={styles.choiceHost}>
+      <TranscriptionChoice
+        hasKey={hasKey}
+        savedEngine={savedEngine}
+        onChoose={handleChoose}
+        onCancel={pendingBlob ? undefined : () => setChoiceOpen(false)}
+      />
+    </div>
+  );
   useEffect(() => {
     if (state === "processing" && audioBlob && audioBlob !== transcribedBlobRef.current) {
       transcribedBlobRef.current = audioBlob;
@@ -391,18 +498,24 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             );
           }
 
-          // 3. Set success on recorder immediately (not blocking further recordings)
-          setShowSuccess(true);
-          if (successTimerRef.current) clearTimeout(successTimerRef.current);
-          successTimerRef.current = setTimeout(() => {
-            setShowSuccess(false);
-            setIsFlipped(false);
-            reset();
-            setCreatedNoteId(null);
-          }, 2000);
+          // 3. Resolve which engine to use: remembered, or ask on first run
+          let cfg: Awaited<ReturnType<typeof getTranscriptionConfig>> = {};
+          try {
+            cfg = await getTranscriptionConfig();
+          } catch (cfgError) {
+            console.error("Could not read transcription config:", cfgError);
+          }
+          setSavedEngine(cfg.engine);
+          setHasKey(isValidGeminiKey(cfg.geminiKey));
 
-          // 4. Run background transcription
-          transcribeAudio();
+          if (!cfg.engine) {
+            // First recording: hold the blob until the user picks an engine
+            setPendingBlob(true);
+            setChoiceOpen(true);
+            return;
+          }
+
+          startWithEngine(cfg.engine);
         } catch (error) {
           console.error("Error initiating voice note:", error);
           reset();
@@ -411,7 +524,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
       createAndMoveToNotes();
     }
-  }, [state, audioBlob, user, transcribeAudio, reset, toast]);
+  }, [state, audioBlob, user, startWithEngine, reset, toast]);
 
   // Update waveform history for scrolling effect
   useEffect(() => {
@@ -596,7 +709,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
             >
               <WidgetContainer>
                 <div className={styles.miniContainer}>
-                  {showSuccess ? (
+                  {choiceOpen ? (
+                    choiceCard
+                  ) : showSuccess ? (
                     <div className={styles.miniCompleteContainer}>
                       <div className={styles.miniCompleteMessage}>
                         <CheckIcon size={14} className={styles.successCheckIcon} />
@@ -771,6 +886,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
+              {choiceOpen ? choiceCard : (
               <div
                 className={cn(styles.flipContainer, {
                   [styles.flipped]: showBack,
@@ -820,6 +936,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                       {/* Text */}
                       <p className={styles.bodyText}>Start recording</p>
+                      {engineLabelRow}
                     </div>
                   </div>
                 </div>
@@ -903,7 +1020,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               <div className={styles.transcribingProgressFill} />
                             </div>
                             <p className={styles.transcribingSubtitle}>
-                              Moving to Notes...
+                              {downloadingModel
+                                ? "Downloading model (one time)…"
+                                : "Moving to Notes..."}
                             </p>
                           </div>
                           <button
@@ -952,6 +1071,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               onRecordNew={handleRecordNew}
                             />
                           </div>
+                          {showSuccess ? engineLabelRow : null}
                         </>
                       )}
                     </div>
@@ -960,6 +1080,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
               </div>
             </div>
           </div>
+              )}
         </motion.div>
       )}
     </AnimatePresence>

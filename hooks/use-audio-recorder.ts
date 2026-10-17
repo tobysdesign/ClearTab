@@ -227,24 +227,36 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     }
 
     console.log('Audio blob size:', audioBlob.size)
-    const cfg = await getTranscriptionConfig()
+    let cfg: Awaited<ReturnType<typeof getTranscriptionConfig>>
+    try {
+      cfg = await getTranscriptionConfig()
+    } catch (e) {
+      onError?.(e instanceof Error ? e.message : 'Failed to read transcription settings')
+      setState('idle')
+      return
+    }
     const engine = engineArg ?? cfg.engine ?? 'local-en'
     setLocalProgress(null)
-    await runTranscription({
-      blob: audioBlob,
-      engine,
-      geminiKey: cfg.geminiKey,
-      // apiFetch resolves the API base URL for the extension build
-      fetchImpl: ((input: RequestInfo | URL, init?: RequestInit) =>
-        apiFetch(String(input), init)) as typeof fetch,
-      onProgress: (p) => setLocalProgress(p),
-      // Keep state as 'processing' on success - let the component handle state changes
-      onComplete: async (text) => { await onTranscriptionComplete?.(text) },
-      onError: (msg) => {
-        onError?.(msg)
-        setState('idle')
-      },
-    })
+    try {
+      await runTranscription({
+        blob: audioBlob,
+        engine,
+        geminiKey: cfg.geminiKey,
+        // apiFetch resolves the API base URL for the extension build
+        fetchImpl: ((input: RequestInfo | URL, init?: RequestInit) =>
+          apiFetch(String(input), init)) as typeof fetch,
+        onProgress: (p) => setLocalProgress(p),
+        // Keep state as 'processing' on success - let the component handle state changes
+        onComplete: async (text) => { await onTranscriptionComplete?.(text) },
+        onError: (msg) => {
+          onError?.(msg)
+          setState('idle')
+        },
+      })
+    } finally {
+      // Never leave a stale "downloading" value behind after success or failure
+      setLocalProgress(null)
+    }
   }, [audioBlob, onTranscriptionComplete, onError])
 
   const toggleMute = useCallback(() => {

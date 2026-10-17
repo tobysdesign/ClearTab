@@ -20,6 +20,24 @@ describe('runTranscription routing', () => {
     expect(onComplete).toHaveBeenCalledWith('hi')
   })
 
+  it('treats an empty gemini transcript as a completed result, not a failure', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: { text: '' } }), { status: 200 }),
+    )
+    const onComplete = vi.fn()
+    const onError = vi.fn()
+    await runTranscription({
+      blob: new Blob([new Uint8Array([0])]),
+      engine: 'gemini',
+      geminiKey: 'AIzaSyA_1234567890abcdefg',
+      fetchImpl,
+      onComplete,
+      onError,
+    })
+    expect(onComplete).toHaveBeenCalledWith('')
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it('POSTs to /api/transcribe with the key header for gemini', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ success: true, data: { text: 'cloud' } }), { status: 200 }),

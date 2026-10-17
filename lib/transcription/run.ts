@@ -44,7 +44,7 @@ export async function runTranscription(args: RunTranscriptionArgs): Promise<void
       return
     }
     const result = await res.json()
-    if (result?.success && result.data?.text) await onComplete(result.data.text)
+    if (result?.success && typeof result.data?.text === 'string') await onComplete(result.data.text)
     else onError(result?.error || 'Failed to transcribe audio')
   } catch (e) {
     onError(e instanceof Error ? e.message : 'Failed to transcribe audio')
