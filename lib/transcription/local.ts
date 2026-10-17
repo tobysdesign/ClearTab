@@ -16,25 +16,17 @@ export type LocalProgress =
 env.backends.onnx.wasm.wasmPaths = '/wasm/'
 env.allowLocalModels = false // model weights come from the HF hub, cached by the browser
 
-async function pickDevice(): Promise<'webgpu' | 'wasm'> {
-  const gpu = (navigator as unknown as { gpu?: unknown }).gpu
-  if (!gpu) return 'wasm'
-  try {
-    const adapter = await (gpu as { requestAdapter(): Promise<unknown> }).requestAdapter()
-    return adapter ? 'webgpu' : 'wasm'
-  } catch {
-    return 'wasm'
-  }
-}
-
 const pipelineCache = new Map<LocalModel, Promise<AutomaticSpeechRecognitionPipeline>>()
 
 async function getPipeline(model: LocalModel, onProgress?: (p: LocalProgress) => void) {
   let cached = pipelineCache.get(model)
   if (!cached) {
-    const device = await pickDevice()
+    // CPU (wasm) EP: Whisper on the WebGPU EP with q8 weights currently produces
+    // garbage / looping output in onnxruntime-web, so run on CPU for correct
+    // transcripts. The bundled jsep wasm includes the CPU kernels, so no extra
+    // file is needed. (Revisit WebGPU later with per-module fp16/q4 dtypes.)
     cached = pipeline('automatic-speech-recognition', MODEL_IDS[model], {
-      device,
+      device: 'wasm',
       dtype: 'q8',
       progress_callback: (e: { status?: string; progress?: number }) => {
         if (e.status === 'progress' && typeof e.progress === 'number') {

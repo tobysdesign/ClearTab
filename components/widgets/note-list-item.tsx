@@ -177,6 +177,11 @@ export const NoteListItem = React.memo(function NoteListItem({
             stiffness: 500,
             damping: 30,
             duration: isRecentlyUpdated ? 0.5 : 0.3,
+            // The y "bounce" is a 3-keyframe array, which a spring can't animate
+            // (motion supports only 2 keyframes for spring) — tween it instead.
+            ...(isRecentlyUpdated
+              ? { y: { type: "tween", duration: 0.5, ease: "easeOut" } }
+              : {}),
           }}
           className={cn(
             styles.collapsedItem,
