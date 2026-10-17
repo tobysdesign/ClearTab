@@ -78,17 +78,27 @@
 
 /* --- Widget show/hide chips --- */
 
+.flankLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+/* Base chip = a HIDDEN widget: struck through and very muted (it's off). */
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
   height: 28px;
   padding: 0 10px;
   border-radius: 8px;
-  border: 1px solid #4e4e4e;
-  background: #131313;
-  /* "Hidden" widgets read as dimmed, but still legible. */
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.32);
+  text-decoration: line-through;
   font-size: 12px;
   font-weight: 500;
   /* Hidden widget → clicking shows it → "eye" (show) cursor. */
@@ -98,23 +108,25 @@
 }
 
 .chip:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* A VISIBLE widget: the subtle solid style (what off-hover used to be), no strike. */
+.chipOn {
   border-color: #8a8a8a;
   background: #2a2a2a;
   color: #ffffff;
-}
-
-.chipOn {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #1a1a1a;
+  text-decoration: none;
   /* Visible widget → clicking hides it → "eye-off" (hide) cursor. */
   cursor: url('/cursors/eye-off.png') 14 14, pointer;
 }
 
 .chipOn:hover:not(:disabled) {
-  background: #ececec;
-  border-color: #ffffff;
-  color: #1a1a1a;
+  border-color: #a6a6a6;
+  background: #343434;
+  color: #ffffff;
 }
 
 .chip:disabled {

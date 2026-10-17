@@ -83,6 +83,7 @@ export function WidgetFlank({ widgets, toggleWidget, activeCount, orientation }:
       className={cn(styles.flank, orientation === 'vertical' ? styles.flankVertical : styles.flankHorizontal)}
       data-testid="edit-widgets"
     >
+      <span className={styles.flankLabel}>Visibility</span>
       {WIDGET_ORDER.map((id) => {
         const on = widgets[id]
         const isLastVisible = on && activeCount <= 1
