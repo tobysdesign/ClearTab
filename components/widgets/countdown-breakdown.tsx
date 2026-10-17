@@ -252,16 +252,18 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
       <div ref={ref} className={styles.breakdown}>
         <div
           className={styles.daysOnly}
-          data-horizontal={layout.daysHorizontal}
           role="img"
           aria-label={`${daysLeft} day${daysLeft === 1 ? "" : "s"} until ${title}`}
         >
-          {!layout.daysHorizontal && <DaysDotGrid count={daysLeft} />}
-          <div className={styles.daysNumber}>{daysLeft}</div>
-          <p className={styles.daysCaption}>
-            <span className={styles.untilLabel}>Day{daysLeft === 1 ? "" : "s"} until</span>
-            <span className={styles.title}>{title}</span>
-          </p>
+          <DaysDotGrid count={daysLeft} />
+          {/* number on the left, "Days until <title>" on the right */}
+          <div className={styles.daysFooter}>
+            <div className={styles.daysNumber}>{daysLeft}</div>
+            <p className={styles.daysCaption}>
+              <span className={styles.untilLabel}>Day{daysLeft === 1 ? "" : "s"} until</span>
+              <span className={styles.title}>{title}</span>
+            </p>
+          </div>
         </div>
       </div>
     );

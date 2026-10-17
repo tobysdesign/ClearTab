@@ -192,29 +192,26 @@
     flex-shrink: 0;
 }
 
-.daysCaption {
+/* Number on the left, "Days until <title>" on the right, under the dot grid */
+.daysFooter {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    margin: 0;
-    max-width: 100%;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-/* Too short for the dot grid: number on the left, "Days until <title>" on the right */
-.daysOnly[data-horizontal="true"] {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 14px;
+    flex-shrink: 0;
+    max-width: 100%;
+    min-width: 0;
 }
 
-.daysOnly[data-horizontal="true"] .daysCaption {
+.daysCaption {
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    text-align: left;
+    gap: 2px;
+    margin: 0;
     min-width: 0;
+    text-align: left;
 }
 
 /* ── Numbers (fixed design size) ── */
