@@ -28,7 +28,9 @@ function tasksFor(text: string) {
 
 function answerFor(text: string) {
   const lower = text.toLowerCase()
-  if (lower.includes('summar')) return 'The plumber is coming Thursday, and you want to book flights for Mum’s birthday and get the slides to Sam by Friday.'
+  if (lower.includes('summar')) {
+    return 'Summary: You and Sam aligned on the Q4 launch — **send Sam the slides by Friday** and **book flights for Mum’s birthday**.'
+  }
   if (lower.includes('left') || lower.includes('due') || lower.includes('today')) {
     return 'Two things today: **email Priya the invoice** (it’s marked important) and renew your passport, which is due tomorrow. Your next meeting is the design review at 10.'
   }

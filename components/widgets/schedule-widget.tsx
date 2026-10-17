@@ -1,7 +1,7 @@
 'use client'
 
 // Icons replaced with ASCII placeholders
-import React, { useMemo, useRef, useState, useEffect } from 'react'
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { format, parseISO, isToday, isAfter, isBefore } from '@/lib/date-utils'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api-client'
 import { EmptyState } from '@/components/ui/empty-state'
 import { cn } from '@/lib/utils'
-import { WidgetLoader, WidgetContainer, WidgetHeader, WidgetContent } from "@cleartab/ui";
+import { WidgetLoader, WidgetContainer, WidgetHeader, WidgetContent, Tooltip, TooltipTrigger, TooltipContent } from "@cleartab/ui";
 import { useAuth } from '@/components/auth/auth-provider'
 import { isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
@@ -152,7 +152,7 @@ export function ScheduleWidget() {
   // Use auth
   const { loading, signIn } = useAuth()
   const { isVisible } = useCalendarVisibility()
-  const { ref, isMini } = useWidgetHeight()
+  const { ref, isMini, height } = useWidgetHeight()
 
   // Check if calendar was just connected (from URL param)
   useEffect(() => {
@@ -171,6 +171,20 @@ export function ScheduleWidget() {
   // Check if we have session cookies as a workaround for auth loading issues
   const hasSessionCookies = typeof document !== 'undefined' && document.cookie.includes('sb-qclvzjiyglvxtctauyhb-auth-token')
 
+function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const cachedRaw = window.localStorage.getItem('cleartab_cached_schedule_v1');
+    if (cachedRaw) {
+      const cachedEvents = JSON.parse(cachedRaw);
+      if (Array.isArray(cachedEvents) && cachedEvents.length > 0) {
+        return { events: cachedEvents, needsReconnection: false };
+      }
+    }
+  } catch {}
+  return undefined;
+}
+
   const {
     data,
     isLoading,
@@ -178,22 +192,23 @@ export function ScheduleWidget() {
     refetch
   } = useQuery({
     queryKey: ['schedule'],
+    initialData: getInitialCachedSchedule,
+    initialDataUpdatedAt: () => 0,
     enabled: !loading || hasSessionCookies, // Enable query if not loading OR if we have session cookies
     retry: (failureCount, error) => {
       const errorWithMeta = error as Error & { errorType?: string; status?: number };
-      // Retry auth errors up to 2 times (token refresh might fix it)
-      if (errorWithMeta.errorType === 'AUTH_EXPIRED' && failureCount < 2) {
-        return true;
+      if (errorWithMeta.status === 401 || errorWithMeta.status === 403) {
+        return errorWithMeta.errorType === 'AUTH_EXPIRED' && failureCount < 2;
       }
-      // Don't retry other errors
-      return false;
+      // Automatically retry transient network / 5xx errors up to 2 times
+      return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 5000),
     queryFn: async (): Promise<ScheduleQueryResult> => {
       try {
         const res = await api.get('/api/calendar')
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData = await res.json().catch(() => ({}));
           const error = new Error(errorData.error || 'Failed to fetch schedule') as Error & {
             errorType?: string;
             userMessage?: string;
@@ -210,10 +225,10 @@ export function ScheduleWidget() {
         console.log('API response:', json);
 
         // Check if calendar needs reconnection - handle gracefully without throwing
-        if (json.success && json.needsReconnection) {
-          console.warn('Google Calendar disconnection detected');
-          return { events: [], needsReconnection: true, reconnectReason: json.reason, message: json.message };
-        }
+        // Keep whatever events the server returned (e.g. healthy connected accounts) even when
+        // one account needs reconnecting — don't blank the whole schedule.
+        const needsReconnection = Boolean(json.success && json.needsReconnection)
+        if (needsReconnection) console.warn('Google Calendar reconnection needed for an account')
 
         const eventsFromServer = json.data || []
         console.log('Events from server:', eventsFromServer);
@@ -233,9 +248,25 @@ export function ScheduleWidget() {
           accountId: event.accountId,
         }));
         console.log('Mapped events:', mappedEvents);
-        return { events: mappedEvents, needsReconnection: false, message: json.message };
+        try {
+          window.localStorage.setItem('cleartab_cached_schedule_v1', JSON.stringify(mappedEvents))
+        } catch {
+          // Ignore storage quota / sandboxed errors
+        }
+        return { events: mappedEvents, needsReconnection, reconnectReason: json.reason, message: json.message };
       } catch (error) {
         console.error('Error fetching schedule:', error)
+        try {
+          const cachedRaw = window.localStorage.getItem('cleartab_cached_schedule_v1')
+          if (cachedRaw) {
+            const cachedEvents = JSON.parse(cachedRaw)
+            if (Array.isArray(cachedEvents) && cachedEvents.length > 0) {
+              return { events: cachedEvents, needsReconnection: false }
+            }
+          }
+        } catch {
+          // Ignore cache read errors
+        }
         throw error
       }
     },
@@ -342,6 +373,31 @@ export function ScheduleWidget() {
     }
   }, [isLoading])
 
+  // Keep the agenda centred on today on load AND whenever the widget is resized
+  // (the layout reflows at narrow/short sizes). A ResizeObserver on the scroll
+  // area fires both when it mounts and on every size change.
+  const scrollContainerElRef = useRef<HTMLDivElement | null>(null)
+  const scrollResizeObserverRef = useRef<ResizeObserver | null>(null)
+  const scrollToTodayNow = useCallback(() => {
+    const node = scrollContainerElRef.current
+    const todayEl = todayRef.current
+    if (node && todayEl) node.scrollTop = Math.max(0, todayEl.offsetTop - 50)
+  }, [])
+  const setScrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    scrollResizeObserverRef.current?.disconnect()
+    scrollResizeObserverRef.current = null
+    scrollContainerElRef.current = node
+    if (!node) return
+    const ro = new ResizeObserver(() => requestAnimationFrame(scrollToTodayNow))
+    ro.observe(node)
+    scrollResizeObserverRef.current = ro
+  }, [scrollToTodayNow])
+
+  // Re-centre on today whenever the widget is resized (height from useWidgetHeight)
+  useEffect(() => {
+    requestAnimationFrame(scrollToTodayNow)
+  }, [height, isMini, scrollToTodayNow])
+
   // Find next upcoming event for mini view - Moved here to follow Rules of Hooks
   const nextEvent = useMemo(() => {
     return todayEvents.find(e => {
@@ -358,7 +414,9 @@ export function ScheduleWidget() {
     )
   }
 
-  if (error || needsReconnection) {
+  // Only take over the whole widget with the reconnect prompt when there are no events to show;
+  // if other (healthy) accounts returned events, keep showing them.
+  if (error || (needsReconnection && events.length === 0)) {
     // Show connection UI for reconnection state or specific auth errors
     const isConnectionError = needsReconnection ||
       error?.message?.includes('not connected') ||
@@ -384,19 +442,22 @@ export function ScheduleWidget() {
       )
     }
 
-    // Generic error fallback
-    console.log('Schedule widget error:', error);
+    // Graceful error state with Try again button
     return (
       <div ref={ref} style={{ width: '100%', height: '100%' }}>
         <WidgetContainer>
           <WidgetHeader title="Schedule" />
           <WidgetContent scrollable={false}>
-            <div className="p-4 text-sm text-red-400">
-              <p className="font-bold mb-2">Error loading schedule</p>
-              <pre className="whitespace-pre-wrap text-xs opacity-70">
-                {error instanceof Error ? error.message : 'Unknown error'}
-              </pre>
-            </div>
+            <EmptyState
+              title="Couldn't load schedule"
+              description="Couldn't reach your calendar right now."
+              action={{
+                label: "Try again",
+                onClick: () => {
+                  void refetch()
+                },
+              }}
+            />
           </WidgetContent>
         </WidgetContainer>
       </div>
@@ -467,44 +528,49 @@ export function ScheduleWidget() {
                     <div></div>
 
                     {/* Footer with day/date stacked and month */}
-                    <div
-                      className={styles.sidebarFooter}
-                      onClick={() => {
-                        // Scroll to today within container
-                        if (todayRef.current) {
-                          const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
-                            todayRef.current.closest('[class*="scrollContainer"]')
-                          if (scrollContainer) {
-                            const elementTop = todayRef.current.offsetTop
-                            scrollContainer.scrollTo({
-                              top: Math.max(0, elementTop - 50),
-                              behavior: 'smooth'
-                            })
-                          }
-                        }
-                      }}
-                    >
-                      {/* Day and date stacked */}
-                      <div className={styles.dayDateContainer}>
-                        <div className={styles.dayText}>
-                          {isToday(visibleDate) && <div className={styles.todayDot} />}
-                          {format(visibleDate, 'EEE')}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={styles.sidebarFooter}
+                          onClick={() => {
+                            // Scroll to today within container
+                            if (todayRef.current) {
+                              const scrollContainer = todayRef.current.closest('.overflow-y-auto') ||
+                                todayRef.current.closest('[class*="scrollContainer"]')
+                              if (scrollContainer) {
+                                const elementTop = todayRef.current.offsetTop
+                                scrollContainer.scrollTo({
+                                  top: Math.max(0, elementTop - 50),
+                                  behavior: 'smooth'
+                                })
+                              }
+                            }
+                          }}
+                        >
+                          {/* Day and date stacked */}
+                          <div className={styles.dayDateContainer}>
+                            <div className={styles.dayText}>
+                              {isToday(visibleDate) && <div className={styles.todayDot} />}
+                              {format(visibleDate, 'EEE')}
+                            </div>
+                            <div className="bigNumber">
+                              {format(visibleDate, 'dd')}
+                            </div>
+                          </div>
+                          {/* Month */}
+                          <div className={styles.monthText}>
+                            {format(visibleDate, 'MMMM')}
+                          </div>
                         </div>
-                        <div className="bigNumber">
-                          {format(visibleDate, 'dd')}
-                        </div>
-                      </div>
-                      {/* Month */}
-                      <div className={styles.monthText}>
-                        {format(visibleDate, 'MMMM')}
-                      </div>
-                    </div>
+                      </TooltipTrigger>
+                      <TooltipContent>Goto todays date</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
                 {/* Right Content */}
                 <div className={styles.rightContent}>
-                  <div className={styles.scrollContainer}>
+                  <div ref={setScrollContainerRef} className={styles.scrollContainer}>
                     {sortedDays.length === 0 ? (
                       <EmptyState
                         title="No events scheduled"

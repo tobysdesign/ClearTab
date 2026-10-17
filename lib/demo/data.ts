@@ -12,12 +12,13 @@ export const DEMO_USER = {
 export const PERSONAL_ACCOUNT_ID = 'demo-personal-account'
 const PRIMARY_ACCOUNT_ID = `primary-${DEMO_USER.id}`
 
-// What the voice memo "hears"
+// What the voice memo "hears" (with speaker identification)
 export const DEMO_TRANSCRIPT =
-  "Plumber's coming Thursday about the leak. I need to book flights for Mum's birthday and send Sam the slides by Friday."
+  "Speaker 1 (You): Great brainstorming session on the Q4 launch.\nSpeaker 2 (Sam): I'll send Sam the slides by Friday, and we need to book flights for Mum's birthday."
 
-// The part of it the hero demo highlights and asks the AI to turn into tasks
-export const DEMO_TASK_SOURCE = "book flights for Mum's birthday and send Sam the slides by Friday"
+// The part of it the hero demo highlights and asks the AI to summarize and turn into tasks
+export const DEMO_TASK_SOURCE =
+  "Speaker 2 (Sam): I'll send Sam the slides by Friday, and we need to book flights for Mum's birthday."
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -199,7 +200,7 @@ export function demoWeather(units: 'METRIC' | 'IMPERIAL' = 'METRIC') {
   const location = 'Sydney NSW, Australia'
   return [
     { label: '5 Day Forecast', location, isForecast: true, condition: 'Forecast', forecast },
-    { label: 'Tomorrow', location, temperature: forecast[1].high, condition: forecast[1].condition, high: forecast[1].high, low: forecast[1].low },
+    { label: forecast[1].day, location, temperature: forecast[1].high, condition: forecast[1].condition, high: forecast[1].high, low: forecast[1].low },
     { label: 'Today', location, temperature: toUnit('21'), condition: forecast[0].condition, high: forecast[0].high, low: forecast[0].low },
   ]
 }

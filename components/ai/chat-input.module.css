@@ -5,8 +5,8 @@
 .composer {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 12px 14px;
   background: rgba(18, 18, 18, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
@@ -20,13 +20,13 @@
 
 .input {
   width: 100%;
-  min-height: 18px;
+  min-height: 40px;
   padding: 0;
   background: transparent;
   border: none;
   outline: none;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.4;
 }
 
@@ -58,7 +58,7 @@
   border-radius: 6px;
   background: transparent;
   color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
+  font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   cursor: pointer;
   transition: background-color 100ms ease, color 100ms ease;
@@ -89,11 +89,12 @@
   transition: background-color 200ms ease, color 200ms ease, transform 200ms ease;
 }
 
-.sendButton:active:not(:disabled) {
+.sendButton:active:not(:disabled):not([aria-disabled="true"]) {
   transform: scale(0.96);
 }
 
-.sendButton:disabled {
+.sendButton:disabled,
+.sendButton[aria-disabled="true"] {
   background: rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;

@@ -114,7 +114,7 @@
 
 .footerLink {
   /* typography */
-  font-size: 12px;
+  font-size: 14px;
   color: var(--widget-text-muted);
   text-decoration: none;
 }

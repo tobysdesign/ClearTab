@@ -100,7 +100,7 @@
     justify-content: center;
     width: var(--cell-size);
     height: var(--cell-size);
-    font-size: 0.8rem;
+    font-size: 12px;
     font-weight: 400;
     color: #8c8c8c;
     user-select: none;
@@ -120,7 +120,7 @@
     justify-content: center;
     text-align: center;
     color: #8c8c8c;
-    font-size: 0.8rem;
+    font-size: 12px;
     user-select: none;
 }
 

@@ -6,11 +6,15 @@ import { interDisplay } from "./fonts";
 import Providers from "./providers";
 import React, { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
-import { CharcoalWave } from "@/components/ui/charcoal-wave";
+import dynamic from "next/dynamic";
 import { Toaster as SonnerToaster } from "sonner";
 import Loading from "./loading";
-import dynamic from "next/dynamic";
 import { TaskModalProvider } from "@/hooks/use-task-modal";
+
+const CharcoalWave = dynamic(
+  () => import("@/components/ui/charcoal-wave").then((mod) => ({ default: mod.CharcoalWave })),
+  { loading: () => null }
+);
 
 const SettingsDrawer = dynamic(
   () => import("@/components/settings/settings-drawer").then((mod) => ({ default: mod.SettingsDrawer })),
@@ -31,9 +35,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={interDisplay.variable} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
       <body className={interDisplay.className}>

@@ -30,18 +30,25 @@ function AuthenticatedBetaDashboard() {
 export default function TabPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!loading && !user) {
       // The extension has no /login page: it shows its own sign-in screen below
-      if (!IS_EXTENSION) router.push('/login')
+      if (!IS_EXTENSION) {
+        router.replace('/login')
+      }
     } else if (!loading && user) {
       setHasLoaded(true)
     }
   }, [user, loading, router])
 
-  if (loading && !hasLoaded) {
+  if (!mounted || (loading && !hasLoaded)) {
     return (
       <div className={styles.loadingContainer}>
         <BrandedLoader size="medium" />
@@ -57,6 +64,14 @@ export default function TabPage() {
     return (
       <div className={styles.loadingContainer}>
         <BrandedLoader size="medium" />
+        {!IS_EXTENSION && !loading && (
+          <p style={{ marginTop: 16, fontSize: 13, color: '#94a3b8' }}>
+            Redirecting to sign in...{' '}
+            <a href="/login" style={{ color: '#38bdf8', textDecoration: 'underline' }}>
+              Click here if you are not redirected
+            </a>
+          </p>
+        )}
       </div>
     )
   }

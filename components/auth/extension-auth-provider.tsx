@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { clearPreferencesCache } from "@/hooks/use-preferences"
 import {
   getStoredAuth,
+  readLocalStoredAuth,
   onStoredAuthChange,
   signInWithBrowser,
   signOutExtension,
@@ -15,10 +16,10 @@ import { AuthContext, type AuthContextType } from "./auth-context"
 
 // Sign-in for the Chrome extension build (see lib/extension/auth.ts)
 export function ExtensionAuthProvider({ children }: { children: React.ReactNode }) {
-  const [auth, setAuth] = useState<StoredAuth | null>(null)
-  const [loading, setLoading] = useState(true)
-  const userIdRef = useRef<string | null>(null)
-  const hadUserRef = useRef(false)
+  const [auth, setAuth] = useState<StoredAuth | null>(readLocalStoredAuth)
+  const [loading, setLoading] = useState(() => auth === null)
+  const userIdRef = useRef<string | null>(auth?.user.id ?? null)
+  const hadUserRef = useRef(auth !== null)
 
   useEffect(() => {
     let active = true

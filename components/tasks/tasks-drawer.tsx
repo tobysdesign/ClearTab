@@ -12,6 +12,7 @@ import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
+import footerStyles from "../ui/modal-actions.module.css";
 
 export function TasksDrawer() {
   const {
@@ -31,6 +32,19 @@ export function TasksDrawer() {
     (activeTask?.id && !activeTask.id.startsWith("draft-")) ||
     (activeTaskId && !activeTaskId.startsWith("draft-"))
   );
+
+  // Cmd/Ctrl+Enter finishes (the editor uses plain Enter for newlines)
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleModalClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, handleModalClose]);
 
   return (
     <div className={styles.drawerContainer}>
@@ -54,8 +68,8 @@ export function TasksDrawer() {
             </DrawerDescription>
 
             <div className={styles.headerActions}>
-              {/* Actions menu for edit mode, Cancel (discards draft) for create mode */}
-              {isEditing ? (
+              {/* Edit mode keeps the actions menu (Delete) in the header */}
+              {isEditing && (
                 <SimpleDropdown
                   trigger={
                     <Button variant="ghost" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
@@ -68,13 +82,9 @@ export function TasksDrawer() {
                     Delete
                   </SimpleDropdownItem>
                 </SimpleDropdown>
-              ) : (
-                <Button variant="ghost" onClick={handleCancelTask}>
-                  Cancel
-                </Button>
               )}
-              <Button onClick={handleModalClose}>
-                <span>Done</span>
+              <Button variant="ghost" onClick={handleModalClose}>
+                <span>Close</span>
                 <kbd className={styles.escKey}>Esc</kbd>
               </Button>
             </div>
@@ -89,6 +99,12 @@ export function TasksDrawer() {
             isCreating={isCreatingNew}
             isLoadingTask={isLoadingTask}
           />
+          <div className={footerStyles.footer}>
+            <Button onClick={handleModalClose}>
+              <span>Done</span>
+              <kbd className={footerStyles.kbd}>⌘⏎</kbd>
+            </Button>
+          </div>
         </DrawerContent>
       </Drawer>
     </div>

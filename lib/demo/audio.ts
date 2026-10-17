@@ -9,6 +9,9 @@ export const demoAudio: DemoAudio = {
   createStream() {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     const context = new AudioContextClass()
+    if (context.state === 'suspended') {
+      void context.resume().catch(() => {})
+    }
     const destination = context.createMediaStreamDestination()
     const oscillator = context.createOscillator()
     const gain = context.createGain()

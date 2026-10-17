@@ -11,14 +11,29 @@
     display: none !important;
 }
 
+/* Proper header bar: title left, Close right — so the Close no longer floats over content */
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topBarTitle {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f4f4f5;
+    margin: 0;
+}
+
 .container {
     display: grid;
     grid-template-columns: 240px 1fr;
     flex: 1 1 auto;
     min-height: 0;
-    height: 100%;
-    position: relative;
-
 }
 
 .sidebar {
@@ -200,40 +215,34 @@
     border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Positioning only — the label/pill styling comes from the shared Button */
 .closeButtonFloating {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 14px;
+    right: 14px;
     z-index: 100;
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-    background: #1a1a1a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    color: rgba(255, 255, 255, 0.7);
-    transition: all 0.2s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.closeButtonFloating:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.9);
-    transform: scale(1.05);
-}
-
-.closeIcon {
-    width: 14px;
-    height: 14px;
-    color: currentColor;
+.escKey {
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+    margin-left: 6px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .sections {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 16px 24px;
+    /* Generous bottom space so the last section (Countdown) can scroll up to the
+       active position — otherwise the sidebar can't reach/highlight it. */
+    padding: 20px 16px 60vh;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -256,6 +265,6 @@
 }
 
 .sectionDescription {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.5);
 }

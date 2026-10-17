@@ -86,7 +86,7 @@
 .alertBox {
   max-width: 240px;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   text-align: center;
   color: rgba(234, 179, 8, 0.85); /* yellow-500 */
@@ -202,7 +202,7 @@
 
 .loadingText {
   font-family: 'Inter Display', -apple-system, sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.4);
 }
 

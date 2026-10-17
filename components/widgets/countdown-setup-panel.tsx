@@ -11,6 +11,7 @@ import {
   useToast,
 } from "@cleartab/ui";
 import styles from "./countdown-setup-panel.module.css";
+import footerStyles from "../ui/modal-actions.module.css";
 import { apiFetch } from "@/lib/api-fetch";
 
 type Recurrence = "none" | "weekly" | "fortnightly" | "monthly" | "annual";
@@ -64,76 +65,69 @@ export function CountdownSetupPanel({
     }
   }, [isOpen]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // Closing always keeps valid input (save-on-close). An incomplete form has nothing to save,
+  // so it just closes; it stays open only if a save was attempted and failed.
+  const handleFinish = async (event?: React.FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
 
-    if (!dateInput || !labelInput.trim()) {
-      toast({
-        title: "Missing details",
-        description: "Both a date and a label are required.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (dateInput && labelInput.trim()) {
+      setSaving(true);
 
-    setSaving(true);
+      const payload = {
+        countdownTitle: labelInput.trim(),
+        countdownMode: "date-range",
+        paydayFrequency: recurrenceInput,
+        paydayDate: toApiDate(dateInput),
+        startDate: null,
+        endDate: null,
+      };
 
-    const payload = {
-      countdownTitle: labelInput.trim(),
-      countdownMode: "date-range",
-      paydayFrequency: recurrenceInput,
-      paydayDate: toApiDate(dateInput),
-      startDate: null,
-      endDate: null,
-    };
+      try {
+        const response = await apiFetch("/api/preferences", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-    try {
-      const response = await apiFetch("/api/preferences", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+        if (!response.ok) {
+          throw new Error("Failed to save countdown");
+        }
 
-      if (!response.ok) {
-        throw new Error("Failed to save countdown");
+        // The widget reads preferences through React Query -- refetch so it
+        // flips out of the empty state immediately.
+        await queryClient.invalidateQueries({ queryKey: ["preferences"] });
+      } catch (error) {
+        toast({
+          title: "Unable to save",
+          description: "Please try again in a few moments.",
+          variant: "destructive",
+        });
+        setSaving(false);
+        return;
       }
 
-      // The widget reads preferences through React Query -- refetch so it
-      // flips out of the empty state immediately.
-      await queryClient.invalidateQueries({ queryKey: ["preferences"] });
-
-      toast({
-        title: "Countdown saved",
-        description: "Your widget will refresh shortly.",
-      });
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Unable to save",
-        description: "Please try again in a few moments.",
-        variant: "destructive",
-      });
-    } finally {
       setSaving(false);
     }
+
+    onClose();
   };
 
   return (
     <DockPanel
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleFinish}
       anchorSelector={anchorSelector}
       className={styles.panel}
     >
       <div className={styles.header}>
         <h2 className={styles.title}>New countdown</h2>
-        <button type="button" onClick={onClose} className={styles.closeButton}>
-          <span>Cancel</span>
+        <button type="button" onClick={() => handleFinish()} className={styles.closeButton}>
+          <span>Close</span>
           <kbd className={styles.escKey}>Esc</kbd>
         </button>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleFinish}>
         <div className={styles.field}>
           <span className={styles.label}>Event name</span>
           <Input
@@ -172,14 +166,10 @@ export function CountdownSetupPanel({
           </div>
         </div>
 
-        <div className={styles.actions}>
-          <Button
-            type="submit"
-            disabled={saving}
-            tooltipLabel="Save countdown"
-            shortcut="⌘S"
-          >
-            {saving ? "Saving…" : "Save"}
+        <div className={footerStyles.footer}>
+          <Button type="submit" disabled={saving} tooltipLabel="Done">
+            <span>{saving ? "Saving…" : "Done"}</span>
+            <kbd className={footerStyles.kbd}>⏎</kbd>
           </Button>
         </div>
       </form>

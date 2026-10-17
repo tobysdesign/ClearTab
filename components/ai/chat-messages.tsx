@@ -152,9 +152,11 @@ function TaskSuggestions({ tasks, added, onAdd }: {
 
   if (added !== undefined) {
     return (
-      <div className={styles.toolRow}>
-        <CheckIcon size={13} className={styles.toolIcon} />
-        <span className={styles.toolLabel}>Added {added} task{added === 1 ? '' : 's'}</span>
+      <div className={styles.tasksAddedBanner} role="status">
+        <CheckIcon size={13} className={styles.tasksAddedIcon} />
+        <span className={styles.tasksAddedLabel}>
+          Added {added} task{added === 1 ? '' : 's'} to Tasks
+        </span>
       </div>
     )
   }
@@ -170,6 +172,7 @@ function TaskSuggestions({ tasks, added, onAdd }: {
 
   return (
     <div className={styles.suggestions}>
+      <span className={styles.suggestionsLabel}>Suggested tasks</span>
       <ul className={styles.suggestionList}>
         {items.map((item, i) => (
           <li key={`${item.title}-${i}`} className={styles.suggestion} data-selected={item.selected}>

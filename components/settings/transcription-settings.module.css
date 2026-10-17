@@ -1,0 +1,21 @@
+/* Transcription settings — layout tweaks on top of settings-shared.module.css */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.securityNote {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.caption {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.45;
+    margin: 4px 0 0;
+}

@@ -6,7 +6,7 @@
  * See components/ai/THIRD_PARTY_NOTICES.md.
  */
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Tooltip, TooltipContent, TooltipShortcut, TooltipTrigger } from '@cleartab/ui'
 import { ArrowUpIcon } from '@/components/icons'
 import styles from './chat-input.module.css'
@@ -32,6 +32,14 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
   const inputRef = useRef<HTMLInputElement>(null)
   const activeCommand: Command | null = value.includes('#task') ? 'task' : value.includes('#note') ? 'note' : null
   const canSend = !disabled && value.trim().length > 0
+
+  // Keep focus on the prompt: on open (the panel remounts this each time) and again
+  // when a reply finishes (disabled flips back to false, which had blurred the input).
+  useEffect(() => {
+    if (disabled) return
+    const id = requestAnimationFrame(() => inputRef.current?.focus())
+    return () => cancelAnimationFrame(id)
+  }, [disabled])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -61,7 +69,6 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
         placeholder={placeholder}
         aria-label="Chat prompt"
         className={styles.input}
-        autoFocus
       />
       <div className={styles.controls}>
         <div className={styles.commands}>
@@ -73,6 +80,7 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
                   className={styles.commandChip}
                   data-active={activeCommand === command.id}
                   aria-pressed={activeCommand === command.id}
+                  tabIndex={-1}
                   onClick={(e) => {
                     e.stopPropagation()
                     handleCommand(command.id)
@@ -92,9 +100,10 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
               className={styles.sendButton}
               onClick={(e) => {
                 e.stopPropagation()
+                if (!canSend) return
                 onSubmit()
               }}
-              disabled={!canSend}
+              aria-disabled={!canSend}
               aria-label={activeCommand ? `Create ${activeCommand}` : 'Send message'}
             >
               <ArrowUpIcon size={16} />

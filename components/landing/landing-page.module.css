@@ -263,6 +263,30 @@
 .heroDemo {
   max-width: 1000px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.showcaseDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px 0 16px;
+  position: relative;
+  width: 100%;
+}
+
+.showcaseDividerLine {
+  width: 100%;
+  max-width: 860px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.1) 20%,
+    oklch(1 0 0 / 0.1) 80%,
+    transparent 100%
+  );
 }
 
 /* Page-load entrance: words resolve out of a blur, then the demo rises */

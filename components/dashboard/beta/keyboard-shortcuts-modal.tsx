@@ -29,7 +29,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
       <div className={styles.modalHeader}>
         <h2 className={styles.modalTitle}>Keyboard Shortcuts</h2>
         <button type="button" onClick={onClose} className={styles.closeButton}>
-          <span>Done</span>
+          <span>Close</span>
           <kbd className={styles.escKey}>Esc</kbd>
         </button>
       </div>

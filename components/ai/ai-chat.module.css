@@ -2,11 +2,187 @@
    Header/close button/kbd styles mirror keyboard-shortcuts-modal so every
    dock panel reads the same. */
 .container {
-  width: 380px;
+  /* Fixed width: minimising the sidebar hands its space to the chat rather than
+     shrinking the window. */
+  width: 640px;
   max-width: calc(100vw - 48px);
-  padding: 20px;
+  padding: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* Conversations sidebar */
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.newChatButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.newChatButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.threadList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.threadItem {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  transition: background 0.12s ease;
+}
+
+.threadItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.threadItem[data-active="true"] {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.threadButton {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  padding: 7px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #a1a1aa;
+  font-size: 12.5px;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.threadItem[data-active="true"] .threadButton {
+  color: #f4f4f5;
+}
+
+.threadDelete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #71717a;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.threadItem:hover .threadDelete,
+.threadItem[data-active="true"] .threadDelete {
+  opacity: 1;
+}
+
+.threadDelete:hover {
+  color: #f87171;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebarToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebarToggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.toggleCollapsed {
+  transform: rotate(180deg);
+}
+
+@keyframes aiSpotlightPulse {
+  0%,
+  100% {
+    border-color: rgba(56, 189, 248, 0.42);
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(56, 189, 248, 0.08),
+      0 0 18px rgba(56, 189, 248, 0.14);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.58);
+    box-shadow:
+      0 24px 56px rgba(0, 0, 0, 0.65),
+      0 0 0 2px rgba(56, 189, 248, 0.15),
+      0 0 24px rgba(56, 189, 248, 0.22);
+  }
+}
+
+.container[data-demo-spotlight="true"] {
+  border: 1.5px solid rgba(56, 189, 248, 0.45) !important;
+  animation: aiSpotlightPulse 2.6s ease-in-out infinite;
 }
 
 .modalHeader {
@@ -24,12 +200,6 @@
   letter-spacing: -0.02em;
   color: #f4f4f5;
   margin: 0;
-}
-
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .closeButton {
@@ -57,81 +227,12 @@
   font-size: 11px;
 }
 
-.iconButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  color: #a1a1aa;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.iconButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-.expandedContent {
-  max-height: 280px;
+.messagesArea {
+  max-height: min(520px, 60vh);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin-bottom: 12px;
-}
-
-.collapsedIndicator {
-  align-self: flex-start;
-  margin-bottom: 12px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: #71717a;
-  font-size: 12px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.collapsedIndicator:hover {
-  color: #d4d4d8;
-}
-
-.hints {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.shortcut {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset;
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: #d4d4d8;
 }
 
 /* Shown while follow-up questions are about a note selection */
@@ -143,7 +244,7 @@
   padding: 4px 4px 4px 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .contextLabel {

@@ -37,6 +37,7 @@ import { toast as sonnerToast } from "sonner";
 import { MoreActionsIcon, ChevronLeftIcon } from "@/components/icons";
 import { useChatContext } from "@/hooks/use-chat-context";
 import { useIsStacked } from "@/hooks/use-stacked-layout";
+import { getDemoApi } from "@/lib/demo/mode";
 
 // "Today, 4:12 am", "Yesterday, 9:03 pm", "5 Oct, 3:10 pm" (year only when it isn't this year)
 function formatNoteDate(value: Date | string | null | undefined) {
@@ -293,6 +294,11 @@ export function NotesWidget() {
   >("idle");
   const [showSaveStatus, setShowSaveStatus] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
+  const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
+  const [arrivalNotice, setArrivalNotice] = useState<string | null>(null);
+  const [isWidgetHighlighted, setIsWidgetHighlighted] = useState(false);
+  const [isEditorHighlighted, setIsEditorHighlighted] = useState(false);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedContent = useRef<string>("");
   const lastSavedTitle = useRef<string>("");
@@ -300,6 +306,23 @@ export function NotesWidget() {
   const activeNoteIdRef = useRef<string | null>(null);
   const isInitializedRef = useRef(false);
   const draftCounterRef = useRef(0);
+
+  const triggerNoteHighlight = useCallback(
+    (noteId: string | null, notice: string, highlightEditor = false) => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+      if (noteId) setHighlightedNoteId(noteId);
+      setArrivalNotice(notice);
+      setIsWidgetHighlighted(true);
+      setIsEditorHighlighted(highlightEditor);
+      highlightTimerRef.current = setTimeout(() => {
+        setHighlightedNoteId(null);
+        setArrivalNotice(null);
+        setIsWidgetHighlighted(false);
+        setIsEditorHighlighted(false);
+      }, 7500);
+    },
+    [],
+  );
 
   // Generate unique draft ID to prevent duplicate keys
   const generateDraftId = useCallback(() => {
@@ -322,9 +345,17 @@ export function NotesWidget() {
       }
     };
 
-    const handleNoteCreated = () => {
+    const handleNoteCreated = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ data?: { id?: string }; source?: string }>
+      ).detail;
       console.log('📣 NotesWidget: Received note-created event, refreshing...');
       loadNotes();
+      triggerNoteHighlight(
+        detail?.data?.id ?? null,
+        detail?.source === 'voice' ? 'Saved from Voice' : 'Note added',
+        false,
+      );
     };
 
     window.addEventListener('data-deleted-all', handleDeleteAll as EventListener);
@@ -333,7 +364,7 @@ export function NotesWidget() {
       window.removeEventListener('data-deleted-all', handleDeleteAll as EventListener);
       window.removeEventListener('note-created', handleNoteCreated as EventListener);
     };
-  }, []); // Empty dependencies - loadNotes is stable from useNotes hook
+  }, [triggerNoteHighlight]); // Empty dependencies - loadNotes is stable from useNotes hook
 
   // Single effect to handle initialization and note deletion
   useEffect(() => {
@@ -770,26 +801,77 @@ export function NotesWidget() {
 
   const pendingSelectNoteIdRef = useRef<string | null>(null);
 
-  // Listen for select-note events (e.g. from recorder widget "View note")
+  // Listen for select-note events (e.g. from recorder widget "View note" or auto-select on record stop)
   useEffect(() => {
     const handleSelectNoteEvent = (event: Event) => {
-      const detail = (event as CustomEvent<{ id: string }>).detail;
+      const detail = (event as CustomEvent<{ id: string; note?: Note }>).detail;
       if (!detail?.id) return;
       console.log('📣 NotesWidget: Received select-note event for note:', detail.id);
-      const noteToSelect = notes.find((n) => n.id === detail.id);
+      triggerNoteHighlight(detail.id, 'Opened from Voice', true);
+      const noteToSelect = notes.find((n) => n.id === detail.id) || detail.note;
       if (noteToSelect) {
-        handleSelectNote(noteToSelect);
+        if (!notes.some((n) => n.id === noteToSelect.id)) {
+          insertNoteAtIndex(noteToSelect as Note, 0);
+        }
+        handleSelectNote(noteToSelect as Note);
+        setStackedView('editor');
       } else {
         pendingSelectNoteIdRef.current = detail.id;
         loadNotes();
       }
     };
 
+    const handleNoteTranscribed = (event: Event) => {
+      const detail = (event as CustomEvent<{ id: string; text?: string; content: any }>).detail;
+      if (!detail?.id) return;
+      console.log('📣 NotesWidget: Received note-transcribed for note:', detail.id);
+
+      updateNoteOptimistic(detail.id, { content: detail.content });
+
+      if (activeNoteRef.current?.id === detail.id) {
+        const updated = {
+          ...activeNoteRef.current,
+          content: detail.content,
+        };
+        activeNoteRef.current = updated;
+        setActiveNote(updated);
+        lastSavedContent.current = JSON.stringify(detail.content);
+      }
+    };
+
+    const handleNoteTranscriptionFailed = (event: Event) => {
+      const detail = (event as CustomEvent<{ id: string; reason?: string; error?: string }>).detail;
+      if (!detail?.id) return;
+      console.log('📣 NotesWidget: Received note-transcription-failed for note:', detail.id);
+
+      const failedContent = {
+        status: detail.reason === 'out_of_credits' ? 'out_of_credits' : 'out_of_credits',
+        error: detail.error,
+        ops: [{ insert: '\n' }],
+      };
+
+      updateNoteOptimistic(detail.id, { content: failedContent });
+
+      if (activeNoteRef.current?.id === detail.id) {
+        const updated = {
+          ...activeNoteRef.current,
+          content: failedContent,
+        };
+        activeNoteRef.current = updated;
+        setActiveNote(updated);
+        lastSavedContent.current = JSON.stringify(failedContent);
+      }
+    };
+
     window.addEventListener('select-note', handleSelectNoteEvent as EventListener);
+    window.addEventListener('note-transcribed', handleNoteTranscribed as EventListener);
+    window.addEventListener('note-transcription-failed', handleNoteTranscriptionFailed as EventListener);
     return () => {
       window.removeEventListener('select-note', handleSelectNoteEvent as EventListener);
+      window.removeEventListener('note-transcribed', handleNoteTranscribed as EventListener);
+      window.removeEventListener('note-transcription-failed', handleNoteTranscriptionFailed as EventListener);
     };
-  }, [notes, handleSelectNote, loadNotes]);
+  }, [notes, handleSelectNote, loadNotes, triggerNoteHighlight, insertNoteAtIndex, updateNoteOptimistic]);
 
   // If a note was pending selection after loading
   useEffect(() => {
@@ -799,6 +881,7 @@ export function NotesWidget() {
       if (found) {
         pendingSelectNoteIdRef.current = null;
         handleSelectNote(found);
+        setStackedView('editor');
       }
     }
   }, [notes, handleSelectNote]);
@@ -972,10 +1055,14 @@ export function NotesWidget() {
       try {
         const title = text.charAt(0).toUpperCase() + text.slice(1);
         await createTasks([{ title }]);
-        sonnerToast.success("Task added", { description: text.slice(0, 80), duration: 2500 });
+        if (!getDemoApi()) {
+          sonnerToast.success("Added to Tasks", { description: text.slice(0, 80), duration: 2500 });
+        }
       } catch (error) {
         console.error("NotesWidget: creating task from selection failed", error);
-        sonnerToast.error("Couldn't add that task");
+        if (!getDemoApi()) {
+          sonnerToast.error("Couldn't add that task");
+        }
       }
     },
     [createTasks],
@@ -1075,13 +1162,17 @@ export function NotesWidget() {
 
   useEffect(() => {
     return () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
       pendingDeletesRef.current.forEach(({ timeout }) => clearTimeout(timeout));
       pendingDeletesRef.current.clear();
     };
   }, []);
 
   return (
-    <WidgetContainer className="notes-widget" data-widget="notes">
+    <WidgetContainer
+      className={cn("notes-widget", isWidgetHighlighted && notesStyles.widgetHighlighted)}
+      data-widget="notes"
+    >
       <link rel="stylesheet" href="/styles/quill-custom.css" />
       <ResizablePanels
         defaultWidth={300}
@@ -1093,6 +1184,11 @@ export function NotesWidget() {
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
           <WidgetHeader title="Notes">
+            {arrivalNotice && (
+              <span className={notesStyles.arrivalBadge} role="status">
+                ✓ {arrivalNotice}
+              </span>
+            )}
             <AddButton onClick={createAndOpenNote} tooltip="Add note" />
           </WidgetHeader>
           <div className={notesStyles.notesListScroll}>
@@ -1142,6 +1238,7 @@ export function NotesWidget() {
                         onClick={() => openNote(note)}
                         onDelete={() => handleDeleteNote(note.id as string)}
                         collapsed={!isStacked && panelWidth < 100}
+                        isRecentlyUpdated={highlightedNoteId === note.id}
                         isEditing={isActive && isEditing}
                         isDeleting={deletingNoteId === note.id}
                       />
@@ -1160,7 +1257,12 @@ export function NotesWidget() {
         {/* Note Editor */}
         <div className={notesStyles.notesEditorPanel}>
           {activeNote ? (
-            <div className={notesStyles.notesContentPanel}>
+            <div
+              className={cn(
+                notesStyles.notesContentPanel,
+                isEditorHighlighted && notesStyles.editorHighlighted,
+              )}
+            >
               {/* Header with Title and Actions - Fixed */}
               <div className={notesStyles.notesEditorHeader}>
                 <div className={notesStyles.notesHeaderContent}>
@@ -1314,33 +1416,122 @@ export function NotesWidget() {
                   }
                 }}
               >
-                <DynamicQuillEditor
-                  tabIndex={4}
-                  key="stable-notes-editor" // Keep stable to prevent focus loss
-                  value={activeNoteRef.current?.content || activeNote?.content}
-                  onChange={(content) => {
-                    // Just piggyback off Quill's onChange - don't interfere with editing
-                    if (!activeNoteRef.current) return;
+                {(() => {
+                  const activeContent = activeNoteRef.current?.content || activeNote?.content;
+                  let contentObj = activeContent;
+                  if (typeof contentObj === "string") {
+                    try {
+                      contentObj = JSON.parse(contentObj);
+                    } catch {
+                      contentObj = null;
+                    }
+                  }
+                  const isTranscribing = (contentObj as any)?.status === "transcribing";
+                  const isOutOfCredits = (contentObj as any)?.status === "out_of_credits";
 
-                    console.log(
-                      "QuillEditor onChange called for note:",
-                      activeNoteRef.current.id,
+                  if (isTranscribing) {
+                    return (
+                      <div className={notesStyles.inNoteTranscribingCard}>
+                        <div className={notesStyles.inNoteTranscribingHeader}>
+                          <div className={notesStyles.inNoteTranscribingTitleGroup}>
+                            <span className={notesStyles.inNotePulseDot} />
+                            <span className={notesStyles.inNoteTranscribingTitle}>
+                              Transcribing voice memo...
+                            </span>
+                          </div>
+                          <span className={notesStyles.inNoteBadge}>In progress</span>
+                        </div>
+                        <div className={notesStyles.inNoteProgressTrack}>
+                          <div className={notesStyles.inNoteProgressFill} />
+                        </div>
+                        <div className={notesStyles.inNoteFooter}>
+                          <p className={notesStyles.inNoteSubtitle}>
+                            Attributing speakers and formatting notes...
+                          </p>
+                          <span className={notesStyles.inNoteCreditsHint}>
+                            ⚡ 1 credit remaining
+                          </span>
+                        </div>
+                      </div>
                     );
+                  }
 
-                    // Update our data silently in background - NO STATE UPDATES
-                    activeNoteRef.current = {
-                      ...activeNoteRef.current,
-                      content,
-                    };
+                  if (isOutOfCredits) {
+                    return (
+                      <div className={notesStyles.outOfCreditsCard}>
+                        <div className={notesStyles.outOfCreditsHeader}>
+                          <div className={notesStyles.outOfCreditsTitleGroup}>
+                            <span className={notesStyles.outOfCreditsIcon}>⚡</span>
+                            <h4 className={notesStyles.outOfCreditsTitle}>
+                              Out of transcription credits
+                            </h4>
+                          </div>
+                        </div>
+                        <p className={notesStyles.outOfCreditsDesc}>
+                          You have used your transcription credits for this period. Add credits to transcribe this recording and future voice memos.
+                        </p>
+                        <div className={notesStyles.outOfCreditsActions}>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              toast({
+                                title: "Transcription Credits",
+                                description: "ClearTab Pro voice credits coming soon! Free local transcription enabled.",
+                              });
+                            }}
+                          >
+                            Add credits
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (activeNote?.id) {
+                                const emptyContent = EMPTY_QUILL_CONTENT;
+                                updateNote.mutate({ id: activeNote.id as string, content: emptyContent });
+                                const updated = { ...activeNote, content: emptyContent };
+                                setActiveNote(updated);
+                                activeNoteRef.current = updated;
+                              }
+                            }}
+                          >
+                            Write note manually
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  }
 
-                    // Save immediately on every change (debounced internally)
-                    scheduleBackgroundSave();
-                  }}
-                  editable={true}
-                  onOpenAiChat={askAboutText}
-                  onCreateTask={handleCreateTaskFromSelection}
-                  className={notesStyles.notesEditorContainer}
-                />
+                  return (
+                    <DynamicQuillEditor
+                      tabIndex={4}
+                      key="stable-notes-editor" // Keep stable to prevent focus loss
+                      value={activeNoteRef.current?.content || activeNote?.content}
+                      onChange={(content) => {
+                        // Just piggyback off Quill's onChange - don't interfere with editing
+                        if (!activeNoteRef.current) return;
+
+                        console.log(
+                          "QuillEditor onChange called for note:",
+                          activeNoteRef.current.id,
+                        );
+
+                        // Update our data silently in background - NO STATE UPDATES
+                        activeNoteRef.current = {
+                          ...activeNoteRef.current,
+                          content,
+                        };
+
+                        // Save immediately on every change (debounced internally)
+                        scheduleBackgroundSave();
+                      }}
+                      editable={true}
+                      onOpenAiChat={askAboutText}
+                      onCreateTask={handleCreateTaskFromSelection}
+                      className={notesStyles.notesEditorContainer}
+                    />
+                  );
+                })()}
               </div>
             </div>
           ) : (

@@ -54,6 +54,8 @@ export function usePreferences() {
   return useQuery({
     queryKey: PREFERENCES_QUERY_KEY,
     queryFn: fetchPreferences,
+    initialData: readCachedPreferences,
+    initialDataUpdatedAt: () => 0,
     placeholderData: readCachedPreferences,
   })
 }

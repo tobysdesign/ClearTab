@@ -68,7 +68,7 @@ const nextConfig = {
               style-src 'self' 'unsafe-inline' fonts.googleapis.com;
               img-src 'self' data: blob: cdn.jsdelivr.net unpkg.com lottie.host lh3.googleusercontent.com;
               font-src 'self' data: fonts.gstatic.com;
-              connect-src 'self' cdn.jsdelivr.net unpkg.com lottie.host static.hotjar.com *.supabase.co;
+              connect-src 'self' ws: wss: cdn.jsdelivr.net unpkg.com lottie.host static.hotjar.com *.supabase.co;
               media-src 'self';
               object-src 'none';
               frame-src 'self';

@@ -17,6 +17,8 @@ import { useLayout } from '@/hooks/use-layout'
 import { MobileCompactLayout } from './mobile-compact-layout'
 import styles from './resizable-bento-grid.module.css'
 
+const RESIZE_HIT_MARGINS = { fine: 14, coarse: 20 }
+
 interface ResizableBentoGridProps {
   notes: ReactNode
   tasks: ReactNode
@@ -57,7 +59,7 @@ export function ResizableBentoGrid({
               {login}
             </motion.div>
           </Panel>
-          <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
 
           {/* Main Content Area */}
           <Panel defaultSize={80} minSize={70}>
@@ -70,7 +72,7 @@ export function ResizableBentoGrid({
                       {notes}
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
                   <Panel defaultSize={50} minSize={8}>
                     <motion.div {...motionProps(0.5)} className="panel-motion">
                       {tasks}
@@ -79,7 +81,7 @@ export function ResizableBentoGrid({
                 </PanelGroup>
               </Panel>
 
-              <PanelResizeHandle className={styles.resizeHandleVertical} />
+              <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
 
               {/* Bottom Row */}
               <Panel defaultSize={50} minSize={8}>
@@ -89,19 +91,19 @@ export function ResizableBentoGrid({
                       <WeatherWidgetNew />
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
                   <Panel defaultSize={25}>
                     <motion.div {...motionProps(0.85)} className="panel-motion">
                       <RecorderWidget />
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
                   <Panel defaultSize={25}>
                     <motion.div {...motionProps(1)} className="panel-motion">
                       <CountdownWidget />
                     </motion.div>
                   </Panel>
-                  <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+                  <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
                   <Panel defaultSize={25}>
                     <motion.div {...motionProps(1.25)} className="panel-motion">
                       <ScheduleWidget />
@@ -126,7 +128,7 @@ export function ResizableBentoGrid({
                 {notes}
               </motion.div>
             </Panel>
-            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
             <Panel defaultSize={30} minSize={8}>
               <motion.div {...motionProps(0.5)} className="panel-motion">
                 {tasks}
@@ -135,7 +137,7 @@ export function ResizableBentoGrid({
           </PanelGroup>
         </Panel>
 
-        <PanelResizeHandle className={styles.resizeHandleVertical} />
+        <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
 
         {/* Bottom Row */}
         <Panel defaultSize={50} minSize={8}>
@@ -145,19 +147,19 @@ export function ResizableBentoGrid({
                 <WeatherWidgetNew />
               </motion.div>
             </Panel>
-            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
             <Panel defaultSize={17}>
               <motion.div {...motionProps(0.85)} className="panel-motion">
                 <RecorderWidget />
               </motion.div>
             </Panel>
-            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
             <Panel defaultSize={17}>
               <motion.div {...motionProps(1)} className="panel-motion">
                 <CountdownWidget />
               </motion.div>
             </Panel>
-            <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+            <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
             <Panel defaultSize={41}>
               <motion.div {...motionProps(1.25)} className="panel-motion">
                 <ScheduleWidget />
@@ -178,7 +180,7 @@ export function ResizableBentoGrid({
               {notes}
             </motion.div>
           </Panel>
-          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
           <Panel defaultSize={40} minSize={25}>
             <PanelGroup direction="horizontal" className="panel-group">
               <Panel defaultSize={33} style={{ overflow: 'visible' }}>
@@ -186,13 +188,13 @@ export function ResizableBentoGrid({
                   <WeatherWidgetNew />
                 </motion.div>
               </Panel>
-              <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+              <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
               <Panel defaultSize={33}>
                 <motion.div {...motionProps(0.85)} className="panel-motion">
                   <CountdownWidget />
                 </motion.div>
               </Panel>
-              <PanelResizeHandle className={styles.resizeHandleHorizontal} />
+              <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleHorizontal} />
               <Panel defaultSize={34}>
                 <motion.div {...motionProps(1)} className="panel-motion">
                   <RecorderWidget />
@@ -202,7 +204,7 @@ export function ResizableBentoGrid({
           </Panel>
         </PanelGroup>
       </Panel>
-      <PanelResizeHandle className={styles.resizeHandleInline} />
+      <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleInline} />
       <Panel defaultSize={33} minSize={8}>
         <PanelGroup direction="vertical" className="panel-group">
           <Panel defaultSize={50} minSize={8}>
@@ -210,7 +212,7 @@ export function ResizableBentoGrid({
               {tasks}
             </motion.div>
           </Panel>
-          <PanelResizeHandle className={styles.resizeHandleVertical} />
+          <PanelResizeHandle hitAreaMargins={RESIZE_HIT_MARGINS} className={styles.resizeHandleVertical} />
           <Panel defaultSize={50} minSize={8}>
             <motion.div {...motionProps(1.25)} className="panel-motion">
               <ScheduleWidget />

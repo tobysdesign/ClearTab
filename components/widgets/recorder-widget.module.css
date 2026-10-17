@@ -337,6 +337,9 @@
 .waveformBar {
     /* box model */
     width: 2px;
+    /* Keep the bar width when the row is narrow -- otherwise flex shrinks every bar
+       to 0 and the waveform disappears. The container clips the oldest (left) bars. */
+    flex-shrink: 0;
     min-height: 3px;
     border-radius: 9999px;
 
@@ -650,12 +653,68 @@
 .transcribingTitle {
     /* typography */
     color: #ddd;
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 13px;
+    font-weight: 500;
     letter-spacing: -0.02em;
 
     /* box model */
     margin-bottom: 6px;
+}
+
+.transcribingProgressTrack {
+    width: 100%;
+    max-width: 220px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 8px 0 10px;
+    position: relative;
+}
+
+.transcribingProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+    border-radius: 9999px;
+    animation: transcribingProgress 2.2s ease-in-out infinite;
+}
+
+@keyframes transcribingProgress {
+    0% {
+        width: 20%;
+        transform: translateX(-100%);
+    }
+    50% {
+        width: 65%;
+        transform: translateX(60%);
+    }
+    100% {
+        width: 100%;
+        transform: translateX(120%);
+    }
+}
+
+.miniProcessingWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.miniProgressTrack {
+    width: 90px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    overflow: hidden;
+    position: relative;
+}
+
+.miniProgressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    border-radius: 9999px;
+    animation: transcribingProgress 1.8s ease-in-out infinite;
 }
 
 .transcribingSubtitle {
@@ -858,6 +917,9 @@
     gap: 12px;
     overflow: hidden;
     box-sizing: border-box;
+    /* Query container so the narrow button-shrink and delete-confirm rules apply
+       here too (the mini is outside the expanded card's .container). */
+    container-type: inline-size;
 }
 
 .miniIdleRow {
@@ -975,11 +1037,73 @@
     flex-shrink: 0;
 }
 
+.miniControlsFull {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Shown only when the mini is too narrow for the full control row (see @container) */
+.miniControlsCollapsed {
+    display: none;
+    align-items: center;
+    gap: 6px;
+}
+
+.miniMenuDots {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Smaller screens (tablet): tighten padding/gaps and the record dot so the mini
+   controls stay on-screen before they need to collapse. */
+@container (max-width: 360px) {
+    .miniContainer {
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    .miniStatusGroup {
+        gap: 4px;
+    }
+
+    .miniControlsFull,
+    .miniControlsCollapsed {
+        gap: 4px;
+    }
+
+    .miniPulseDotRecording,
+    .miniPulseDotPaused {
+        width: 4px;
+        height: 4px;
+    }
+}
+
+/* Too narrow for four controls: collapse the bar to a drop-up menu + Complete */
+@container (max-width: 270px) {
+    .miniControlsFull {
+        display: none;
+    }
+
+    .miniControlsCollapsed {
+        display: flex;
+    }
+}
+
 /* Transcription Complete States */
 .transcriptionCompleteContainer {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 12px;
+    width: 100%;
+}
+
+.successActionButtons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .transcriptionCompleteMessage {
@@ -1044,6 +1168,43 @@
     color: #d4d4d8;
     white-space: nowrap;
     margin-right: 2px;
+}
+
+/* Narrow widgets: keep the recording controls and the delete-confirm on-screen. */
+@container (max-width: 320px) {
+    .recordingControls,
+    .miniControlsGroup {
+        gap: 8px;
+    }
+
+    /* The "Delete recording?" prompt pushes Cancel/Delete off both edges; the two
+       buttons are clear enough on their own. */
+    .deleteConfirmText {
+        display: none;
+    }
+
+    .deleteConfirm {
+        justify-content: center;
+    }
+}
+
+@container (max-width: 230px) {
+    /* Too narrow for four full-size controls: shrink the buttons (keep Mute) so all
+       of Mute/Pause/Delete/Complete stay visible. */
+    .recordingControls,
+    .miniControlsGroup {
+        gap: 5px;
+    }
+
+    /* Direct children only: the icon controls. NOT the Cancel/Delete text buttons
+       nested inside .deleteConfirm, which need their natural width. */
+    .recordingControls > button,
+    .miniControlsGroup > button {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        padding: 0;
+    }
 }
 
 /* Short widgets (between the mini threshold and the full layout's natural

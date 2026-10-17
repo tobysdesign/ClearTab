@@ -1,24 +1,49 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import type { Note } from '@/shared/schema'
 import type { ActionResponse } from '@/types/actions'
 import { api } from '@/lib/api-client'
 
+async function fetchNotesOnce(): Promise<Note[]> {
+  const res = await api.get('/api/notes');
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Network response was not ok: ${res.status} ${res.statusText}`, errorText);
+    throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
+  }
+  const body: ActionResponse<Note[]> = await res.json();
+  if (body.success) {
+    return body.data || [];
+  }
+  console.error("Failed to fetch notes:", body.error);
+  throw new Error(body.error || 'Failed to fetch notes');
+}
+
 async function getNotes(): Promise<Note[]> {
   try {
-    const res = await api.get('/api/notes');
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error(`Network response was not ok: ${res.status} ${res.statusText}`, errorText);
-      throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
+    let notes: Note[];
+    try {
+      notes = await fetchNotesOnce();
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      notes = await fetchNotesOnce();
     }
-    const body: ActionResponse<Note[]> = await res.json();
-    if (body.success) {
-      return body.data || [];
+    try {
+      window.localStorage.setItem('cleartab_cached_notes_v1', JSON.stringify(notes));
+    } catch {
+      // Ignore storage errors
     }
-    console.error("Failed to fetch notes:", body.error);
-    throw new Error(body.error || 'Failed to fetch notes');
+    return notes;
   } catch (error) {
     console.error("Error in getNotes:", error);
+    try {
+      const cachedRaw = window.localStorage.getItem('cleartab_cached_notes_v1');
+      if (cachedRaw) {
+        const cachedNotes = JSON.parse(cachedRaw);
+        if (Array.isArray(cachedNotes)) return cachedNotes;
+      }
+    } catch {
+      // Ignore cache read errors
+    }
     return [];
   }
 }
@@ -69,18 +94,35 @@ async function deleteNote(id: string): Promise<{ id: string }> {
   return { id }
 }
 
-export function useNotes() {
-  const [notes, setNotes] = useState<Note[]>([])
-  const [isLoadingNotes, setIsLoadingNotes] = useState(false)
-  const [notesError, setNotesError] = useState<Error | null>(null)
+function getInitialCachedNotes(): Note[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const cachedRaw = window.localStorage.getItem('cleartab_cached_notes_v1')
+    if (cachedRaw) {
+      const parsed = JSON.parse(cachedRaw)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {}
+  return []
+}
 
-  // Load notes once on mount
+export function useNotes() {
+  const [notes, setNotes] = useState<Note[]>(getInitialCachedNotes)
+  const initialHadNotes = useRef(notes.length > 0)
+  const [isLoadingNotes, setIsLoadingNotes] = useState(!initialHadNotes.current)
+  const [notesError, setNotesError] = useState<Error | null>(null)
+  const hasLoadedOnceRef = useRef(initialHadNotes.current)
+
+  // Load notes on mount or refresh silently when a note is created elsewhere
   const loadNotes = useCallback(async () => {
-    setIsLoadingNotes(true)
+    if (!hasLoadedOnceRef.current) {
+      setIsLoadingNotes(true)
+    }
     setNotesError(null)
     try {
       const data = await getNotes()
       setNotes(data)
+      hasLoadedOnceRef.current = true
     } catch (error) {
       console.error('Error loading notes:', error)
       setNotesError(error as Error)

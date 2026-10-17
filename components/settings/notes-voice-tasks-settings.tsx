@@ -232,6 +232,7 @@ export const NotesVoiceTasksSettings = React.forwardRef<
           </div>
         </div>
 
+        <div className={sharedStyles.rowGroup}>
         {dataSets.map((item) => (
           <div key={item.key} className={sharedStyles.row}>
             <div className={sharedStyles.rowMeta}>
@@ -273,6 +274,7 @@ export const NotesVoiceTasksSettings = React.forwardRef<
             </SimpleDropdown>
           </div>
         ))}
+        </div>
       </div>
 
       <Dialog

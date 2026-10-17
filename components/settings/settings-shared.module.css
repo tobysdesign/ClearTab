@@ -17,7 +17,7 @@
 }
 
 .cardNote {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.55);
     max-width: 420px;
     line-height: 1.45;
@@ -86,15 +86,15 @@
 .label {
     display: inline-flex;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #5a5a5a;
+    color: #71717a;
     margin-bottom: 4px;
 }
 
 .fieldDescription {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.45);
     line-height: 1.45;
 }
@@ -230,12 +230,35 @@
 
 .row {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) auto auto;
+    /* Fixed last column so the Visible toggle lines up whether or not a row has
+       an actions (⋮) button. */
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr) auto 40px;
     gap: 2px;
     align-items: center;
     padding: 12px;
     border-radius: 16px;
     background: #222;
+}
+
+/* Grouped rows: a single rounded surface with hairline dividers between rows,
+   instead of separate floating pills. */
+.rowGroup {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    background: #222;
+    overflow: hidden;
+}
+
+.rowGroup .row {
+    border-radius: 0;
+    background: transparent;
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.rowGroup .row:first-child {
+    border-top: none;
 }
 
 .rowMeta {
@@ -246,13 +269,13 @@
 }
 
 .rowTitle {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: #c4c4c4;
+    color: #e4e4e7;
 }
 
 .rowDescription {
-    font-size: 0.8rem;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.45);
     margin-top: 2px;
 }
@@ -288,11 +311,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 8px;
-    border-radius: 3px;
-    background: rgba(125, 125, 125, 0.3);
-    color: #c4c4c4;
-    font-size: 8npx;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #a1a1aa;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -393,7 +418,16 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    align-items: flex-start;
+    /* Right-aligned so the Visible toggle lines up across rows, with or without a ⋮ */
+    align-items: flex-end;
+}
+
+/* A readable but secondary value (e.g. an email under a name) — same size as the
+   title, just dimmer, so values don't look tiny. */
+.rowValueMuted {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .compactNotice {

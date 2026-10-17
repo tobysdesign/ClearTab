@@ -5,6 +5,8 @@ import { useSettings } from '@/hooks/use-settings'
 import { useToast } from '@/hooks/use-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api-fetch'
+import { getDemoApi } from '@/lib/demo/mode'
+import { type ChatThread, newThreadId, deriveThreadTitle, loadChatThreads, saveChatThreads } from '@/lib/chat-threads'
 
 export interface Message {
   content: string
@@ -31,7 +33,7 @@ export interface TaskSuggestion {
 }
 
 export const MAKE_TASKS_REPLY = 'Make tasks from this'
-const SUMMARISE_REPLY = 'Summarise this'
+export const SUMMARISE_REPLY = 'Summarise this'
 
 interface ChatContextType {
   isChatOpen: boolean
@@ -62,6 +64,12 @@ interface ChatContextType {
   toggleStreamingMode: () => void
   cancelMessage: () => void
   canCancel: boolean
+  /** saved conversations, newest first */
+  threads: ChatThread[]
+  activeThreadId: string | null
+  newThread: () => void
+  selectThread: (id: string) => void
+  deleteThread: (id: string) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -164,6 +172,55 @@ function parseTaskSuggestions(raw: string): TaskSuggestion[] {
   }
 }
 
+// When a plain message might be asking to create something, a structured call decides whether to
+// actually make a task/note. Kept conservative so ordinary chat is never hijacked.
+const CREATE_INTENT_HINT = /\b(add|create|make|new|set up|jot|note down|take a note|remind me)\b/i
+
+const CREATE_INTENT_SCHEMA = {
+  type: 'object',
+  properties: {
+    action: { type: 'string', enum: ['create_task', 'create_note', 'none'] },
+    task: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        important: { type: 'boolean' },
+        due: { type: ['string', 'null'] },
+      },
+    },
+    note: {
+      type: 'object',
+      properties: { text: { type: 'string' } },
+    },
+  },
+  required: ['action'],
+}
+
+type CreateIntent =
+  | { action: 'create_task'; task: { title: string; important: boolean; due: string | null } }
+  | { action: 'create_note'; note: { text: string } }
+  | { action: 'none' }
+
+function parseCreateIntent(raw: string): CreateIntent {
+  const match = raw.match(/\{[\s\S]*\}/)
+  if (!match) return { action: 'none' }
+  try {
+    const parsed = JSON.parse(match[0])
+    if (parsed?.action === 'create_task' && typeof parsed?.task?.title === 'string' && parsed.task.title.trim()) {
+      return {
+        action: 'create_task',
+        task: { title: parsed.task.title.trim(), important: parsed.task.important === true, due: parsed.task.due ?? null },
+      }
+    }
+    if (parsed?.action === 'create_note' && typeof parsed?.note?.text === 'string' && parsed.note.text.trim()) {
+      return { action: 'create_note', note: { text: parsed.note.text.trim() } }
+    }
+    return { action: 'none' }
+  } catch {
+    return { action: 'none' }
+  }
+}
+
 export function ChatProvider({ children, languageModel }: { children: ReactNode; languageModel?: unknown }) {
   // Stable for the provider's lifetime, so a ref keeps it out of every dependency list
   const languageModelRef = useRef(languageModel)
@@ -175,10 +232,139 @@ export function ChatProvider({ children, languageModel }: { children: ReactNode;
   const [isStreamingMode, setIsStreamingMode] = useState(true)
   const [contextText, setContextText] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  // Set when we abort because the user switched threads, so no "cancelled" toast is shown
+  const suppressCancelToastRef = useRef(false)
   const { hasSeenOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, userName, agentName } = useSettings()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const localAiSessionRef = useRef<any>(null)
+
+  // Conversation threads (saved per-device; see lib/chat-threads). `messages` is the live copy of
+  // the active thread; a settled change is written back into that thread and persisted.
+  const [threads, setThreads] = useState<ChatThread[]>([])
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null)
+  const threadsRef = useRef<ChatThread[]>([])
+  threadsRef.current = threads
+  const activeThreadIdRef = useRef<string | null>(null)
+  activeThreadIdRef.current = activeThreadId
+  const threadsLoadedRef = useRef(false)
+
+  const welcomeMessage = useCallback((): Message => ({
+    role: 'assistant',
+    content: hasSeenOnboarding
+      ? 'Welcome back! What can I help you with?'
+      : `Hi, I'm ${agentName || 'Alex'}. Ask me about your notes, tasks or schedule, or use #task and #note to add things.`,
+  }), [hasSeenOnboarding, agentName])
+
+  const createThread = useCallback((): ChatThread => {
+    const now = Date.now()
+    return { id: newThreadId(), title: 'New chat', messages: [welcomeMessage()], createdAt: now, updatedAt: now }
+  }, [welcomeMessage])
+
+  // A thread keeps the model's conversation history inside its session, so switching threads must
+  // start a fresh session (the next prompt rebuilds it with up-to-date context).
+  const resetModelSession = useCallback(() => {
+    try { localAiSessionRef.current?.destroy?.() } catch {}
+    localAiSessionRef.current = null
+  }, [])
+
+  // Abort any streaming reply before switching away, so its tokens don't land in another thread
+  const stopActiveGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      suppressCancelToastRef.current = true
+      abortControllerRef.current.abort()
+    }
+    setIsThinking(false)
+  }, [])
+
+  // Load saved threads once. The scripted /demo keeps its own in-memory thread and never persists.
+  useEffect(() => {
+    if (getDemoApi()) {
+      const t = createThread()
+      setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+      threadsLoadedRef.current = true
+      return
+    }
+    let active = true
+    loadChatThreads()
+      .then(({ threads: loaded, activeThreadId: savedActive }) => {
+        if (!active) return
+        if (loaded.length) {
+          setThreads(loaded)
+          const current = loaded.find(t => t.id === savedActive) ?? loaded[0]
+          setActiveThreadId(current.id)
+          setMessages(current.messages)
+        } else {
+          const t = createThread()
+          setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+        }
+      })
+      .catch(() => {
+        if (!active) return
+        const t = createThread()
+        setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages)
+      })
+      .finally(() => { threadsLoadedRef.current = true })
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Write the live messages back into the active thread once streaming has settled, and persist.
+  useEffect(() => {
+    if (!threadsLoadedRef.current || !activeThreadId || getDemoApi()) return
+    if (isThinking || messages.some(m => m.isStreaming)) return
+    const prev = threadsRef.current
+    if (!prev.some(t => t.id === activeThreadId)) return
+    const next = prev.map(t => (t.id === activeThreadId
+      ? { ...t, messages, title: deriveThreadTitle(messages), updatedAt: Date.now() }
+      : t))
+    setThreads(next)
+    saveChatThreads(next, activeThreadId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isThinking, activeThreadId])
+
+  const newThread = useCallback(() => {
+    stopActiveGeneration()
+    const t = createThread()
+    const next = [t, ...threadsRef.current]
+    setThreads(next)
+    setActiveThreadId(t.id)
+    setMessages(t.messages)
+    setContextText(null)
+    resetModelSession()
+    if (!getDemoApi()) saveChatThreads(next, t.id)
+  }, [createThread, resetModelSession, stopActiveGeneration])
+
+  const selectThread = useCallback((id: string) => {
+    const target = threadsRef.current.find(t => t.id === id)
+    if (!target || id === activeThreadIdRef.current) return
+    stopActiveGeneration()
+    setActiveThreadId(id)
+    setMessages(target.messages)
+    setContextText(null)
+    resetModelSession()
+    if (!getDemoApi()) saveChatThreads(threadsRef.current, id)
+  }, [resetModelSession, stopActiveGeneration])
+
+  const deleteThread = useCallback((id: string) => {
+    const remaining = threadsRef.current.filter(t => t.id !== id)
+    const wasActive = id === activeThreadIdRef.current
+    if (wasActive) stopActiveGeneration()
+    if (remaining.length === 0) {
+      const t = createThread()
+      setThreads([t]); setActiveThreadId(t.id); setMessages(t.messages); resetModelSession()
+      if (!getDemoApi()) saveChatThreads([t], t.id)
+      return
+    }
+    setThreads(remaining)
+    const nextActiveId = wasActive ? remaining[0].id : activeThreadIdRef.current
+    if (wasActive) {
+      setActiveThreadId(remaining[0].id)
+      setMessages(remaining[0].messages)
+      resetModelSession()
+    }
+    if (!getDemoApi()) saveChatThreads(remaining, nextActiveId)
+  }, [createThread, resetModelSession, stopActiveGeneration])
 
   const initLocalAiSession = useCallback(async () => {
     if (localAiSessionRef.current) return localAiSessionRef.current;
@@ -221,6 +407,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
   // Creates tasks via the API. The API reads `title` (sending `content` saved them as "Untitled Task").
   const createTasks = useCallback(async (items: Array<Partial<TaskSuggestion> & { title: string }>) => {
     let created = 0
+    const createdIds: string[] = []
     for (const item of items) {
       const title = item.title.trim().slice(0, 200)
       if (!title) continue
@@ -235,12 +422,14 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         }),
       })
       if (!response.ok) throw new Error('Failed to create task')
+      const body = await response.json().catch(() => ({}))
+      if (body?.data?.id) createdIds.push(body.data.id)
       created += 1
     }
     console.log('ChatProvider: created', created, 'tasks')
     queryClient.invalidateQueries({ queryKey: ['tasks'] })
-    // The Tasks widget keeps its own list; this makes it reload so the new tasks show
-    window.dispatchEvent(new CustomEvent('tasks-changed'))
+    // The Tasks widget keeps its own list; this makes it reload and highlight the new tasks
+    window.dispatchEvent(new CustomEvent('tasks-changed', { detail: { createdIds, count: created } }))
     return created
   }, [queryClient])
 
@@ -263,24 +452,83 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       queryClient.invalidateQueries({ queryKey: ['notes'] })
       // The Notes widget reloads on this (it keeps its own list)
       window.dispatchEvent(new CustomEvent('note-created', { detail: result }))
-      toast({
-        title: 'Note created',
-        description: 'Your note has been created successfully.',
-      })
+      if (!getDemoApi()) {
+        toast({
+          title: 'Note created',
+          description: 'Your note has been created successfully.',
+        })
+      }
     },
   })
 
-  // Handles #task / #note commands. Returns true when the message was a command.
+  // Handles #task / #note commands. The tag can sit anywhere in the message ("buy milk #task" or
+  // "#task buy milk"); the rest of the text becomes the task/note. Returns true when it ran.
   const handleHashtagCommand = useCallback(async (userMessage: string) => {
-    const taskMatch = userMessage.match(/#task\s+(.+)/)
-    const noteMatch = userMessage.match(/#note\s+(.+)/)
-    const match = taskMatch ? { kind: 'task' as const, text: taskMatch[1] } : noteMatch ? { kind: 'note' as const, text: noteMatch[1] } : null
+    const strip = (tag: RegExp) => userMessage.replace(tag, '').replace(/\s+/g, ' ').trim()
+    let match: { kind: 'task' | 'note'; text: string } | null = null
+    if (/#task\b/i.test(userMessage)) {
+      const text = strip(/#task\b/gi)
+      if (text) match = { kind: 'task', text }
+    } else if (/#note\b/i.test(userMessage)) {
+      const text = strip(/#note\b/gi)
+      if (text) match = { kind: 'note', text }
+    }
     if (!match) return false
 
     if (match.kind === 'task') await createTasks([{ title: match.text }])
     else await createNoteMutation.mutateAsync(match.text)
     setMessages(prev => [...prev, { role: 'assistant', content: '', tool: match }])
     return true
+  }, [createTasks, createNoteMutation])
+
+  // Natural-language "add a task…" / "make a note…": a structured call decides whether the message
+  // is really a create request, and creates the object if so. Returns true when it handled it, so
+  // the caller skips the normal chat reply. Plain chat (action "none") falls through untouched.
+  const handleCreateIntent = useCallback(async (userMessage: string) => {
+    if (!CREATE_INTENT_HINT.test(userMessage)) return false
+    const found = getLanguageModelApi(languageModelRef.current)
+    if (!found) return false
+
+    const today = new Date()
+    const systemPrompt = [
+      'Decide whether the user wants to CREATE a task or a note, or is just chatting.',
+      `Today is ${today.toLocaleDateString('en-AU', { weekday: 'long' })} ${localDateISO(today)}.`,
+      'Reply with JSON matching the schema.',
+      '- action "create_task": they want to add a to-do, task or reminder. Give task.title (imperative, reusing their words, at most 12 words), task.important (true only if urgent/ASAP), task.due (YYYY-MM-DD if a day or date is mentioned, otherwise null).',
+      '- action "create_note": they want to save or jot a note. Give note.text (the note content, in their words).',
+      '- action "none": anything else, including questions about existing tasks, notes or schedule.',
+      'Only choose create when they clearly want something saved.',
+    ].join('\n')
+
+    let session: any
+    try {
+      session = found.legacy
+        ? await found.api.create({ systemPrompt })
+        : await found.api.create({ initialPrompts: [{ role: 'system', content: systemPrompt }] })
+      const raw: string = await session.prompt(
+        userMessage,
+        found.legacy ? undefined : { responseConstraint: CREATE_INTENT_SCHEMA },
+      )
+      session.destroy?.()
+
+      const intent = parseCreateIntent(raw)
+      if (intent.action === 'create_task') {
+        await createTasks([{ title: intent.task.title, isHighPriority: intent.task.important, dueDate: normaliseDue(intent.task.due) }])
+        setMessages(prev => [...prev, { role: 'assistant', content: '', tool: { kind: 'task', text: intent.task.title } }])
+        return true
+      }
+      if (intent.action === 'create_note') {
+        await createNoteMutation.mutateAsync(intent.note.text)
+        const title = intent.note.text.split('\n')[0].slice(0, 60)
+        setMessages(prev => [...prev, { role: 'assistant', content: '', tool: { kind: 'note', text: title } }])
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('ChatProvider: create-intent detection failed', error)
+      try { session?.destroy?.() } catch {}
+      return false
+    }
   }, [createTasks, createNoteMutation])
 
   const runLocalAi = useCallback(async (userMessage: string, streaming: boolean) => {
@@ -301,6 +549,9 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         return
       }
 
+      // "add a task…" / "make a note…" create the object instead of a chat reply
+      if (await handleCreateIntent(userMessage)) return
+
       const session = await withWarmUpNotice(initLocalAiSession(), setThinkingContent)
       const startedAt = Date.now()
       // Questions after "Ask AI" on a selection are about that text
@@ -308,9 +559,20 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         ? `Here is some text from my notes:\n"""\n${contextText}\n"""\n\n${userMessage}`
         : userMessage
 
+      const followUpReplies =
+        contextText && userMessage === SUMMARISE_REPLY ? [MAKE_TASKS_REPLY] : undefined
+
       if (!streaming) {
         const responseText = await session.prompt(prompt, { signal: controller.signal })
-        setMessages(prev => [...prev, { role: 'assistant', content: responseText, thoughtMs: Date.now() - startedAt }])
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: responseText,
+            thoughtMs: Date.now() - startedAt,
+            quickReplies: followUpReplies,
+          },
+        ])
         return
       }
 
@@ -342,12 +604,19 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       setMessages(prev => {
         if (!started) return prev
         const updated = [...prev]
-        updated[updated.length - 1] = { ...updated[updated.length - 1], isStreaming: false }
+        updated[updated.length - 1] = {
+          ...updated[updated.length - 1],
+          isStreaming: false,
+          quickReplies: followUpReplies,
+        }
         return updated
       })
     } catch (error: any) {
       if (error?.name === 'AbortError') {
-        toast({ title: 'Message cancelled', description: 'The message was cancelled.' })
+        if (!suppressCancelToastRef.current) {
+          toast({ title: 'Message cancelled', description: 'The message was cancelled.' })
+        }
+        suppressCancelToastRef.current = false
       } else {
         console.error('Error processing message:', error)
         toast({
@@ -361,7 +630,7 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
       setThinkingContent('')
       abortControllerRef.current = null
     }
-  }, [handleHashtagCommand, initLocalAiSession, toast, contextText])
+  }, [handleHashtagCommand, handleCreateIntent, initLocalAiSession, toast, contextText])
 
   const processMessage = useCallback(async (initialMessage?: string) => {
     const userMessage = (initialMessage || inputValue).trim()
@@ -486,6 +755,12 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
     try {
       const created = await createTasks(tasks)
       setMessages(prev => prev.map((m, i) => (i === messageIndex ? { ...m, tasksAdded: created } : m)))
+      // Pause so "Added N tasks to Tasks" reads clearly before revealing the Tasks widget
+      setTimeout(() => {
+        setIsChatOpen(false)
+        setContextText(null)
+        window.dispatchEvent(new CustomEvent('tasks-focus'))
+      }, 1100)
     } catch (error) {
       console.error('ChatProvider: adding suggested tasks failed', error)
       toast({ title: 'Error', description: "Couldn't add those tasks. Please try again.", variant: 'destructive' })
@@ -514,19 +789,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
 
   const openChat = useCallback(() => {
     setIsChatOpen(true)
-    if (messages.length === 0) {
-      // The old server-driven onboarding chat no longer exists, so finish onboarding on first open
-      if (!hasSeenOnboarding) {
-        completeOnboarding({ userName, agentName })
-      }
-      setMessages([{
-        role: 'assistant',
-        content: hasSeenOnboarding
-          ? 'Welcome back! What can I help you with?'
-          : `Hi, I'm ${agentName}. Ask me about your notes, tasks or schedule, or use #task and #note to add things.`,
-      }])
+    // The active thread already carries its welcome / history (see the thread-loading effect)
+    if (!hasSeenOnboarding) {
+      completeOnboarding({ userName, agentName })
     }
-  }, [hasSeenOnboarding, completeOnboarding, userName, agentName, messages])
+  }, [hasSeenOnboarding, completeOnboarding, userName, agentName])
 
   const closeChat = useCallback(() => {
     setIsChatOpen(false)
@@ -574,6 +841,11 @@ Be concise. Do not answer questions unrelated to the user's data or productivity
         toggleStreamingMode,
         cancelMessage,
         canCancel,
+        threads,
+        activeThreadId,
+        newThread,
+        selectThread,
+        deleteThread,
       }}
     >
       {children}

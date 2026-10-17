@@ -3,7 +3,7 @@
 // Icons replaced with ASCII placeholders
 import { useState, useEffect, memo, useMemo, useCallback, useId, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckIcon, PauseIcon, TrashIcon } from "@/components/icons";
+import { CheckIcon, PauseIcon, TrashIcon, MicIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
 import {
@@ -12,6 +12,8 @@ import {
   BrandedLoader,
   WidgetContainer,
   ClientOnly,
+  SimpleDropdown,
+  SimpleDropdownItem,
 } from "@cleartab/ui";
 import { useToast } from "@cleartab/ui";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -20,6 +22,7 @@ import { isExtensionEnvironment } from "@/lib/extension-utils";
 import { apiFetch } from "@/lib/api-fetch";
 import { stringToQuillDelta } from "@/lib/quill-utils";
 import { useWidgetHeight } from "@/hooks/use-widget-height";
+import { getDemoApi } from "@/lib/demo/mode";
 
 // Waveform frames kept while recording (10fps); also the mini bar count
 const MAX_WAVEFORM_FRAMES = 160;
@@ -41,6 +44,7 @@ interface RecordingControlsProps {
   onConfirmDelete: () => void;
   onTranscribe: () => void;
   onViewNote?: () => void;
+  onRecordNew?: () => void;
 }
 
 const RecordingControls = memo(function RecordingControls({
@@ -56,6 +60,7 @@ const RecordingControls = memo(function RecordingControls({
   onConfirmDelete,
   onTranscribe,
   onViewNote,
+  onRecordNew,
 }: RecordingControlsProps) {
   if (state === "recording" || state === "paused") {
     if (confirmingDelete) {
@@ -94,13 +99,20 @@ const RecordingControls = memo(function RecordingControls({
       <div className={styles.transcriptionCompleteContainer}>
         <div className={styles.transcriptionCompleteMessage}>
           <CheckIcon size={16} className={styles.successCheckIcon} />
-          <span>Transcription complete.</span>
+          <span>Saved to Notes</span>
         </div>
-        {onViewNote && (
-          <Button size="sm" onClick={onViewNote}>
-            View note
-          </Button>
-        )}
+        <div className={styles.successActionButtons}>
+          {onRecordNew && (
+            <Button size="sm" onClick={onRecordNew}>
+              Record new
+            </Button>
+          )}
+          {onViewNote && (
+            <Button size="sm" variant="ghost" onClick={onViewNote}>
+              View note
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -186,21 +198,13 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const miniStartLabelId = useId();
   const [createdNoteId, setCreatedNoteId] = useState<string | null>(null);
   const [waveformHistory, setWaveformHistory] = useState<Uint8Array[]>([]);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
 
   // Use auth
   const { user } = useAuth();
 
-  const handleViewNote = useCallback(() => {
-    if (createdNoteId && typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("select-note", { detail: { id: createdNoteId } })
-      );
-    }
-    setShowSuccess(false);
-    setIsFlipped(false);
-    setCreatedNoteId(null);
-  }, [createdNoteId]);
+  const activeVoiceNoteIdRef = useRef<string | null>(null);
 
   const {
     state,
@@ -219,98 +223,195 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     discardRecording,
   } = useAudioRecorder({
     onTranscriptionComplete: async (text: string) => {
-      console.log("Transcription complete:", text);
+      const targetId = activeVoiceNoteIdRef.current;
+      console.log("Transcription complete for note:", targetId, text);
+      if (!targetId) return;
+
       try {
-        if (!user) {
-          toast({
-            title: "Error",
-            description: "You must be logged in to save voice memos",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        console.log("Saving note for user:", user.id);
-
-        // Save note through the notes API
-        const response = await apiFetch("/api/notes", {
-          method: "POST",
+        const deltaContent = stringToQuillDelta(text);
+        await apiFetch("/api/notes", {
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: "Voice Note", content: stringToQuillDelta(text) }),
+          body: JSON.stringify({
+            noteId: targetId,
+            title: "Voice Note",
+            content: deltaContent,
+          }),
         });
-        const result: { success?: boolean; data?: { id?: string }; error?: string } = await response
-          .json()
-          .catch(() => ({}));
-
-        if (!response.ok || !result.success) {
-          console.error("Error saving note:", result.error);
-          toast({
-            title: "Error",
-            description: result.error || "Failed to save voice note",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        console.log("Note saved successfully:", result);
 
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("note-created", { detail: result }));
+          window.dispatchEvent(
+            new CustomEvent("note-transcribed", {
+              detail: {
+                id: targetId,
+                text,
+                content: deltaContent,
+              },
+            }),
+          );
         }
-
-        // Extract saved note id
-        const noteId = result.data?.id;
-        if (noteId) {
-          setCreatedNoteId(noteId);
-        }
-
-        toast({
-          title: "Success",
-          description: "Transcription complete.",
-        });
-
-        console.log("Setting showSuccess to true");
-        setShowSuccess(true);
-        setTimeout(() => {
-          console.log("Hiding success and resetting");
-          setShowSuccess(false);
-          setIsFlipped(false);
-          reset();
-          setCreatedNoteId(null);
-        }, 6000);
-      } catch (error: unknown) {
-        console.error("Error processing transcription:", error);
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error("Error details:", errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage || "Failed to process transcription",
-          variant: "destructive",
-        });
-        // Reset state on error
-        reset();
+      } catch (error) {
+        console.error("Error updating note with transcription:", error);
       }
     },
-    onError: (error: string) => {
+    onError: async (errorMsg: string) => {
+      const targetId = activeVoiceNoteIdRef.current;
+      console.error("Transcription error for note:", targetId, errorMsg);
+
+      if (targetId) {
+        const isCreditIssue =
+          errorMsg.toLowerCase().includes("credit") ||
+          errorMsg.toLowerCase().includes("quota") ||
+          errorMsg.toLowerCase().includes("limit");
+        const failedStatus = isCreditIssue ? "out_of_credits" : "out_of_credits";
+
+        try {
+          await apiFetch("/api/notes", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              noteId: targetId,
+              title: "Voice Note",
+              content: {
+                status: failedStatus,
+                error: errorMsg,
+                ops: [{ insert: "\n" }],
+              },
+            }),
+          });
+
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("note-transcription-failed", {
+                detail: {
+                  id: targetId,
+                  reason: failedStatus,
+                  error: errorMsg,
+                },
+              }),
+            );
+          }
+        } catch (updateErr) {
+          console.error("Failed to update note with error status:", updateErr);
+        }
+      }
+
       toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
+        title: "Voice Memo Saved",
+        description: "Voice memo saved to Notes.",
       });
     },
   });
 
-  // Transcribe each recording once, as soon as it's ready. Keyed on the recording itself:
-  // keying on the success panel re-ran this when "View note" closed it, saving a duplicate.
+  const handleViewNote = useCallback(() => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    if (createdNoteId && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("select-note", { detail: { id: createdNoteId } })
+      );
+    }
+    setShowSuccess(false);
+    setIsFlipped(false);
+    setCreatedNoteId(null);
+  }, [createdNoteId]);
+
+  const handleRecordNew = useCallback(() => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    setShowSuccess(false);
+    setIsFlipped(false);
+    reset();
+    setCreatedNoteId(null);
+  }, [reset]);
+
+  // When recording stops and audio is ready, immediately create note and switch to notes widget.
+  // Transcription then proceeds in the background with progress displayed in the note itself.
   const transcribedBlobRef = useRef<Blob | null>(null);
   useEffect(() => {
     if (state === "processing" && audioBlob && audioBlob !== transcribedBlobRef.current) {
       transcribedBlobRef.current = audioBlob;
-      console.log("Audio blob ready, starting transcription...");
-      transcribeAudio();
+      console.log("Audio blob ready, immediately moving note to Notes widget...");
+
+      const createAndMoveToNotes = async () => {
+        try {
+          if (!user) {
+            toast({
+              title: "Error",
+              description: "You must be logged in to save voice memos",
+              variant: "destructive",
+            });
+            reset();
+            return;
+          }
+
+          // 1. Immediately create note with 'transcribing' status
+          const response = await apiFetch("/api/notes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: "Voice Note",
+              content: { status: "transcribing", ops: [{ insert: "\n" }] },
+            }),
+          });
+
+          const result: { success?: boolean; data?: { id?: string }; error?: string } =
+            await response.json().catch(() => ({}));
+
+          if (!response.ok || !result.success || !result.data?.id) {
+            console.error("Error creating initial voice note:", result.error);
+            toast({
+              title: "Error",
+              description: result.error || "Failed to save voice note",
+              variant: "destructive",
+            });
+            reset();
+            return;
+          }
+
+          const noteId = result.data.id;
+          activeVoiceNoteIdRef.current = noteId;
+          setCreatedNoteId(noteId);
+
+          // 2. Immediately notify NotesWidget and select the new note
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("note-created", {
+                detail: { ...result, source: "voice" },
+              }),
+            );
+            window.dispatchEvent(
+              new CustomEvent("select-note", {
+                detail: { id: noteId, note: result.data },
+              }),
+            );
+          }
+
+          // 3. Set success on recorder immediately (not blocking further recordings)
+          setShowSuccess(true);
+          if (successTimerRef.current) clearTimeout(successTimerRef.current);
+          successTimerRef.current = setTimeout(() => {
+            setShowSuccess(false);
+            setIsFlipped(false);
+            reset();
+            setCreatedNoteId(null);
+          }, 2000);
+
+          // 4. Run background transcription
+          transcribeAudio();
+        } catch (error) {
+          console.error("Error initiating voice note:", error);
+          reset();
+        }
+      };
+
+      createAndMoveToNotes();
     }
-  }, [state, audioBlob, transcribeAudio]);
+  }, [state, audioBlob, user, transcribeAudio, reset, toast]);
 
   // Update waveform history for scrolling effect
   useEffect(() => {
@@ -499,17 +600,27 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                     <div className={styles.miniCompleteContainer}>
                       <div className={styles.miniCompleteMessage}>
                         <CheckIcon size={14} className={styles.successCheckIcon} />
-                        <span>Transcription complete.</span>
+                        <span>Saved to Notes</span>
                       </div>
-                      {createdNoteId && (
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                         <Button
                           size="sm"
-                          onClick={handleViewNote}
+                          onClick={handleRecordNew}
                           className={styles.miniViewNoteButton}
                         >
-                          View note
+                          Record new
                         </Button>
-                      )}
+                        {createdNoteId && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleViewNote}
+                            className={styles.miniViewNoteButton}
+                          >
+                            View note
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ) : state === "idle" ? (
                     // The whole row is the click target; the Button gives it a
@@ -556,9 +667,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             {miniWaveformBars}
                           </div>
                         ) : (
-                          <span className={styles.miniProcessingText}>
-                            Transcribing note...
-                          </span>
+                          <div className={styles.miniProcessingWrapper}>
+                            <span className={styles.miniProcessingText}>
+                              Saving note...
+                            </span>
+                            <div className={styles.miniProgressTrack}>
+                              <div className={styles.miniProgressFill} />
+                            </div>
+                          </div>
                         )}
                       </div>
 
@@ -571,15 +687,73 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             />
                           ) : (
                             <>
-                              <PauseResumeButton
-                                state={state}
-                                onPause={pauseRecording}
-                                onResume={resumeRecording}
-                              />
-                              <DeleteButton
-                                onClick={() => setConfirmingDelete(true)}
-                              />
-                              <TranscribeButton onClick={handleStopRecording} />
+                              {/* Wide enough: all controls in a row */}
+                              <div className={styles.miniControlsFull}>
+                                <Button
+                                  size="icon"
+                                  onClick={toggleMute}
+                                  tooltipLabel={isMuted ? "Unmute" : "Mute"}
+                                >
+                                  <img
+                                    src={
+                                      isMuted
+                                        ? "/icons/si_micMute-fill.svg"
+                                        : "/icons/si_mic-fill.svg"
+                                    }
+                                    alt=""
+                                    className={styles.controlIcon}
+                                  />
+                                </Button>
+                                <PauseResumeButton
+                                  state={state}
+                                  onPause={pauseRecording}
+                                  onResume={resumeRecording}
+                                />
+                                <DeleteButton
+                                  onClick={() => setConfirmingDelete(true)}
+                                />
+                                <TranscribeButton onClick={handleStopRecording} />
+                              </div>
+
+                              {/* Too narrow: collapse the secondary actions into a
+                                  drop-up menu, keep Complete as a button */}
+                              <div className={styles.miniControlsCollapsed}>
+                                <SimpleDropdown
+                                  align="right"
+                                  direction="up"
+                                  trigger={(open) => (
+                                    <Button
+                                      size="icon"
+                                      tooltipLabel={open ? undefined : "More actions"}
+                                    >
+                                      <span className={styles.miniMenuDots}>⋮</span>
+                                    </Button>
+                                  )}
+                                >
+                                  <SimpleDropdownItem onClick={toggleMute}>
+                                    <MicIcon size={16} />
+                                    {isMuted ? "Unmute" : "Mute"}
+                                  </SimpleDropdownItem>
+                                  <SimpleDropdownItem
+                                    onClick={
+                                      state === "paused"
+                                        ? resumeRecording
+                                        : pauseRecording
+                                    }
+                                  >
+                                    <PauseIcon size={14} />
+                                    {state === "paused" ? "Resume" : "Pause"}
+                                  </SimpleDropdownItem>
+                                  <SimpleDropdownItem
+                                    variant="danger"
+                                    onClick={() => setConfirmingDelete(true)}
+                                  >
+                                    <TrashIcon size={16} />
+                                    Delete
+                                  </SimpleDropdownItem>
+                                </SimpleDropdown>
+                                <TranscribeButton onClick={handleStopRecording} />
+                              </div>
                             </>
                           ))}
                       </div>
@@ -723,7 +897,13 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         <div className={styles.transcribingWrapper}>
                           <div className={styles.transcribingContent}>
                             <p className={styles.transcribingTitle}>
-                              Transcribing note...
+                              Saving note...
+                            </p>
+                            <div className={styles.transcribingProgressTrack}>
+                              <div className={styles.transcribingProgressFill} />
+                            </div>
+                            <p className={styles.transcribingSubtitle}>
+                              Moving to Notes...
                             </p>
                           </div>
                           <button
@@ -735,9 +915,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         </div>
                       ) : (
                         <>
-                          {/* Status: recording dot + timer + waveform (same order as mini) */}
-                          <div className={styles.statusRow}>
-                            {isCapturing && (
+                          {/* Status: recording dot + timer + waveform ONLY while capturing (not when complete) */}
+                          {isCapturing && (
+                            <div className={styles.statusRow}>
                               <div
                                 className={
                                   state === "recording"
@@ -745,14 +925,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                     : styles.miniPulseDotPaused
                                 }
                               />
-                            )}
-                            <p className={styles.timer}>
-                              {formatTime(duration)}
-                            </p>
-                            <div className={styles.waveformContainer}>
-                              {waveformBars}
+                              <p className={styles.timer}>
+                                {formatTime(duration)}
+                              </p>
+                              <div className={styles.waveformContainer}>
+                                {waveformBars}
+                              </div>
                             </div>
-                          </div>
+                          )}
 
                           {/* Controls */}
                           <div className={styles.recordingControls}>
@@ -769,6 +949,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               onConfirmDelete={handleConfirmDelete}
                               onTranscribe={handleStopRecording}
                               onViewNote={handleViewNote}
+                              onRecordNew={handleRecordNew}
                             />
                           </div>
                         </>

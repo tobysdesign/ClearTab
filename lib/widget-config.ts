@@ -24,10 +24,10 @@ export interface PanelConstraints {
 // Panel constraints for the bento grid layout
 export const panelConstraints: Record<WidgetId, PanelConstraints> = {
   notes: {
-    minWidth: '320px',
+    minWidth: '160px',
     minHeight: '400px',
     defaultSize: 60,
-    minSize: 25,
+    minSize: 12.5,
     responsiveLayouts: {
       narrow: {
         width: 400,
@@ -44,33 +44,33 @@ export const panelConstraints: Record<WidgetId, PanelConstraints> = {
     }
   },
   tasks: {
-    minWidth: '300px',
+    minWidth: '160px',
     minHeight: '360px',
     defaultSize: 50,
-    minSize: 25
+    minSize: 12.5
   },
   schedule: {
-    minWidth: '300px',
+    minWidth: '160px',
     minHeight: '320px',
     defaultSize: 50,
-    minSize: 25
+    minSize: 12.5
   },
   weather: {
-    minWidth: '280px',
+    minWidth: '140px',
     minHeight: '240px',
     defaultSize: 33,
-    minSize: 25
+    minSize: 12.5
   },
   countdown: {
-    minWidth: '280px',
+    minWidth: '140px',
     minHeight: '280px',
     defaultSize: 33,
-    minSize: 25
+    minSize: 12.5
   },
   recorder: {
-    minWidth: '280px',
+    minWidth: '140px',
     minHeight: '240px',
     defaultSize: 33,
-    minSize: 25
+    minSize: 12.5
   }
 } 

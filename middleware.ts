@@ -5,8 +5,10 @@ import authConfig from "@/auth.config"
 
 const { auth } = NextAuth(authConfig)
 
-// /demo: the real dashboard with sample data, embedded in the landing page
-const PUBLIC_PAGES = ['/', '/privacy', '/demo']
+// /demo and /tab: public pages handled by client/extension auth
+const PUBLIC_PAGES = ['/', '/privacy', '/demo', '/tab']
+// Dev-only widget responsiveness harness (never public in production)
+if (process.env.NODE_ENV !== 'production') PUBLIC_PAGES.push('/widget-sizes')
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth

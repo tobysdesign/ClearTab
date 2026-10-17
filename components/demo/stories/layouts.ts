@@ -73,21 +73,76 @@ async function setVisible(d: Director, layout: LayoutsContext, id: WidgetId, vis
 }
 
 export async function layoutsStory(d: Director, layout: LayoutsContext) {
-  await d.sleep(1800)
+  d.spotlight('notes')
+  d.callout('Custom Layouts', 'Swap or hide any widget', {
+    target: 'notes',
+    placement: 'offset-bottom-right',
+  })
+  await d.sleep(3000)
+
+  d.spotlight('tasks')
+  d.callout('Swap Widgets', 'Notes ↔ Tasks', {
+    target: 'tasks',
+    placement: 'offset-bottom-left',
+  })
   await swap(d, layout, 'notes', 'tasks')
-  await d.sleep(2200)
+  await d.sleep(3200)
+
+  d.spotlight('recorder')
+  d.callout('Swap Widgets', 'Weather ↔ Voice memo', {
+    target: 'recorder',
+    placement: 'offset-top-left',
+  })
   await swap(d, layout, 'weather', 'recorder')
-  await d.sleep(2200)
+  await d.sleep(3200)
+
+  d.spotlight('countdown')
+  d.callout('Toggle Widgets', 'Hide Countdown widget', {
+    target: 'countdown',
+    placement: 'offset-top-left',
+  })
   await setVisible(d, layout, 'countdown', false)
-  await d.sleep(2200)
+  await d.sleep(3200)
+
   await setVisible(d, layout, 'countdown', true)
-  await d.sleep(2200)
+  d.spotlight('countdown')
+  d.callout('Toggle Widgets', 'Restore Countdown widget', {
+    target: 'countdown',
+    placement: 'offset-top-left',
+  })
+  await d.sleep(3200)
+
+  d.spotlight('notes')
+  d.callout('Swap Widgets', 'Tasks ↔ Notes', {
+    target: 'notes',
+    placement: 'offset-bottom-left',
+  })
   await swap(d, layout, 'notes', 'tasks')
-  await d.sleep(2200)
+  await d.sleep(3200)
+
+  d.spotlight('weather')
+  d.callout('Toggle Widgets', 'Hide Weather widget', {
+    target: 'weather',
+    placement: 'offset-top-left',
+  })
   await setVisible(d, layout, 'weather', false)
-  await d.sleep(2200)
+  await d.sleep(3200)
+
   await setVisible(d, layout, 'weather', true)
-  await d.sleep(2200)
+  d.spotlight('weather')
+  d.callout('Toggle Widgets', 'Restore Weather widget', {
+    target: 'weather',
+    placement: 'offset-bottom-left',
+  })
+  await d.sleep(3200)
+
+  d.spotlight('recorder')
+  d.callout('Swap Widgets', 'Voice memo ↔ Weather', {
+    target: 'recorder',
+    placement: 'offset-top-left',
+  })
   await swap(d, layout, 'weather', 'recorder')
-  await d.sleep(2000)
+  await d.sleep(3000)
 }
+
+

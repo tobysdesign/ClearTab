@@ -1,21 +1,163 @@
-/* Demo pointer: positioned from JS through --x / --y, gliding over --move */
+/* Demo pointer & floating white callout card */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+}
+
+@keyframes calloutSpringIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.82);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -5px, 0) scale(1.035);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(0, 2px, 0) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes calloutSpringOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.86);
+  }
+}
+
+@keyframes calloutGentleHover {
+  0%,
+  100% {
+    transform: translate3d(0, 0px, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+.calloutPositioner {
+  position: fixed;
+  left: var(--callout-x, 48px);
+  top: var(--callout-y, 48px);
+  opacity: 0;
+  transform: translate3d(0, 20px, 0) scale(0.82);
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+.calloutPositioner[data-callout-state="active"] {
+  animation: calloutSpringIn 540ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.calloutPositioner[data-callout-state="exiting"] {
+  animation: calloutSpringOut 210ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.calloutCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: max-content;
+  max-width: min(460px, calc(100vw - 40px));
+  padding: 16px 24px 16px 16px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow:
+    0 26px 65px rgba(0, 0, 0, 0.5),
+    0 10px 24px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+  will-change: transform;
+}
+
+.calloutPositioner[data-callout-state="active"] .calloutCard {
+  animation: calloutGentleHover 3.2s ease-in-out infinite;
+}
+
+.calloutIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #0284c7;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.calloutCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.calloutBadge {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.calloutBadge:empty {
+  display: none;
+}
+
+.calloutText {
+  color: #09090b;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+  white-space: normal;
+}
+
+/* Slightly larger inside smaller half/card demo iframes so it stays effortless to read */
+@media (max-width: 1150px) {
+  .calloutCard {
+    max-width: min(480px, calc(100vw - 32px));
+    padding: 18px 26px 18px 18px;
+  }
+
+  .calloutBadge {
+    font-size: 14px;
+  }
+
+  .calloutText {
+    font-size: 20px;
+  }
+}
+
 .cursor {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 2147483000;
-  pointer-events: none;
   transform: translate(var(--x, 60vw), var(--y, 70vh));
-  transition: transform var(--move, 700ms) cubic-bezier(0.65, 0, 0.35, 1);
+  transition: transform var(--move, 1100ms) cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .arrow {
   display: block;
-  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.45));
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.65));
   transform-origin: 0 0;
-  transition: transform 120ms ease;
+  transition: transform 140ms ease;
 }
 
-.cursor[data-pressed="true"] .arrow {
-  transform: scale(0.82);
+.root[data-pressed="true"] .arrow {
+  transform: scale(0.8);
 }
+
+
