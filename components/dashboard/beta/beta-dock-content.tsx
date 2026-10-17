@@ -78,13 +78,17 @@ export function BetaDockContent({
       >
         <DockIconButton
           onClick={onToggleEdit}
-          title="Edit layout"
+          title={editMode ? 'Done' : 'Edit layout'}
           shortcut="⌘L"
           aria-expanded={editMode}
           aria-pressed={editMode}
           data-testid="layout-trigger"
         >
-          <LayoutToggleIcon isToggled={editMode} size={16} />
+          {editMode ? (
+            <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>check</span>
+          ) : (
+            <LayoutToggleIcon isToggled={false} size={16} />
+          )}
         </DockIconButton>
 
         <ShinyAiButton

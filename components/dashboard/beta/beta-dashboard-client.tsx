@@ -372,10 +372,12 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       {editingEnabled && editMode && (
         <button
           type="button"
-          className={betaStyles.editDoneButton}
+          className={betaStyles.editCloseButton}
           onClick={() => setEditMode(false)}
+          aria-label="Close layout editing"
         >
-          Done
+          <span>Close</span>
+          <kbd className={betaStyles.editCloseKbd}>Esc</kbd>
         </button>
       )}
 
