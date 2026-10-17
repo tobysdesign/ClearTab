@@ -9,10 +9,8 @@ import {
   getTranscriptionConfig,
   setTranscriptionConfig,
   isValidGeminiKey,
-  isValidProxyUrl,
-  type TranscriptionMode,
+  type TranscriptionEngine,
 } from "@/lib/transcription-config";
-import { requestHostPermission } from "@/lib/chrome-extension-utils";
 
 interface TranscriptionSettingsProps {
   sectionId: string;
@@ -20,13 +18,13 @@ interface TranscriptionSettingsProps {
   description?: string;
 }
 
-const MODE_CAPTIONS: Record<TranscriptionMode, string> = {
-  builtin:
-    "ClearTab transcribes your voice memos for you. Nothing to set up.",
-  byok:
-    "Use your own Google Gemini API key. Your recordings are transcribed on your quota, not ClearTab's.",
-  proxy:
-    "Send recordings to your own transcription server (a self-hosted ClearTab or compatible endpoint). Your key stays on that server.",
+const ENGINE_CAPTIONS: Record<TranscriptionEngine, string> = {
+  gemini:
+    "Use your own Google Gemini API key. Your recordings are sent to Google and transcribed on your quota.",
+  "local-en":
+    "Transcribes on this device. Smaller download, English only. Audio never leaves your computer.",
+  "local-multi":
+    "Transcribes on this device in many languages. Larger download. Audio never leaves your computer.",
 };
 
 export const TranscriptionSettings = React.forwardRef<
@@ -34,73 +32,67 @@ export const TranscriptionSettings = React.forwardRef<
   TranscriptionSettingsProps
 >(function TranscriptionSettings({ sectionId, heading, description }, ref) {
   const { toast } = useToast();
-  const [mode, setMode] = React.useState<TranscriptionMode>("builtin");
+  const [engine, setEngine] = React.useState<TranscriptionEngine>("local-en");
   const [geminiKey, setGeminiKey] = React.useState("");
-  const [proxyUrl, setProxyUrl] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
+  const [clearing, setClearing] = React.useState(false);
+  const [cachedLabel, setCachedLabel] = React.useState<string | null>(null);
+
+  const refreshCached = React.useCallback(async () => {
+    try {
+      const { isModelCached } = await import("@/lib/transcription/local");
+      const [en, multi] = await Promise.all([
+        isModelCached("local-en"),
+        isModelCached("local-multi"),
+      ]);
+      const parts: string[] = [];
+      if (en) parts.push("English");
+      if (multi) parts.push("Multilingual");
+      setCachedLabel(
+        parts.length ? `${parts.join(" and ")} model downloaded` : null,
+      );
+    } catch {
+      setCachedLabel(null);
+    }
+  }, []);
 
   React.useEffect(() => {
     let active = true;
     getTranscriptionConfig()
       .then((cfg) => {
         if (!active) return;
-        setMode(cfg.mode);
+        setEngine(cfg.engine ?? "local-en");
         setGeminiKey(cfg.geminiKey ?? "");
-        setProxyUrl(cfg.proxyUrl ?? "");
       })
       .finally(() => {
         if (active) setLoading(false);
       });
+    void refreshCached();
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshCached]);
 
   const handleSave = async () => {
-    if (mode === "byok" && !isValidGeminiKey(geminiKey)) {
+    if (engine === "gemini" && !isValidGeminiKey(geminiKey)) {
       toast({
         title: "Add your API key",
-        description: "Enter a valid Google Gemini API key to use your own key.",
+        description: "Enter a valid Google Gemini API key to use Gemini.",
         variant: "destructive",
       });
       return;
-    }
-    if (mode === "proxy" && !isValidProxyUrl(proxyUrl)) {
-      toast({
-        title: "Add a backend URL",
-        description: "Enter a valid https:// transcription endpoint.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // In the extension, calling an arbitrary backend needs that origin's host permission.
-    // Request it now, inside the click gesture, before any other await. (No-op on the web.)
-    if (mode === "proxy") {
-      const granted = await requestHostPermission(proxyUrl);
-      if (!granted) {
-        toast({
-          title: "Permission needed",
-          description:
-            "ClearTab needs your allowance to send recordings to that site. Save again and choose Allow.",
-          variant: "destructive",
-        });
-        return;
-      }
     }
 
     setSaving(true);
     try {
-      await setTranscriptionConfig({ mode, geminiKey, proxyUrl });
+      await setTranscriptionConfig({ engine, geminiKey });
       toast({
         title: "Transcription updated",
         description:
-          mode === "builtin"
-            ? "Using ClearTab's built-in transcription."
-            : mode === "byok"
-              ? "Using your own Gemini API key."
-              : "Sending recordings to your backend.",
+          engine === "gemini"
+            ? "Using your own Gemini API key."
+            : "Transcribing on this device.",
       });
     } catch {
       toast({
@@ -110,6 +102,24 @@ export const TranscriptionSettings = React.forwardRef<
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setClearing(true);
+    try {
+      const { clearModelCache } = await import("@/lib/transcription/local");
+      await clearModelCache();
+      toast({ title: "On-device model cleared" });
+      await refreshCached();
+    } catch {
+      toast({
+        title: "Couldn't clear model",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -124,22 +134,22 @@ export const TranscriptionSettings = React.forwardRef<
 
       <div className={`${sharedStyles.innerCard} ${styles.form}`}>
         <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
-          <span className={sharedStyles.label}>Transcription source</span>
+          <span className={sharedStyles.label}>Transcription engine</span>
           <Select
-            id="transcription-mode"
-            value={mode}
-            onValueChange={(val) => setMode(val as TranscriptionMode)}
+            id="transcription-engine"
+            value={engine}
+            onValueChange={(val) => setEngine(val as TranscriptionEngine)}
             className={sharedStyles.selectAuto}
             disabled={loading}
           >
-            <SelectItem value="builtin">Built-in (ClearTab)</SelectItem>
-            <SelectItem value="byok">Your own API key</SelectItem>
-            <SelectItem value="proxy">Your own backend</SelectItem>
+            <SelectItem value="local-en">On device — English only</SelectItem>
+            <SelectItem value="local-multi">On device — Multilingual</SelectItem>
+            <SelectItem value="gemini">Gemini (cloud)</SelectItem>
           </Select>
-          <p className={styles.caption}>{MODE_CAPTIONS[mode]}</p>
+          <p className={styles.caption}>{ENGINE_CAPTIONS[engine]}</p>
         </div>
 
-        {mode === "byok" ? (
+        {engine === "gemini" ? (
           <div className={`${sharedStyles.field} ${sharedStyles.fieldGrow}`}>
             <span className={sharedStyles.label}>Gemini API key</span>
             <input
@@ -155,31 +165,34 @@ export const TranscriptionSettings = React.forwardRef<
             <p className={styles.securityNote}>
               Stored only on this device and sent to Google over HTTPS as a request
               header — never in a URL, and never saved on ClearTab's servers. Get a free
-              key from Google AI Studio.
+              key from{" "}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.link}
+              >
+                Google AI Studio
+              </a>
+              .
             </p>
           </div>
         ) : null}
 
-        {mode === "proxy" ? (
-          <div className={`${sharedStyles.field} ${sharedStyles.fieldGrow}`}>
-            <span className={sharedStyles.label}>Backend URL</span>
-            <input
-              type="url"
-              value={proxyUrl}
-              onChange={(event) => setProxyUrl(event.target.value)}
-              placeholder="https://your-server.example.com/api/transcribe"
-              autoComplete="off"
-              spellCheck={false}
-              className={sharedStyles.input}
-              disabled={loading || saving}
-            />
-            <p className={styles.securityNote}>
-              Recordings POST straight to this endpoint, which must accept the same
-              multipart form as ClearTab&apos;s. In the Chrome extension, the browser may
-              prompt to allow this site the first time.
-            </p>
+        <div className={`${sharedStyles.field} ${sharedStyles.fieldAuto}`}>
+          <span className={sharedStyles.label}>Downloaded model</span>
+          <div>
+            <Button
+              className={`${sharedStyles.button} ${sharedStyles.buttonPill} ${sharedStyles.buttonSubtle}`}
+              onClick={handleClear}
+              disabled={loading || clearing}
+              tooltipLabel="Delete the downloaded on-device model"
+            >
+              {clearing ? "Clearing…" : "Clear downloaded model"}
+            </Button>
           </div>
-        ) : null}
+          {cachedLabel ? <p className={styles.caption}>{cachedLabel}</p> : null}
+        </div>
 
         <div className={sharedStyles.formActions}>
           <Button

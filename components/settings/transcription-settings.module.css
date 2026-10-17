@@ -19,3 +19,12 @@
     line-height: 1.45;
     margin: 4px 0 0;
 }
+
+.link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: underline;
+}
+
+.link:hover {
+    color: white;
+}

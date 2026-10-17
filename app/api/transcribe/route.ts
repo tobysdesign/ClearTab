@@ -12,48 +12,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Bring-your-own-key: if the client sent its own key, use it instead of the server key.
+    // Bring-your-own-key only: the server carries no Gemini key.
     const headerKey = request.headers.get("x-user-gemini-key")?.trim();
-    if (headerKey && !/^[A-Za-z0-9_-]{20,}$/.test(headerKey)) {
+    if (!headerKey) {
+      return NextResponse.json(
+        { success: false, error: "A Gemini API key is required. Add yours in Settings → Transcription." },
+        { status: 400 }
+      );
+    }
+    if (!/^[A-Za-z0-9_-]{20,}$/.test(headerKey)) {
       return NextResponse.json(
         { success: false, error: "Invalid API key format." },
         { status: 400 }
       );
     }
-
-    let apiKey =
-      headerKey ||
-      process.env.GEMINI_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.GOOGLE_AI_KEY;
-
-    // Fallback in case dev server was started before .env.local was saved
-    if (!apiKey) {
-      try {
-        const fs = await import("fs");
-        const path = await import("path");
-        const envPath = path.resolve(process.cwd(), ".env.local");
-        if (fs.existsSync(envPath)) {
-          const content = fs.readFileSync(envPath, "utf-8");
-          const match = content.match(/^(?:GEMINI_API_KEY|GOOGLE_API_KEY|GOOGLE_AI_KEY)=["']?([^"'\r\n]+)["']?/m);
-          if (match?.[1]) {
-            apiKey = match[1].trim();
-          }
-        }
-      } catch (err) {
-        console.warn("Could not read fallback .env.local:", err);
-      }
-    }
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Google Gemini API key not configured. Please add GEMINI_API_KEY to your .env.local file and restart your dev server.",
-        },
-        { status: 500 }
-      );
-    }
+    const apiKey = headerKey;
 
     const formData = await request.formData();
     const audioFile = formData.get("audio") as File | null;
@@ -104,8 +77,8 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Google Gemini transcription error:", response.status, errorText);
-      // A user-supplied key that Google rejects (400/403) is a settings problem, not a 500.
-      const keyRejected = Boolean(headerKey) && (response.status === 400 || response.status === 403);
+      // Every request is BYOK now, so a 400/403 from Google means the user's key was rejected.
+      const keyRejected = response.status === 400 || response.status === 403;
       return NextResponse.json(
         {
           success: false,

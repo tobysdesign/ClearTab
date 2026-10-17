@@ -179,12 +179,10 @@ function writeManifest() {
     permissions: ["identity", "storage"],
     // Lets the new tab call the ClearTab API without CORS
     host_permissions: [`${apiBase}/*`],
-    // "Your own backend" transcription can point at any server. We don't know that origin at
-    // build time, so it's requested at runtime (chrome.permissions.request) when the user saves
-    // a proxy URL — see lib/chrome-extension-utils.ts requestHostPermission.
-    optional_host_permissions: ["https://*/*", "http://*/*"],
     icons: { 16: "icons/16.png", 48: "icons/48.png", 128: "icons/128.png" },
     minimum_chrome_version: "116",
+    // On-device Whisper runs ONNX Runtime wasm from public/wasm/; MV3 needs wasm-unsafe-eval for it
+    content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
     ...(devKey && { key: devKey }),
   };
   fs.writeFileSync(path.join(DIST, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
@@ -214,6 +212,11 @@ function verify() {
     if (fs.readFileSync(file, "utf8").includes("/_next/")) problems.push(`"/_next/" still referenced in ${path.relative(DIST, file)}`);
   }
   if (!fs.existsSync(path.join(DIST, "index.html"))) problems.push("index.html missing");
+  // Sanity: the ORT wasm backend must ship or on-device transcription breaks in the extension
+  const wasmDir = path.join(DIST, "wasm");
+  if (!fs.existsSync(wasmDir) || fs.readdirSync(wasmDir).filter((f) => f.endsWith(".wasm")).length === 0) {
+    problems.push("missing wasm/*.wasm (public/wasm) — on-device transcription will fail in the extension");
+  }
 
   if (problems.length) {
     console.error(`\n\x1b[31m[extension] Build isn't loadable:\x1b[0m\n  ${[...new Set(problems)].join("\n  ")}`);

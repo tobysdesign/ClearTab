@@ -845,7 +845,7 @@ export function NotesWidget() {
       console.log('📣 NotesWidget: Received note-transcription-failed for note:', detail.id);
 
       const failedContent = {
-        status: detail.reason === 'out_of_credits' ? 'out_of_credits' : 'out_of_credits',
+        status: detail.reason === 'out_of_credits' ? 'out_of_credits' : 'transcription_failed',
         error: detail.error,
         ops: [{ insert: '\n' }],
       };
