@@ -4,7 +4,7 @@ import React from 'react'
 import { CloseIcon } from '@/components/icons'
 import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
-import { DockIconButton, ShinyAiButton } from '@cleartab/ui'
+import { DockIconButton, ShinyAiButton, Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -69,16 +69,21 @@ export function BetaDockContent({
         )}
       >
         {editMode ? (
-          <button
-            type="button"
-            onClick={onToggleEdit}
-            className={styles.doneButton}
-            aria-pressed={true}
-            aria-label="Done editing layout"
-            data-testid="layout-trigger"
-          >
-            <span className={cn('material-symbols-outlined', styles.doneIcon)}>check</span>
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onToggleEdit}
+                className={styles.doneButton}
+                aria-pressed={true}
+                aria-label="Done editing layout"
+                data-testid="layout-trigger"
+              >
+                <span className={cn('material-symbols-outlined', styles.doneIcon)}>check</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Done</TooltipContent>
+          </Tooltip>
         ) : (
           <DockIconButton
             onClick={onToggleEdit}

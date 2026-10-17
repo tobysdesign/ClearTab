@@ -384,7 +384,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       {editingEnabled && editMode && (
         <div className={betaStyles.editInstructions}>
           <span className={betaStyles.editInstructionsText}>
-            Drag a widget onto another to rearrange
+            Drag onto a widget&apos;s edge (top / bottom / left / right) to join, or its center to swap
           </span>
           <span className={betaStyles.editLegend}>
             <span className={betaStyles.editLegendItem}>

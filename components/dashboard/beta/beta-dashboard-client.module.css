@@ -48,7 +48,11 @@
   backdrop-filter: blur(12px);
   color: #e4e4e7;
   font-size: 13px;
-  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+}
+
+.editLegend {
+  flex-shrink: 0;
 }
 
 .editInstructionsText {
