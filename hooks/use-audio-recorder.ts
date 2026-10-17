@@ -2,7 +2,9 @@ import { useState, useRef, useCallback } from 'react'
 import { isExtension, saveAudioToExtensionStorage, getEnvironmentConfig } from '@/lib/chrome-extension-utils'
 import { apiFetch } from '@/lib/api-fetch'
 import { getDemoAudio } from '@/lib/demo/mode'
-import { getTranscriptionConfig } from '@/lib/transcription-config'
+import { getTranscriptionConfig, type TranscriptionEngine } from '@/lib/transcription-config'
+import { runTranscription } from '@/lib/transcription/run'
+import type { LocalProgress } from '@/lib/transcription/local'
 
 export type RecordingState = 'idle' | 'requesting-permission' | 'permission-denied' | 'recording' | 'paused' | 'processing'
 
@@ -17,6 +19,7 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [isMuted, setIsMuted] = useState(false)
   const [audioData, setAudioData] = useState<Uint8Array>(new Uint8Array(50))
+  const [localProgress, setLocalProgress] = useState<LocalProgress | null>(null)
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -215,7 +218,7 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     setState('processing')
   }, [stopTimer])
 
-  const transcribeAudio = useCallback(async () => {
+  const transcribeAudio = useCallback(async (engineArg?: TranscriptionEngine) => {
     console.log('transcribeAudio called, audioBlob:', !!audioBlob)
     if (!audioBlob) {
       console.error('No audio blob available')
@@ -224,64 +227,24 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     }
 
     console.log('Audio blob size:', audioBlob.size)
-    try {
-      const formData = new FormData()
-      formData.append('audio', audioBlob, `recording-${Date.now()}.webm`)
-
-      const config = await getTranscriptionConfig()
-
-      // No Content-Type header: fetch sets the multipart boundary itself
-      let response: Response
-      if (config.mode === 'proxy' && config.proxyUrl) {
-        // Straight to the user's own transcription endpoint (their server holds the key)
-        response = await fetch(config.proxyUrl, {
-          method: 'POST',
-          body: formData,
-        })
-      } else {
-        // Built-in or BYOK: both go through ClearTab's /api/transcribe. BYOK adds the user's
-        // key as a header so the route uses it instead of the server's key.
-        const headers: Record<string, string> = {}
-        if (config.mode === 'byok' && config.geminiKey) {
-          headers['x-user-gemini-key'] = config.geminiKey
-        }
-        response = await apiFetch('/api/transcribe', {
-          method: 'POST',
-          body: formData,
-          headers,
-        })
-      }
-
-      console.log('Transcription response status:', response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Transcription API error:', errorText)
-        if (response.status === 401 && config.mode === 'byok') {
-          onError?.('Your Gemini API key was rejected. Check it in Settings → Transcription.')
-        } else {
-          onError?.(`Transcription failed: ${response.statusText}`)
-        }
+    const cfg = await getTranscriptionConfig()
+    const engine = engineArg ?? cfg.engine ?? 'local-en'
+    setLocalProgress(null)
+    await runTranscription({
+      blob: audioBlob,
+      engine,
+      geminiKey: cfg.geminiKey,
+      // apiFetch resolves the API base URL for the extension build
+      fetchImpl: ((input: RequestInfo | URL, init?: RequestInit) =>
+        apiFetch(String(input), init)) as typeof fetch,
+      onProgress: (p) => setLocalProgress(p),
+      // Keep state as 'processing' on success - let the component handle state changes
+      onComplete: async (text) => { await onTranscriptionComplete?.(text) },
+      onError: (msg) => {
+        onError?.(msg)
         setState('idle')
-        return
-      }
-
-      const result = await response.json()
-      console.log('Transcription result:', result)
-
-      if (result.success) {
-        console.log('Calling onTranscriptionComplete with:', result.data.text)
-        // Keep state as 'processing' - let the component handle state changes
-        await onTranscriptionComplete?.(result.data.text)
-      } else {
-        onError?.(result.error || 'Failed to transcribe audio')
-        setState('idle')
-      }
-    } catch (error) {
-      console.error('Transcription error:', error)
-      onError?.('Failed to transcribe audio')
-      setState('idle')
-    }
+      },
+    })
   }, [audioBlob, onTranscriptionComplete, onError])
 
   const toggleMute = useCallback(() => {
@@ -379,6 +342,7 @@ export function useAudioRecorder({ onTranscriptionComplete, onError }: UseAudioR
     stopRecording,
     toggleMute,
     transcribeAudio,
+    localProgress,
     saveAudioLocally,
     reset,
     discardRecording
