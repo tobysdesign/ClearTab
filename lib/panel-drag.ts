@@ -22,7 +22,16 @@ export function computeZone(
   )
 }
 
-/** Hit-test the live DOM at the cursor for the tile under the drag and its zone. */
+/**
+ * Hit-test the live DOM at the cursor for the tile under the drag and its zone.
+ *
+ * Queries the live DOM via elementsFromPoint rather than a ref map: a ref map keyed by
+ * widget id goes stale when two tiles trade ids in a single commit.
+ *
+ * `pagePoint` is page-relative, so the `- window.scrollX/Y` conversion is required before
+ * elementsFromPoint/getBoundingClientRect (both viewport-relative). Removing it silently
+ * breaks the hit-test on scrolled pages.
+ */
 export function computeDropTarget(
   draggedEl: HTMLElement,
   pagePoint: { x: number; y: number },

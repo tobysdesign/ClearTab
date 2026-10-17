@@ -7,6 +7,9 @@ describe('computeZone', () => {
   it('center region swaps', () => {
     expect(computeZone(rect, { x: 50, y: 50 })).toBe('center')
   })
+  it('center boundary is inclusive (0.25)', () => {
+    expect(computeZone(rect, { x: 25, y: 50 })).toBe('center')
+  })
   it('left edge', () => {
     expect(computeZone(rect, { x: 5, y: 50 })).toBe('left')
   })
