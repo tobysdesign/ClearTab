@@ -685,6 +685,21 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                             />
                           ) : (
                             <>
+                              <Button
+                                size="icon"
+                                onClick={toggleMute}
+                                tooltipLabel={isMuted ? "Unmute" : "Mute"}
+                              >
+                                <img
+                                  src={
+                                    isMuted
+                                      ? "/icons/si_micMute-fill.svg"
+                                      : "/icons/si_mic-fill.svg"
+                                  }
+                                  alt=""
+                                  className={styles.controlIcon}
+                                />
+                              </Button>
                               <PauseResumeButton
                                 state={state}
                                 onPause={pauseRecording}

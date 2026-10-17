@@ -917,6 +917,9 @@
     gap: 12px;
     overflow: hidden;
     box-sizing: border-box;
+    /* Query container so the narrow button-shrink and delete-confirm rules apply
+       here too (the mini is outside the expanded card's .container). */
+    container-type: inline-size;
 }
 
 .miniIdleRow {
