@@ -73,7 +73,17 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
   const [isDragging, setIsDragging] = useState(false)
   const [nearestZoneId, setNearestZoneId] = useState<'top' | 'left' | 'right' | 'bottom' | null>(null)
   const [dragOrigin, setDragOrigin] = useState<{ x: number; y: number } | null>(null)
-  const [editMode, setEditMode] = useState(false)
+  // Layout editing writes to the real user's prefs, so it is disabled on
+  // demo/landing surfaces that drive the layout via layoutOverride.
+  const editingEnabled = !layoutOverride
+  const [editMode, setEditModeRaw] = useState(false)
+  const setEditMode = useCallback(
+    (next: boolean | ((prev: boolean) => boolean)) => {
+      if (!editingEnabled) return
+      setEditModeRaw(next)
+    },
+    [editingEnabled]
+  )
   const [layoutPopoverOpen, setLayoutPopoverOpen] = useState(false)
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false)
 
@@ -87,7 +97,6 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     widgets,
     toggleWidget,
     activeCount,
-    totalCount,
     customLayout,
     moveWidgetInCustomLayout,
   } = useBetaWidgets()
@@ -179,7 +188,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
         // (setShowSettings alone did nothing — the dock no longer reads that state.)
         window.dispatchEvent(new CustomEvent('openSettings', { detail: { tab: 'schedule', toggle: true } }))
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l' && editingEnabled) {
         e.preventDefault()
         setEditMode((prev) => !prev)
       }
@@ -200,7 +209,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [editingEnabled, setEditMode])
 
   const calculateDropZones = useCallback(() => {
     if (typeof window === 'undefined') return []
@@ -368,13 +377,13 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
             customLayout={layoutOverride?.customLayout ?? customLayout}
             dockPosition={position}
             searchQuery={searchQuery}
-            editMode={editMode}
-            onMoveWidget={moveWidgetInCustomLayout}
+            editMode={editingEnabled && editMode}
+            onMoveWidget={editingEnabled ? moveWidgetInCustomLayout : undefined}
           />
         </Suspense>
       </div>
 
-      {editMode && (
+      {editingEnabled && editMode && (
         <button
           type="button"
           className={betaStyles.editDoneButton}
@@ -450,7 +459,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                     widgets={widgets}
                     toggleWidget={toggleWidget}
                     activeCount={activeCount}
-                    onEnterEdit={() => setEditMode(true)}
+                    onEnterEdit={editingEnabled ? () => setEditMode(true) : undefined}
                   >
                     {button}
                   </LayoutPopover>

@@ -27,7 +27,8 @@ interface LayoutPopoverProps {
   widgets: WidgetVisibilityState
   toggleWidget: (id: WidgetId) => void
   activeCount: number
-  onEnterEdit: () => void
+  /** Omitted when layout editing is disabled (demo surfaces). */
+  onEnterEdit?: () => void
 }
 
 export function LayoutPopover({
@@ -47,7 +48,7 @@ export function LayoutPopover({
 
   const handleEnterEdit = () => {
     onOpenChange(false)
-    onEnterEdit()
+    onEnterEdit?.()
   }
 
   return (
@@ -99,7 +100,7 @@ export function LayoutPopover({
                   className={styles.secondaryButton}
                   onClick={() => setPresetLayout('notetaker')}
                 >
-                  Reset to preset
+                  Reset to Notetaker
                 </button>
               </div>
             )}
@@ -128,7 +129,7 @@ export function LayoutPopover({
             </div>
           </section>
 
-          {!isStacked && (
+          {!isStacked && onEnterEdit && (
             <button type="button" className={styles.primaryButton} onClick={handleEnterEdit}>
               Edit layout
               <kbd className={styles.kbd}>⌘L</kbd>
