@@ -203,6 +203,20 @@
     flex-shrink: 0;
 }
 
+/* Too short for the dot grid: number on the left, "Days until <title>" on the right */
+.daysOnly[data-horizontal="true"] {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.daysOnly[data-horizontal="true"] .daysCaption {
+    align-items: flex-start;
+    text-align: left;
+    min-width: 0;
+}
+
 /* ── Numbers (fixed design size) ── */
 .label {
     /* layout */

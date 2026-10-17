@@ -146,12 +146,17 @@ function minRowWidth(units: Unit[]) {
 // Too narrow for even the columns -> stack the numbers vertically, drop the dots.
 function chooseLayout(width: number, height: number, units: Unit[]) {
   if (width < minRowWidth(units)) {
-    // Numbers stack top-to-bottom: value+unit per row, "+" between, then the title
-    const STACK_ROW = LABEL_HEIGHT; // number + unit
-    const STACK_PLUS = 24; // the "+" line between units
-    const used =
-      units.length * STACK_ROW + (units.length - 1) * STACK_PLUS + BODY_GAP + TITLE_HEIGHT;
-    return { rows: 1 as Rows, dot: DOT, compact: true, stacked: true, showUntil: height - used >= UNTIL_HEIGHT };
+    // Days-only view. When too short for the dot grid on top, lay the number out on
+    // the left with the "Days until <title>" caption on the right instead.
+    const daysHorizontal = height < 170;
+    return {
+      rows: 1 as Rows,
+      dot: DOT,
+      compact: true,
+      stacked: true,
+      daysHorizontal,
+      showUntil: true,
+    };
   }
   let compact = false;
   let best = bestRows(width, height, units, false);
@@ -161,7 +166,7 @@ function chooseLayout(width: number, height: number, units: Unit[]) {
   }
   const used =
     best.rows * best.dot + (best.rows - 1) * DOT_GAP + LABEL_HEIGHT + COLUMN_GAP + BODY_GAP + TITLE_HEIGHT;
-  return { ...best, compact, stacked: false, showUntil: height - used >= UNTIL_HEIGHT };
+  return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT };
 }
 
 function Dots({ unit, rows, compact }: { unit: Unit; rows: Rows; compact: boolean }) {
@@ -199,11 +204,12 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     .join(", ");
 
   const ref = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; stacked: boolean; showUntil: boolean }>({
+  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; stacked: boolean; daysHorizontal: boolean; showUntil: boolean }>({
     rows: 4,
     dot: DOT,
     compact: false,
     stacked: false,
+    daysHorizontal: false,
     showUntil: true,
   });
 
@@ -219,6 +225,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
         prev.rows === next.rows &&
         prev.compact === next.compact &&
         prev.stacked === next.stacked &&
+        prev.daysHorizontal === next.daysHorizontal &&
         Math.abs(prev.dot - next.dot) < 0.1 &&
         prev.showUntil === next.showUntil
           ? prev
@@ -245,10 +252,11 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
       <div ref={ref} className={styles.breakdown}>
         <div
           className={styles.daysOnly}
+          data-horizontal={layout.daysHorizontal}
           role="img"
           aria-label={`${daysLeft} day${daysLeft === 1 ? "" : "s"} until ${title}`}
         >
-          <DaysDotGrid count={daysLeft} />
+          {!layout.daysHorizontal && <DaysDotGrid count={daysLeft} />}
           <div className={styles.daysNumber}>{daysLeft}</div>
           <p className={styles.daysCaption}>
             <span className={styles.untilLabel}>Day{daysLeft === 1 ? "" : "s"} until</span>
