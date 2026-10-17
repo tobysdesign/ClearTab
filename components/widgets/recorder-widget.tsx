@@ -3,7 +3,7 @@
 // Icons replaced with ASCII placeholders
 import { useState, useEffect, memo, useMemo, useCallback, useId, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckIcon, PauseIcon, TrashIcon } from "@/components/icons";
+import { CheckIcon, PauseIcon, TrashIcon, MicIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import styles from "./recorder-widget.module.css";
 import {
@@ -731,6 +731,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                   )}
                                 >
                                   <SimpleDropdownItem onClick={toggleMute}>
+                                    <MicIcon size={16} />
                                     {isMuted ? "Unmute" : "Mute"}
                                   </SimpleDropdownItem>
                                   <SimpleDropdownItem
@@ -740,12 +741,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                         : pauseRecording
                                     }
                                   >
+                                    <PauseIcon size={14} />
                                     {state === "paused" ? "Resume" : "Pause"}
                                   </SimpleDropdownItem>
                                   <SimpleDropdownItem
                                     variant="danger"
                                     onClick={() => setConfirmingDelete(true)}
                                   >
+                                    <TrashIcon size={16} />
                                     Delete
                                   </SimpleDropdownItem>
                                 </SimpleDropdown>

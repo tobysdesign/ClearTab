@@ -67,6 +67,7 @@
     /* layout */
     display: flex;
     align-items: center;
+    gap: 10px;
 
     /* box model */
     padding: 8px 12px;

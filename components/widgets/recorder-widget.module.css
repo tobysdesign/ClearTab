@@ -1055,6 +1055,30 @@
     line-height: 1;
 }
 
+/* Smaller screens (tablet): tighten padding/gaps and the record dot so the mini
+   controls stay on-screen before they need to collapse. */
+@container (max-width: 360px) {
+    .miniContainer {
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    .miniStatusGroup {
+        gap: 4px;
+    }
+
+    .miniControlsFull,
+    .miniControlsCollapsed {
+        gap: 4px;
+    }
+
+    .miniPulseDotRecording,
+    .miniPulseDotPaused {
+        width: 4px;
+        height: 4px;
+    }
+}
+
 /* Too narrow for four controls: collapse the bar to a drop-up menu + Complete */
 @container (max-width: 270px) {
     .miniControlsFull {
