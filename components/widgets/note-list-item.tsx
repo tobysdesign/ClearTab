@@ -58,6 +58,9 @@ export const NoteListItem = React.memo(function NoteListItem({
           if (parsedContent.status === "out_of_credits") {
             return "Out of transcription credits";
           }
+          if (parsedContent.status === "transcription_failed") {
+            return "Transcription failed";
+          }
           const previewText = parsedContent.ops
             .map((op: any) => (typeof op.insert === "string" ? op.insert : ""))
             .join("")

@@ -179,10 +179,6 @@ function writeManifest() {
     permissions: ["identity", "storage"],
     // Lets the new tab call the ClearTab API without CORS
     host_permissions: [`${apiBase}/*`],
-    // "Your own backend" transcription can point at any server. We don't know that origin at
-    // build time, so it's requested at runtime (chrome.permissions.request) when the user saves
-    // a proxy URL — see lib/chrome-extension-utils.ts requestHostPermission.
-    optional_host_permissions: ["https://*/*", "http://*/*"],
     icons: { 16: "icons/16.png", 48: "icons/48.png", 128: "icons/128.png" },
     minimum_chrome_version: "116",
     // On-device Whisper runs ONNX Runtime wasm from public/wasm/; MV3 needs wasm-unsafe-eval for it

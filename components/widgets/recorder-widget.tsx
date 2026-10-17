@@ -280,7 +280,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
           errorMsg.toLowerCase().includes("credit") ||
           errorMsg.toLowerCase().includes("quota") ||
           errorMsg.toLowerCase().includes("limit");
-        const failedStatus = isCreditIssue ? "out_of_credits" : "out_of_credits";
+        const failedStatus = isCreditIssue ? "out_of_credits" : "transcription_failed";
 
         try {
           await apiFetch("/api/notes", {
@@ -314,8 +314,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       }
 
       toast({
-        title: "Voice Memo Saved",
-        description: "Voice memo saved to Notes.",
+        title: "Transcription failed",
+        description: "Your voice memo was saved, but it couldn't be transcribed.",
+        variant: "destructive",
       });
     },
   });
