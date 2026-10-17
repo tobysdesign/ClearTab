@@ -1111,6 +1111,37 @@
     margin-right: 2px;
 }
 
+/* Narrow widgets: keep the recording controls and the delete-confirm on-screen. */
+@container (max-width: 320px) {
+    .recordingControls,
+    .miniControlsGroup {
+        gap: 8px;
+    }
+
+    /* The "Delete recording?" prompt pushes Cancel/Delete off both edges; the two
+       buttons are clear enough on their own. */
+    .deleteConfirmText {
+        display: none;
+    }
+
+    .deleteConfirm {
+        justify-content: center;
+    }
+}
+
+@container (max-width: 230px) {
+    /* Too narrow for four controls: drop Mute (least critical) so Pause, Delete and
+       Complete stay visible. The delete-confirm (a div) is excluded. */
+    .recordingControls > :first-child:not([class*="deleteConfirm"]) {
+        display: none;
+    }
+
+    .recordingControls,
+    .miniControlsGroup {
+        gap: 6px;
+    }
+}
+
 /* Short widgets (between the mini threshold and the full layout's natural
    ~176-197px): tighten the header and spacing so the controls stay inside. */
 @container (max-height: 200px) {
