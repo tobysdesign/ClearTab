@@ -62,6 +62,86 @@ export function BetaDockContent({
 
   return (
     <>
+      <div
+        className={cn(
+          styles.container,
+          isVertical ? styles.containerVertical : styles.containerHorizontal
+        )}
+      >
+        {editMode ? (
+          <button
+            type="button"
+            onClick={onToggleEdit}
+            className={styles.doneButton}
+            aria-pressed={true}
+            aria-label="Done editing layout"
+            data-testid="layout-trigger"
+          >
+            <span className={cn('material-symbols-outlined', styles.doneIcon)}>check</span>
+          </button>
+        ) : (
+          <DockIconButton
+            onClick={onToggleEdit}
+            title="Edit layout"
+            shortcut="⌘L"
+            data-testid="layout-trigger"
+          >
+            <LayoutToggleIcon isToggled={false} size={16} />
+          </DockIconButton>
+        )}
+
+        {/* While editing the layout, hide the unrelated dock actions — only the
+            Done toggle (and the drag handle, rendered by the parent) remain. */}
+        {!editMode && (
+          <>
+            <ShinyAiButton
+              data-testid="ai-chat-trigger"
+              onClick={handleToggleChat}
+              tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
+              shortcut="⌘K"
+              className={cn(isChatOpen && styles.aiButtonActive)}
+            />
+
+            {showSearch && (
+              <div
+                className={cn(
+                  styles.searchContainer,
+                  isVertical ? styles.searchContainerVertical : styles.searchContainerHorizontal
+                )}
+              >
+                <Input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={styles.searchInput}
+                />
+                {searchQuery && (
+                  <DockIconButton
+                    onClick={() => setSearchQuery('')}
+                    title="Clear search"
+                    shortcut="Esc"
+                  >
+                    <CloseIcon size={16} />
+                  </DockIconButton>
+                )}
+              </div>
+            )}
+
+            <SettingsTrigger />
+
+            <DockIconButton
+              onClick={onOpenShortcuts}
+              title="Keyboard shortcuts"
+              shortcut="?"
+              data-testid="shortcuts-trigger"
+            >
+              <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
+            </DockIconButton>
+          </>
+        )}
+      </div>
+
       {editMode && (
         <PresetFlank
           presetLayout={presetLayout}
@@ -69,73 +149,6 @@ export function BetaDockContent({
           orientation={orientation}
         />
       )}
-
-      <div
-        className={cn(
-          styles.container,
-          isVertical ? styles.containerVertical : styles.containerHorizontal
-        )}
-      >
-        <DockIconButton
-          onClick={onToggleEdit}
-          title={editMode ? 'Done' : 'Edit layout'}
-          shortcut="⌘L"
-          aria-expanded={editMode}
-          aria-pressed={editMode}
-          data-testid="layout-trigger"
-        >
-          {editMode ? (
-            <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>check</span>
-          ) : (
-            <LayoutToggleIcon isToggled={false} size={16} />
-          )}
-        </DockIconButton>
-
-        <ShinyAiButton
-          data-testid="ai-chat-trigger"
-          onClick={handleToggleChat}
-          tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
-          shortcut="⌘K"
-          className={cn(isChatOpen && styles.aiButtonActive)}
-        />
-
-        {showSearch && (
-          <div
-            className={cn(
-              styles.searchContainer,
-              isVertical ? styles.searchContainerVertical : styles.searchContainerHorizontal
-            )}
-          >
-            <Input
-              type="text"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
-            />
-            {searchQuery && (
-              <DockIconButton
-                onClick={() => setSearchQuery('')}
-                title="Clear search"
-                shortcut="Esc"
-              >
-                <CloseIcon size={16} />
-              </DockIconButton>
-            )}
-          </div>
-        )}
-
-        <SettingsTrigger />
-
-        <DockIconButton
-          onClick={onOpenShortcuts}
-          title="Keyboard shortcuts"
-          shortcut="?"
-          data-testid="shortcuts-trigger"
-        >
-          <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
-        </DockIconButton>
-      </div>
 
       {editMode && (
         <WidgetFlank

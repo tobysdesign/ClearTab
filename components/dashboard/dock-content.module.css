@@ -5,6 +5,31 @@
     align-items: center;
 }
 
+/* Filled "Done" button shown in the dock while editing the layout. */
+.doneButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.doneButton:hover {
+    background: #e6e6e6;
+    border-color: #e6e6e6;
+}
+
+.doneIcon {
+    font-size: 18px;
+    line-height: 1;
+}
+
 .containerVertical {
     /* layout */
     flex-direction: column;
