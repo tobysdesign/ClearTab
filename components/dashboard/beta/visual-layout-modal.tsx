@@ -14,6 +14,7 @@ import {
   CustomLayoutState,
 } from '@/hooks/use-beta-widgets'
 import { PanelNode, DropZone, presetToTree, collapseForVisibility } from '@/lib/panel-tree'
+import { computeDropTarget, dropIndicatorRect } from '@/lib/panel-drag'
 import styles from './visual-layout-modal.module.css'
 
 interface VisualLayoutModalProps {
@@ -66,75 +67,6 @@ function MiniWireframeBlock({
       {isLight && <span className={styles.miniBlockName}>{label}</span>}
     </div>
   )
-}
-
-interface DropTarget {
-  targetId: WidgetId
-  zone: DropZone
-  rect: DOMRect
-}
-
-/** Shared hit-test: given the dragged widget's current pointer position, find which
- * other tile it's over and whether that's a center (swap) or edge (split) drop.
- * Queries the live DOM at the cursor point rather than a maintained ref map —
- * a map keyed by widget id can go stale the instant two tiles trade ids in the
- * same commit (e.g. right after a swap), since their ref callbacks re-register
- * in the same pass; elementsFromPoint always reflects what's actually rendered.
- *
- * `point` is framer-motion's PanInfo.point, which is page-relative (includes
- * scroll offset) -- elementsFromPoint and getBoundingClientRect are both
- * viewport-relative, so it's converted here before use. Otherwise, with any
- * page scroll, the hit-test silently finds whatever unrelated element happens
- * to sit at the scroll-shifted coordinates (e.g. a rail thumbnail far from
- * the actual cursor position), rather than the tile actually under the drag. */
-function computeDropTarget(
-  draggedEl: HTMLElement,
-  pagePoint: { x: number; y: number },
-): DropTarget | null {
-  const point = { x: pagePoint.x - window.scrollX, y: pagePoint.y - window.scrollY }
-  const stack = document.elementsFromPoint(point.x, point.y)
-  const targetEl = stack.find(
-    (el): el is HTMLElement => el !== draggedEl && !draggedEl.contains(el) && el instanceof HTMLElement && el.hasAttribute('data-widget-id'),
-  )
-  if (!targetEl) return null
-  const targetId = targetEl.getAttribute('data-widget-id') as WidgetId
-  const targetRect = targetEl.getBoundingClientRect()
-  const relX = (point.x - targetRect.left) / targetRect.width
-  const relY = (point.y - targetRect.top) / targetRect.height
-  const inCenter = relX >= 0.25 && relX <= 0.75 && relY >= 0.25 && relY <= 0.75
-  let zone: DropZone
-  if (inCenter) {
-    zone = 'center'
-  } else {
-    const distances: Record<'left' | 'right' | 'top' | 'bottom', number> = {
-      left: relX,
-      right: 1 - relX,
-      top: relY,
-      bottom: 1 - relY,
-    }
-    zone = (Object.keys(distances) as Array<'left' | 'right' | 'top' | 'bottom'>).reduce((closest, key) =>
-      distances[key] < distances[closest] ? key : closest
-    , 'left')
-  }
-  return { targetId, zone, rect: targetRect }
-}
-
-/** Rect (viewport coords) the live drop-indicator overlay should cover for a given zone —
- * the whole tile for a center/swap drop, or just the relevant half for an edge/split drop. */
-function dropIndicatorRect(target: DropTarget): { left: number; top: number; width: number; height: number } {
-  const { rect, zone } = target
-  switch (zone) {
-    case 'center':
-      return { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
-    case 'left':
-      return { left: rect.left, top: rect.top, width: rect.width / 2, height: rect.height }
-    case 'right':
-      return { left: rect.left + rect.width / 2, top: rect.top, width: rect.width / 2, height: rect.height }
-    case 'top':
-      return { left: rect.left, top: rect.top, width: rect.width, height: rect.height / 2 }
-    case 'bottom':
-      return { left: rect.left, top: rect.top + rect.height / 2, width: rect.width, height: rect.height / 2 }
-  }
 }
 
 function renderTreeWireframe(node: PanelNode, className: string = styles.wireframeFlex1): React.ReactNode {
