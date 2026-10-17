@@ -14,6 +14,7 @@ import { BetaPresetLayout, WidgetVisibilityState, WidgetId, CustomLayoutState } 
 import { PanelNode, DropZone, collapseForVisibility, presetToTree } from '@/lib/panel-tree'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useIsStacked } from '@/hooks/use-stacked-layout'
+import { EditOverlay } from './edit-overlay'
 import styles from './beta-adaptive-grid.module.css'
 
 // --- Pixel-aware resizing ---------------------------------------------------
@@ -201,7 +202,7 @@ export function BetaAdaptiveGrid({
   dockPosition,
   searchQuery: _searchQuery,
   editMode = false,
-  onMoveWidget: _onMoveWidget,
+  onMoveWidget,
 }: BetaAdaptiveGridProps) {
   const padding = useDockPadding(dockPosition)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -295,6 +296,15 @@ export function BetaAdaptiveGrid({
   const renderPanelNode = (node: PanelNode | null): React.ReactNode => {
     if (!node) return null
     if (node.type === 'widget') {
+      // Edit mode: EditOverlay's draggable wrapper carries the single data-widget-id
+      // (keeps computeDropTarget's self-exclusion valid); the inner tile must not.
+      if (editMode && onMoveWidget) {
+        return (
+          <EditOverlay widgetId={node.id} onMove={onMoveWidget}>
+            <div className={styles.widgetPanel}>{renderWidget(node.id)}</div>
+          </EditOverlay>
+        )
+      }
       return <div className={styles.widgetPanel} data-widget-id={node.id}>{renderWidget(node.id)}</div>
     }
     return (
