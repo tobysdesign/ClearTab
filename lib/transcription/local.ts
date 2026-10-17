@@ -18,22 +18,56 @@ env.allowLocalModels = false // model weights come from the HF hub, cached by th
 
 const pipelineCache = new Map<LocalModel, Promise<AutomaticSpeechRecognitionPipeline>>()
 
+async function hasWebGPU(): Promise<boolean> {
+  const gpu = (navigator as unknown as { gpu?: { requestAdapter(): Promise<unknown> } }).gpu
+  if (!gpu) return false
+  try {
+    return !!(await gpu.requestAdapter())
+  } catch {
+    return false
+  }
+}
+
+function loadPipeline(
+  model: LocalModel,
+  device: 'webgpu' | 'wasm',
+  onProgress?: (p: LocalProgress) => void,
+) {
+  // WebGPU: fp16 encoder + q4 decoder is the stable combo (plain q8 on WebGPU
+  // produces garbled/looping output in onnxruntime-web). CPU (wasm): q8.
+  const dtype =
+    device === 'webgpu'
+      ? { encoder_model: 'fp16' as const, decoder_model_merged: 'q4' as const }
+      : ('q8' as const)
+  return pipeline('automatic-speech-recognition', MODEL_IDS[model], {
+    device,
+    // transformers.js accepts a per-module dtype map; the typings are narrower.
+    dtype: dtype as unknown as 'q8',
+    progress_callback: (e: { status?: string; progress?: number }) => {
+      if (e.status === 'progress' && typeof e.progress === 'number') {
+        onProgress?.({ stage: 'download', ratio: e.progress / 100 })
+      }
+    },
+  }) as unknown as Promise<AutomaticSpeechRecognitionPipeline>
+}
+
 async function getPipeline(model: LocalModel, onProgress?: (p: LocalProgress) => void) {
   let cached = pipelineCache.get(model)
   if (!cached) {
-    // CPU (wasm) EP: Whisper on the WebGPU EP with q8 weights currently produces
-    // garbage / looping output in onnxruntime-web, so run on CPU for correct
-    // transcripts. The bundled jsep wasm includes the CPU kernels, so no extra
-    // file is needed. (Revisit WebGPU later with per-module fp16/q4 dtypes.)
-    cached = pipeline('automatic-speech-recognition', MODEL_IDS[model], {
-      device: 'wasm',
-      dtype: 'q8',
-      progress_callback: (e: { status?: string; progress?: number }) => {
-        if (e.status === 'progress' && typeof e.progress === 'number') {
-          onProgress?.({ stage: 'download', ratio: e.progress / 100 })
+    cached = (async () => {
+      const device = (await hasWebGPU()) ? 'webgpu' : 'wasm'
+      try {
+        return await loadPipeline(model, device, onProgress)
+      } catch (err) {
+        if (device === 'webgpu') {
+          // WebGPU unavailable, or the fp16/q4 variant is missing for this model:
+          // fall back to the CPU (wasm) EP with q8, which always works.
+          console.warn('WebGPU Whisper load failed; falling back to CPU (wasm):', err)
+          return await loadPipeline(model, 'wasm', onProgress)
         }
-      },
-    }) as unknown as Promise<AutomaticSpeechRecognitionPipeline>
+        throw err
+      }
+    })()
     pipelineCache.set(model, cached)
     // Don't cache a failed load; allow retry.
     cached.catch(() => pipelineCache.delete(model))
