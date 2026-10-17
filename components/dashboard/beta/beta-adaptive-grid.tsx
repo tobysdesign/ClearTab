@@ -11,7 +11,7 @@ import { WeatherWidgetNew } from '@/components/widgets/weather-widget-new'
 import { RecorderWidget } from '@/components/widgets/recorder-widget'
 import { CountdownWidget } from '@/components/widgets/countdown-widget-main'
 import { BetaPresetLayout, WidgetVisibilityState, WidgetId, CustomLayoutState } from '@/hooks/use-beta-widgets'
-import { PanelNode, collapseForVisibility } from '@/lib/panel-tree'
+import { PanelNode, DropZone, collapseForVisibility, presetToTree } from '@/lib/panel-tree'
 import { useDockPadding } from '@/hooks/use-dock-padding'
 import { useIsStacked } from '@/hooks/use-stacked-layout'
 import styles from './beta-adaptive-grid.module.css'
@@ -141,6 +141,8 @@ interface BetaAdaptiveGridProps {
   customLayout?: CustomLayoutState
   dockPosition: 'top' | 'left' | 'right' | 'bottom'
   searchQuery?: string
+  editMode?: boolean
+  onMoveWidget?: (draggedId: WidgetId, targetId: WidgetId, zone: DropZone) => void
 }
 
 /*
@@ -198,6 +200,8 @@ export function BetaAdaptiveGrid({
   customLayout = { tree: null },
   dockPosition,
   searchQuery: _searchQuery,
+  editMode = false,
+  onMoveWidget: _onMoveWidget,
 }: BetaAdaptiveGridProps) {
   const padding = useDockPadding(dockPosition)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -452,8 +456,17 @@ export function BetaAdaptiveGrid({
     </div>
   )
 
+  const currentTree = (): PanelNode | null => {
+    const base = presetLayout === 'custom' ? customLayout.tree : presetToTree(presetLayout)
+    return base ? collapseForVisibility(base, isVisible) : null
+  }
+
   const renderActiveLayout = () => {
     if (isStacked) return renderStacked()
+    if (editMode) {
+      const tree = currentTree()
+      return tree ? renderPanelNode(tree) : renderNotetaker()
+    }
     switch (presetLayout) {
       case 'notetaker': return renderNotetaker()
       case 'even': return renderTwoRowSplit(60, 20, 40, 20, 'even')
