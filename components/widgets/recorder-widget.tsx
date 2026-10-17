@@ -217,7 +217,8 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   // first-run choice; choiceOpen = the choice card is showing.
   const [pendingBlob, setPendingBlob] = useState(false);
   const [choiceOpen, setChoiceOpen] = useState(false);
-  const [engineLabel, setEngineLabel] = useState<string | null>(null);
+  // Engine of the run currently in flight (null when nothing is transcribing)
+  const [runningEngine, setRunningEngine] = useState<TranscriptionEngine | null>(null);
   const [savedEngine, setSavedEngine] = useState<TranscriptionEngine | undefined>(undefined);
   const [hasKey, setHasKey] = useState(false);
 
@@ -353,7 +354,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   // then run transcription in the background with the chosen engine.
   const startWithEngine = useCallback(
     (engine: TranscriptionEngine) => {
-      setEngineLabel("Transcribing with " + ENGINE_LABELS[engine]);
+      setRunningEngine(engine);
       setSavedEngine(engine);
       setChoiceOpen(false);
       setPendingBlob(false);
@@ -367,7 +368,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         setCreatedNoteId(null);
       }, 2000);
 
-      transcribeAudio(engine);
+      Promise.resolve(transcribeAudio(engine)).finally(() => setRunningEngine(null));
     },
     [transcribeAudio, reset],
   );
@@ -381,18 +382,27 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         prevKey = undefined;
       }
       const key = geminiKey ?? prevKey;
-      await setTranscriptionConfig({ engine, geminiKey: key });
+      try {
+        await setTranscriptionConfig({ engine, geminiKey: key });
+      } catch (saveError) {
+        console.error("Failed to save transcription config:", saveError);
+        toast({
+          title: "Error",
+          description: "Couldn't save your transcription choice. Please try again.",
+          variant: "destructive",
+        });
+        return; // keep the card open
+      }
       setHasKey(isValidGeminiKey(key));
       if (pendingBlob) {
         startWithEngine(engine);
       } else {
-        // Just changing the default for future recordings
+        // Just changing the default for future recordings; never touches an in-flight run
         setSavedEngine(engine);
-        setEngineLabel("Transcribing with " + ENGINE_LABELS[engine]);
         setChoiceOpen(false);
       }
     },
-    [pendingBlob, startWithEngine],
+    [pendingBlob, startWithEngine, toast],
   );
 
   // Load the remembered engine so the label is visible before the first save
@@ -403,7 +413,6 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         if (cancelled) return;
         setSavedEngine(cfg.engine);
         setHasKey(isValidGeminiKey(cfg.geminiKey));
-        if (cfg.engine) setEngineLabel("Transcribing with " + ENGINE_LABELS[cfg.engine]);
       })
       .catch(() => {});
     return () => {
@@ -412,22 +421,54 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   }, []);
 
   const downloadingModel = localProgress?.stage === "download";
-  const engineLabelRow = engineLabel ? (
-    <p className={styles.engineLabel}>
-      {engineLabel} ·{" "}
-      <button
-        type="button"
-        className={styles.changeLink}
-        onClick={() => setChoiceOpen(true)}
-        data-testid="change-engine"
-      >
-        change
-      </button>
-      {downloadingModel
-        ? ` · Downloading model (one time)… ${Math.round(localProgress.ratio * 100)}%`
-        : null}
-    </p>
+  const downloadText =
+    localProgress?.stage === "download"
+      ? `Downloading model (one time)… ${Math.round(localProgress.ratio * 100)}%`
+      : null;
+  // One status line every layout can render while a model downloads
+  const downloadLine = downloadText ? (
+    <p className={styles.engineLabel} data-testid="model-download">{downloadText}</p>
   ) : null;
+  const engineText = runningEngine
+    ? "Transcribing with " + ENGINE_LABELS[runningEngine]
+    : savedEngine
+      ? "Engine: " + ENGINE_LABELS[savedEngine]
+      : null;
+  const engineLabelRow = engineText ? (
+    <>
+      <p className={styles.engineLabel}>
+        {engineText} ·{" "}
+        <button
+          type="button"
+          className={styles.changeLink}
+          onClick={() => setChoiceOpen(true)}
+          data-testid="change-engine"
+        >
+          change
+        </button>
+      </p>
+      {downloadLine}
+    </>
+  ) : (
+    downloadLine
+  );
+
+  // Dismiss the first-run choice without transcribing: drop the recording and
+  // the empty placeholder note that was created before the choice.
+  const handleDiscardPending = useCallback(() => {
+    const noteId = activeVoiceNoteIdRef.current;
+    activeVoiceNoteIdRef.current = null;
+    setPendingBlob(false);
+    setChoiceOpen(false);
+    setCreatedNoteId(null);
+    setIsFlipped(false);
+    reset();
+    if (noteId) {
+      apiFetch(`/api/notes?id=${encodeURIComponent(noteId)}`, { method: "DELETE" }).catch(
+        (err) => console.error("Failed to remove placeholder note:", err),
+      );
+    }
+  }, [reset]);
 
   const choiceCard = (
     <div className={styles.choiceHost}>
@@ -435,7 +476,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         hasKey={hasKey}
         savedEngine={savedEngine}
         onChoose={handleChoose}
-        onCancel={pendingBlob ? undefined : () => setChoiceOpen(false)}
+        onCancel={pendingBlob ? handleDiscardPending : () => setChoiceOpen(false)}
       />
     </div>
   );
@@ -717,6 +758,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                         <CheckIcon size={14} className={styles.successCheckIcon} />
                         <span>Saved to Notes</span>
                       </div>
+                      {downloadLine}
                       <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                         <Button
                           size="sm"

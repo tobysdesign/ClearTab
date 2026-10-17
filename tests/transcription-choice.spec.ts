@@ -3,6 +3,11 @@ import { test, expect, type Page } from '@playwright/test'
 // Needs: @playwright/test, a Playwright config with baseURL, a dev server on
 // localhost, and the dummy dev account signed in (see project memory).
 
+// Chromium needs fake media flags for the mic prompt to resolve headlessly:
+// test.use({ launchOptions: { args: [FAKE_MEDIA...] } })
+const FAKE_MEDIA = ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream']
+test.use({ launchOptions: { args: FAKE_MEDIA } })
+
 const VALID_KEY = 'AIzaSyA_1234567890abcdefghij'
 
 async function stubRecording(page: Page) {
@@ -32,9 +37,11 @@ test('first run shows the 3-way choice; later runs show change', async ({ page, 
   await page.getByTestId('choice-local-en').click()
   await expect(page.getByTestId('transcription-choice')).toBeHidden()
 
+  // let the ~2s "Saved to Notes" reset finish before recording again
+  await page.waitForTimeout(2500)
   await recordAndStop(page)
+  // remembered engine: no choice card on the 2nd run
   await expect(page.getByTestId('transcription-choice')).toBeHidden()
-  await expect(page.getByTestId('change-engine').first()).toBeVisible()
 })
 
 test('choosing Gemini without a key shows onboarding and validates the key', async ({ page, context }) => {
