@@ -138,7 +138,7 @@
 .editingDot {
   width: 0.375rem;
   height: 0.375rem;
-  background-color: #60a5fa;
+  background-color: #c57b93;
   border-radius: 9999px;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -203,22 +203,22 @@
 }
 
 .itemHighlighted {
-  border-color: rgba(56, 189, 248, 0.55) !important;
+  border-color: rgba(197, 123, 147, 0.55) !important;
   background: linear-gradient(
     90deg,
-    rgba(56, 189, 248, 0.14) 0%,
-    rgba(56, 189, 248, 0.04) 100%
+    rgba(197, 123, 147, 0.14) 0%,
+    rgba(197, 123, 147, 0.04) 100%
   ) !important;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.16);
+  box-shadow: 0 0 18px rgba(197, 123, 147, 0.16);
 }
 
 .newBadge {
   flex-shrink: 0;
   padding: 1px 6px;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.18);
-  border: 1px solid rgba(56, 189, 248, 0.45);
-  color: #7dd3fc;
+  background: rgba(197, 123, 147, 0.18);
+  border: 1px solid rgba(197, 123, 147, 0.45);
+  color: #e0aabc;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;

@@ -674,7 +674,12 @@
 
 .transcribingProgressFill {
     height: 100%;
-    background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.2)
+    );
     border-radius: 9999px;
     animation: transcribingProgress 2.2s ease-in-out infinite;
 }
@@ -712,7 +717,12 @@
 
 .miniProgressFill {
     height: 100%;
-    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.2)
+    );
     border-radius: 9999px;
     animation: transcribingProgress 1.8s ease-in-out infinite;
 }
