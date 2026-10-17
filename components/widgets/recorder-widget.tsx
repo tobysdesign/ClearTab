@@ -374,6 +374,59 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     [transcribeAudio, reset],
   );
 
+  // Create the voice note (as "transcribing") and move focus to it. Called only
+  // once an engine is known — never while the first-run choice card is open, so
+  // notes don't show a transcribing spinner before a model is picked.
+  const createVoiceNote = useCallback(async (): Promise<string | null> => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to save voice memos",
+        variant: "destructive",
+      });
+      reset();
+      return null;
+    }
+    try {
+      const response = await apiFetch("/api/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Voice Note",
+          content: { status: "transcribing", ops: [{ insert: "\n" }] },
+        }),
+      });
+      const result: { success?: boolean; data?: { id?: string }; error?: string } =
+        await response.json().catch(() => ({}));
+      if (!response.ok || !result.success || !result.data?.id) {
+        console.error("Error creating voice note:", result.error);
+        toast({
+          title: "Error",
+          description: result.error || "Failed to save voice note",
+          variant: "destructive",
+        });
+        reset();
+        return null;
+      }
+      const noteId = result.data.id;
+      activeVoiceNoteIdRef.current = noteId;
+      setCreatedNoteId(noteId);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("note-created", { detail: { ...result, source: "voice" } }),
+        );
+        window.dispatchEvent(
+          new CustomEvent("select-note", { detail: { id: noteId, note: result.data } }),
+        );
+      }
+      return noteId;
+    } catch (error) {
+      console.error("Error creating voice note:", error);
+      reset();
+      return null;
+    }
+  }, [user, toast, reset]);
+
   const handleChoose = useCallback(
     async (engine: TranscriptionEngine, geminiKey?: string) => {
       let prevKey: string | undefined;
@@ -396,14 +449,21 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       }
       setHasKey(isValidGeminiKey(key));
       if (pendingBlob) {
-        startWithEngine(engine);
+        // Now that a model is chosen, create the note (as transcribing) and run.
+        const noteId = await createVoiceNote();
+        if (noteId) {
+          startWithEngine(engine);
+        } else {
+          setPendingBlob(false);
+          setChoiceOpen(false);
+        }
       } else {
         // Just changing the default for future recordings; never touches an in-flight run
         setSavedEngine(engine);
         setChoiceOpen(false);
       }
     },
-    [pendingBlob, startWithEngine, toast],
+    [pendingBlob, startWithEngine, createVoiceNote, toast],
   );
 
   // Load the remembered engine so the label is visible before the first save
@@ -454,8 +514,9 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     downloadLine
   );
 
-  // Dismiss the first-run choice without transcribing: drop the recording and
-  // the empty placeholder note that was created before the choice.
+  // Dismiss the first-run choice without transcribing: drop the recording. The note
+  // isn't created until a model is chosen, so there's usually nothing to delete; the
+  // guarded DELETE stays as a safety net.
   const handleDiscardPending = useCallback(() => {
     const noteId = activeVoiceNoteIdRef.current;
     activeVoiceNoteIdRef.current = null;
@@ -487,86 +548,31 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       console.log("Audio blob ready, immediately moving note to Notes widget...");
 
       const createAndMoveToNotes = async () => {
+        // Resolve the engine FIRST, so the note is only created (as "transcribing")
+        // once we know we're transcribing — never while the first-run choice is open.
+        let cfg: Awaited<ReturnType<typeof getTranscriptionConfig>> = {};
         try {
-          if (!user) {
-            toast({
-              title: "Error",
-              description: "You must be logged in to save voice memos",
-              variant: "destructive",
-            });
-            reset();
-            return;
-          }
-
-          // 1. Immediately create note with 'transcribing' status
-          const response = await apiFetch("/api/notes", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: "Voice Note",
-              content: { status: "transcribing", ops: [{ insert: "\n" }] },
-            }),
-          });
-
-          const result: { success?: boolean; data?: { id?: string }; error?: string } =
-            await response.json().catch(() => ({}));
-
-          if (!response.ok || !result.success || !result.data?.id) {
-            console.error("Error creating initial voice note:", result.error);
-            toast({
-              title: "Error",
-              description: result.error || "Failed to save voice note",
-              variant: "destructive",
-            });
-            reset();
-            return;
-          }
-
-          const noteId = result.data.id;
-          activeVoiceNoteIdRef.current = noteId;
-          setCreatedNoteId(noteId);
-
-          // 2. Immediately notify NotesWidget and select the new note
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(
-              new CustomEvent("note-created", {
-                detail: { ...result, source: "voice" },
-              }),
-            );
-            window.dispatchEvent(
-              new CustomEvent("select-note", {
-                detail: { id: noteId, note: result.data },
-              }),
-            );
-          }
-
-          // 3. Resolve which engine to use: remembered, or ask on first run
-          let cfg: Awaited<ReturnType<typeof getTranscriptionConfig>> = {};
-          try {
-            cfg = await getTranscriptionConfig();
-          } catch (cfgError) {
-            console.error("Could not read transcription config:", cfgError);
-          }
-          setSavedEngine(cfg.engine);
-          setHasKey(isValidGeminiKey(cfg.geminiKey));
-
-          if (!cfg.engine) {
-            // First recording: hold the blob until the user picks an engine
-            setPendingBlob(true);
-            setChoiceOpen(true);
-            return;
-          }
-
-          startWithEngine(cfg.engine);
-        } catch (error) {
-          console.error("Error initiating voice note:", error);
-          reset();
+          cfg = await getTranscriptionConfig();
+        } catch (cfgError) {
+          console.error("Could not read transcription config:", cfgError);
         }
+        setSavedEngine(cfg.engine);
+        setHasKey(isValidGeminiKey(cfg.geminiKey));
+
+        if (!cfg.engine) {
+          // First recording: hold the blob and ask; create nothing until they choose.
+          setPendingBlob(true);
+          setChoiceOpen(true);
+          return;
+        }
+
+        const noteId = await createVoiceNote();
+        if (noteId) startWithEngine(cfg.engine);
       };
 
       createAndMoveToNotes();
     }
-  }, [state, audioBlob, user, startWithEngine, reset, toast]);
+  }, [state, audioBlob, createVoiceNote, startWithEngine]);
 
   // Update waveform history for scrolling effect
   useEffect(() => {

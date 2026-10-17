@@ -213,12 +213,13 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    /* The icon is drawn with box-shadows that spill past its 4em box, so give the
-       container a fixed square that contains the whole visual (~5em). Otherwise it
-       overflows into the condition text and clips at the card edge. */
-    width: 5em;
-    height: 5em;
-    /* Icons are em-sized: 10px -> ~50px */
+    /* The icon is drawn with box-shadows that spill asymmetrically well past its 4em
+       base (the cloud reaches ~5.5em right/down), so give the container a fixed 6em
+       square that fully contains the whole visual. Otherwise the cloud overflows into
+       the condition text and clips at the card edge. */
+    width: 6em;
+    height: 6em;
+    /* Icons are em-sized: 10px -> ~40px base, ~55px with the box-shadow spill */
     font-size: 10px;
 }
 
@@ -236,13 +237,13 @@
 .cardBack:hover {
     transform: rotate(5deg);
     transform-origin: bottom right;
-    transition: transform 0.3s spring;
+    transition: transform 0.2s ease;
 }
 
 .cardMiddle:hover {
     transform: rotate(-5deg);
     transform-origin: bottom left;
-    transition: transform 0.3s spring;
+    transition: transform 0.2s ease;
 }
 
 /* 5-day forecast grid */
