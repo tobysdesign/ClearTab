@@ -251,9 +251,6 @@ export const NoteListItem = React.memo(function NoteListItem({
             >
               {displayText}
             </div>
-            {isRecentlyUpdated && !isDeleting && (
-              <span className={styles.newBadge}>New</span>
-            )}
             {isEditing && !isDeleting && (
               <div className={styles.editingIndicator}>
                 <div className={styles.editingDot} />

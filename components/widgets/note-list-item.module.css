@@ -212,15 +212,3 @@
   box-shadow: 0 0 18px rgba(197, 123, 147, 0.16);
 }
 
-.newBadge {
-  flex-shrink: 0;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: rgba(197, 123, 147, 0.18);
-  border: 1px solid rgba(197, 123, 147, 0.45);
-  color: #e0aabc;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-}

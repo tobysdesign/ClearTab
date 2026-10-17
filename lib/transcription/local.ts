@@ -47,12 +47,15 @@ function loadPipeline(
     device,
     // transformers.js accepts a per-module dtype map; the typings are narrower.
     dtype: dtype as unknown as 'q8',
+    // Suppress ORT's per-session "node not assigned to preferred EP" warnings
+    // (severity 3 = error-only); harmless but Next surfaces them as errors.
+    session_options: { logSeverityLevel: 3 },
     progress_callback: (e: { status?: string; progress?: number }) => {
       if (e.status === 'progress' && typeof e.progress === 'number') {
         onProgress?.({ stage: 'download', ratio: e.progress / 100 })
       }
     },
-  }) as unknown as Promise<AutomaticSpeechRecognitionPipeline>
+  } as unknown as Parameters<typeof pipeline>[2]) as unknown as Promise<AutomaticSpeechRecognitionPipeline>
 }
 
 async function getPipeline(model: LocalModel, onProgress?: (p: LocalProgress) => void) {

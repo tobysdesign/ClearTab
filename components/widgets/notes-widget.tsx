@@ -295,9 +295,6 @@ export function NotesWidget() {
   const [showSaveStatus, setShowSaveStatus] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
-  const [arrivalNotice, setArrivalNotice] = useState<string | null>(null);
-  const [isWidgetHighlighted, setIsWidgetHighlighted] = useState(false);
-  const [isEditorHighlighted, setIsEditorHighlighted] = useState(false);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedContent = useRef<string>("");
@@ -307,22 +304,14 @@ export function NotesWidget() {
   const isInitializedRef = useRef(false);
   const draftCounterRef = useRef(0);
 
-  const triggerNoteHighlight = useCallback(
-    (noteId: string | null, notice: string, highlightEditor = false) => {
-      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-      if (noteId) setHighlightedNoteId(noteId);
-      setArrivalNotice(notice);
-      setIsWidgetHighlighted(true);
-      setIsEditorHighlighted(highlightEditor);
-      highlightTimerRef.current = setTimeout(() => {
-        setHighlightedNoteId(null);
-        setArrivalNotice(null);
-        setIsWidgetHighlighted(false);
-        setIsEditorHighlighted(false);
-      }, 7500);
-    },
-    [],
-  );
+  const triggerNoteHighlight = useCallback((noteId: string | null) => {
+    if (!noteId) return;
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    setHighlightedNoteId(noteId);
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedNoteId(null);
+    }, 7500);
+  }, []);
 
   // Generate unique draft ID to prevent duplicate keys
   const generateDraftId = useCallback(() => {
@@ -351,11 +340,7 @@ export function NotesWidget() {
       ).detail;
       console.log('📣 NotesWidget: Received note-created event, refreshing...');
       loadNotes();
-      triggerNoteHighlight(
-        detail?.data?.id ?? null,
-        detail?.source === 'voice' ? 'Saved from Voice' : 'Note added',
-        false,
-      );
+      triggerNoteHighlight(detail?.data?.id ?? null);
     };
 
     window.addEventListener('data-deleted-all', handleDeleteAll as EventListener);
@@ -807,7 +792,7 @@ export function NotesWidget() {
       const detail = (event as CustomEvent<{ id: string; note?: Note }>).detail;
       if (!detail?.id) return;
       console.log('📣 NotesWidget: Received select-note event for note:', detail.id);
-      triggerNoteHighlight(detail.id, 'Opened from Voice', true);
+      triggerNoteHighlight(detail.id);
       const noteToSelect = notes.find((n) => n.id === detail.id) || detail.note;
       if (noteToSelect) {
         if (!notes.some((n) => n.id === noteToSelect.id)) {
@@ -1169,10 +1154,7 @@ export function NotesWidget() {
   }, []);
 
   return (
-    <WidgetContainer
-      className={cn("notes-widget", isWidgetHighlighted && notesStyles.widgetHighlighted)}
-      data-widget="notes"
-    >
+    <WidgetContainer className="notes-widget" data-widget="notes">
       <link rel="stylesheet" href="/styles/quill-custom.css" />
       <ResizablePanels
         defaultWidth={300}
@@ -1184,11 +1166,6 @@ export function NotesWidget() {
         {/* Notes List */}
         <div className={notesStyles.notesListPanel}>
           <WidgetHeader title="Notes">
-            {arrivalNotice && (
-              <span className={notesStyles.arrivalBadge} role="status">
-                ✓ {arrivalNotice}
-              </span>
-            )}
             <AddButton onClick={createAndOpenNote} tooltip="Add note" />
           </WidgetHeader>
           <div className={notesStyles.notesListScroll}>
@@ -1257,12 +1234,7 @@ export function NotesWidget() {
         {/* Note Editor */}
         <div className={notesStyles.notesEditorPanel}>
           {activeNote ? (
-            <div
-              className={cn(
-                notesStyles.notesContentPanel,
-                isEditorHighlighted && notesStyles.editorHighlighted,
-              )}
-            >
+            <div className={notesStyles.notesContentPanel}>
               {/* Header with Title and Actions - Fixed */}
               <div className={notesStyles.notesEditorHeader}>
                 <div className={notesStyles.notesHeaderContent}>
