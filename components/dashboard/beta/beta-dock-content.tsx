@@ -8,6 +8,8 @@ import { DockIconButton, ShinyAiButton } from '@cleartab/ui'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
+import { PresetFlank, WidgetFlank } from './dock-edit-panels'
+import type { BetaPresetLayout, WidgetId, WidgetVisibilityState } from '@/hooks/use-beta-widgets'
 import styles from '../dock-content.module.css'
 
 interface BetaDockContentProps {
@@ -18,10 +20,15 @@ interface BetaDockContentProps {
   setShowSettings: (show: boolean) => void
   setShowSearch: (show: boolean) => void
   isVertical: boolean
-  onToggleLayout: () => void
-  layoutOpen: boolean
-  /** Wraps the layout button so a popover can anchor to it. */
-  wrapLayoutButton: (button: React.ReactNode) => React.ReactNode
+  /** Edit mode is live: show the flanking preset + widget panels and highlight the trigger. */
+  editMode: boolean
+  /** Toggle edit mode (no-op on surfaces where editing is disabled). */
+  onToggleEdit: () => void
+  presetLayout: BetaPresetLayout
+  setPresetLayout: (layout: BetaPresetLayout) => void
+  widgets: WidgetVisibilityState
+  toggleWidget: (id: WidgetId) => void
+  activeCount: number
   onOpenShortcuts: () => void
 }
 
@@ -33,12 +40,17 @@ export function BetaDockContent({
   setShowSettings: _setShowSettings,
   setShowSearch: _setShowSearch,
   isVertical,
-  onToggleLayout,
-  layoutOpen,
-  wrapLayoutButton,
+  editMode,
+  onToggleEdit,
+  presetLayout,
+  setPresetLayout,
+  widgets,
+  toggleWidget,
+  activeCount,
   onOpenShortcuts,
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
+  const orientation = isVertical ? 'vertical' : 'horizontal'
 
   const handleToggleChat = () => {
     if (isChatOpen) {
@@ -49,71 +61,86 @@ export function BetaDockContent({
   }
 
   return (
-    <div
-      className={cn(
-        styles.container,
-        isVertical ? styles.containerVertical : styles.containerHorizontal
+    <>
+      {editMode && (
+        <PresetFlank
+          presetLayout={presetLayout}
+          setPresetLayout={setPresetLayout}
+          orientation={orientation}
+        />
       )}
-    >
-      {wrapLayoutButton(
+
+      <div
+        className={cn(
+          styles.container,
+          isVertical ? styles.containerVertical : styles.containerHorizontal
+        )}
+      >
         <DockIconButton
-          onClick={onToggleLayout}
-          title="Dashboard layout"
-          aria-expanded={layoutOpen}
-          aria-haspopup="dialog"
+          onClick={onToggleEdit}
+          title="Edit layout"
+          shortcut="⌘L"
+          aria-expanded={editMode}
+          aria-pressed={editMode}
           data-testid="layout-trigger"
         >
-          <LayoutToggleIcon
-            isToggled={false}
-            size={16}
-          />
+          <LayoutToggleIcon isToggled={editMode} size={16} />
         </DockIconButton>
-      )}
 
-      <ShinyAiButton
-        data-testid="ai-chat-trigger"
-        onClick={handleToggleChat}
-        tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
-        shortcut="⌘K"
-        className={cn(isChatOpen && styles.aiButtonActive)}
-      />
+        <ShinyAiButton
+          data-testid="ai-chat-trigger"
+          onClick={handleToggleChat}
+          tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
+          shortcut="⌘K"
+          className={cn(isChatOpen && styles.aiButtonActive)}
+        />
 
-      {showSearch && (
-        <div
-          className={cn(
-            styles.searchContainer,
-            isVertical ? styles.searchContainerVertical : styles.searchContainerHorizontal
-          )}
+        {showSearch && (
+          <div
+            className={cn(
+              styles.searchContainer,
+              isVertical ? styles.searchContainerVertical : styles.searchContainerHorizontal
+            )}
+          >
+            <Input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchQuery && (
+              <DockIconButton
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+                shortcut="Esc"
+              >
+                <CloseIcon size={16} />
+              </DockIconButton>
+            )}
+          </div>
+        )}
+
+        <SettingsTrigger />
+
+        <DockIconButton
+          onClick={onOpenShortcuts}
+          title="Keyboard shortcuts"
+          shortcut="?"
+          data-testid="shortcuts-trigger"
         >
-          <Input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-          {searchQuery && (
-            <DockIconButton
-              onClick={() => setSearchQuery('')}
-              title="Clear search"
-              shortcut="Esc"
-            >
-              <CloseIcon size={16} />
-            </DockIconButton>
-          )}
-        </div>
+          <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
+        </DockIconButton>
+      </div>
+
+      {editMode && (
+        <WidgetFlank
+          widgets={widgets}
+          toggleWidget={toggleWidget}
+          activeCount={activeCount}
+          orientation={orientation}
+        />
       )}
-
-      <SettingsTrigger />
-
-      <DockIconButton
-        onClick={onOpenShortcuts}
-        title="Keyboard shortcuts"
-        shortcut="?"
-        data-testid="shortcuts-trigger"
-      >
-        <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
-      </DockIconButton>
-    </div>
+    </>
   )
 }
