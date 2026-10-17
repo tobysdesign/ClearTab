@@ -1140,8 +1140,10 @@
         gap: 5px;
     }
 
-    .recordingControls button,
-    .miniControlsGroup button {
+    /* Direct children only: the icon controls. NOT the Cancel/Delete text buttons
+       nested inside .deleteConfirm, which need their natural width. */
+    .recordingControls > button,
+    .miniControlsGroup > button {
         width: 28px;
         height: 28px;
         min-width: 28px;
