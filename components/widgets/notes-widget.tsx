@@ -1430,28 +1430,24 @@ export function NotesWidget() {
                   const isOutOfCredits = (contentObj as any)?.status === "out_of_credits";
 
                   if (isTranscribing) {
+                    const engine = (contentObj as any)?.engine as string | undefined;
+                    const engineCopy =
+                      engine === "local-en"
+                        ? "Transcription using English model on device"
+                        : engine === "local-multi"
+                          ? "Transcription using multilingual model on device"
+                          : engine === "gemini"
+                            ? "Transcription using Gemini (cloud)"
+                            : "Transcription in progress";
                     return (
                       <div className={notesStyles.inNoteTranscribingCard}>
-                        <div className={notesStyles.inNoteTranscribingHeader}>
-                          <div className={notesStyles.inNoteTranscribingTitleGroup}>
-                            <span className={notesStyles.inNotePulseDot} />
-                            <span className={notesStyles.inNoteTranscribingTitle}>
-                              Transcribing voice memo...
-                            </span>
-                          </div>
-                          <span className={notesStyles.inNoteBadge}>In progress</span>
-                        </div>
+                        <span className={notesStyles.inNoteTranscribingTitle}>
+                          Transcribing voice memo...
+                        </span>
                         <div className={notesStyles.inNoteProgressTrack}>
                           <div className={notesStyles.inNoteProgressFill} />
                         </div>
-                        <div className={notesStyles.inNoteFooter}>
-                          <p className={notesStyles.inNoteSubtitle}>
-                            Attributing speakers and formatting notes...
-                          </p>
-                          <span className={notesStyles.inNoteCreditsHint}>
-                            ⚡ 1 credit remaining
-                          </span>
-                        </div>
+                        <p className={notesStyles.inNoteSubtitle}>{engineCopy}</p>
                       </div>
                     );
                   }

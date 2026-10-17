@@ -601,7 +601,12 @@
     bottom: 0;
     left: 0;
     width: 45%;
-    background: linear-gradient(90deg, #38bdf8, #818cf8, #38bdf8);
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.2)
+    );
     border-radius: 9999px;
     animation: inNoteShimmer 1.8s ease-in-out infinite;
 }

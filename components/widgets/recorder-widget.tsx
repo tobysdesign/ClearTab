@@ -29,7 +29,7 @@ import {
   isValidGeminiKey,
   type TranscriptionEngine,
 } from "@/lib/transcription-config";
-import { TranscriptionChoice, ENGINE_LABELS } from "./transcription-choice";
+import { TranscriptionChoice } from "./transcription-choice";
 
 // Waveform frames kept while recording (10fps); also the mini bar count
 const MAX_WAVEFORM_FRAMES = 160;
@@ -377,7 +377,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   // Create the voice note (as "transcribing") and move focus to it. Called only
   // once an engine is known — never while the first-run choice card is open, so
   // notes don't show a transcribing spinner before a model is picked.
-  const createVoiceNote = useCallback(async (): Promise<string | null> => {
+  const createVoiceNote = useCallback(async (engine: TranscriptionEngine): Promise<string | null> => {
     if (!user) {
       toast({
         title: "Error",
@@ -393,7 +393,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: "Voice Note",
-          content: { status: "transcribing", ops: [{ insert: "\n" }] },
+          content: { status: "transcribing", engine, ops: [{ insert: "\n" }] },
         }),
       });
       const result: { success?: boolean; data?: { id?: string }; error?: string } =
@@ -450,7 +450,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
       setHasKey(isValidGeminiKey(key));
       if (pendingBlob) {
         // Now that a model is chosen, create the note (as transcribing) and run.
-        const noteId = await createVoiceNote();
+        const noteId = await createVoiceNote(engine);
         if (noteId) {
           startWithEngine(engine);
         } else {
@@ -490,29 +490,8 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
   const downloadLine = downloadText ? (
     <p className={styles.engineLabel} data-testid="model-download">{downloadText}</p>
   ) : null;
-  const engineText = runningEngine
-    ? "Transcribing with " + ENGINE_LABELS[runningEngine]
-    : savedEngine
-      ? "Engine: " + ENGINE_LABELS[savedEngine]
-      : null;
-  const engineLabelRow = engineText ? (
-    <>
-      <p className={styles.engineLabel}>
-        {engineText} ·{" "}
-        <button
-          type="button"
-          className={styles.changeLink}
-          onClick={() => setChoiceOpen(true)}
-          data-testid="change-engine"
-        >
-          change
-        </button>
-      </p>
-      {downloadLine}
-    </>
-  ) : (
-    downloadLine
-  );
+  // The engine label moved to the in-progress note card; the recorder only shows
+  // the one-time model-download progress now.
 
   // Dismiss the first-run choice without transcribing: drop the recording. The note
   // isn't created until a model is chosen, so there's usually nothing to delete; the
@@ -566,7 +545,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
           return;
         }
 
-        const noteId = await createVoiceNote();
+        const noteId = await createVoiceNote(cfg.engine);
         if (noteId) startWithEngine(cfg.engine);
       };
 
@@ -985,7 +964,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
                       {/* Text */}
                       <p className={styles.bodyText}>Start recording</p>
-                      {engineLabelRow}
+                      {downloadLine}
                     </div>
                   </div>
                 </div>
@@ -1120,7 +1099,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                               onRecordNew={handleRecordNew}
                             />
                           </div>
-                          {showSuccess ? engineLabelRow : null}
+                          {showSuccess ? downloadLine : null}
                         </>
                       )}
                     </div>

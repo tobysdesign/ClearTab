@@ -15,6 +15,9 @@ export type LocalProgress =
 // public/ is carried into the static export, so this path works in web and extension builds.
 env.backends.onnx.wasm.wasmPaths = '/wasm/'
 env.allowLocalModels = false // model weights come from the HF hub, cached by the browser
+// Silence ORT's informational/warning spam (e.g. "node not assigned to preferred
+// EP"), which is harmless but Next surfaces as errors. Real errors still log.
+;(env.backends.onnx as unknown as { logLevel?: string }).logLevel = 'error'
 
 const pipelineCache = new Map<LocalModel, Promise<AutomaticSpeechRecognitionPipeline>>()
 
