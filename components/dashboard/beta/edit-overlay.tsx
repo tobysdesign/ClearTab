@@ -9,6 +9,10 @@ import styles from './edit-overlay.module.css'
 interface EditOverlayProps {
   widgetId: WidgetId
   children: React.ReactNode
+  /** Drag + blocker are live only while true; the wrapper itself is always mounted. */
+  active: boolean
+  /** Extra class for the wrapper (the grid passes its widgetPanel class). */
+  className?: string
   onMove: (draggedId: WidgetId, targetId: WidgetId, zone: DropZone) => void
 }
 
@@ -27,13 +31,20 @@ function getIndicator(): HTMLDivElement {
 }
 
 function hideIndicator() {
-  if (sharedIndicator) sharedIndicator.style.opacity = '0'
+  if (sharedIndicator) {
+    sharedIndicator.style.opacity = '0'
+    sharedIndicator.style.transition = 'none'
+  }
 }
 
 function showIndicator(target: DropTarget) {
   const el = getIndicator()
   const r = dropIndicatorRect(target)
-  el.className = `${styles.dropIndicator} ${target.zone === 'center' ? styles.dropIndicatorCenter : styles.dropIndicatorEdge}`
+  const cls = `${styles.dropIndicator} ${target.zone === 'center' ? styles.dropIndicatorCenter : styles.dropIndicatorEdge}`
+  if (el.className !== cls) el.className = cls
+  // Re-enable the slide transition only once visible, so it never animates from a stale rect.
+  const wasHidden = el.style.opacity !== '1'
+  el.style.transition = wasHidden ? 'none' : ''
   el.style.opacity = '1'
   el.style.left = `${r.left}px`
   el.style.top = `${r.top}px`
@@ -42,13 +53,15 @@ function showIndicator(target: DropTarget) {
 }
 
 /**
- * Edit-mode wrapper for a single widget tile. Mounted ONLY while editing.
+ * Wrapper for a single widget tile. Always mounted (so the widget subtree keeps a
+ * stable position and never remounts when edit mode toggles); drag and the blocker
+ * are enabled only while `active`.
  * The motion.div is the one element per tile carrying data-widget-id, so
  * computeDropTarget excludes it (and its descendants) from the hit-test.
  * The in-flight target lives in a ref, never state, so pointer moves don't
  * re-render and fight framer-motion's transform (same rule as the layout modal).
  */
-export function EditOverlay({ widgetId, children, onMove }: EditOverlayProps) {
+export function EditOverlay({ widgetId, children, active, className, onMove }: EditOverlayProps) {
   const elRef = useRef<HTMLDivElement>(null)
   const targetRef = useRef<DropTarget | null>(null)
 
@@ -65,7 +78,7 @@ export function EditOverlay({ widgetId, children, onMove }: EditOverlayProps) {
   const handleDragEnd = useCallback((point: { x: number; y: number }) => {
     const el = elRef.current
     hideIndicator()
-    const target = (el ? computeDropTarget(el, point) : null) ?? targetRef.current
+    const target = el ? computeDropTarget(el, point) : null
     targetRef.current = null
     if (!target || target.targetId === widgetId) return
     onMove(widgetId, target.targetId, target.zone)
@@ -75,8 +88,8 @@ export function EditOverlay({ widgetId, children, onMove }: EditOverlayProps) {
     <motion.div
       ref={elRef}
       data-widget-id={widgetId}
-      className={styles.tile}
-      drag
+      className={className ? `${styles.tile} ${className}` : styles.tile}
+      drag={active}
       dragSnapToOrigin
       dragElastic={0.2}
       whileDrag={{ zIndex: 50, scale: 1.01 }}
@@ -84,7 +97,7 @@ export function EditOverlay({ widgetId, children, onMove }: EditOverlayProps) {
       onDragEnd={(_e, info) => handleDragEnd(info.point)}
     >
       {children}
-      <div className={styles.blocker} />
+      {active && <div className={styles.blocker} />}
     </motion.div>
   )
 }

@@ -293,19 +293,17 @@ export function BetaAdaptiveGrid({
     return null
   }
 
+  const noopMove = () => {}
   const renderPanelNode = (node: PanelNode | null): React.ReactNode => {
     if (!node) return null
     if (node.type === 'widget') {
-      // Edit mode: EditOverlay's draggable wrapper carries the single data-widget-id
-      // (keeps computeDropTarget's self-exclusion valid); the inner tile must not.
-      if (editMode && onMoveWidget) {
-        return (
-          <EditOverlay widgetId={node.id} onMove={onMoveWidget}>
-            <div className={styles.widgetPanel}>{renderWidget(node.id)}</div>
-          </EditOverlay>
-        )
-      }
-      return <div className={styles.widgetPanel} data-widget-id={node.id}>{renderWidget(node.id)}</div>
+      // EditOverlay is ALWAYS the wrapper so renderWidget's subtree keeps a stable tree
+      // position across edit-mode toggles (no remount of editors / recorder state).
+      return (
+        <EditOverlay widgetId={node.id} active={!!(editMode && onMoveWidget)} className={styles.widgetPanel} onMove={onMoveWidget ?? noopMove}>
+          {renderWidget(node.id)}
+        </EditOverlay>
+      )
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>

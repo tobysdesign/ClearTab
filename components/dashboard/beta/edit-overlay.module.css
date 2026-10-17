@@ -4,14 +4,13 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
-  touch-action: none;
 }
 
 /* Swallows all pointer events so the widget's own content (editors, lists)
    never receives clicks or typing while arranging. */
 .blocker {
   position: absolute;
-  inset: 0;
+  inset: 7px;
   z-index: 40;
   pointer-events: auto;
   cursor: grab;
@@ -27,7 +26,7 @@
   outline-color: rgba(255, 255, 255, 0.6);
 }
 
-.tile:active .blocker {
+.blocker:active {
   cursor: grabbing;
 }
 
