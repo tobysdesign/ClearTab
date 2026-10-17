@@ -36,8 +36,10 @@ const STACK_ORDER: WidgetId[] = ['notes', 'tasks', 'schedule', 'weather', 'count
 const MIN_WIDGET_HEIGHT_PX = 48
 const MIN_WIDGET_WIDTH_FRACTION = 1 / 8 // of the viewport width (12.5%)
 const RESIZE_HIT_MARGINS = { fine: 14, coarse: 20 }
-// Extra top inset while editing, so the instructions panel doesn't cover widgets.
-const EDIT_TOP_SPACE = 72
+// While editing, the whole board zooms out so the instructions panel has room and
+// the layout reads as an editable "board". Transform (not padding) keeps widget
+// proportions; the cursor-based hit-test + dragSnapToOrigin stay correct under scale.
+const EDIT_ZOOM = 0.9
 
 // Min height (px) a subtree needs so every leaf stays >= MIN_WIDGET_HEIGHT_PX.
 function nodeMinHeightPx(node: PanelNode | null): number {
@@ -289,13 +291,13 @@ export function BetaAdaptiveGrid({
       data-settled={settled}
       data-stacked={isStacked}
       style={{
-        // In edit mode the dashboard shrinks from the top to make room for the
-        // instructions panel (padding, not transform: a CSS scale would break
-        // framer-motion's drag math).
-        paddingTop: `${padding.paddingTop + (editMode && !isStacked ? EDIT_TOP_SPACE : 0)}px`,
+        paddingTop: `${padding.paddingTop}px`,
         paddingRight: `${padding.paddingRight}px`,
         paddingBottom: `${padding.paddingBottom}px`,
         paddingLeft: `${padding.paddingLeft}px`,
+        // Zoom the board out while editing (see EDIT_ZOOM).
+        transform: editMode && !isStacked ? `scale(${EDIT_ZOOM})` : undefined,
+        transformOrigin: 'center center',
       }}
     >
       {renderActiveLayout()}
