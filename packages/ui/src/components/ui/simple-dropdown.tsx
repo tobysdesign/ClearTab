@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, createContext, useContext } from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '../../lib/utils'
 import styles from './simple-dropdown.module.css'
 
@@ -8,7 +9,8 @@ import styles from './simple-dropdown.module.css'
 const DropdownContext = createContext<{ close: () => void } | null>(null)
 
 interface SimpleDropdownProps {
-  trigger: React.ReactNode
+  /** A node, or a render function given the open state (e.g. to drop a tooltip while open). */
+  trigger: React.ReactNode | ((isOpen: boolean) => React.ReactNode)
   children: React.ReactNode
   className?: string
   align?: 'left' | 'right' | 'center'
@@ -24,30 +26,50 @@ export function SimpleDropdown({
   direction = 'down'
 }: SimpleDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  // The menu is portalled to <body> (position: fixed) so it isn't clipped by any
+  // overflow:hidden ancestor; position is measured from the trigger.
+  const [pos, setPos] = useState<React.CSSProperties>({})
 
   const close = useCallback(() => setIsOpen(false), [])
 
-  // Handle click outside to close
+  const place = useCallback(() => {
+    const el = triggerRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const s: React.CSSProperties = {}
+    if (direction === 'up') s.bottom = Math.round(window.innerHeight - r.top + 4)
+    else s.top = Math.round(r.bottom + 4)
+    if (align === 'left') s.left = Math.round(r.left)
+    else if (align === 'center') s.left = Math.round(r.left + r.width / 2)
+    else s.right = Math.round(window.innerWidth - r.right)
+    setPos(s)
+  }, [align, direction])
+
+  useLayoutEffect(() => {
+    if (isOpen) place()
+  }, [isOpen, place])
+
+  // Close on outside click; reposition on scroll/resize
   useEffect(() => {
     if (!isOpen) return
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
+    const onDocClick = (event: MouseEvent) => {
+      const t = event.target as Node
+      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return
+      setIsOpen(false)
     }
-
-    // Small delay to avoid the opening click from triggering close
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside)
-    }, 0)
-
+    const reposition = () => place()
+    const timeoutId = setTimeout(() => document.addEventListener('click', onDocClick), 0)
+    window.addEventListener('resize', reposition)
+    window.addEventListener('scroll', reposition, true)
     return () => {
       clearTimeout(timeoutId)
-      document.removeEventListener('click', handleClickOutside)
+      document.removeEventListener('click', onDocClick)
+      window.removeEventListener('resize', reposition)
+      window.removeEventListener('scroll', reposition, true)
     }
-  }, [isOpen])
+  }, [isOpen, place])
 
   const handleTriggerClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -55,43 +77,29 @@ export function SimpleDropdown({
     setIsOpen(prev => !prev)
   }, [])
 
-  const getAlignClass = () => {
-    switch (align) {
-      case 'left':
-        return styles.alignLeft
-      case 'right':
-        return styles.alignRight
-      case 'center':
-        return styles.alignCenter
-      default:
-        return styles.alignRight
-    }
-  }
-
   return (
     <DropdownContext.Provider value={{ close }}>
-      <div ref={containerRef} className={styles.container}>
-        <div
-          onClick={handleTriggerClick}
-          className={styles.trigger}
-        >
-          {trigger}
-        </div>
+      <div ref={triggerRef} onClick={handleTriggerClick} className={styles.trigger}>
+        {typeof trigger === 'function' ? trigger(isOpen) : trigger}
+      </div>
 
-        {isOpen && (
+      {isOpen && typeof document !== 'undefined' &&
+        createPortal(
           <div
+            ref={menuRef}
+            style={{ position: 'fixed', ...pos }}
             className={cn(
               styles.dropdownContent,
-              getAlignClass(),
-              direction === 'up' && styles.directionUp,
+              styles.portaled,
+              align === 'center' && styles.alignCenter,
               className
             )}
             onClick={(e) => e.stopPropagation()}
           >
             {children}
-          </div>
+          </div>,
+          document.body
         )}
-      </div>
     </DropdownContext.Provider>
   )
 }

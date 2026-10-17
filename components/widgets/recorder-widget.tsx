@@ -721,11 +721,14 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                                 <SimpleDropdown
                                   align="right"
                                   direction="up"
-                                  trigger={
-                                    <Button size="icon" tooltipLabel="More actions">
+                                  trigger={(open) => (
+                                    <Button
+                                      size="icon"
+                                      tooltipLabel={open ? undefined : "More actions"}
+                                    >
                                       <span className={styles.miniMenuDots}>⋮</span>
                                     </Button>
-                                  }
+                                  )}
                                 >
                                   <SimpleDropdownItem onClick={toggleMute}>
                                     {isMuted ? "Unmute" : "Mute"}

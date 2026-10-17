@@ -51,6 +51,17 @@
     margin-bottom: 4px;
 }
 
+/* Portalled to <body>: position comes from the inline style, so clear the
+   absolute-layout defaults above. */
+.portaled {
+    position: fixed;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin: 0;
+}
+
 /* SimpleDropdown: Item */
 .item {
     /* layout */
