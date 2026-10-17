@@ -101,8 +101,7 @@
   text-decoration: line-through;
   font-size: 12px;
   font-weight: 500;
-  /* Hidden widget → clicking shows it → "eye" (show) cursor. */
-  cursor: url('/cursors/eye.png') 14 14, pointer;
+  cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -119,8 +118,6 @@
   background: #2a2a2a;
   color: #ffffff;
   text-decoration: none;
-  /* Visible widget → clicking hides it → "eye-off" (hide) cursor. */
-  cursor: url('/cursors/eye-off.png') 14 14, pointer;
 }
 
 .chipOn:hover:not(:disabled) {

@@ -6,8 +6,10 @@ import {
   WidgetId,
   WidgetVisibilityState,
   WIDGET_METADATA,
+  LAYOUT_PRESET_METADATA,
 } from '@/hooks/use-beta-widgets'
 import { PanelNode, presetToTree } from '@/lib/panel-tree'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
 import { cn } from '@/lib/utils'
 import styles from './dock-edit-panels.module.css'
 
@@ -51,18 +53,21 @@ export function PresetFlank({ presetLayout, setPresetLayout, orientation }: Pres
       {PRESET_ORDER.map((id) => {
         const active = presetLayout === id
         return (
-          <button
-            key={id}
-            type="button"
-            className={cn(styles.preset, active && styles.presetActive)}
-            aria-pressed={active}
-            aria-label={`${id} layout`}
-            title={id}
-            onClick={() => setPresetLayout(id)}
-            data-testid={`edit-preset-${id}`}
-          >
-            <Wireframe node={presetToTree(id)} />
-          </button>
+          <Tooltip key={id}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className={cn(styles.preset, active && styles.presetActive)}
+                aria-pressed={active}
+                aria-label={`${LAYOUT_PRESET_METADATA[id].name} layout`}
+                onClick={() => setPresetLayout(id)}
+                data-testid={`edit-preset-${id}`}
+              >
+                <Wireframe node={presetToTree(id)} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{LAYOUT_PRESET_METADATA[id].name}</TooltipContent>
+          </Tooltip>
         )
       })}
     </div>
