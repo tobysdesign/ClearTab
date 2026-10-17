@@ -97,9 +97,6 @@ export function WidgetFlank({ widgets, toggleWidget, activeCount, orientation }:
             onClick={() => toggleWidget(id)}
             data-testid={`edit-widget-${id}`}
           >
-            <span className={cn('material-symbols-outlined', styles.chipIcon)} aria-hidden="true">
-              {on ? 'visibility' : 'visibility_off'}
-            </span>
             {WIDGET_METADATA[id].name}
           </button>
         )
