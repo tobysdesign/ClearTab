@@ -33,11 +33,12 @@ function loadPipeline(
   device: 'webgpu' | 'wasm',
   onProgress?: (p: LocalProgress) => void,
 ) {
-  // WebGPU: fp16 encoder + q4 decoder is the stable combo (plain q8 on WebGPU
-  // produces garbled/looping output in onnxruntime-web). CPU (wasm): q8.
+  // WebGPU: fp32 encoder + q4 decoder is the safe combo. (q8 on WebGPU garbles,
+  // and fp16 is unreliable on Apple Silicon's Metal backend — fp32 works across
+  // GPUs.) CPU (wasm): q8.
   const dtype =
     device === 'webgpu'
-      ? { encoder_model: 'fp16' as const, decoder_model_merged: 'q4' as const }
+      ? { encoder_model: 'fp32' as const, decoder_model_merged: 'q4' as const }
       : ('q8' as const)
   return pipeline('automatic-speech-recognition', MODEL_IDS[model], {
     device,
