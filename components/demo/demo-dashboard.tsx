@@ -17,6 +17,7 @@ import { DEMO_USER } from '@/lib/demo/data'
 import { demoLanguageModel } from '@/lib/demo/language-model'
 import { enableDemoMode } from '@/lib/demo/mode'
 import { sandboxDemo } from '@/lib/demo/sandbox'
+import { setTranscriptionConfig } from '@/lib/transcription-config'
 import { createDirector } from './director'
 import { DemoCursor } from './demo-cursor'
 import { askStory, calendarsStory, dockStory, notesStory, scheduleStory, tasksStory } from './stories/features'
@@ -35,6 +36,13 @@ import type { WidgetId } from '@/hooks/use-beta-widgets'
 if (typeof window !== 'undefined') {
   sandboxDemo()
   enableDemoMode({ api: demoApi, audio: demoAudio })
+  // Pre-pick the transcription engine so the recorder skips its first-run choice
+  // card (which would otherwise stall the hero story). Gemini routes to the demo
+  // backend's canned /api/transcribe response, which carries the speaker-labelled
+  // DEMO_TRANSCRIPT the rest of the story depends on. The key is only pattern-checked
+  // client-side; the demo backend ignores its value. Written into the sandboxed
+  // (in-memory) localStorage set up by sandboxDemo() above.
+  setTranscriptionConfig({ engine: 'gemini', geminiKey: 'demo-gemini-key-0000000000' })
 }
 
 const DEMO_AUTH: AuthContextType = {
