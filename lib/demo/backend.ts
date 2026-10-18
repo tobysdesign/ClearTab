@@ -2,6 +2,7 @@ import type { DemoApi } from './mode'
 import {
   DEMO_TRANSCRIPT,
   DEMO_USER,
+  PERSONAL_ACCOUNT_ID,
   demoEvents,
   demoNotes,
   demoPreferences,
@@ -142,7 +143,9 @@ export const demoApi: DemoApi = async (path, init) => {
       return json({ success: true, data: demoWeather(units) })
     }
     case '/api/settings/accounts':
-      return json([])
+      // The demo has a 2nd (personal) Google account on top of the primary, so its
+      // events show the "2nd account" dots on the Schedule card.
+      return json([{ id: PERSONAL_ACCOUNT_ID, email: 'sam.personal@gmail.com' }])
     case '/api/ai-context':
       return json({
         success: true,

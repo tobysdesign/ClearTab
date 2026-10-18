@@ -40,7 +40,7 @@ interface ScheduleQueryResult {
   message?: string;
 }
 
-function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: boolean }) {
+function EventCard({ event, isCurrent, dots }: { event: CalendarEvent; isCurrent: boolean; dots: number }) {
   const parseEventTime = (timeStr: string) => {
     if (!timeStr) return new Date();
     return timeStr.includes('T') ? parseISO(timeStr) : new Date(parseInt(timeStr));
@@ -62,6 +62,14 @@ function EventCard({ event, isCurrent }: { event: CalendarEvent; isCurrent: bool
       <div className={styles.eventTime}>
         {event.allDay ? 'All day' : `${format(startTime, 'p')} – ${format(endTime, 'p')}`}
       </div>
+      {/* Account indicator: Nth connected account shows N dots (primary shows none) */}
+      {dots > 0 && (
+        <div className={styles.accountDots} aria-hidden="true">
+          {Array.from({ length: dots }).map((_, i) => (
+            <span key={i} className={styles.accountDot} />
+          ))}
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -74,6 +82,7 @@ function DaySection({
   currentEvent,
   todayRef,
   onVisible,
+  accountDots,
 }: {
   dayKey: string
   events: CalendarEvent[]
@@ -82,6 +91,7 @@ function DaySection({
   currentEvent?: CalendarEvent
   todayRef: React.RefObject<HTMLDivElement> | null
   onVisible: (dayKey: string) => void
+  accountDots: Map<string, number>
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const onVisibleRef = useRef(onVisible)
@@ -141,6 +151,7 @@ function DaySection({
           key={event.id}
           event={event}
           isCurrent={currentEvent?.id === event.id}
+          dots={event.accountId ? (accountDots.get(event.accountId) ?? 0) : 0}
         />
       ))}
     </div>
@@ -271,6 +282,27 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
       }
     },
   })
+
+  // Connected accounts, in order, so each event's card can show its account's dot count:
+  // primary = position 1 (no dots), each connected account = position 2, 3, … (that many dots).
+  const { data: connectedAccounts } = useQuery<Array<{ id: string }>>({
+    queryKey: ['calendar-accounts'],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const res = await api.get('/api/settings/accounts')
+      if (!res.ok) return []
+      const json = await res.json().catch(() => [])
+      return Array.isArray(json) ? json : []
+    },
+  })
+
+  const accountDots = useMemo(() => {
+    const map = new Map<string, number>()
+    ;(connectedAccounts ?? []).forEach((acc, i) => {
+      if (acc?.id) map.set(acc.id, i + 2)
+    })
+    return map
+  }, [connectedAccounts])
 
   // Destructure events, needsReconnection, and optional message from data
   const events = data?.events || [];
@@ -592,6 +624,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
                             currentEvent={currentEvent}
                             todayRef={isCurrentDay ? todayRef : null}
                             onVisible={setVisibleDayKey}
+                            accountDots={accountDots}
                           />
                         )
                       })

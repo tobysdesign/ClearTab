@@ -199,7 +199,7 @@
     flex-shrink: 0;
 
     /* box model */
-    padding: 14px 10px;
+    padding: 14px 18px 14px 22px;
 }
 
 .notesHeaderContent {
@@ -367,14 +367,18 @@
     cursor: text;
 }
 
-.notesEditorContainer .ql-editor {
+/* NOTE: .ql-editor/.ql-blank are Quill's own global classes, so they must be wrapped in
+   :global() — otherwise CSS Modules hashes them and these rules never match the editor
+   (which left the placeholder on Quill's default left: 15px, the "dented" placeholder). */
+.notesEditorContainer :global(.ql-editor) {
     padding: 0;
     min-height: 300px;
     cursor: text;
 }
 
-.notesEditorContainer .ql-editor.ql-blank::before {
-    left: 10px;
+.notesEditorContainer :global(.ql-editor.ql-blank)::before {
+    /* Align the placeholder with where typed text starts (editor padding-left is 0). */
+    left: 0;
 }
 
 /* Notes Widget: Empty State */

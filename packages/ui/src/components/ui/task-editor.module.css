@@ -26,8 +26,7 @@
 .taskEditorBase :global(.ql-editor.ql-blank::before) {
     color: rgba(255, 255, 255, 0.5);
     font-style: normal;
-    left: 0.75rem;
-    right: 0.75rem;
+left:0;
 }
 
 .taskEditorBase :global(.ql-toolbar) {

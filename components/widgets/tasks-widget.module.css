@@ -69,6 +69,77 @@
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
+/* Tasks Widget: Header (title + tabs inline, wrapping when narrow).
+   The header row itself never wraps — only the left group wraps internally, so the
+   add button stays pinned top-right. */
+.header {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.headerLeft {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Tasks Widget: Tab bar (Todo / Complete) */
+.tabBar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.tab {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.tab:hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.tabActive {
+    color: rgba(255, 255, 255, 0.9);
+    background:rgb(189 185 185 / 26%);
+}
+
+/* Enlarged, comfortable hit area around the 18px checkbox without shifting layout */
+.checkboxHit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px;
+    margin: -9px;
+    cursor: pointer;
+}
+
+/* Rows stack above each other so an exiting (completing) row drops behind the rest */
+.taskRow {
+    position: relative;
+    z-index: 1;
+}
+
 /* Tasks Widget: Container */
 .tasksContainer {
     /* box model */
@@ -132,20 +203,16 @@
 /* Tasks Widget: Task Item - styles moved to widget-list-components.css */
 /* Only keep non-conflicting styles here */
 
-.taskActiveIndicator {
-    /* layout */
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-
-    /* box model */
-    width: 3px;
-    height: 60%;
-    border-radius: 0 2px 2px 0;
-
-    /* visual */
-    background-color: hsl(var(--primary));
+/* Active task: the same pink/mauve outline the Notes list uses for a note being
+   transcribed (matches .itemHighlighted in note-list-item.module.css). */
+.taskActive {
+    border-color: rgba(197, 123, 147, 0.55) !important;
+    background: linear-gradient(
+        90deg,
+        rgba(197, 123, 147, 0.14) 0%,
+        rgba(197, 123, 147, 0.04) 100%
+    ) !important;
+    box-shadow: 0 0 18px rgba(197, 123, 147, 0.16);
 }
 
 /* Tasks Widget: Task Title */

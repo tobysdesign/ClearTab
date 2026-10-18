@@ -31,30 +31,51 @@ interface TasksWidgetProps {
 }
 
 // API functions (these should now use isCompleted and priority for updates)
+
+/**
+ * Read a task API response safely. The endpoint should always return JSON, but a
+ * dropped/stale session or a server error can return an HTML page (login redirect,
+ * error overlay). Blindly calling res.json() on that throws the cryptic
+ * "Unexpected token '<'" — so parse the text ourselves and raise a clear, actionable
+ * error that names the status (and a snippet) instead.
+ */
+async function readTaskJson(res: Response, action: string): Promise<any> {
+  const text = await res.text();
+  let body: any = null;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      const snippet = text.slice(0, 80).replace(/\s+/g, " ").trim();
+      const looksHtml = /^<(!doctype|html)/i.test(text.trim());
+      throw new Error(
+        `${action} failed: the server returned ${res.status} with a non-JSON response` +
+          (looksHtml ? " (an HTML page — you may be signed out; try reloading)" : "") +
+          (snippet ? ` — "${snippet}…"` : ""),
+      );
+    }
+  }
+  if (!res.ok) {
+    throw new Error(body?.error || `${action} failed (${res.status})`);
+  }
+  return body;
+}
+
 async function fetchTasks(): Promise<Task[]> {
   const res = await api.get("/api/tasks");
-  if (!res.ok) throw new Error("Failed to fetch tasks");
-  const response = await res.json();
-  return response.data || [];
+  const response = await readTaskJson(res, "Loading tasks");
+  return response?.data || [];
 }
 
 async function updateTask(task: Partial<Task> & { id: string }): Promise<Task> {
-  console.log("updateTask called with:", task);
   const res = await api.put(`/api/tasks`, task);
-  console.log("updateTask response status:", res.status);
-  if (!res.ok) {
-    const errorBody = await res.json();
-    console.error("updateTask error:", errorBody);
-    throw new Error("Failed to update task");
-  }
-  const response = await res.json();
-  console.log("updateTask success:", response);
+  const response = await readTaskJson(res, "Updating task");
   return response.data;
 }
 
 async function deleteTask(taskId: string): Promise<void> {
   const res = await api.delete(`/api/tasks?id=${taskId}`);
-  if (!res.ok) throw new Error("Failed to delete task");
+  if (!res.ok) await readTaskJson(res, "Deleting task");
 }
 
 async function createTask(
@@ -69,11 +90,7 @@ async function createTask(
     isHighPriority, // Use passed high priority flag
     content, // Use passed content
   });
-  if (!res.ok) {
-    const errorBody = await res.json();
-    throw new Error(errorBody.error || "Failed to create task");
-  }
-  const response = await res.json();
+  const response = await readTaskJson(res, "Creating task");
   return response.data;
 }
 
@@ -132,6 +149,13 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   } = useTaskModal();
   const { ref, isMini } = useWidgetHeight();
   const [tasks, setTasks] = useState<Task[]>(getInitialCachedTasks);
+  const [activeTab, setActiveTab] = useState<"todo" | "complete">("todo");
+  // Tasks that were just checked/unchecked: held in the current tab for a beat so the
+  // check + strike-through play before the card animates out to the other tab.
+  const [completingIds, setCompletingIds] = useState<Set<string>>(new Set());
+  const completeTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
   const initialHadTasks = useRef(tasks.length > 0);
   const [isLoading, setIsLoading] = useState(!initialHadTasks.current);
   const [isError, setIsError] = useState(false);
@@ -386,10 +410,39 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
 
   const handleTaskStatusChange = useCallback(
     (taskId: string, isCompleted: boolean) => {
+      // Hold the row in place while it scales down (~0.45s) and pauses (~1s) — the
+      // checkbox fills and the title strikes through, giving time to undo an
+      // accidental tap — then release it so the exit drops it to the other tab.
+      setCompletingIds((prev) => {
+        const next = new Set(prev);
+        next.add(taskId);
+        return next;
+      });
+      const existing = completeTimersRef.current.get(taskId);
+      if (existing) clearTimeout(existing);
+      const timer = setTimeout(() => {
+        setCompletingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
+        completeTimersRef.current.delete(taskId);
+      }, 1450);
+      completeTimersRef.current.set(taskId, timer);
+
       updateTaskLocal({ id: taskId, isCompleted });
     },
     [updateTaskLocal],
   );
+
+  // Clear any pending completion-hold timers on unmount
+  useEffect(() => {
+    const timers = completeTimersRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+    };
+  }, []);
 
   function _handleTaskSave(_updatedTask: Partial<Task>) {
     // Removed activeTask check and direct mutation - now handled by EditTaskForm's onSave
@@ -429,6 +482,14 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
   // Mini view (short widgets): the next open task + how many more are waiting
   const openTasks = tasks.filter((task) => !task.isCompleted);
   const nextTask = openTasks[0];
+
+  // Tasks shown in the current tab: Todo = open, Complete = done.
+  // Checking a task flips isCompleted, so it moves between the two tabs on its own.
+  // A just-toggled task is held in place (completingIds) until its exit animation runs.
+  const visibleTasks = tasks.filter((task) => {
+    const matchesTab = activeTab === "todo" ? !task.isCompleted : task.isCompleted;
+    return matchesTab || completingIds.has(task.id);
+  });
 
   if (isLoading) {
     return (
@@ -491,28 +552,78 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
     <WidgetContainer
       className={cn("tasks-widget", isWidgetHighlighted && tasksStyles.widgetHighlighted)}
     >
-      <WidgetHeader title="Tasks">
-        {addedNotice && (
-          <span className={tasksStyles.arrivalBadge} role="status">
-            ✓ {addedNotice}
-          </span>
-        )}
-        <AddButton onClick={handleAddTask} tooltip="Add task" />
-      </WidgetHeader>
+      {/* Header: title + tabs sit on one row when they fit; the tabs wrap to a
+          second line when the widget is too narrow. Add button stays on the right. */}
+      <div className={cn("widget-header", tasksStyles.header)}>
+        <div className={tasksStyles.headerLeft}>
+          <h2 className="widget-title">Tasks</h2>
+          {/* Rendered from a list so future label-driven tabs can slot in. */}
+          <div className={tasksStyles.tabBar} role="tablist" aria-label="Task filter">
+            {([
+              { id: "todo", label: "Todo" },
+              { id: "complete", label: "Complete" },
+            ] as const).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className={cn(
+                  tasksStyles.tab,
+                  activeTab === tab.id && tasksStyles.tabActive,
+                )}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className={tasksStyles.headerRight}>
+          {addedNotice && (
+            <span className={tasksStyles.arrivalBadge} role="status">
+              ✓ {addedNotice}
+            </span>
+          )}
+          <AddButton onClick={handleAddTask} tooltip="Add task" />
+        </div>
+      </div>
       <WidgetContent>
         <div ref={scrollContainerRef} className={tasksStyles.tasksContainer}>
           <div className="ListContent">
             <div className={tasksStyles.tasksEmpty}>
-              {tasks.length === 0 ? (
-                <EmptyState
-                  title="No tasks!"
-                  description="Create a task now?"
-                  action={{
-                    label: "Add Task",
-                    onClick: handleAddTask,
-                  }}
-                  className={tasksStyles.tasksScrollArea}
-                />
+              {visibleTasks.length === 0 ? (
+                activeTab === "todo" ? (
+                  tasks.length === 0 ? (
+                    // Never had any tasks — plain empty state
+                    <EmptyState
+                      title="No tasks!"
+                      description="Add a task now?"
+                      action={{
+                        label: "Add Task",
+                        onClick: handleAddTask,
+                      }}
+                      className={tasksStyles.tasksScrollArea}
+                    />
+                  ) : (
+                    // Emptied: had tasks and cleared them all — celebrate
+                    <EmptyState
+                      title="Congrats on completing all your tasks!"
+                      description="You're all caught up."
+                      action={{
+                        label: "Add Task",
+                        onClick: handleAddTask,
+                      }}
+                      className={tasksStyles.tasksScrollArea}
+                    />
+                  )
+                ) : (
+                  <EmptyState
+                    title="Nothing completed yet"
+                    description="Completed tasks will show up here."
+                    className={tasksStyles.tasksScrollArea}
+                  />
+                )
               ) : (
                 <ClientOnly>
                   <motion.div
@@ -526,18 +637,45 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                       },
                     }}
                   >
-                    <AnimatePresence>
-                      {tasks.map((task) => {
+                    <AnimatePresence mode="popLayout">
+                      {visibleTasks.map((task) => {
                         const isActive = activeTask?.id === task.id;
                         const isNewlyAdded = highlightedTaskIds.has(task.id);
+                        // Just-toggled rows are held, scaled down in place (see the
+                        // completion grace window below), then dropped on exit.
+                        const isCompleting = completingIds.has(task.id);
                         return (
                           <motion.div
                             key={task.id}
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ x: -50, opacity: 0 }}
-                            whileHover={{ x: 2 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            // Position-only layout: when a row drops out, the rows
+                            // below slide up to fill the gap (scale won't distort it).
+                            layout="position"
+                            initial={{ y: 20, opacity: 0, scale: 1 }}
+                            // On complete: scale down straight away (ease-out, so it
+                            // decelerates into the hold), then the exit drops it.
+                            animate={{
+                              y: 0,
+                              opacity: 1,
+                              zIndex: 1,
+                              scale: isCompleting ? 0.9 : 1,
+                            }}
+                            // Exit: after the ~1s pause, drop downward behind the other
+                            // rows (lower z-index) toward the bottom, with a little spring.
+                            exit={{
+                              scale: 0.9,
+                              y: 160,
+                              opacity: 0,
+                              zIndex: 0,
+                              transition: { type: "spring", stiffness: 420, damping: 30 },
+                            }}
+                            whileHover={isCompleting ? undefined : { x: 2 }}
+                            transition={{
+                              duration: 0.2,
+                              ease: "easeOut",
+                              // Pronounced fast-start-then-slow (easeOutExpo-ish) so the
+                              // deceleration into the paused state is clearly visible.
+                              scale: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+                            }}
                             onClick={() => {
                               console.log("Setting active task ID:", task.id);
                               console.log("Full task object:", task);
@@ -545,30 +683,30 @@ export function TasksWidget({ searchQuery: _searchQuery }: TasksWidgetProps) {
                             }}
                             className={cn(
                               "widget-list-item widget-list-item--tasks",
-                              isActive && "active",
+                              tasksStyles.taskRow,
+                              isActive && tasksStyles.taskActive,
                               isNewlyAdded && tasksStyles.taskItemHighlighted,
                             )}
                           >
-                            {/* Pink dot for active item */}
-                            {isActive && (
-                              <div
-                                className={tasksStyles.taskActiveIndicator}
-                              />
-                            )}
-
                             <div className={tasksStyles.tasksContent}>
                               <div className={tasksStyles.tasksContentLeft}>
-                                <Checkbox
-                                  id={`task-${task.id}`}
-                                  checked={task.isCompleted}
-                                  onCheckedChange={(checked) =>
-                                    handleTaskStatusChange(
-                                      task.id,
-                                      checked as boolean,
-                                    )
-                                  }
+                                <label
+                                  htmlFor={`task-${task.id}`}
+                                  className={tasksStyles.checkboxHit}
                                   onClick={(e) => e.stopPropagation()}
-                                />
+                                >
+                                  <Checkbox
+                                    id={`task-${task.id}`}
+                                    checked={task.isCompleted}
+                                    onCheckedChange={(checked) =>
+                                      handleTaskStatusChange(
+                                        task.id,
+                                        checked as boolean,
+                                      )
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </label>
                                 <h3
                                   className={cn(
                                     tasksStyles.taskTitle,

@@ -1,6 +1,10 @@
 /* Event card styles moved to widget-list-components.css */
 /* Only keep non-conflicting styles here */
 
+.eventCard {
+    position: relative;
+}
+
 .eventTitle {
     font-weight: 500;
     font-size: 14px;
@@ -11,6 +15,24 @@
 .eventTime {
     color: rgba(255, 255, 255, 0.4);
     font-size: 14px;
+}
+
+/* Account indicator dots: shown bottom-right of an event card.
+   Count = the account's position (primary = none, 2nd account = 2, 3rd = 3, …). */
+.accountDots {
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.accountDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background-color: rgba(251, 113, 133, 0.55);
 }
 
 .daySection {
@@ -103,7 +125,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 0.25rem;
 }
 
 .dayText {
@@ -113,7 +134,7 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
-    margin-bottom: 0.25rem;
+
 }
 
 .todayDot {
@@ -122,6 +143,7 @@
     border-radius: 9999px;
     background-color: #fb7185;
     margin-right: 0.5rem;
+    display:none;
 }
 
 /* Removed - using global bigNumber class directly */
