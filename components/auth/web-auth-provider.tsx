@@ -55,17 +55,22 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
     },
     signOut: async () => {
       clearPreferencesCache()
-      try {
-        window.localStorage.removeItem(WEB_SESSION_CACHE_KEY)
-      } catch {}
       // Clear the session without relying on NextAuth's own redirect (unreliable in the
       // app router on v5 beta), then hard-navigate so all client state is dropped.
       try {
         await nextAuthSignOut({ redirect: false })
       } catch (error) {
-        console.error("signOut failed, forcing navigation to /login", error)
+        console.error("signOut failed, forcing navigation to /", error)
       }
-      window.location.href = "/login"
+      // Remove the cached user AFTER signout: doing it before races the caching
+      // effect, which re-writes the cache while the session is still briefly
+      // non-null during the await — leaving a stale user that makes the landing
+      // page look signed-in after logout.
+      try {
+        window.localStorage.removeItem(WEB_SESSION_CACHE_KEY)
+      } catch {}
+      // The landing page at "/" is the sign-in surface now.
+      window.location.href = "/"
     },
     loading: isLoading,
   }), [effectiveUser, session, cachedUser, isLoading])

@@ -39,9 +39,9 @@ export default function TabPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      // The extension has no /login page: it shows its own sign-in screen below
+      // The extension has no landing page: it shows its own sign-in screen below
       if (!IS_EXTENSION) {
-        router.replace('/login')
+        router.replace('/')
       }
     } else if (!loading && user) {
       setHasLoaded(true)
@@ -67,7 +67,7 @@ export default function TabPage() {
         {!IS_EXTENSION && !loading && (
           <p style={{ marginTop: 16, fontSize: 13, color: '#94a3b8' }}>
             Redirecting to sign in...{' '}
-            <a href="/login" style={{ color: '#38bdf8', textDecoration: 'underline' }}>
+            <a href="/" style={{ color: '#38bdf8', textDecoration: 'underline' }}>
               Click here if you are not redirected
             </a>
           </p>

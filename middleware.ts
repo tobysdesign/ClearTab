@@ -12,24 +12,24 @@ if (process.env.NODE_ENV !== 'production') PUBLIC_PAGES.push('/widget-sizes')
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth
-  const isAuthPage = req.nextUrl.pathname.startsWith('/login')
-  // Landing and legal pages are public (Google's OAuth reviewers must reach them signed out)
+  // The landing page "/" is the sign-in surface now; "/login" is retired.
   const isPublicPage = PUBLIC_PAGES.includes(req.nextUrl.pathname)
   const isApiRoute = req.nextUrl.pathname.startsWith('/api/')
 
-  // Allow API routes and logout to pass through
+  // Retire the old standalone login page: anything under /login goes to the landing page.
+  if (req.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // Allow API routes, public pages (landing + legal, which Google's OAuth reviewers
+  // must reach signed out) and logout to pass through
   if (isApiRoute || isPublicPage || req.nextUrl.pathname.startsWith('/logout')) {
     return NextResponse.next()
   }
 
-  // If on login page and already authenticated, redirect to home
-  if (isAuthPage && isLoggedIn) {
-    return NextResponse.redirect(new URL('/tab', req.url))
-  }
-
-  // If not authenticated and not on login page, redirect to login
-  if (!isLoggedIn && !isAuthPage) {
-    const loginUrl = new URL('/login', req.url)
+  // If not authenticated on a protected page, send to the landing page to sign in
+  if (!isLoggedIn) {
+    const loginUrl = new URL('/', req.url)
     loginUrl.searchParams.set('callbackUrl', req.url)
     return NextResponse.redirect(loginUrl)
   }

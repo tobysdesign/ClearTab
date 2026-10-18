@@ -37,7 +37,7 @@ export default function ClassicDashboardPage() {
   useEffect(() => {
     // Only redirect if we're not loading and there's no user
     if (!loading && !user) {
-      router.push('/login')
+      router.push('/')
     } else if (!loading && user) {
       // Mark as loaded once auth is confirmed
       setHasLoaded(true)
