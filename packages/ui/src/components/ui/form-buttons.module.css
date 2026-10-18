@@ -68,26 +68,29 @@
     padding-top: 4px;
 }
 
+/* Rounded square to match the task list-view checkbox (checkbox.module.css) */
 .checkbox {
-    width: 16px;
-    height: 16px;
-    border: 1px solid white;
-    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 40%;
     background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    flex-shrink: 0;
     transition: all 0.2s ease;
 }
 
 .checkbox:hover {
-    border-color: white;
+    border-color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .checkboxChecked {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.8);
 }
 
 .checkboxChecked:hover {
@@ -95,9 +98,9 @@
 }
 
 .checkmark {
-    width: 16px;
-    height: 16px;
-    stroke: rgba(255, 255, 255, 0.4);
+    width: 12px;
+    height: 12px;
+    stroke: rgba(255, 255, 255, 0.9);
 }
 
 .checkboxChecked:hover .checkmark {
@@ -105,9 +108,10 @@
 }
 
 .checkboxLabel {
-    color: #d4d4d8;
-    font-size: 13px;
-    font-weight: 400;
+    /* Match the shared FormField label (site-wide form-field convention) */
+    color: #a1a1aa;
+    font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     user-select: none;
 }

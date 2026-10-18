@@ -72,7 +72,7 @@ export function TasksDrawer() {
               {isEditing && (
                 <SimpleDropdown
                   trigger={
-                    <Button variant="ghost" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
+                    <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" shortcut="⌘/.">
                       ⋮
                     </Button>
                   }
@@ -83,7 +83,7 @@ export function TasksDrawer() {
                   </SimpleDropdownItem>
                 </SimpleDropdown>
               )}
-              <Button variant="ghost" onClick={handleModalClose}>
+              <Button variant="ghost-icon" onClick={handleModalClose}>
                 <span>Close</span>
                 <kbd className={styles.escKey}>Esc</kbd>
               </Button>
