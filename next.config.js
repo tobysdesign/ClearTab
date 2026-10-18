@@ -15,6 +15,21 @@ const isExtensionBuild =
 
 const nextConfig = {
   outputFileTracingRoot: __dirname,
+  // Local (browser) transcription pulls in @huggingface/transformers, which
+  // resolves onnxruntime-node (~140MB+ of native binaries) under Next's server
+  // file-tracing. node-file-trace follows the dynamic import() in
+  // lib/transcription/run.ts even though that code only ever runs in the
+  // browser (WASM/WebGPU) — the /api/transcribe route just fetches Gemini and
+  // no server code touches ORT. Left in, these binaries push every serverless
+  // function past Vercel's 250MB uncompressed limit. Prune them from the server
+  // traces; client bundles are unaffected.
+  outputFileTracingExcludes: {
+    "**": [
+      "**/onnxruntime-node/**",
+      "**/onnxruntime-web/**",
+      "**/@huggingface/transformers/**",
+    ],
+  },
   eslint: {
     ignoreDuringBuilds: false,
   },
