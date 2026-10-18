@@ -245,7 +245,7 @@
 
 .notesTitleInput::placeholder {
     /* typography */
-    color: #565656;
+    color:#999;
     font-style: normal;
     font-weight: 400;
 }

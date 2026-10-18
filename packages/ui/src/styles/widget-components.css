@@ -343,7 +343,7 @@
 }
 
 .form-input-base::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color:#999;
     font-style: italic;
 }
 

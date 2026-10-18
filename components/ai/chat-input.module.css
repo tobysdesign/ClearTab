@@ -31,7 +31,7 @@
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: #999;
 }
 
 .input:disabled {

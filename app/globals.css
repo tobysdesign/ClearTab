@@ -98,7 +98,7 @@
   /* Widget Common Variables */
   --widget-header-height: 60px;
   /* Widget text: secondary/greyed text and primary light text (both 14px / 500) */
-  --widget-text-muted: #555;
+  --widget-text-muted: #ffffff66;
   --widget-text-light: #c4c4c4;
   --widget-text-size: 14px;
   --widget-text-weight: 500;
@@ -719,7 +719,7 @@ html {
 /* Global placeholder styles - darker and italic */
 input::placeholder,
 textarea::placeholder {
-  color: #3a3a3a !important;
+  color: #999 !important;
   font-style: italic;
 }
 

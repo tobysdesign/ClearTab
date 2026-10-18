@@ -29,7 +29,7 @@
 }
 
 .textInput::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color:#999;
 }
 
 .textInput:focus {
@@ -50,7 +50,7 @@
 }
 
 .dateInput::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color:#999;
 }
 
 .dateInput:focus {
