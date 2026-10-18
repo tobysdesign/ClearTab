@@ -420,6 +420,30 @@
     gap: 8px;
     /* Right-aligned so the Visible toggle lines up across rows, with or without a ⋮ */
     align-items: flex-end;
+    /* Breathing room between the Visible toggle and the actions (⋮) menu */
+    margin-right: 14px;
+}
+
+/* A row mid-action (e.g. disconnecting an account): dimmed and non-interactive */
+.rowBusy {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* Inline spinner shown while a row action is in progress */
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    animation: settingsSpin 0.7s linear infinite;
+}
+
+@keyframes settingsSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* A readable but secondary value (e.g. an email under a name) — same size as the

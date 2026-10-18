@@ -1,3 +1,15 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  /* Purely cosmetic: a light wash that fades the content behind the panel
+     (matching the task drawer's overlay), rather than a dark dim. pointer-events
+     stay off so clicking outside (or another dock button) still closes/switches
+     the panel -- the DockPanel is a non-blocking popover, not a modal. */
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.16);
+}
+
 .panelPositioner {
   position: fixed;
   z-index: 99999;

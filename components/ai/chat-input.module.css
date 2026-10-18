@@ -21,13 +21,19 @@
 .input {
   width: 100%;
   min-height: 40px;
+  /* Grow with content up to a few lines, then scroll inside the composer */
+  max-height: 160px;
   padding: 0;
   background: transparent;
   border: none;
   outline: none;
   color: rgba(255, 255, 255, 0.9);
+  font-family: inherit;
   font-size: 15px;
   line-height: 1.4;
+  /* Multiline: no drag handle, wrap text, auto-sized by JS */
+  resize: none;
+  overflow-y: auto;
 }
 
 .input::placeholder {
