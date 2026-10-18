@@ -108,10 +108,12 @@
 }
 
 .checkboxLabel {
-    /* Match the shared FormField label (site-wide form-field convention) */
-    color: #a1a1aa;
-    font-size: 12px;
-    font-weight: 500;
+    /* Uses the shared form-label token (see :root in globals.css) */
+    color: var(--form-label-color);
+    font-size: var(--form-label-size);
+    font-weight: var(--form-label-weight);
+    letter-spacing: var(--form-label-letter-spacing);
+    text-transform: var(--form-label-transform);
     cursor: pointer;
     user-select: none;
 }

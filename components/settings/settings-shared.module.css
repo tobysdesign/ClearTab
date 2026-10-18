@@ -86,10 +86,11 @@
 .label {
     display: inline-flex;
     align-items: center;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #71717a;
+    /* Shared form-label token (see :root in globals.css) */
+    font-size: var(--form-label-size);
+    letter-spacing: var(--form-label-letter-spacing);
+    text-transform: var(--form-label-transform);
+    color: var(--form-label-color);
     margin-bottom: 4px;
 }
 

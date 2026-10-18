@@ -106,6 +106,14 @@
   --widget-padding: 1rem;
   --widget-sidebar-width: 250px;
   --widget-item-padding: 0.75rem;
+
+  /* Form field labels — single source of truth for every form label (task modal,
+     settings, …). Change these once to restyle all labels (e.g. transform: none). */
+  --form-label-color: #71717a;
+  --form-label-size: 0.72rem;
+  --form-label-weight: 500;
+  --form-label-letter-spacing: 0.08em;
+  --form-label-transform: uppercase;
 }
 
 html {
