@@ -231,7 +231,18 @@ export function DockPanel({
 
   return createPortal(
     <AnimatePresence>
-      {isOpen && anchorRect && (
+      {isOpen && anchorRect && [
+        /* A cosmetic scrim that slightly dims the content behind the panel. It
+           never captures pointer events (see .scrim), so the panel stays a
+           non-blocking popover: clicking outside still closes it. */
+        <motion.div
+          key="dock-scrim"
+          className={styles.scrim}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        />,
         /* Plain div for positioning, not a motion component: framer-motion owns
            the `transform` CSS property entirely once scale is animated on an
            element, which would silently overwrite the transform set here. */
@@ -250,8 +261,8 @@ export function DockPanel({
             </div>
             <div className={cn(styles.tail, tailClass)} style={tailStyle} />
           </motion.div>
-        </div>
-      )}
+        </div>,
+      ]}
     </AnimatePresence>,
     document.body,
   )

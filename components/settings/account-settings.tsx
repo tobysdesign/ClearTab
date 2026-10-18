@@ -133,6 +133,18 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
         queryClient.invalidateQueries({ queryKey: ["connectedAccounts"] });
         // Removed account's events should disappear without a reload
         queryClient.invalidateQueries({ queryKey: ["schedule"] });
+        toast({ title: "Account logged out", duration: 3000 });
+      },
+      onError: (error) => {
+        console.error("Failed to disconnect account", error);
+        toast({
+          title: "Unable to log out account",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while disconnecting this account.",
+          variant: "destructive",
+        });
       },
     });
 
@@ -242,8 +254,15 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
             <div className={sharedStyles.rowActions} />
           </div>
 
-          {connectedAccounts.map((account) => (
-            <div key={account.id} className={sharedStyles.row}>
+          {connectedAccounts.map((account) => {
+            const isRemoving =
+              removeAccountMutation.isPending &&
+              removeAccountMutation.variables === account.id;
+            return (
+            <div
+              key={account.id}
+              className={`${sharedStyles.row}${isRemoving ? ` ${sharedStyles.rowBusy}` : ""}`}
+            >
               <div className={sharedStyles.rowMeta}>
                 <div>
                   <div className={sharedStyles.rowTitle}>
@@ -261,29 +280,38 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
                 />
               </div>
               <div className={sharedStyles.rowActions}>
-                <SimpleDropdown
-                  key={`dropdown-${account.id}`}
-                  trigger={
-                    <Button
-                      className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
-                      aria-label={`More actions for ${account.email}`}
-                      tooltipLabel={`More actions for ${account.email}`}
-                      shortcut="⌘/."
-                    >
-                      <MoreActionsIcon size={16} aria-hidden />
-                    </Button>
-                  }
-                >
-                  <SimpleDropdownItem
-                    onClick={() => removeAccountMutation.mutate(account.id)}
-                    variant="danger"
+                {isRemoving ? (
+                  <span
+                    className={sharedStyles.spinner}
+                    role="status"
+                    aria-label={`Logging out ${account.email}`}
+                  />
+                ) : (
+                  <SimpleDropdown
+                    key={`dropdown-${account.id}`}
+                    trigger={
+                      <Button
+                        className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
+                        aria-label={`More actions for ${account.email}`}
+                        tooltipLabel={`More actions for ${account.email}`}
+                        shortcut="⌘/."
+                      >
+                        <MoreActionsIcon size={16} aria-hidden />
+                      </Button>
+                    }
                   >
-                    Disconnect
-                  </SimpleDropdownItem>
-                </SimpleDropdown>
+                    <SimpleDropdownItem
+                      onClick={() => removeAccountMutation.mutate(account.id)}
+                      variant="danger"
+                    >
+                      Log out
+                    </SimpleDropdownItem>
+                  </SimpleDropdown>
+                )}
               </div>
             </div>
-          ))}
+            );
+          })}
           </div>
 
           {accountsLoading && (

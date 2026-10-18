@@ -29,9 +29,18 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled, placeholder = 'Message...' }: ChatInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const activeCommand: Command | null = value.includes('#task') ? 'task' : value.includes('#note') ? 'note' : null
   const canSend = !disabled && value.trim().length > 0
+
+  // Grow the textarea to fit its content (capped by max-height in CSS, which then
+  // scrolls). Runs whenever the value changes, including when it clears on send.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [value])
 
   // Keep focus on the prompt: on open (the panel remounts this each time) and again
   // when a reply finishes (disabled flips back to false, which had blurred the input).
@@ -41,7 +50,8 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
     return () => cancelAnimationFrame(id)
   }, [disabled])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter sends; Shift+Enter inserts a line break (the textarea default).
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (canSend) onSubmit()
@@ -59,9 +69,9 @@ export function ChatInput({ value, onChange, onSubmit, onInsertCommand, disabled
       className={styles.composer}
       onClick={() => inputRef.current?.focus()}
     >
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
+        rows={1}
         value={value}
         onChange={onChange}
         onKeyDown={handleKeyDown}
