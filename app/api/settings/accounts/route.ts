@@ -36,17 +36,42 @@ export async function GET(_request: NextRequest) {
     const accountsWithEmail: ConnectedAccountWithEmail[] = [];
 
     for (const account of accounts) {
-      if (!account.accessToken) continue;
+      // Show any account we can still use. The calendar route only needs a refresh
+      // token, so an expired/cleared access token must not hide the account from
+      // Settings (otherwise it silently "disappears" and the user re-adds it).
+      if (!account.accessToken && !account.refreshToken) continue;
       // Google tokens stay on the server; the settings UI only needs the account itself
       const { accessToken: _accessToken, refreshToken: _refreshToken, ...publicAccount } = account;
 
-      try {
-        const authInfo = {
-          accessToken: account.accessToken,
-          refreshToken: account.refreshToken || undefined,
-        };
+      // Refresh the access token if it's missing or about to expire, so we can resolve
+      // the account's email and keep the stored token usable.
+      let accessToken = account.accessToken;
+      const expired =
+        !accessToken ||
+        (account.tokenExpiry !== null && account.tokenExpiry.getTime() < Date.now() + 60_000);
+      if (expired && account.refreshToken) {
+        try {
+          const refreshed = await googleApiService.refreshAccessToken(account.refreshToken);
+          accessToken = refreshed.access_token;
+          await dbMinimal
+            .update(connectedAccounts)
+            .set({
+              accessToken: refreshed.access_token,
+              tokenExpiry: new Date(Date.now() + refreshed.expires_in * 1000),
+            } as any)
+            .where(eq(connectedAccounts.id, account.id));
+        } catch (error) {
+          console.error(`Failed to refresh token for connected account ${account.id}:`, error);
+        }
+      }
 
-        const email = await googleApiService.getUserInfo(authInfo);
+      try {
+        const email = accessToken
+          ? await googleApiService.getUserInfo({
+              accessToken,
+              refreshToken: account.refreshToken || undefined,
+            })
+          : "Unknown";
         accountsWithEmail.push({
           ...publicAccount,
           email,

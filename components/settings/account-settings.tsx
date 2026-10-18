@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@cleartab/ui";
+import { Button, SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -261,16 +261,26 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
                 />
               </div>
               <div className={sharedStyles.rowActions}>
-                <Button
-                  className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
-                  onClick={() => removeAccountMutation.mutate(account.id)}
-                  disabled={removeAccountMutation.isPending}
-                  aria-label={`Disconnect ${account.email}`}
-                  tooltipLabel={`Disconnect ${account.email}`}
-                  shortcut="⌘⌫"
+                <SimpleDropdown
+                  key={`dropdown-${account.id}`}
+                  trigger={
+                    <Button
+                      className={`${sharedStyles.button} ${sharedStyles.buttonIcon}`}
+                      aria-label={`More actions for ${account.email}`}
+                      tooltipLabel={`More actions for ${account.email}`}
+                      shortcut="⌘/."
+                    >
+                      <MoreActionsIcon size={16} aria-hidden />
+                    </Button>
+                  }
                 >
-                  <MoreActionsIcon size={16} aria-hidden />
-                </Button>
+                  <SimpleDropdownItem
+                    onClick={() => removeAccountMutation.mutate(account.id)}
+                    variant="danger"
+                  >
+                    Disconnect
+                  </SimpleDropdownItem>
+                </SimpleDropdown>
               </div>
             </div>
           ))}
