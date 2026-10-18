@@ -39,3 +39,19 @@
 .ql-editor {
     padding: 15px 0px;
 }
+
+/* Bubble toolbar (moved from notes-widget.module.css, where a global selector can't live).
+   !important because this file loads before Quill's own quill.bubble.css — same reason the
+   rules above use it. */
+.ql-bubble {
+    z-index: 20;
+}
+.ql-bubble .ql-toolbar button {
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    height: 22px !important;
+    padding: 3px 0px !important;
+    width: 20px !important;
+}
