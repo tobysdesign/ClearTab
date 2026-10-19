@@ -397,8 +397,8 @@
 
 .buttonGhost {
     background: transparent !important;
-    border: 1px solid transparent !important;
-    color: rgba(255, 255, 255, 0.68) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color:#797979;
 }
 
 .buttonGhost:hover {

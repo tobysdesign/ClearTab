@@ -97,8 +97,8 @@
 /* Ghost: base shape, fill + border only on hover */
 .ghost {
     background: transparent;
-    border-color: transparent;
-    color: #d4d4d8;
+    border: 1px solid  #2B2B2B;
+    color: #8d8d8d;
 }
 
 .ghost:hover {

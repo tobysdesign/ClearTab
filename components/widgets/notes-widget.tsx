@@ -1282,7 +1282,7 @@ export function NotesWidget() {
                   <div tabIndex={2} className={notesStyles.notesActions}>
                     <SimpleDropdown
                       trigger={
-                        <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" mini>
+                        <Button variant="ghost" size="icon" tooltipLabel="More actions" mini>
                           <MoreActionsIcon size={16} />
                         </Button>
                       }
@@ -1426,7 +1426,7 @@ export function NotesWidget() {
                     return (
                       <div className={notesStyles.inNoteTranscribingCard}>
                         <span className={notesStyles.inNoteTranscribingTitle}>
-                          Transcribing voice memo...
+                          Transcribing voice note...
                         </span>
                         <div className={notesStyles.inNoteProgressTrack}>
                           <div className={notesStyles.inNoteProgressFill} />
@@ -1448,7 +1448,7 @@ export function NotesWidget() {
                           </div>
                         </div>
                         <p className={notesStyles.outOfCreditsDesc}>
-                          You have used your transcription credits for this period. Add credits to transcribe this recording and future voice memos.
+                          You have used your transcription credits for this period. Add credits to transcribe this recording and future voice notes.
                         </p>
                         <div className={notesStyles.outOfCreditsActions}>
                           <Button

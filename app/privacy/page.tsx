@@ -50,7 +50,7 @@ export default function PrivacyPage() {
             location) are stored so they&apos;re there on every device you sign in on.
           </li>
           <li>
-            <strong>Voice memos.</strong> When you record a voice memo, the audio is sent to transcribe it and the text is saved
+            <strong>voice note notes.</strong> When you record a voice note, the audio is sent to transcribe it and the text is saved
             as a note. We don&apos;t keep the audio.
           </li>
           <li>
@@ -70,14 +70,14 @@ export default function PrivacyPage() {
         <p>
           The AI chat runs on Gemini Nano, the model built into Google Chrome. Your questions, and the notes, tasks and
           schedule it reads to answer them, are processed on your device and aren&apos;t sent to us or to an AI provider.
-          Chat conversations aren&apos;t saved. Voice memos use Google Gemini to transcribe your recording into text, which is
+          Chat conversations aren&apos;t saved. voice notes use Google Gemini to transcribe your recording into text, which is
           saved as a note; the audio itself isn&apos;t kept.
         </p>
 
         <h2>Who processes your data</h2>
         <p>We use a small number of providers to run ClearTab. Each only receives what it needs:</p>
         <ul>
-          <li><strong>Google</strong>: sign-in, Google Calendar, weather data, and transcription of voice memos (Gemini API).</li>
+          <li><strong>Google</strong>: sign-in, Google Calendar, weather data, and transcription of voice notes (Gemini API).</li>
           <li><strong>Supabase</strong>: our database, which stores your account, notes, tasks and settings.</li>
           <li><strong>Vercel</strong>: hosts the ClearTab website and app.</li>
         </ul>

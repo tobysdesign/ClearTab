@@ -199,13 +199,13 @@
     flex-shrink: 0;
 
     /* box model */
-    padding: 14px 18px 14px 22px;
+    padding: 14px 18px 14px 10px;
 }
 
 .notesHeaderContent {
     /* layout */
     display: flex;
-    align-items: center;
+    align-items: end;
     justify-content: space-between;
 
     /* box model */
@@ -230,12 +230,14 @@
     letter-spacing: var(--form-label-letter-spacing);
     text-transform: var(--form-label-transform);
     margin-bottom: 0px;
+    margin-left: 10px;
+    line-height: 13px;
 }
 
 /* "Contents" sits between the header and the scrollable editor; indent to match */
 .notesContentsLabel {
     flex-shrink: 0;
-    padding: 0 22px;
+    padding: 0 10px;
     margin-top: 2px;
     margin-bottom: 0px;
 }
@@ -247,8 +249,8 @@
     align-items: end;
 
     /* input well */
-    min-height: 40px;
-    padding: 8px 16px;
+    min-height: 32px;
+    padding: 4px 16px;
     background:rgba(0, 0, 0, 0.14);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 16px;
@@ -285,7 +287,7 @@
     /* layout */
     flex-shrink: 0;
     width:24px;
-    margin-bottom:2px;
+    margin-bottom:0px;
 }
 
 /* Notes Widget: Save Status */
@@ -379,7 +381,7 @@
     /* layout */
     flex: 1;
     /* content well — left-aligned with the title well, inset from the panel edges */
-    margin: 0 18px 18px 22px;
+    margin: 0 10px 10px 10px;
     padding: 14px 16px;
     background: rgba(0, 0, 0, 0.14);
     border: 1px solid rgba(255, 255, 255, 0.05);

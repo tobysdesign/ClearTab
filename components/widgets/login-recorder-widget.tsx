@@ -54,7 +54,7 @@ export function LoginRecorderWidget() {
 
                   {/* Text */}
                   <p className={styles.bodyText}>
-                    Voice memos will be transcribed to your notes list.
+                    voice notes will be transcribed to your notes list.
                   </p>
                 </div>
               </div>

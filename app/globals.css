@@ -109,8 +109,8 @@
 
   /* Form field labels — single source of truth for every form label (task modal,
      settings, …). Change these once to restyle all labels (e.g. transform: none). */
-  --form-label-color: #71717a;
-  --form-label-size: 0.72rem;
+  --form-label-color: #787878;
+  --form-label-size: 11px;
   --form-label-weight: 500;
   --form-label-letter-spacing: normal;
   --form-label-transform: none;

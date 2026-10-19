@@ -12,7 +12,7 @@ export const DEMO_USER = {
 export const PERSONAL_ACCOUNT_ID = 'demo-personal-account'
 const PRIMARY_ACCOUNT_ID = `primary-${DEMO_USER.id}`
 
-// What the voice memo "hears" (with speaker identification)
+// What the voice note "hears" (with speaker identification)
 export const DEMO_TRANSCRIPT =
   "Speaker 1 (You): Great brainstorming session on the Q4 launch.\nSpeaker 2 (Sam): I'll send Sam the slides by Friday, and we need to book flights for Mum's birthday."
 

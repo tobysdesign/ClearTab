@@ -25,7 +25,7 @@ export const WIDGET_METADATA: Record<WidgetId, WidgetMeta> = {
   tasks: { id: 'tasks', name: 'Tasks', icon: '✓' },
   schedule: { id: 'schedule', name: 'Schedule', icon: '📅' },
   weather: { id: 'weather', name: 'Weather', icon: '☁️' },
-  recorder: { id: 'recorder', name: 'Voice Memo', icon: '🎙️' },
+  recorder: { id: 'recorder', name: 'voice note', icon: '🎙️' },
   countdown: { id: 'countdown', name: 'Counter', icon: '⏳' },
 }
 

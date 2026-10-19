@@ -47,7 +47,7 @@ const sections: SectionConfig[] = [
   {
     id: "transcription",
     label: "Transcription",
-    description: "Choose how your voice memos are transcribed.",
+    description: "Choose how your voice notes are transcribed.",
     component: TranscriptionSettings,
   },
   {

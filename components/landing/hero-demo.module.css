@@ -1,6 +1,6 @@
 /* ClearTab Hero Showcase:
    LOOKS LIKE THE REAL UI, BUT NOT FUNCTIONAL (Zero scroll-jacking, zero live side effects)
-   - Top-Left: Voice memo with overlapping callout (media_1791939348896.png)
+   - Top-Left: voice note with overlapping callout (media_1791939348896.png)
    - Middle: Connecting dashed line with glowing live pill
    - Bottom-Right: Attributed speaker notes with callout on left & AI Chat drawer on right (media_1791844087647.png)
 */
@@ -72,7 +72,7 @@
   transform: translate(-1.5px, -1.5px);
 }
 
-/* ── 1. TOP: VOICE MEMO ON LEFT WITH OVERLAPPING CALLOUT (media_1791939348896.png) ── */
+/* ── 1. TOP: voice note ON LEFT WITH OVERLAPPING CALLOUT (media_1791939348896.png) ── */
 .topContainer {
   display: flex;
   justify-content: flex-start;

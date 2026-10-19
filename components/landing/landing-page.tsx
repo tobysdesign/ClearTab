@@ -64,7 +64,7 @@ const FEATURES = [
   { icon: KeyboardIcon, title: 'Dock anywhere.', body: 'Bottom, top, left or right. ⌘K opens chat; #task and #note add things without the mouse.' },
   { icon: TimerIcon, title: 'Countdowns.', body: 'Birthdays, launches and holidays, counted down one dot at a time.' },
   { icon: CloudSunIcon, title: 'Weather.', body: 'Now and the next five days for the city you choose.' },
-  { icon: MicIcon, title: 'Voice memos.', body: 'Press record, say it out loud, and get a transcribed note back.' },
+  { icon: MicIcon, title: 'voice notes.', body: 'Press record, say it out loud, and get a transcribed note back.' },
   { icon: ChipIcon, title: 'On-device AI.', body: "Chat runs on Chrome's built-in Gemini Nano. No AI account, no API key." },
   { icon: ShieldIcon, title: 'No ads, no trackers.', body: 'No advertising and no analytics scripts. Your data is never sold.' },
 ]
@@ -72,7 +72,7 @@ const FEATURES = [
 const FAQS = [
   {
     q: 'What is ClearTab?',
-    a: 'A calm starting point for every new tab: your tasks, notes and schedule, arranged in the order you choose, so when you drift you land straight back on what matters. It also has a private AI assistant, weather, countdowns and voice memos.',
+    a: 'A calm starting point for every new tab: your tasks, notes and schedule, arranged in the order you choose, so when you drift you land straight back on what matters. It also has a private AI assistant, weather, countdowns and voice notes.',
   },
   {
     q: 'What does ClearTab do with my Google Calendar?',
@@ -99,7 +99,7 @@ const FAQS = [
     a: "No. Chat runs on Gemini Nano, the model built into Chrome, so your questions and the notes it reads stay on your device. It needs desktop Chrome 138 or later.",
   },
   {
-    q: 'How do voice memos work?',
+    q: 'How do voice notes work?',
     a: "Your recording is sent to Google's Gemini API to be transcribed, and the text is saved as a note. ClearTab doesn't keep the audio.",
   },
   {

@@ -315,7 +315,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
 
       toast({
         title: "Transcription failed",
-        description: "Your voice memo was saved, but it couldn't be transcribed.",
+        description: "Your voice note was saved, but it couldn't be transcribed.",
         variant: "destructive",
       });
     },
@@ -381,7 +381,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     if (!user) {
       toast({
         title: "Error",
-        description: "You must be logged in to save voice memos",
+        description: "You must be logged in to save voice notes",
         variant: "destructive",
       });
       reset();
@@ -927,7 +927,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                   <div className={styles.content}>
                     {/* Header */}
                     <WidgetHeader
-                      title="Voice memo"
+                      title="voice note"
                       className="!justify-start"
                     />
 
@@ -945,13 +945,13 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                           <div className={styles.buttonOuter}>
                             {/* Main shading background */}
                             <div className={styles.buttonBackground} />
-    
+
                             {/* Gradient border */}
                             <div className={styles.buttonBorder} />
-    
+
                             {/* Top highlight for lighter upper half */}
                             <div className={styles.buttonTopHighlight} />
-    
+
                             {/* Recording indicator dot (positioned top-right) */}
                             <div
                               className={cn(styles.recordingDot, {

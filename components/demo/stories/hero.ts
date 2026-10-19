@@ -4,7 +4,7 @@ import { DEMO_TASK_SOURCE } from '@/lib/demo/data'
 import { byText, type Director, type Point } from '../director'
 
 /*
- * Landing page hero: record a voice memo -> transcribed with speaker identification into a note ->
+ * Landing page hero: record a voice note -> transcribed with speaker identification into a note ->
  * highlight part of the note -> AI summarises the conversation -> create tasks from the summary ->
  * added to Tasks. Every action uses the dashboard's own buttons and flows.
  */
@@ -149,5 +149,3 @@ export async function heroStory(d: Director, chat: HeroContext) {
   await d.moveTo(created, { x: 0.2 })
   await d.sleep(5400)
 }
-
-

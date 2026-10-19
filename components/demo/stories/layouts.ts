@@ -89,7 +89,7 @@ export async function layoutsStory(d: Director, layout: LayoutsContext) {
   await d.sleep(3200)
 
   d.spotlight('recorder')
-  d.callout('Swap Widgets', 'Weather ↔ Voice memo', {
+  d.callout('Swap Widgets', 'Weather ↔ voice note', {
     target: 'recorder',
     placement: 'offset-top-left',
   })
@@ -137,12 +137,10 @@ export async function layoutsStory(d: Director, layout: LayoutsContext) {
   await d.sleep(3200)
 
   d.spotlight('recorder')
-  d.callout('Swap Widgets', 'Voice memo ↔ Weather', {
+  d.callout('Swap Widgets', 'voice note ↔ Weather', {
     target: 'recorder',
     placement: 'offset-top-left',
   })
   await swap(d, layout, 'weather', 'recorder')
   await d.sleep(3000)
 }
-
-

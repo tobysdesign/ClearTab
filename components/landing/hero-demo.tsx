@@ -152,7 +152,7 @@ export function HeroDemo() {
       if (!container) return
       const containerRect = container.getBoundingClientRect()
 
-      // 1. Natural entry: Position pointer near Start Recording button in Voice memo widget
+      // 1. Natural entry: Position pointer near Start Recording button in voice note widget
       const initialRecordPos = getTargetPos('[aria-label="Start recording"]', Math.round(containerRect.width * 0.22), 135)
 
       setPointer({
@@ -221,7 +221,7 @@ export function HeroDemo() {
       if (cancelled) return
       setPointer((prev) => ({ ...prev, clicked: false }))
 
-      // 4. Transition to Phase 2: Voice memo shows Saved briefly, progress moves into Note
+      // 4. Transition to Phase 2: voice note shows Saved briefly, progress moves into Note
       setPhase(2)
 
       // Pointer glides smoothly along connecting line down to Notes editor
@@ -313,7 +313,7 @@ export function HeroDemo() {
       ref={containerRef}
       className={styles.showcase}
       role="region"
-      aria-label="ClearTab Voice Memo to Attributed Speaker Notes and AI Summary"
+      aria-label="ClearTab voice note to Attributed Speaker Notes and AI Summary"
     >
       {/* Non-interactive Virtual Pointer Cursor */}
       <VirtualCursor
@@ -324,7 +324,7 @@ export function HeroDemo() {
         duration={pointer.duration}
       />
 
-      {/* ── 1. TOP: VOICE MEMO ON LEFT WITH CALLOUT ON RIGHT (media_1791939348896.png) ── */}
+      {/* ── 1. TOP: voice note ON LEFT WITH CALLOUT ON RIGHT (media_1791939348896.png) ── */}
       <div className={styles.topContainer}>
         <div className={styles.recorderWrapper}>
           {/* Authentic ClearTab Voice notes Widget Box */}
@@ -333,7 +333,7 @@ export function HeroDemo() {
               <div className={recorderStyles.content}>
                 {/* Header */}
                 <WidgetHeader
-                  title={phase === 1 || phase === 2 ? 'Voice notes' : 'Voice memo'}
+                  title={phase === 1 || phase === 2 ? 'Voice notes' : 'voice note'}
                   className="!justify-start"
                 >
                   {phase === 1 && (
@@ -455,7 +455,7 @@ export function HeroDemo() {
           {/* Overlapping Callout Card on the Right (media_1791939348896.png) */}
           <div className={styles.calloutCardTop}>
             <div className={styles.calloutHeaderRow}>
-              <span className={styles.calloutCategoryLabel}>VOICE MEMO</span>
+              <span className={styles.calloutCategoryLabel}>voice note</span>
               <span className={styles.calloutBadge}>
                 <SparkleIcon size={11} />
                 <span>Instant Audio Capture</span>
@@ -534,7 +534,7 @@ export function HeroDemo() {
                       <div className={styles.inNoteTranscribingHeader}>
                         <div className={styles.inNoteTranscribingTitle}>
                           <SparkleIcon size={13} />
-                          <span>Transcribing voice memo...</span>
+                          <span>Transcribing voice note...</span>
                         </div>
                         <span className={styles.inNoteTranscribingBadge}>{transcribeProgress}%</span>
                       </div>
