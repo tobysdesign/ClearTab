@@ -112,12 +112,23 @@
   --form-label-color: #71717a;
   --form-label-size: 0.72rem;
   --form-label-weight: 500;
-  --form-label-letter-spacing: 0.08em;
-  --form-label-transform: uppercase;
+  --form-label-letter-spacing: normal;
+  --form-label-transform: none;
 }
 
 html {
   font-size: 14px;
+  /* Single source of truth for the app font + fallback. Everything inherits this;
+     change the fallback (currently Papyrus) here only. */
+  font-family: var(--font-inter-display), Arial;
+}
+
+/* Form controls don't inherit font-family by default — make them match. */
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
 }
 
 /* Respect motion preferences */
@@ -430,7 +441,6 @@ html {
 
 .countdown-number {
   color: #d2d2d2;
-  font-family: "Inter Display", sans-serif;
   font-size: 48px;
   font-weight: 300;
   line-height: 1em;
@@ -806,7 +816,6 @@ textarea::placeholder {
 }
 
 .notestits {
-  font-family: "Inter Display", sans-serif;
   font-size: 16px;
   line-height: 12px;
   font-weight: 500;
@@ -833,7 +842,6 @@ textarea::placeholder {
 
 .font-light {
   color: #c4c4c4;
-  font-family: "Inter Display", sans-serif;
   font-size: 48px;
   font-weight: 300;
   line-height: 0.9;
@@ -845,7 +853,6 @@ textarea::placeholder {
 }
 
 .WidgeTit {
-  font-family: "Inter Display", sans-serif;
   font-size: 14px;
   line-height: 14px;
   font-weight: 500;

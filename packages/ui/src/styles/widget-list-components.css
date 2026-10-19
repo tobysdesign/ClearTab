@@ -82,7 +82,7 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 12px;
-    gap: 6px;
+    gap: 0px;
     background: #222222;
     border: 1px solid #222222;
     transition:
@@ -192,7 +192,6 @@
    =========================================== */
 
 .bigNumber {
-    font-family: "Inter Display", sans-serif;
     font-size: 48px;
     line-height: 1em;
     font-weight: 300;
@@ -212,7 +211,6 @@
 
 /* List item secondary text */
 .item-subtitle {
-    font-family: "Inter Display", sans-serif;
     font-size: 14px;
     line-height: 17px;
     font-weight: 400;
@@ -388,20 +386,19 @@
    =========================================== */
 
 .widget-header {
-    min-height: 60px;
-    padding: 1rem 18px;
+    min-height: 52px;
+    padding: 14px 18px;
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
     gap: 0.5rem;
     border-radius: 22px 22px 0 0;
 }
 
 .widget-title {
-    font-family: "Inter Display", sans-serif;
     font-size: 12px;
-    line-height: 12px;
+    line-height: 32px;
     font-weight: 500;
     letter-spacing: 0.05em;
     color: #bbbbbb;

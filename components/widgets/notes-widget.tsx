@@ -1251,35 +1251,38 @@ export function NotesWidget() {
                       </Button>
                     </div>
                   )}
-                  {/* Title Input - Tab Index 1 */}
-                  <div className={notesStyles.notesTitleContainer}>
-                    <textarea
-                      ref={(el) => {
-                        if (el) {
-                          (titleInputRef as any).current = el;
-                          el.style.height = "auto";
-                          el.style.height = el.scrollHeight + "px";
-                        }
-                      }}
-                      tabIndex={3}
-                      className={notesStyles.notesTitleInput}
-                      placeholder="Untitled note"
-                      rows={1}
-                      value={displayTitle}
-                      onChange={(e) => {
-                        handleTitleChange(e);
-                        const target = e.target as HTMLTextAreaElement;
-                        target.style.height = "auto";
-                        target.style.height = target.scrollHeight + "px";
-                      }}
-                      onBlur={handleTitleBlur}
-                    />
+                  {/* Title section: label + input - Tab Index 1 */}
+                  <div className={notesStyles.notesTitleSection}>
+                    <span className={notesStyles.notesSectionLabel}>Title</span>
+                    <div className={notesStyles.notesTitleContainer}>
+                      <textarea
+                        ref={(el) => {
+                          if (el) {
+                            (titleInputRef as any).current = el;
+                            el.style.height = "auto";
+                            el.style.height = el.scrollHeight + "px";
+                          }
+                        }}
+                        tabIndex={3}
+                        className={notesStyles.notesTitleInput}
+                        placeholder="Untitled note"
+                        rows={1}
+                        value={displayTitle}
+                        onChange={(e) => {
+                          handleTitleChange(e);
+                          const target = e.target as HTMLTextAreaElement;
+                          target.style.height = "auto";
+                          target.style.height = target.scrollHeight + "px";
+                        }}
+                        onBlur={handleTitleBlur}
+                      />
+                    </div>
                   </div>
                   {/* Actions Menu - Tab Index 3 */}
                   <div tabIndex={2} className={notesStyles.notesActions}>
                     <SimpleDropdown
                       trigger={
-                        <Button variant="ghost-icon" size="icon" tooltipLabel="More actions">
+                        <Button variant="ghost-icon" size="icon" tooltipLabel="More actions" mini>
                           <MoreActionsIcon size={16} />
                         </Button>
                       }
@@ -1372,6 +1375,15 @@ export function NotesWidget() {
                 </div>
               )}
 
+              {/* Contents section label */}
+              <span
+                className={cn(
+                  notesStyles.notesSectionLabel,
+                  notesStyles.notesContentsLabel,
+                )}
+              >
+                Contents
+              </span>
               {/* Content Editor - Scrollable - Tab Index 2 */}
               <div
                 className={cn(

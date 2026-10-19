@@ -33,6 +33,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    // suppressHydrationWarning: next-themes sets class="dark" + color-scheme on <html>
+    // client-side (server can't match it); this only silences <html>'s own attributes.
     <html lang="en" className={interDisplay.variable} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -42,7 +44,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body className={interDisplay.className}>
+      {/* Font family comes from the global `html` rule (var(--font-inter-display));
+          the variable is provided by interDisplay.variable on <html> above. */}
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

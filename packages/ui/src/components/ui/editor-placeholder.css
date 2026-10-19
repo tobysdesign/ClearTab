@@ -16,7 +16,6 @@
 
 /* Style paragraphs and other text */
 .editor-with-custom-placeholder [data-content] {
-  font-family: 'Inter Display', sans-serif;
   font-size: 14px;
   line-height: 1.6;
 }

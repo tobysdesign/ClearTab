@@ -38,7 +38,6 @@
 .title {
     /* typography */
     color: #d2d2d2;
-    font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 1.21em;
@@ -75,7 +74,6 @@
 .number {
     /* typography */
     color: #c4c4c4;
-    font-family: "Inter Display", sans-serif;
     font-size: 48px;
     font-weight: 300;
     line-height: 1em;
@@ -87,7 +85,6 @@
 .daysLabel {
     /* typography */
     color: #5a5a5a;
-    font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 400;
     line-height: 1em;
@@ -103,7 +100,6 @@
 .eventLabel {
     /* typography */
     color: #c4c4c4;
-    font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 700;
     line-height: 1.1;
@@ -305,7 +301,6 @@
 }
 
 .miniNumber {
-    font-family: "Inter Display", sans-serif;
     font-size: 20px;
     font-weight: 300;
     color: #c4c4c4;

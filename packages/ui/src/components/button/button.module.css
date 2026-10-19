@@ -1,3 +1,6 @@
+/* `mini` button variant — applied via the `mini` prop (see button.tsx) */
+.baseButton.mini {width:24px;}
+
 .baseButton {
     display: inline-flex;
     align-items: center;

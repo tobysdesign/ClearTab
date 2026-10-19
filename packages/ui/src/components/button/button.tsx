@@ -25,10 +25,16 @@ const buttonVariants = cva(styles.baseButton, {
       lg: styles.sizeLg,
       icon: styles.iconSize,
     },
+    // Composable width modifier — stacks on top of variant/size (e.g. ghost-icon + mini)
+    mini: {
+      true: styles.mini,
+      false: null,
+    },
   },
   defaultVariants: {
     variant: "default",
     size: "default",
+    mini: false,
   },
 });
 
@@ -41,7 +47,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, tooltipLabel, shortcut, title, ...props }, ref) => {
+  ({ className, variant, size, mini, asChild = false, tooltipLabel, shortcut, title, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const contentLabel = tooltipLabel || (props["aria-label"] as string) || title || "";
     const hasTooltip = Boolean(contentLabel || shortcut);
@@ -51,7 +57,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // buttons named for screen readers.
     const buttonEl = (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, mini, className }))}
         ref={ref}
         title={hasTooltip ? undefined : title}
         aria-label={props["aria-label"] ?? (hasTooltip ? contentLabel : undefined)}

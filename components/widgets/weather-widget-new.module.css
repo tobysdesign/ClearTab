@@ -87,8 +87,7 @@
     flex-direction: column;
     justify-content: space-between;
     font-family:
-        "Inter Display",
-        -apple-system,
+        var(--font-inter-display), serif        -apple-system,
         BlinkMacSystemFont,
         sans-serif;
     box-shadow:
@@ -104,7 +103,6 @@
 
 /* Leads every card: the place name in white */
 .place {
-    font-family: "Inter Display", sans-serif;
     /* Shared widget light text (14px / 500), the lead line of the card */
     line-height: 1.2;
     white-space: nowrap;
@@ -120,7 +118,6 @@
 }
 
 .date {
-    font-family: "Inter Display", sans-serif;
     line-height: 1.2;
     white-space: nowrap;
     color: var(--widget-text-muted);
@@ -166,7 +163,6 @@
 
 .bigTemp {
     color: #e4e4e7;
-    font-family: "Inter Display", sans-serif;
     font-size: 48px;
     font-weight: 200;
     line-height: 1em;
@@ -185,7 +181,6 @@
 
 .hiLoValue {
     color: #e4e4e7;
-    font-family: "Inter Display", sans-serif;
     font-size: 14px;
     font-weight: 300;
     line-height: 1.2;
@@ -193,7 +188,6 @@
 }
 
 .hiLoLabel {
-    font-family: "Inter Display", sans-serif;
     line-height: 1.2;
     color: var(--widget-text-muted);
     font-size: var(--widget-text-size);
@@ -224,7 +218,6 @@
 }
 
 .conditionText {
-    font-family: "Inter Display", sans-serif;
     line-height: 1.2;
     text-align: center;
     /* Long conditions ("Cloudy, with late showers") wrap under the icon */
@@ -274,7 +267,6 @@
 }
 
 .forecastDayLabel {
-    font-family: "Inter Display", sans-serif;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.02em;
@@ -295,7 +287,6 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    font-family: "Inter Display", sans-serif;
     font-size: 12px;
     font-weight: 400;
     align-items: center;
@@ -380,7 +371,6 @@
     font-size: 18px;
     font-weight: 300;
     color: #c4c4c4;
-    font-family: "Inter Display", sans-serif;
 }
 
 .miniIconContainer {

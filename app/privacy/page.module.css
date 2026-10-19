@@ -8,7 +8,6 @@
   padding: 0 clamp(20px, 6vw, 80px) calc(96px + env(safe-area-inset-bottom, 0px));
   background: oklch(0.165 0.003 260);
   color: var(--ink-muted);
-  font-family: var(--font-inter-display), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
