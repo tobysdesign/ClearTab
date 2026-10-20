@@ -283,7 +283,26 @@ export function NotesWidget() {
     insertNoteAtIndex,
   } = useNotes();
   const { toast } = useToast();
-  const [activeNote, setActiveNote] = useState<Partial<Note> | null>(null);
+  // The first draft exists from the very first paint (created synchronously here, not in
+  // a post-mount effect) so it is never *inserted* into an already-rendered sidebar list.
+  // That late insertion is what shifted the list — on load, and again on the first
+  // keystroke once we started hiding the empty draft. Present from frame one = no shift.
+  const firstDraftIdRef = useRef(`draft-${Date.now()}-init`);
+  const [activeNote, setActiveNote] = useState<Partial<Note> | null>(() => ({
+    id: firstDraftIdRef.current,
+    title: "",
+    content: EMPTY_QUILL_CONTENT,
+  }));
+  // The persistent compose draft shown at the top of the list, decoupled from activeNote.
+  // It stays rendered (keyed by its own draft id) even while a saved note is the active
+  // note, so selecting a saved note never removes it → no "select" jump. On save it is
+  // cleared and the just-saved note reuses the SAME key (via _clientKey), so the row
+  // morphs in place at the top — no new untitled is spawned and nothing shifts.
+  const [draftNote, setDraftNote] = useState<Partial<Note> | null>(() => ({
+    id: firstDraftIdRef.current,
+    title: "",
+    content: EMPTY_QUILL_CONTENT,
+  }));
   const [displayTitle, setDisplayTitle] = useState<string>("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [panelWidth, setPanelWidth] = useState(300);
@@ -297,11 +316,11 @@ export function NotesWidget() {
   const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
-  const lastSavedContent = useRef<string>("");
+  const lastSavedContent = useRef<string>(JSON.stringify(EMPTY_QUILL_CONTENT));
   const lastSavedTitle = useRef<string>("");
 
-  const activeNoteIdRef = useRef<string | null>(null);
-  const isInitializedRef = useRef(false);
+  const activeNoteIdRef = useRef<string | null>(firstDraftIdRef.current);
+  const isInitializedRef = useRef(true);
   const draftCounterRef = useRef(0);
 
   const triggerNoteHighlight = useCallback((noteId: string | null) => {
@@ -351,27 +370,11 @@ export function NotesWidget() {
     };
   }, [triggerNoteHighlight]); // Empty dependencies - loadNotes is stable from useNotes hook
 
-  // Single effect to handle initialization and note deletion
+  // Replace the active note with a fresh blank draft if it gets deleted elsewhere.
+  // The first draft is created synchronously above, so there is no "initialize on load"
+  // branch here anymore.
   useEffect(() => {
     if (isLoadingNotes) return;
-
-    // Initialize only once when notes are loaded
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-
-      // Always create a blank note as the first/active note
-      const blankNote = {
-        id: generateDraftId(),
-        title: "",
-        content: EMPTY_QUILL_CONTENT,
-      };
-      setActiveNote(blankNote);
-      setDisplayTitle("");
-      activeNoteIdRef.current = blankNote.id;
-      lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
-      lastSavedTitle.current = "";
-      return;
-    }
 
     // Handle case where active note was deleted
     // Only check for deletion if the active note is a saved note (not a draft)
@@ -387,6 +390,7 @@ export function NotesWidget() {
         content: EMPTY_QUILL_CONTENT,
       };
       setActiveNote(newNote);
+      setDraftNote(newNote);
       setDisplayTitle("");
       activeNoteIdRef.current = newNote.id;
       lastSavedContent.current = JSON.stringify(EMPTY_QUILL_CONTENT);
@@ -525,6 +529,13 @@ export function NotesWidget() {
               lastSavedTitle.current = savedNote.title || "";
             }
 
+            // If this was the persistent top draft, clear it. Its just-saved twin reuses
+            // the same list key (_clientKey === this draft id), so the top row morphs into
+            // the saved note in place — no fresh untitled is generated and nothing shifts.
+            setDraftNote((prev) =>
+              prev && prev.id === snapshot.id ? null : prev,
+            );
+
             console.log("Note saved (was draft):", savedNote.id);
           } else {
             const savedNoteRaw = await updateNote.mutate({
@@ -628,7 +639,8 @@ export function NotesWidget() {
       clearTimeout(backgroundSaveTimeoutRef.current);
     }
 
-    // Schedule save for 500ms from now (debounce rapid typing)
+    // Schedule save ~2s after the last keystroke (debounce rapid typing). Longer so the
+    // post-save sidebar re-render/jump doesn't fire during short pauses while you're working.
     // Don't capture snapshot here - capture it when timeout fires to get latest content
     backgroundSaveTimeoutRef.current = setTimeout(() => {
       // Create snapshot at save time to get the latest content
@@ -638,7 +650,7 @@ export function NotesWidget() {
       saveCurrentNote(snapshot).catch((error) => {
         console.error("Background save failed:", error);
       });
-    }, 500);
+    }, 2000);
   }, [saveCurrentNote]);
 
   // Save note function (must be defined before debouncedSave)
@@ -926,6 +938,8 @@ export function NotesWidget() {
     // Update display title and active note (minimal state changes)
     setDisplayTitle("");
     setActiveNote(newNote);
+    // This new draft becomes the persistent top-of-list compose row.
+    setDraftNote(newNote);
     setIsEditing(false); // Clear editing state for new note
   }, [generateDraftId]);
 
@@ -1118,6 +1132,21 @@ export function NotesWidget() {
     showEditor();
   }, [handleCreateNew, showEditor]);
 
+  // Re-open the existing persistent draft in the editor (no new draft created), used when
+  // the draft row is shown but a saved note is currently the active note.
+  const openDraft = useCallback(() => {
+    if (!draftNote) return;
+    const content = draftNote.content ?? EMPTY_QUILL_CONTENT;
+    activeNoteIdRef.current = draftNote.id ?? null;
+    activeNoteRef.current = draftNote;
+    lastSavedContent.current = JSON.stringify(content);
+    lastSavedTitle.current = draftNote.title || "";
+    setActiveNote(draftNote);
+    setDisplayTitle(draftNote.title || "");
+    setIsEditing(false);
+    showEditor();
+  }, [draftNote, showEditor]);
+
   const handleDeleteActiveNote = useCallback(() => {
     if (activeNote?.id) {
       handleDeleteNote(activeNote.id as string);
@@ -1173,54 +1202,87 @@ export function NotesWidget() {
               <WidgetLoader />
             ) : notes.length > 0 || activeNote ? (
               <div className="ListContent">
-                <AnimatePresence>
-                  {/* Show the active draft note (should be only one) */}
-                  {activeNote && activeNote.id?.startsWith("draft-") && (
-                    <>
-                      <NoteListItem
-                        key={activeNote.id}
-                        note={
-                          {
-                            ...activeNote,
-                            title: displayTitle, // Use live display title instead of stale activeNote.title
-                            content:
-                              activeNoteRef.current?.content ||
-                              activeNote.content, // Use live content
-                          } as Note
-                        }
-                        isSelected={true}
-                        onClick={showEditor} // Already selected
-                        onDelete={() =>
-                          handleDeleteNote(activeNote.id as string)
-                        }
-                        collapsed={!isStacked && panelWidth < 100}
-                        isEditing={isEditing}
-                        isDeleting={deletingNoteId === activeNote.id}
-                      />
-                    </>
-                  )}
-                  {/* Then show all saved notes */}
-                  {notes.map((note) => {
-                    // Check if this saved note is the currently active note
-                    // For saved notes, only show as active if activeNote is not a draft
-                    const isActive =
-                      !activeNote?.id?.startsWith("draft-") &&
-                      activeNoteIdRef.current === note.id;
-
-                    return (
-                      <NoteListItem
-                        key={note.id}
-                        note={note}
-                        isSelected={isActive}
-                        onClick={() => openNote(note)}
-                        onDelete={() => handleDeleteNote(note.id as string)}
-                        collapsed={!isStacked && panelWidth < 100}
-                        isRecentlyUpdated={highlightedNoteId === note.id}
-                        isEditing={isActive && isEditing}
-                        isDeleting={deletingNoteId === note.id}
-                      />
-                    );
-                  })}
+                {/* popLayout: when an item leaves (e.g. the empty draft on switching notes),
+                    it pops out of flow so the rest slide up smoothly instead of snapping. */}
+                <AnimatePresence mode="popLayout">
+                  {/* Draft (live, from activeNote) + saved notes in ONE keyed list. The draft
+                      keys on its id; its just-saved note reuses that key via _clientKey, so the
+                      element is kept across the draft→saved swap — no remount, no sidebar jump. */}
+                  {(() => {
+                    type Row = {
+                      key: string;
+                      isDraft: boolean;
+                      isDraftActive: boolean;
+                      note: Note;
+                    };
+                    const rows: Row[] = [];
+                    // The persistent compose draft sits at the top, keyed by its own draft
+                    // id. It survives opening a saved note (no "select" jump). When it is
+                    // the active note it shows live edits; otherwise it shows its stored
+                    // (usually empty) content. On save it is cleared and the just-saved
+                    // note — which carries this same id as its _clientKey — takes this exact
+                    // slot, so the row morphs in place: no new untitled, no shift.
+                    if (draftNote?.id) {
+                      const isDraftActive = activeNote?.id === draftNote.id;
+                      rows.push({
+                        key: draftNote.id,
+                        isDraft: true,
+                        isDraftActive,
+                        note: (isDraftActive
+                          ? {
+                              ...draftNote,
+                              title: displayTitle, // live title
+                              content:
+                                activeNoteRef.current?.content ||
+                                draftNote.content, // live content
+                            }
+                          : draftNote) as Note,
+                      });
+                    }
+                    for (const note of notes) {
+                      const ck = (note as Note & { _clientKey?: string })._clientKey;
+                      // While the draft is still shown, skip its just-saved twin so the key
+                      // stays unique during the one-tick draft→saved handoff.
+                      if (draftNote?.id && ck === draftNote.id) continue;
+                      rows.push({
+                        key: ck ?? (note.id as string),
+                        isDraft: false,
+                        isDraftActive: false,
+                        note,
+                      });
+                    }
+                    return rows.map(({ key, isDraft, isDraftActive, note }) => {
+                      const isActive =
+                        !isDraft && activeNoteIdRef.current === note.id;
+                      return (
+                        <NoteListItem
+                          key={key}
+                          note={note}
+                          suppressEntrance={isDraft}
+                          reservePreview={isDraft}
+                          isSelected={isDraft ? isDraftActive : isActive}
+                          onClick={
+                            isDraft
+                              ? isDraftActive
+                                ? showEditor
+                                : openDraft
+                              : () => openNote(note)
+                          }
+                          onDelete={
+                            isDraft
+                              ? () => handleDeleteNote(draftNote?.id as string)
+                              : () => handleDeleteNote(note.id as string)
+                          }
+                          collapsed={!isStacked && panelWidth < 100}
+                          isRecentlyUpdated={!isDraft && highlightedNoteId === note.id}
+                          isEditing={
+                            isDraft ? isDraftActive && isEditing : isActive && isEditing
+                          }
+                          isDeleting={deletingNoteId === note.id}
+                        />
+                      );
+                    });
+                  })()}
                 </AnimatePresence>
               </div>
             ) : (

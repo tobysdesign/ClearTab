@@ -50,7 +50,7 @@ export default function PrivacyPage() {
             location) are stored so they&apos;re there on every device you sign in on.
           </li>
           <li>
-            <strong>voice note notes.</strong> When you record a voice note, the audio is sent to transcribe it and the text is saved
+            <strong>Voice notes.</strong> When you record a voice note, the audio is sent to transcribe it and the text is saved
             as a note. We don&apos;t keep the audio.
           </li>
           <li>

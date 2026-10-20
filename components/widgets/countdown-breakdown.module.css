@@ -9,8 +9,14 @@
 
     /* layout */
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* Centre the content when it fits (via margin-block: auto on .body below),
+       but anchor it to the BOTTOM when it's too tall: justify-content is the
+       fallback once the auto margins collapse, so the overflow clips off the TOP
+       (the dots) and the number + "until <title>" caption stay visible, instead
+       of centring and clipping the important bottom line. */
+    justify-content: flex-end;
     flex: 1;
     min-height: 0;
     min-width: 0;
@@ -23,6 +29,11 @@
     flex-direction: column;
     align-items: center;
     gap: 14px;
+
+    /* Centre vertically while there's spare room; the auto margins collapse to 0
+       once the content overflows, letting .breakdown's justify-content: flex-end
+       pin the bottom and clip the dots off the top. */
+    margin-block: auto;
 }
 
 .columns {
@@ -176,7 +187,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* Bottom-anchored like .breakdown: the number + caption stay put and the dot
+       grid above clips first when the widget gets too short. */
+    justify-content: flex-end;
     gap: 10px;
     width: 100%;
     height: 100%;

@@ -104,8 +104,8 @@
 
 .widget-list-item--notes.active,
 .widget-list-item--notes.widget-list-item--active {
-    background: #272727;
-    border: 1px solid #454545;
+    background: #373138;
+    border: 1px solid #7f657d;
 }
 
 /* Schedule-specific list items */
@@ -401,7 +401,7 @@
     line-height: 32px;
     font-weight: 500;
     letter-spacing: 0.05em;
-    color: #bbbbbb;
+    color: #717171fc;
     white-space: nowrap;
     overflow: visible;
     text-align: left;

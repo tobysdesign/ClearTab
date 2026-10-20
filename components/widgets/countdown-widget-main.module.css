@@ -235,6 +235,20 @@
     }
 }
 
+/* Very short widgets (< 160px tall): drop the "Counter" label and the edit/actions
+   button entirely and give that space to the days-only view — same idea as the voice
+   note widget hiding its title when short. */
+@container counter (max-height: 160px) {
+    .modeWrapper :global(.widget-header) {
+        display: none;
+    }
+
+    .content {
+        /* No header above, so add a little breathing room at the top. */
+        padding-top: 12px;
+    }
+}
+
 .miniContainer {
     display: flex;
     align-items: center;

@@ -24,6 +24,15 @@ interface NoteListItemProps {
   isRecentlyUpdated?: boolean;
   isEditing?: boolean;
   isDeleting?: boolean;
+  /** Skip the mount/entrance animation (used by the live draft, which is present from
+   *  the first paint and must never animate or push the list when you start typing). */
+  suppressEntrance?: boolean;
+  /** Render the row with the SAME fixed two-line layout (title + preview) that every
+   *  saved note uses, even when the draft is still empty. The live draft uses this so its
+   *  height never changes — not on the first keystroke, and not when it saves and becomes
+   *  an "Untitled Note" with a preview. Without it the draft is one line (44px) and grows
+   *  to two lines (59px), shifting the whole list. */
+  reservePreview?: boolean;
 }
 
 export const NoteListItem = React.memo(function NoteListItem({
@@ -35,6 +44,8 @@ export const NoteListItem = React.memo(function NoteListItem({
   isRecentlyUpdated = false,
   isEditing = false,
   isDeleting = false,
+  suppressEntrance = false,
+  reservePreview = false,
 }: NoteListItemProps) {
   // Memoized function to get a preview from Block[] content
   const preview = useMemo(() => {
@@ -117,13 +128,15 @@ export const NoteListItem = React.memo(function NoteListItem({
     if (note.title && note.title.trim() !== "") {
       return note.title;
     }
-    // If no title but has content, show content preview
-    if (preview && preview !== "Empty note") {
+    // A draft (reservePreview) keeps a fixed two-line layout, so its title line always
+    // falls back to the placeholder — the content lives on the reserved preview line
+    // below, never promoted up into the title (which would collapse it to one line).
+    if (!reservePreview && preview && preview !== "Empty note") {
       return preview;
     }
     // Otherwise show placeholder
     return "Untitled note";
-  }, [note.title, preview]);
+  }, [note.title, preview, reservePreview]);
 
   const shouldShowAsPlaceholder = useMemo(() => {
     return displayText === "Untitled note";
@@ -165,7 +178,7 @@ export const NoteListItem = React.memo(function NoteListItem({
       <ClientOnly>
         <motion.div
           layout
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={suppressEntrance ? false : { scale: 0.8, opacity: 0 }}
           animate={{
             scale: 1,
             opacity: 1,
@@ -213,7 +226,7 @@ export const NoteListItem = React.memo(function NoteListItem({
     <ClientOnly>
       <motion.div
         layout
-        initial={{ y: 20, opacity: 0 }}
+        initial={suppressEntrance ? false : { y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: -20, opacity: 0 }}
         whileHover={{ x: 2 }}
@@ -261,10 +274,14 @@ export const NoteListItem = React.memo(function NoteListItem({
             <span className={styles.itemDate}>{createdLabel}</span>
           )}
         </div>
-        {/* Only show preview if we're showing a title (not content as title) */}
-        {note.title && note.title.trim() !== "" && (
+        {/* Show the preview line when the note has a title, OR always for a draft
+            (reservePreview) so its row stays a constant two-line height. An empty draft
+            renders a blank reserved line rather than the "Empty note" placeholder text. */}
+        {(reservePreview || (note.title && note.title.trim() !== "")) && (
           <div className={styles.itemPreview}>
-            {preview}
+            {reservePreview && (!preview || preview === "Empty note")
+              ? " "
+              : preview}
           </div>
         )}
       </motion.div>

@@ -136,8 +136,12 @@ export function useNotes() {
     mutate: async (newNote: Partial<Note> & { temporaryId?: string }) => {
       try {
         const savedNote = await createNote(newNote)
-        setNotes(prev => [savedNote, ...prev])
-        return savedNote
+        // Stamp the draft's id (passed as temporaryId) as a stable client key so the
+        // sidebar list keeps the SAME element across the draft→saved swap — no remount,
+        // no visual jump. Loaded notes have no _clientKey and key by their real id.
+        const withKey = { ...savedNote, _clientKey: newNote.temporaryId ?? savedNote.id } as Note
+        setNotes(prev => [withKey, ...prev])
+        return withKey
       } catch (error) {
         throw error
       }
@@ -149,8 +153,11 @@ export function useNotes() {
     mutate: async (updatedNote: Partial<Note> & { id: string }) => {
       try {
         const savedNote = await updateNote(updatedNote)
-        setNotes(prev => prev.map(note => 
-          note.id === updatedNote.id ? savedNote : note
+        setNotes(prev => prev.map(note =>
+          // Preserve the stable client key so later saves don't remount the list item
+          note.id === updatedNote.id
+            ? ({ ...savedNote, _clientKey: (note as Note & { _clientKey?: string })._clientKey } as Note)
+            : note
         ))
         return savedNote
       } catch (error) {

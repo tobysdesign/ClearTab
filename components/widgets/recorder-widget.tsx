@@ -683,7 +683,10 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
     return bars;
   }, [state, waveformHistory]);
 
-  const { ref, isMini } = useWidgetHeight();
+  const { ref, isMini, height } = useWidgetHeight();
+  // Hide the "Voice note" title when the widget is short (< 160px tall) to reclaim the
+  // vertical space. height is 0 until the first measurement, so default to showing it.
+  const hideTitle = height > 0 && height < 160;
 
   // Waveform for mini mode: enough bars to fill the row at any width. The
   // container is right-aligned and clips overflow, so narrow widgets drop the
@@ -926,10 +929,12 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                 <div className={styles.container}>
                   <div className={styles.content}>
                     {/* Header */}
-                    <WidgetHeader
-                      title="voice note"
-                      className="!justify-start"
-                    />
+                    {!hideTitle && (
+                      <WidgetHeader
+                        title="Voice note"
+                        className="!justify-start"
+                      />
+                    )}
 
                     {/* Body */}
                     <div className={styles.body}>
@@ -981,7 +986,7 @@ export function RecorderWidget({ className }: RecorderWidgetProps) {
                 >
                   <div className={styles.content}>
                     {/* Header */}
-                    <WidgetHeader title="Voice notes" />
+                    {!hideTitle && <WidgetHeader title="Voice notes" />}
 
                     {/* Body */}
                     <div className={styles.recordingBody}>

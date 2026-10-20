@@ -1225,9 +1225,9 @@
     }
 
     .body {
-        justify-content: center;
+        justify-content: end;
         gap: 8px;
-        margin-bottom: 12px;
+        margin-bottom: 22px;
     }
 
     .recordingBody {

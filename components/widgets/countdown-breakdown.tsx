@@ -145,9 +145,11 @@ function minRowWidth(units: Unit[]) {
 // Full grids if they fit at design size; otherwise only the remaining dots.
 // Too narrow for even the columns -> stack the numbers vertically, drop the dots.
 function chooseLayout(width: number, height: number, units: Unit[]) {
-  if (width < minRowWidth(units)) {
-    // Days-only view. When too short for the dot grid on top, lay the number out on
-    // the left with the "Days until <title>" caption on the right instead.
+  // Use the days-only view (one dot per day + the total + "Days until <title>") whenever
+  // the widget is short (< 180px tall), regardless of width, or too narrow for the
+  // side-by-side months/weeks/days breakdown. The full breakdown needs more height than
+  // that to read cleanly.
+  if (height < 180 || width < minRowWidth(units)) {
     const daysHorizontal = height < 170;
     return {
       rows: 1 as Rows,
