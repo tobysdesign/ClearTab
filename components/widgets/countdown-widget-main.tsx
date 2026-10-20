@@ -296,6 +296,7 @@ export function CountdownWidget({
                   data-testid={COUNTDOWN_ADD_DATE_TESTID}
                   onClick={() => setIsSetupOpen(true)}
                   tooltip="Edit countdown"
+                  variant="ghost"
                 >
                   <PenIcon size={16} />
                 </AddButton>
