@@ -239,7 +239,7 @@ select {
 
 .dock-handle {
   /* box model */
-  padding: 0.5rem;
+  padding: 5px;
   border-radius: 8px;
 
   /* typography */

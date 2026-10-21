@@ -4,7 +4,8 @@
 import { CloseIcon } from '@/components/icons'
 import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
 import { Input } from '@/components/ui/input'
-import { DockIconButton, ShinyAiButton } from '@cleartab/ui'
+import { DockIconButton } from '@cleartab/ui'
+import { AiShaderButton } from '@/components/ai/ai-shader-button'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -57,7 +58,7 @@ export function DockContent({
                 />
             </DockIconButton>
 
-            <ShinyAiButton
+            <AiShaderButton
                 data-testid="ai-chat-trigger"
                 onClick={handleToggleChat}
                 tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}

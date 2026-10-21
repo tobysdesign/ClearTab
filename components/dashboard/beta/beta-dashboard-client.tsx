@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { motion, PanInfo, useAnimationControls } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { DragIcon } from '@/components/icons'
+import { DraggableGlyphIcon } from '@/components/icons/dock-icons'
 import { BetaDockContent } from './beta-dock-content'
 import { BetaAdaptiveGrid } from './beta-adaptive-grid'
 import dynamic from 'next/dynamic'
@@ -183,6 +184,14 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
         const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
         if (!isTyping) setEditMode(false)
       }
+      if (e.key === 'Enter' && editMode) {
+        const target = e.target as HTMLElement
+        const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+        if (!isTyping) {
+          e.preventDefault()
+          setEditMode(false)
+        }
+      }
       if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
         const target = e.target as HTMLElement
         const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
@@ -195,7 +204,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [editingEnabled, setEditMode])
+  }, [editingEnabled, setEditMode, editMode])
 
   const calculateDropZones = useCallback(() => {
     if (typeof window === 'undefined') return []
@@ -470,7 +479,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                   target.setPointerCapture(e.pointerId)
                 }}
               >
-                <DragIcon size={16} className={betaStyles.dockDragIcon} />
+                <DraggableGlyphIcon size={32} className={betaStyles.dockDragIcon} />
               </div>
             </div>
           </motion.div>,

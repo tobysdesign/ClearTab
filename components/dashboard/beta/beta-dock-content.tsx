@@ -3,8 +3,10 @@
 import React from 'react'
 import { CloseIcon } from '@/components/icons'
 import { LayoutToggleIcon } from '@/components/icons/layout-toggle-icon'
+import { LayoutGlyphIcon, ShortcutsGlyphIcon } from '@/components/icons/dock-icons'
 import { Input } from '@/components/ui/input'
-import { DockIconButton, ShinyAiButton, Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
+import { DockIconButton, Tooltip, TooltipContent, TooltipTrigger } from '@cleartab/ui'
+import { AiShaderButton } from '@/components/ai/ai-shader-button'
 import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
@@ -65,25 +67,22 @@ export function BetaDockContent({
       <div
         className={cn(
           styles.container,
-          isVertical ? styles.containerVertical : styles.containerHorizontal
+          isVertical ? styles.containerVertical : styles.containerHorizontal,
+          editMode && styles.containerEditing
         )}
       >
         {editMode ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                onClick={onToggleEdit}
-                className={styles.doneButton}
-                aria-pressed={true}
-                aria-label="Done editing layout"
-                data-testid="layout-trigger"
-              >
-                <span className={cn('material-symbols-outlined', styles.doneIcon)}>check</span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Done</TooltipContent>
-          </Tooltip>
+          <button
+            type="button"
+            onClick={onToggleEdit}
+            className={styles.doneButton}
+            aria-pressed={true}
+            aria-label="Done editing layout"
+            data-testid="layout-trigger"
+          >
+            <span>Done</span>
+            <kbd className={styles.doneKbd}>Enter</kbd>
+          </button>
         ) : (
           <DockIconButton
             onClick={onToggleEdit}
@@ -91,7 +90,7 @@ export function BetaDockContent({
             shortcut="⌘L"
             data-testid="layout-trigger"
           >
-            <LayoutToggleIcon isToggled={false} size={16} />
+            <LayoutGlyphIcon size={32} />
           </DockIconButton>
         )}
 
@@ -99,7 +98,7 @@ export function BetaDockContent({
             Done toggle (and the drag handle, rendered by the parent) remain. */}
         {!editMode && (
           <>
-            <ShinyAiButton
+            <AiShaderButton
               data-testid="ai-chat-trigger"
               onClick={handleToggleChat}
               tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
@@ -141,7 +140,7 @@ export function BetaDockContent({
               shortcut="?"
               data-testid="shortcuts-trigger"
             >
-              <span className={cn('material-symbols-outlined', styles.shortcutsIcon)}>keyboard</span>
+              <ShortcutsGlyphIcon size={32} />
             </DockIconButton>
           </>
         )}

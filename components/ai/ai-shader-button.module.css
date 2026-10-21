@@ -1,0 +1,62 @@
+.button {
+  /* layout */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* box model */
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  /* The shader canvas is larger than the button so the orbiting particles can live
+     outside the circle — let it overflow. */
+  overflow: visible;
+
+  /* visual — no bezel/ring; the shader draws the circle and its soft glow */
+  background: #0b0b0d;
+  cursor: pointer;
+
+  /* state */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button:active {
+  transform: scale(0.94);
+}
+
+.button:focus-visible {
+  outline: 2px solid rgba(197, 123, 147, 0.7);
+  outline-offset: 2px;
+}
+
+.canvas {
+  /* Larger than the button (CANVAS_SCALE = 2.2x) and centred, so the orbit ring has
+     room beyond the circle. The shader clips the circle + particles via alpha; the rest
+     of this box is transparent. */
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.face {
+  position: relative;
+  z-index: 1;
+  /* As large as fits inside the 42px circle (the glyph is wide, so width is the limit). */
+  width: 36px;
+  height: 20px;
+  color: #ababab;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+  transition: color 0.2s ease;
+}
+
+.button:hover .face {
+  color: #ffffff;
+}

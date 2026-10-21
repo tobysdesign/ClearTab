@@ -50,6 +50,7 @@ export function PresetFlank({ presetLayout, setPresetLayout, orientation }: Pres
       className={cn(styles.flank, orientation === 'vertical' ? styles.flankVertical : styles.flankHorizontal)}
       data-testid="edit-presets"
     >
+      <span className={styles.flankLabel}>Presets</span>
       {PRESET_ORDER.map((id) => {
         const active = presetLayout === id
         return (

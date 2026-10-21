@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { SettingsIcon } from '@/components/icons'
+import { SettingsGlyphIcon } from '@/components/icons/dock-icons'
 import { DockIconButton } from '@cleartab/ui'
 import { cn } from '@/lib/utils'
 import styles from './settings-trigger.module.css'
@@ -27,7 +27,7 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
       title="Settings"
       shortcut="⌘," 
     >
-      <SettingsIcon size={16} className={styles.settingsIcon} />
+      <SettingsGlyphIcon size={32} className={styles.settingsIcon} />
       <span className="sr-only">Open Settings</span>
     </DockIconButton>
   )
