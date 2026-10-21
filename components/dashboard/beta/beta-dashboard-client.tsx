@@ -192,19 +192,9 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
           setEditMode(false)
         }
       }
-      // "?" — match the character AND the Shift+/ position, since some layouts/OSes
-      // deliver e.key "/" (with Shift) or an empty e.code rather than "?".
-      if (
-        (e.key === '?' || ((e.key === '/' || e.code === 'Slash') && e.shiftKey)) &&
-        !e.metaKey &&
-        !e.ctrlKey
-      ) {
-        const target = e.target as HTMLElement
-        const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
-        if (!isTyping) {
-          e.preventDefault()
-          setIsShortcutsModalOpen((prev) => !prev)
-        }
+      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
+        e.preventDefault()
+        setIsShortcutsModalOpen((prev) => !prev)
       }
     }
 

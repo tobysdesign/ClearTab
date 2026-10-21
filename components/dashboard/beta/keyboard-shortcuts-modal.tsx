@@ -19,7 +19,7 @@ const SHORTCUTS: ShortcutEntry[] = [
   { keys: ['⌘', 'L'], description: 'Choose dashboard layout' },
   { keys: ['⌘', 'F'], description: 'Search' },
   { keys: ['⌘', ','], description: 'Open settings' },
-  { keys: ['?'], description: 'Show keyboard shortcuts' },
+  { keys: ['⌘', '/'], description: 'Show keyboard shortcuts' },
   { keys: ['Esc'], description: 'Close the open modal or clear search' },
 ]
 

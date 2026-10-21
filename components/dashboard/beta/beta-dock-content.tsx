@@ -137,7 +137,7 @@ export function BetaDockContent({
             <DockIconButton
               onClick={onOpenShortcuts}
               title="Keyboard shortcuts"
-              shortcut="?"
+              shortcut="⌘/"
               data-testid="shortcuts-trigger"
             >
               <ShortcutsGlyphIcon size={32} />
