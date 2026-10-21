@@ -17,7 +17,7 @@ const KeyboardShortcutsModal = dynamic(
 
 import { PieGuide } from '../pie-guide'
 import { type ReactNode } from 'react'
-import { BrandedLoader } from '@cleartab/ui'
+import { BrandedLoader, Tooltip, TooltipTrigger, TooltipContent } from '@cleartab/ui'
 import {
   useBetaWidgets,
   type BetaPresetLayout,
@@ -478,15 +478,22 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 onOpenShortcuts={() => setIsShortcutsModalOpen((prev) => !prev)}
               />
 
-              <div
-                className="dock-handle"
-                onPointerDown={(e) => {
-                  const target = e.currentTarget as HTMLDivElement
-                  target.setPointerCapture(e.pointerId)
-                }}
-              >
-                <DraggableGlyphIcon size={32} className={betaStyles.dockDragIcon} />
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="dock-handle"
+                    onPointerDown={(e) => {
+                      const target = e.currentTarget as HTMLDivElement
+                      target.setPointerCapture(e.pointerId)
+                    }}
+                  >
+                    <DraggableGlyphIcon size={32} className={betaStyles.dockDragIcon} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Drag to reposition the dock (top, right, bottom, left).
+                </TooltipContent>
+              </Tooltip>
             </div>
           </motion.div>,
           document.body
