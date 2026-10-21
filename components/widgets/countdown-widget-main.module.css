@@ -125,9 +125,10 @@
     display: grid;
     justify-items: start;
     align-items: start;
-    /* Spread the leftover across the full box (min row gap is set in JS) */
-    justify-content: space-between;
-    align-content: space-between;
+    /* Cluster the dots (gap is set in JS): centred horizontally, packed to the bottom
+       toward the number below, with the leftover space left empty above/around. */
+    justify-content: center;
+    align-content: end;
     flex: 1;
     min-height: 0;
     overflow: hidden;
