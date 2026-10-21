@@ -94,7 +94,10 @@ void main() {
   float n2 = fbm(noiseUv + warp + vec2(n1, t * 1.2));
 
   float theta = atan(c.y, c.x);
-  float distOut = max(d - R, 0.0);                       // 0 at edge, grows outward
+  float distOut = max(d - R, 0.0);                       // 0 at edge, grows outward (round)
+  // Elliptical distance (compressed vertically) for the GLOW only, so the bloom fits the
+  // short dock's height but still spreads horizontally — like the reference's side glow.
+  float distOutGlow = max(length(vec2(c.x, c.y * 1.7)) - R, 0.0);
 
   // Non-uniform halo: a directional bias (one side clearly stronger) plus big soft
   // lobes, so it never reads as an even ring.
@@ -113,14 +116,15 @@ void main() {
   glass += uGlassColor * exp(-d * 10.0) * uClick * 0.6;  // centre flash on click
 
   // Outer glow: coloured light fading outward, broken by filaments, biased to one side.
-  float reach = mix(0.14, 0.34, uHover);                 // reaches further on hover
-  float outerGlow = exp(-distOut / reach * 2.3) * angVar * filaments * (1.0 - circleMask);
+  // Kept compact so the bloom fits inside the short dock instead of clipping its edges.
+  float reach = mix(0.07, 0.16, uHover);
+  float outerGlow = exp(-distOutGlow / reach * 2.3) * angVar * filaments * (1.0 - circleMask);
   float glowI = mix(0.32, 1.35, energy);                 // a bit more visible at rest
   float glowA = clamp(outerGlow * glowI, 0.0, 1.0) * (1.0 - circleMask);
 
   // Thin rim right at the circle edge — brightest where the glow is strongest, so it
   // reads as glowing light (not a drawn bezel).
-  float rim = exp(-distOut / 0.014) * (1.0 - circleMask) * angVar;
+  float rim = exp(-distOutGlow / 0.014) * (1.0 - circleMask) * angVar;
   float rimA = clamp(rim * mix(0.3, 1.0, energy), 0.0, 1.0) * (1.0 - circleMask);
 
   // White at rest, warming to the accent (red) on hover.
@@ -133,7 +137,7 @@ void main() {
   float particles = 0.0;
   const int N = 24;
   float activeCount = mix(10.0, 22.0, uHover);            // fewer at rest, more on hover
-  float maxR = mix(R + 0.10, 0.48, uHover);               // tighter at rest, spread on hover
+  float maxR = mix(R + 0.09, 0.30, uHover);               // tight at rest, modest spread on hover
   for (int i = 0; i < N; i++) {
     float fi = float(i);
     float gate = smoothstep(activeCount, activeCount - 2.0, fi); // extra ones fade in on hover
@@ -141,9 +145,9 @@ void main() {
     float h1 = hash(vec2(fi, 4.3));
     float h2 = hash(vec2(fi, 9.1));
     float radius = mix(R + 0.025, maxR, h0);
-    float dir = mix(-1.0, 1.0, step(0.5, h1));
-    // Gentle orbit; hover adds only a touch (keeps the spin calm, not frantic).
-    float spd = mix(0.15, 0.28, h2) * dir * (1.0 + uHover * 0.2);
+    // All orbit the same way — two counter-rotating sets looked mechanical. Varied
+    // per-particle speed gives organic differential drift; slow.
+    float spd = mix(0.05, 0.13, h2) * (1.0 + uHover * 0.25);
     float pAng = h0 * 6.2831 + t * spd;
     // radial drift so they don't travel on perfect rails
     float rr = radius + sin(t * mix(0.5, 1.1, h1) + fi) * 0.018;
