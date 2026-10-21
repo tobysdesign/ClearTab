@@ -196,6 +196,9 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
   return undefined;
 }
 
+  // Enable query if not loading OR if we have session cookies
+  const scheduleEnabled = !loading || hasSessionCookies
+
   const {
     data,
     isLoading,
@@ -205,7 +208,15 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
     queryKey: ['schedule'],
     initialData: getInitialCachedSchedule,
     initialDataUpdatedAt: () => 0,
-    enabled: !loading || hasSessionCookies, // Enable query if not loading OR if we have session cookies
+    enabled: scheduleEnabled,
+    // Stale-while-revalidate: the localStorage seed paints instantly, but we always revalidate so
+    // the schedule reflects the server after any change — a connected account, a re-auth, a token
+    // refresh, or an event added directly in Google Calendar. These override the app-wide
+    // refetchOnMount:false / refetchOnWindowFocus:false defaults for this query only; the 60s
+    // staleTime keeps rapid remounts/refocuses from spamming /api/calendar.
+    staleTime: 60_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     retry: (failureCount, error) => {
       const errorWithMeta = error as Error & { errorType?: string; status?: number };
       if (errorWithMeta.status === 401 || errorWithMeta.status === 403) {
@@ -318,7 +329,6 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
     const timer = setInterval(() => setNow(new Date()), 60000) // update 'now' every minute
     return () => clearInterval(timer)
   }, [])
-
 
   // Get all events grouped by day and sort them
   const groupedEvents = useMemo(() => {

@@ -133,6 +133,7 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
         queryClient.invalidateQueries({ queryKey: ["connectedAccounts"] });
         // Removed account's events should disappear without a reload
         queryClient.invalidateQueries({ queryKey: ["schedule"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-accounts"] });
         toast({ title: "Account logged out", duration: 3000 });
       },
       onError: (error) => {
@@ -148,17 +149,38 @@ export const AccountSettings = React.forwardRef<HTMLElement, AccountSettingsProp
       },
     });
 
-    // When accounts are added (after the connect redirect) or removed, refresh the schedule
-    // so the change shows up without a manual reload.
+    // When accounts are added or removed while this page stays mounted, refresh the schedule
+    // and the widget's account list so the change shows up without a manual reload.
     const prevAccountCount = React.useRef<number | null>(null);
     React.useEffect(() => {
       if (accountsLoading) return;
       const count = connectedAccounts.length;
       if (prevAccountCount.current !== null && prevAccountCount.current !== count) {
         queryClient.invalidateQueries({ queryKey: ["schedule"] });
+        queryClient.invalidateQueries({ queryKey: ["calendar-accounts"] });
       }
       prevAccountCount.current = count;
     }, [connectedAccounts, accountsLoading, queryClient]);
+
+    // Connecting an account redirects back here. The Schedule widget now revalidates on mount
+    // (stale-while-revalidate), so returning to the dashboard already refetches — but invalidate
+    // here too so a dashboard mounted alongside this panel (e.g. split view) updates immediately
+    // rather than waiting for a remount. Then drop the success param so this runs once.
+    React.useEffect(() => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("success") !== "account_connected") return;
+      queryClient.invalidateQueries({ queryKey: ["schedule"] });
+      queryClient.invalidateQueries({ queryKey: ["calendar-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["connectedAccounts"] });
+      params.delete("success");
+      const query = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${query ? `?${query}` : ""}`,
+      );
+    }, [queryClient]);
 
 
     const renderHeading = (actions?: React.ReactNode) => (
