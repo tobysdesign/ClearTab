@@ -15,9 +15,9 @@
   --rot-x: 10deg;           /* angle — tweak freely */
   --rot-y: -22deg;          /* angle — tweak freely */
   --rot-z: 14deg;           /* angle — tweak freely */
-  --depth: 0px;             /* Framer "Depth" = translateZ */
-  --perspective: 500px;     /* Framer "Perspective" */
-  --scale: 0.76;            /* overall size of the field */
+  --depth: 0px;             /* translateZ */
+  --perspective: 1200px;    /* Framer "Perspective" — raised from 500 so the moving/zoomed grid never folds over the camera plane */
+  --scale: 0.82;            /* overall size of the field */
 
   /* Large cards; the field overfills the viewport and recedes to the far
      (upper-left) corner, which the left mask fades into the text area. */
@@ -78,6 +78,7 @@
 }
 
 .grid {
+  position: relative; /* so card offsetLeft/Top are local to the grid (the loop reads them) */
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--card-w));
   grid-auto-rows: var(--row-h);

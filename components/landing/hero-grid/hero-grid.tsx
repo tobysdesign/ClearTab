@@ -5,29 +5,18 @@ import styles from './hero-grid.module.css'
 import { HERO_GRID_WIDGETS } from './widgets'
 
 /**
- * Camera-fly timeline (M2). Each keyframe frames the grid: `tx`/`ty` slide the
- * grid across the tilted plane (px, in the plane's local space) and `scale`
- * zooms in on a card. `hold` is how long to rest on the keyframe; `travel` is
- * how long the move INTO it takes. The loop runs: overview → slide+zoom into a
- * card → hold → zoom back out → next card → …, easing every move.
- *
- * These are authored shots rather than a projected focus point — good enough to
- * read as a camera fly, and the single source to tune the choreography.
+ * Camera-fly config (M2). The loop lands on an actual widget card: it translates
+ * the grid so a chosen card's centre arrives at a fixed focus point (in the
+ * plane's local space, which projects to a constant spot on screen — right of
+ * the hero text), holds, then flies to the next card. The path visits far-apart
+ * interior cards so there's lots of movement between stops.
  */
-interface Shot {
-  tx: number
-  ty: number
-  scale: number
-  travel: number // seconds to ease into this shot
-  hold: number // seconds to rest on it
-}
-
-const SHOTS: Shot[] = [
-  { tx: 0, ty: 0, scale: 1.0, travel: 3.2, hold: 1.6 }, // overview
-  { tx: -300, ty: -150, scale: 1.5, travel: 3.4, hold: 2.2 }, // fly into an upper-right card
-  { tx: 0, ty: 0, scale: 1.0, travel: 3.2, hold: 1.4 }, // pull back to overview
-  { tx: 250, ty: 150, scale: 1.46, travel: 3.4, hold: 2.2 }, // fly into a lower card
-]
+const ZOOM = 1.72 // how close the camera sits on a landed widget
+const TRAVEL = 2.3 // seconds to fly between widgets
+const HOLD = 1.25 // seconds resting on a widget
+const FOCUS_X = 110 // local-space landing point — tune to sit the widget right of the text
+const FOCUS_Y = -26
+const MAX_STOPS = 6 // how many widgets the loop visits before repeating
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
@@ -61,47 +50,83 @@ export function HeroGrid() {
     const grid = gridRef.current
     if (!grid) return
 
-    // Respect reduced motion: leave the grid at the overview pose, no loop.
+    const park = () => {
+      grid.style.transform = `translate3d(${FOCUS_X}px, ${FOCUS_Y}px, 0) scale(${ZOOM})`
+    }
+
+    // Respect reduced motion: land on the first widget and stay there, no loop.
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     if (reduce?.matches) {
-      grid.style.transform = 'translate3d(0, 0, 0) scale(1)'
+      park()
       return
     }
 
-    // Build a looping timeline: each segment eases from one shot to the next
-    // over `travel`, then holds for `hold`.
-    const segments = SHOTS.map((shot, i) => {
-      const from = SHOTS[(i - 1 + SHOTS.length) % SHOTS.length]
-      return { from, to: shot, travel: shot.travel, hold: shot.hold }
-    })
-    const total = segments.reduce((sum, s) => sum + s.travel + s.hold, 0)
+    // Each stop's grid translate so that card's centre lands at (FOCUS_X, FOCUS_Y)
+    // in plane-local space. Built lazily once the cards have laid out.
+    let stops: Array<{ tx: number; ty: number }> = []
+
+    const buildStops = () => {
+      const els = Array.from(grid.children) as HTMLElement[]
+      if (els.length === 0) return false
+      const gw = grid.clientWidth
+      const gh = grid.clientHeight
+      if (!gw || !gh) return false
+
+      const cards = els.map((el) => ({
+        cx: el.offsetLeft + el.offsetWidth / 2 - gw / 2,
+        cy: el.offsetTop + el.offsetHeight / 2 - gh / 2,
+      }))
+      // Prefer interior cards so zooming in never reveals the grid's edge.
+      let pool = cards
+        .map((c, i) => ({ i, ...c }))
+        .filter((c) => Math.abs(c.cx) < gw * 0.3 && Math.abs(c.cy) < gh * 0.34)
+      if (pool.length < 3) pool = cards.map((c, i) => ({ i, ...c }))
+
+      // Greedy "farthest next" ordering → big jumps between widgets.
+      const path = [pool[0]]
+      const used = new Set([pool[0].i])
+      let cur = pool[0]
+      while (path.length < Math.min(pool.length, MAX_STOPS)) {
+        let best: (typeof pool)[number] | null = null
+        let bestDist = -1
+        for (const p of pool) {
+          if (used.has(p.i)) continue
+          const d = (p.cx - cur.cx) ** 2 + (p.cy - cur.cy) ** 2
+          if (d > bestDist) {
+            bestDist = d
+            best = p
+          }
+        }
+        if (!best) break
+        path.push(best)
+        used.add(best.i)
+        cur = best
+      }
+
+      stops = path.map((p) => ({ tx: FOCUS_X - ZOOM * p.cx, ty: FOCUS_Y - ZOOM * p.cy }))
+      return stops.length >= 2
+    }
 
     let raf = 0
     const start = performance.now()
+    const seg = TRAVEL + HOLD
 
     const frame = (now: number) => {
-      let t = ((now - start) / 1000) % total
-      let tx = 0
-      let ty = 0
-      let scale = 1
-      for (const seg of segments) {
-        if (t < seg.travel) {
-          const e = easeInOut(t / seg.travel)
-          tx = seg.from.tx + (seg.to.tx - seg.from.tx) * e
-          ty = seg.from.ty + (seg.to.ty - seg.from.ty) * e
-          scale = seg.from.scale + (seg.to.scale - seg.from.scale) * e
-          break
-        }
-        t -= seg.travel
-        if (t < seg.hold) {
-          tx = seg.to.tx
-          ty = seg.to.ty
-          scale = seg.to.scale
-          break
-        }
-        t -= seg.hold
+      if (stops.length < 2 && !buildStops()) {
+        park()
+        raf = requestAnimationFrame(frame)
+        return
       }
-      grid.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`
+      const n = stops.length
+      const t = ((now - start) / 1000) % (n * seg)
+      const idx = Math.floor(t / seg)
+      const from = stops[idx]
+      const to = stops[(idx + 1) % n]
+      const local = t - idx * seg
+      const e = local < TRAVEL ? easeInOut(local / TRAVEL) : 1
+      const tx = from.tx + (to.tx - from.tx) * e
+      const ty = from.ty + (to.ty - from.ty) * e
+      grid.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${ZOOM})`
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
