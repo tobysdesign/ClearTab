@@ -69,29 +69,33 @@ export interface HeroGridEntry {
 }
 
 /**
- * The cards, in reading order (left→right, top→bottom as the grid flows).
- * Sized to read like a dashboard and dense enough that no empty edge shows
- * behind the hero text once the plane is tilted.
+ * Repeating pattern of widget types + row spans. The grid is generated from
+ * this so the total card count (and therefore how far the field spreads behind
+ * the tilted camera) is a single number to tune — see HERO_GRID_CARD_COUNT.
  */
-export const HERO_GRID_WIDGETS: HeroGridEntry[] = [
-  { id: 'tasks-1', Widget: TasksWidget, rows: 2 },
-  { id: 'weather-1', Widget: WeatherWidget, rows: 2 },
-  { id: 'notes-1', Widget: NotesWidget, rows: 2 },
-  { id: 'countdown-1', Widget: CountdownWidget, rows: 1 },
-  { id: 'recorder-1', Widget: RecorderWidget, rows: 1 },
-  { id: 'schedule-1', Widget: ScheduleWidget, rows: 2 },
-  { id: 'notes-2', Widget: NotesWidget, rows: 2 },
-  { id: 'tasks-2', Widget: TasksWidget, rows: 1 },
-  { id: 'countdown-2', Widget: CountdownWidget, rows: 1 },
-  { id: 'schedule-2', Widget: ScheduleWidget, rows: 2 },
-  { id: 'weather-2', Widget: WeatherWidget, rows: 2 },
-  { id: 'recorder-2', Widget: RecorderWidget, rows: 1 },
-  { id: 'notes-3', Widget: NotesWidget, rows: 2 },
-  { id: 'schedule-3', Widget: ScheduleWidget, rows: 2 },
-  { id: 'tasks-3', Widget: TasksWidget, rows: 2 },
-  { id: 'countdown-3', Widget: CountdownWidget, rows: 1 },
-  { id: 'recorder-3', Widget: RecorderWidget, rows: 1 },
-  { id: 'weather-3', Widget: WeatherWidget, rows: 2 },
-  { id: 'tasks-4', Widget: TasksWidget, rows: 1 },
-  { id: 'notes-4', Widget: NotesWidget, rows: 2 },
+const PATTERN: Array<{ Widget: HeroWidget; rows: 1 | 2 }> = [
+  { Widget: TasksWidget, rows: 2 },
+  { Widget: WeatherWidget, rows: 2 },
+  { Widget: NotesWidget, rows: 2 },
+  { Widget: CountdownWidget, rows: 1 },
+  { Widget: RecorderWidget, rows: 1 },
+  { Widget: ScheduleWidget, rows: 2 },
+  { Widget: NotesWidget, rows: 2 },
+  { Widget: TasksWidget, rows: 1 },
+  { Widget: CountdownWidget, rows: 1 },
+  { Widget: ScheduleWidget, rows: 2 },
+  { Widget: WeatherWidget, rows: 2 },
+  { Widget: RecorderWidget, rows: 1 },
 ]
+
+/** How many cards fill the grid. Enough that the zoomed-out field still covers
+ *  the viewport behind the hero copy without any empty edge. */
+export const HERO_GRID_CARD_COUNT = 20
+
+export const HERO_GRID_WIDGETS: HeroGridEntry[] = Array.from(
+  { length: HERO_GRID_CARD_COUNT },
+  (_, i) => {
+    const { Widget, rows } = PATTERN[i % PATTERN.length]
+    return { id: `cell-${i}`, Widget, rows }
+  },
+)

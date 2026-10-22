@@ -150,17 +150,27 @@
   padding: clamp(96px, 14vh, 150px) var(--gutter) 0;
 }
 
-/* Hero copy sits above the tilted widget grid, with a dependable dark scrim
-   behind it so the headline (#fff), muted subhead, CTAs and proof chips stay
-   WCAG-AA legible even over a bright card. (The animated gradient mask from
-   the original spec is deferred to M4 and is NOT load-bearing for contrast.) */
-.heroCopy {
-  --scrim-ink: 8 10 16;
-  --scrim-strong: 0.84;
-  --scrim-mid: 0.62;
-  --scrim-soft: 0.5;
-  --scrim-blur: 3px;
+/* Left gradient mask (owner's original spec): the hero fades into darkness on
+   the left so the headline (#fff), muted subhead, CTAs and proof chips stay
+   WCAG-AA legible. It sits ABOVE the grid but BELOW the copy and the Explainer
+   showcase (both z-index 2), so it only darkens the empty left/background area,
+   never the content. Tune the stops to move the fade. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    rgb(6 8 12 / 0.9) 0%,
+    rgb(6 8 12 / 0.82) 34%,
+    rgb(6 8 12 / 0.4) 52%,
+    rgb(6 8 12 / 0) 68%
+  );
+  pointer-events: none;
+}
 
+.heroCopy {
   position: relative;
   z-index: 2;
   /* Hold the copy to a left-hand column so the tilted widget grid reads in the
@@ -170,30 +180,6 @@
 
 .heroCopy .heroTitle {
   max-width: none;
-}
-
-.heroCopy::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -44px -56px -52px -64px;
-  border-radius: 28px;
-  background:
-    radial-gradient(
-      120% 120% at 18% 32%,
-      rgb(var(--scrim-ink) / var(--scrim-strong)) 0%,
-      rgb(var(--scrim-ink) / var(--scrim-mid)) 44%,
-      rgb(var(--scrim-ink) / 0) 80%
-    ),
-    linear-gradient(
-      180deg,
-      rgb(var(--scrim-ink) / var(--scrim-soft)) 0%,
-      rgb(var(--scrim-ink) / 0.42) 52%,
-      rgb(var(--scrim-ink) / 0) 96%
-    );
-  backdrop-filter: blur(var(--scrim-blur)) saturate(0.85);
-  -webkit-backdrop-filter: blur(var(--scrim-blur)) saturate(0.85);
-  pointer-events: none;
 }
 
 .heroMark {
