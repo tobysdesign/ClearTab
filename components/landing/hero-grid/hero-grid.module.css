@@ -1,0 +1,98 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Camera-fly hero background — Milestone 1 (static tilted widget grid).
+
+   Structure:  .viewport (camera: perspective) → .plane (tilt) → .grid (cards)
+
+   All tunables live as custom properties on .viewport so later milestones and
+   quick visual tweaks never touch the transform maths below.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.viewport {
+  /* ── Tunables ── */
+  /* Camera (owner-specified): Rotate X 15°, Rotate Y 13°, Zoom 0.62. */
+  --tilt-x: 15deg;          /* plane pitch (rotateX) */
+  --tilt-y: 13deg;          /* plane yaw   (rotateY) */
+  --zoom: 0.62;             /* camera zoom → plane scale (smaller = zoomed out) */
+  --perspective: 1600px;    /* camera distance — smaller = more dramatic */
+  --persp-origin-x: 52%;
+  --persp-origin-y: 36%;
+
+  /* Cards are sized up so that at the 0.62 zoom the grid still overfills the
+     viewport (no empty edge behind the hero copy). */
+  --card-w: 340px;          /* fixed card width */
+  --card-gap: 68px;         /* ~0.2 card widths */
+  --row-h: 210px;           /* a 1-row card is this tall; a 2-row card spans two */
+  --card-radius: 16px;
+  --cols: 6;                /* grid columns */
+
+  --plane-shift-x: 4%;
+  --plane-shift-y: 0%;
+  --plane-z: 0px;
+
+  --card-opacity: 0.94;
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  /* Centre the plane in the visible fold rather than the (much taller) hero,
+     so the grid fills the viewport where the copy sits. */
+  height: 100vh;
+  transform: translateX(-50%);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  perspective: var(--perspective);
+  perspective-origin: var(--persp-origin-x) var(--persp-origin-y);
+  /* Soften the very edges so clipped cards fade out instead of hard-cropping. */
+  -webkit-mask-image: radial-gradient(130% 120% at 50% 42%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(130% 120% at 50% 42%, #000 62%, transparent 100%);
+}
+
+.plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transform:
+    translate(-50%, -50%)
+    translate3d(var(--plane-shift-x), var(--plane-shift-y), var(--plane-z))
+    scale(var(--zoom))
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+  will-change: transform;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--card-w));
+  grid-auto-rows: var(--row-h);
+  grid-auto-flow: row dense;
+  gap: var(--card-gap);
+}
+
+.card {
+  width: var(--card-w);
+  grid-row: span 1;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  opacity: var(--card-opacity);
+  /* Grid items stretch to their track height, giving the demo widgets a
+     definite box to fill (they size themselves to 100%). */
+  isolation: isolate;
+  box-shadow:
+    0 24px 48px -16px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.card[data-rows='2'] {
+  grid-row: span 2;
+}
+
+/* Reduced motion: M1 is already static. The grid stays put; this is here so
+   later milestones that add the camera-fly loop inherit the opt-out. */
+@media (prefers-reduced-motion: reduce) {
+  .plane {
+    will-change: auto;
+  }
+}

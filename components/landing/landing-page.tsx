@@ -19,7 +19,8 @@ import {
   SparkleIcon,
   CheckIcon,
 } from '@/components/icons'
-import { HeroDemo } from './hero-demo'
+import { Explainer1 } from './explainer1'
+import { HeroGrid } from './hero-grid/hero-grid'
 import { AppIcon } from './app-icon'
 import { WorksAnywhere } from './works-anywhere'
 import { DemoEmbed } from './demo-embed'
@@ -219,34 +220,40 @@ export function LandingPage() {
       <main>
         {/* Hero */}
         <section className={styles.hero}>
-          <AppIcon size={72} className={`${styles.heroMark} ${styles.enter1}`} />
-          <h1 className={styles.heroTitle}>
-            <span className={`${styles.strong} ${styles.enter1}`}>Drift off. Land back on track. </span>
-            <span className={`${styles.muted} ${styles.enter2}`}>
-              Every new tab opens on your tasks, notes and all your calendars, in your order, with a private AI assistant
-              that runs on your device.
-            </span>
-          </h1>
-          <div className={`${styles.heroActions} ${styles.enter3}`}>
-            {primaryCta}
-            <a href="#anywhere" className={styles.secondaryButton}>Make it your homepage</a>
+          <HeroGrid />
+          <div className={styles.heroCopy}>
+            <AppIcon size={72} className={`${styles.heroMark} ${styles.enter1}`} />
+            <h1 className={styles.heroTitle}>
+              <span className={`${styles.strong} ${styles.enter1}`}>Drift off. Land back on track. </span>
+              <span className={`${styles.muted} ${styles.enter2}`}>
+                Every new tab opens on your tasks, notes and all your calendars, in your order, with a private AI assistant
+                that runs on your device.
+              </span>
+            </h1>
+            <div className={`${styles.heroActions} ${styles.enter3}`}>
+              {primaryCta}
+              <a href="#anywhere" className={styles.secondaryButton}>Make it your homepage</a>
+            </div>
+            <ul className={`${styles.proofList} ${styles.enter3}`}>
+              {PROOF_POINTS.map(({ icon: Icon, text }) => (
+                <li key={text} className={styles.proofChip}>
+                  <Icon size={15} className={styles.proofIcon} />
+                  {text}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className={`${styles.proofList} ${styles.enter3}`}>
-            {PROOF_POINTS.map(({ icon: Icon, text }) => (
-              <li key={text} className={styles.proofChip}>
-                <Icon size={15} className={styles.proofIcon} />
-                {text}
-              </li>
-            ))}
-          </ul>
 
           <div className={`${styles.heroStage} ${styles.enter4}`}>
             <div className={styles.heroDemo}>
-              <HeroDemo />
+              <Explainer1 />
             </div>
           </div>
         </section>
 
+        {/* Everything below the hero sits on an opaque charcoal backdrop, so the
+            CharcoalWave shader is only ever visible behind the hero grid. */}
+        <div className={styles.belowHero}>
         {/* Make it yours */}
         <section id="customise" className={styles.section}>
           <h2 className={`${styles.sectionTitle} ${styles.reveal}`} data-reveal>
@@ -413,9 +420,11 @@ export function LandingPage() {
           </h2>
           <div className={styles.heroActions}>{primaryCta}</div>
         </section>
+        </div>
       </main>
 
       <footer className={styles.footer}>
+        <div className={styles.footerInner}>
         <div className={styles.footerMeta}>
           <p>Made in Sydney.</p>
           <p>©{new Date().getFullYear()} ClearTab</p>
@@ -433,6 +442,7 @@ export function LandingPage() {
             <a href="#faq">FAQs</a>
             <Link href="/privacy">Privacy policy</Link>
           </div>
+        </div>
         </div>
       </footer>
     </div>

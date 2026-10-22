@@ -12,9 +12,16 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   min-height: 100vh;
-  background: var(--bg);
+  /* Transparent so the global CharcoalWave shader shows through in the hero.
+     Every section below restores an opaque charcoal backdrop, so the shader is
+     only ever visible behind the hero. */
+  background: transparent;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  /* The hero grid is a full-bleed 100vw layer; clip horizontally so it can
+     never add a horizontal scrollbar. `clip` (not `hidden`) keeps the page's
+     normal vertical scrolling and sticky/fixed behaviour intact. */
+  overflow-x: clip;
 }
 
 /* The dashboard locks body scrolling; public pages need it back */
@@ -137,9 +144,56 @@
 
 /* ── Hero ── */
 .hero {
+  position: relative;
   max-width: calc(var(--measure) + var(--gutter) * 2);
   margin: 0 auto;
   padding: clamp(96px, 14vh, 150px) var(--gutter) 0;
+}
+
+/* Hero copy sits above the tilted widget grid, with a dependable dark scrim
+   behind it so the headline (#fff), muted subhead, CTAs and proof chips stay
+   WCAG-AA legible even over a bright card. (The animated gradient mask from
+   the original spec is deferred to M4 and is NOT load-bearing for contrast.) */
+.heroCopy {
+  --scrim-ink: 8 10 16;
+  --scrim-strong: 0.84;
+  --scrim-mid: 0.62;
+  --scrim-soft: 0.5;
+  --scrim-blur: 3px;
+
+  position: relative;
+  z-index: 2;
+  /* Hold the copy to a left-hand column so the tilted widget grid reads in the
+     space beside and behind it, rather than the copy spanning the full width. */
+  max-width: clamp(380px, 46vw, 620px);
+}
+
+.heroCopy .heroTitle {
+  max-width: none;
+}
+
+.heroCopy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -44px -56px -52px -64px;
+  border-radius: 28px;
+  background:
+    radial-gradient(
+      120% 120% at 18% 32%,
+      rgb(var(--scrim-ink) / var(--scrim-strong)) 0%,
+      rgb(var(--scrim-ink) / var(--scrim-mid)) 44%,
+      rgb(var(--scrim-ink) / 0) 80%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(var(--scrim-ink) / var(--scrim-soft)) 0%,
+      rgb(var(--scrim-ink) / 0.42) 52%,
+      rgb(var(--scrim-ink) / 0) 96%
+    );
+  backdrop-filter: blur(var(--scrim-blur)) saturate(0.85);
+  -webkit-backdrop-filter: blur(var(--scrim-blur)) saturate(0.85);
+  pointer-events: none;
 }
 
 .heroMark {
@@ -251,6 +305,8 @@
 }
 
 .heroStage {
+  position: relative;
+  z-index: 2;
   margin-top: clamp(48px, 7vw, 88px);
   padding: clamp(28px, 6vw, 96px) clamp(16px, 6vw, 100px);
   border-radius: 16px;
@@ -326,6 +382,12 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* Opaque charcoal backdrop for everything below the hero. Full page width so
+   the shader never leaks through section gutters. */
+.belowHero {
+  background: var(--bg);
 }
 
 /* ── Sections ── */
@@ -603,6 +665,10 @@
 
 /* Footer */
 .footer {
+  background: var(--bg);
+}
+
+.footerInner {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
