@@ -23,7 +23,7 @@
      (upper-left) corner, which the left mask fades into the text area. */
   --card-w: 320px;          /* fixed card width */
   --card-gap: 120px;        /* gap — tweak freely */
-  --row-h: 200px;           /* a 1-row card is this tall; a 2-row card spans two */
+  --row-h: 320px;           /* = card width, so the lattice pitch is square (clean diagonals) */
   --card-radius: 16px;
   --cols: 6;                /* grid columns */
 
@@ -103,9 +103,6 @@
     0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
-.card[data-rows='2'] {
-  grid-row: span 2;
-}
 
 /* Reduced motion: stop the pan and leave the grid static. */
 @media (prefers-reduced-motion: reduce) {

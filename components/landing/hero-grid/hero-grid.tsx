@@ -111,16 +111,39 @@ export function HeroGrid() {
         { x: -step, y: step }, //     S_L  lower-left valley
       ]
 
-      // Fly the ideal anchors directly (land each on FOCUS). Using the ideal
-      // positions — not snapped card centres — guarantees the exact spec
-      // geometry on any layout; whatever widget sits at an anchor gets framed.
-      return anchors.map((a) => ({
-        tx: FOCUS.x - ZOOM * a.x,
-        ty: FOCUS.y - ZOOM * a.y,
-        scale: ZOOM,
-        travel: TRAVEL,
-        hold: HOLD,
-      }))
+      // Snap each anchor to the nearest distinct card centre, so the camera
+      // lands squarely ON a widget. The grid is a uniform SQUARE lattice (row
+      // pitch = column pitch), so the snapped points stay on the diamond — every
+      // hop a diagonal, every turn ~90°.
+      const gcx = grid.offsetLeft + grid.offsetWidth / 2
+      const gcy = grid.offsetTop + grid.offsetHeight / 2
+      const pos = Array.from(cards, (el) => {
+        const c = el as HTMLElement
+        return { ox: c.offsetLeft + c.offsetWidth / 2 - gcx, oy: c.offsetTop + c.offsetHeight / 2 - gcy }
+      })
+      const used = new Set<number>()
+      return anchors.map((a) => {
+        let best = 0
+        let bestD = Infinity
+        for (let i = 0; i < n; i++) {
+          if (used.has(i)) continue
+          const dx = pos[i].ox - a.x
+          const dy = pos[i].oy - a.y
+          const d = dx * dx + dy * dy
+          if (d < bestD) {
+            bestD = d
+            best = i
+          }
+        }
+        used.add(best)
+        return {
+          tx: FOCUS.x - ZOOM * pos[best].ox,
+          ty: FOCUS.y - ZOOM * pos[best].oy,
+          scale: ZOOM,
+          travel: TRAVEL,
+          hold: HOLD,
+        }
+      })
     }
 
     const frame = (now: number) => {
