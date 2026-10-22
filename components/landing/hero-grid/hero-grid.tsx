@@ -17,20 +17,20 @@ import { HERO_GRID_WIDGETS } from './widgets'
  * how long to rest on each. Add entries for more movement between widgets.
  */
 const VISIT: Array<{ card: number; zoom: number; hold: number }> = [
-  { card: 2, zoom: 1.34, hold: 1.0 },
-  { card: 9, zoom: 1.3, hold: 0.9 },
-  { card: 5, zoom: 1.36, hold: 1.0 },
-  { card: 14, zoom: 1.32, hold: 0.9 },
-  { card: 7, zoom: 1.34, hold: 1.0 },
-  { card: 17, zoom: 1.3, hold: 0.9 },
-  { card: 11, zoom: 1.36, hold: 1.0 },
-  { card: 4, zoom: 1.32, hold: 0.9 },
-  { card: 15, zoom: 1.34, hold: 1.0 },
-  { card: 8, zoom: 1.3, hold: 0.9 },
+  { card: 2, zoom: 1.34, hold: 2.6 },
+  { card: 9, zoom: 1.3, hold: 2.4 },
+  { card: 5, zoom: 1.36, hold: 2.6 },
+  { card: 14, zoom: 1.32, hold: 2.4 },
+  { card: 7, zoom: 1.34, hold: 2.6 },
+  { card: 17, zoom: 1.3, hold: 2.4 },
+  { card: 11, zoom: 1.36, hold: 2.6 },
+  { card: 4, zoom: 1.32, hold: 2.4 },
+  { card: 15, zoom: 1.34, hold: 2.6 },
+  { card: 8, zoom: 1.3, hold: 2.4 },
 ]
 
 /** Seconds to fly between two widgets. */
-const TRAVEL = 1.5
+const TRAVEL = 3.2
 /** Plane-local point (offset from grid centre) that a landed widget centres on;
  *  positive x sits it right of the hero copy. */
 const FOCUS = { x: 150, y: 10 }

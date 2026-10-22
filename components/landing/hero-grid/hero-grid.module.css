@@ -22,7 +22,7 @@
   /* Large cards; the field overfills the viewport and recedes to the far
      (upper-left) corner, which the left mask fades into the text area. */
   --card-w: 320px;          /* fixed card width */
-  --card-gap: 64px;         /* gap — tweak freely (~0.2 card widths) */
+  --card-gap: 120px;        /* gap — tweak freely */
   --row-h: 200px;           /* a 1-row card is this tall; a 2-row card spans two */
   --card-radius: 16px;
   --cols: 6;                /* grid columns */
