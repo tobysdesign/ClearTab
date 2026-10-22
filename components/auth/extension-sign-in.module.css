@@ -10,7 +10,9 @@
   gap: 24px;
 
   /* box model */
-  padding: 16px;
+  padding: 24px 16px;
+  /* Let the taller signed-out card scroll rather than clip in a short window */
+  overflow-y: auto;
 }
 
 .card {
@@ -22,7 +24,7 @@
 
   /* box model */
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
 
   /* typography */
   text-align: center;
@@ -41,12 +43,142 @@
 
 .subtitle {
   /* box model */
-  margin: 0 0 12px;
+  margin: 0 0 4px;
 
   /* typography */
   font-size: 14px;
   line-height: 20px;
   color: var(--widget-text-light);
+}
+
+/* Why: what you get once signed in */
+.valueList {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* box model */
+  width: 100%;
+  margin: 8px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.valueItem {
+  /* layout */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  /* typography */
+  text-align: left;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--widget-text-light);
+}
+
+.valueIcon {
+  /* layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* box model */
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+
+  /* visual */
+  color: var(--widget-text-muted);
+}
+
+.valueText strong {
+  font-weight: 600;
+  color: #e6e6e6;
+}
+
+/* What: the Google access being granted */
+.access {
+  /* layout */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  /* box model */
+  width: 100%;
+  margin: 8px 0;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+
+  /* typography */
+  text-align: left;
+
+  /* visual */
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.accessTitle {
+  /* box model */
+  margin: 0 0 2px;
+
+  /* typography */
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--widget-text-muted);
+}
+
+.accessRow {
+  /* layout */
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  /* typography */
+  font-size: 12.5px;
+  line-height: 17px;
+  color: var(--widget-text-light);
+}
+
+.accessIcon {
+  /* layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* box model */
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+
+  /* visual */
+  color: var(--widget-text-muted);
+}
+
+.accessNote {
+  /* layout */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  /* box model */
+  margin: 2px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+  /* typography */
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--widget-text-muted);
+}
+
+.accessNote svg {
+  flex-shrink: 0;
 }
 
 .primaryButton {
