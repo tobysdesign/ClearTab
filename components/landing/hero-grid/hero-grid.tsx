@@ -91,76 +91,32 @@ export function HeroGrid() {
       const cards = grid.children
       const n = cards.length
       if (!n || !grid.offsetWidth) return null
-      const gcx = grid.offsetLeft + grid.offsetWidth / 2
-      const gcy = grid.offsetTop + grid.offsetHeight / 2
-      const pos = Array.from(cards, (el) => {
-        const c = el as HTMLElement
-        return { ox: c.offsetLeft + c.offsetWidth / 2 - gcx, oy: c.offsetTop + c.offsetHeight / 2 - gcy }
-      })
-
-      // Double-diamond circuit. Two concentric diamonds (outer then inner),
-      // each visited N → E → S → W. Every anchor sits on an axis, so every hop
-      // between them is a 45°-ish DIAGONAL and every turn is 90° — no move is
-      // horizontal or vertical, none reverses the one before it, and the loop
-      // closes on itself. We just land on the real card nearest each anchor.
+      // Side-by-side DOUBLE DIAMOND: two diamonds (left + right) sharing the
+      // centre, traced as one continuous ~45° zig-zag that crosses the centre
+      // twice: W_L → N_L → C → N_R → E_R → S_R → C → S_L → (loop). Every leg is
+      // a 45° diagonal and every turn is 90°, so no move is horizontal/vertical,
+      // none reverses the one before it, and the loop closes on itself.
       const halfW = grid.offsetWidth / 2
       const halfH = grid.offsetHeight / 2
-      const rOuter = Math.min(halfW, halfH) * 0.66
-      const rInner = rOuter * 0.6
+      const step = Math.min(halfW / 2, halfH) * 0.82 // diagonal leg size (keeps legs ~45°)
+      const cs = step * 0.16 // small centre offset so the two centre passes don't coincide
       const anchors = [
-        { x: 0, y: -rOuter }, // outer N
-        { x: rOuter, y: 0 }, //  outer E
-        { x: 0, y: rOuter }, //  outer S
-        { x: -rOuter, y: 0 }, // outer W
-        { x: 0, y: -rInner }, // inner N
-        { x: rInner, y: 0 }, //  inner E
-        { x: 0, y: rInner }, //  inner S
-        { x: -rInner, y: 0 }, // inner W
+        { x: -2 * step, y: 0 }, //    W_L  far left
+        { x: -step, y: -step }, //    N_L  upper-left peak
+        { x: -cs, y: 0 }, //          C    centre, first pass
+        { x: step, y: -step }, //     N_R  upper-right peak
+        { x: 2 * step, y: 0 }, //     E_R  far right
+        { x: step, y: step }, //      S_R  lower-right valley
+        { x: cs, y: 0 }, //           C    centre, second pass
+        { x: -step, y: step }, //     S_L  lower-left valley
       ]
 
-      // Diagonal-ness of a vector: shorter axis over longer (1 = perfect 45°).
-      const ratioOf = (dx: number, dy: number) => {
-        const ax = Math.abs(dx)
-        const ay = Math.abs(dy)
-        return Math.min(ax, ay) / (Math.max(ax, ay) || 1)
-      }
-      const K = 7 // candidate cards per anchor
-      const order: number[] = []
-      const used = new Set<number>()
-      anchors.forEach((a, ai) => {
-        const isLast = ai === anchors.length - 1
-        // The K unused cards nearest this anchor.
-        const cand = pos
-          .map((p, i) => ({ i, dd: (p.ox - a.x) ** 2 + (p.oy - a.y) ** 2 }))
-          .filter((c) => !used.has(c.i))
-          .sort((x, y) => x.dd - y.dd)
-          .slice(0, K)
-        if (!cand.length) return
-        let pick = cand[0].i
-        if (order.length > 0) {
-          // Favour the candidate whose hop FROM the previous card is the most
-          // diagonal (and, on the last card, whose wrap back to the first is
-          // diagonal too) — nudging the real cards onto the ideal diamond so no
-          // hop drifts toward horizontal/vertical.
-          const prev = pos[order[order.length - 1]]
-          const first = pos[order[0]]
-          let bestScore = -Infinity
-          for (const c of cand) {
-            let score = ratioOf(pos[c.i].ox - prev.ox, pos[c.i].oy - prev.oy) * 2 - c.dd / 2e7
-            if (isLast) score += ratioOf(first.ox - pos[c.i].ox, first.oy - pos[c.i].oy) * 2
-            if (score > bestScore) {
-              bestScore = score
-              pick = c.i
-            }
-          }
-        }
-        used.add(pick)
-        order.push(pick)
-      })
-
-      return order.map((i) => ({
-        tx: FOCUS.x - ZOOM * pos[i].ox,
-        ty: FOCUS.y - ZOOM * pos[i].oy,
+      // Fly the ideal anchors directly (land each on FOCUS). Using the ideal
+      // positions — not snapped card centres — guarantees the exact spec
+      // geometry on any layout; whatever widget sits at an anchor gets framed.
+      return anchors.map((a) => ({
+        tx: FOCUS.x - ZOOM * a.x,
+        ty: FOCUS.y - ZOOM * a.y,
         scale: ZOOM,
         travel: TRAVEL,
         hold: HOLD,
