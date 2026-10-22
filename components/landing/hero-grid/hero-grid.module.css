@@ -19,11 +19,6 @@
   --perspective: 500px;     /* Framer "Perspective" */
   --scale: 0.76;            /* overall size of the field */
 
-  /* Panning animation (M2): the grid drifts across the tilted plane. */
-  --pan-duration: 30s;
-  --pan-x: 150px;
-  --pan-y: 70px;
-
   /* Large cards; the field overfills the viewport and recedes to the far
      (upper-left) corner, which the left mask fades into the text area. */
   --card-w: 320px;          /* fixed card width */
@@ -88,20 +83,10 @@
   grid-auto-rows: var(--row-h);
   grid-auto-flow: row dense;
   gap: var(--card-gap);
-  /* Pan across the tilted plane (the "camera fly"). The grid sits inside the
-     3D plane, so translating it here drifts the cards along the surface. It
-     eases back and forth so the loop is seamless and never reveals an edge. */
-  animation: heroGridPan var(--pan-duration) ease-in-out infinite alternate;
+  /* The camera-fly loop (JS, see hero-grid.tsx) writes this transform each
+     frame to slide/zoom the grid across the tilted plane. */
+  transform: translate3d(0, 0, 0);
   will-change: transform;
-}
-
-@keyframes heroGridPan {
-  from {
-    transform: translate3d(calc(var(--pan-x) * -0.5), calc(var(--pan-y) * -0.5), 0);
-  }
-  to {
-    transform: translate3d(calc(var(--pan-x) * 0.5), calc(var(--pan-y) * 0.5), 0);
-  }
 }
 
 .card {
