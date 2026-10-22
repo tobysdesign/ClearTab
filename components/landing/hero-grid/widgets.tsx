@@ -90,7 +90,7 @@ const PATTERN: Array<{ Widget: HeroWidget; rows: 1 | 2 }> = [
 
 /** How many cards fill the grid. Enough that the zoomed-out field still covers
  *  the viewport behind the hero copy without any empty edge. */
-export const HERO_GRID_CARD_COUNT = 20
+export const HERO_GRID_CARD_COUNT = 32
 
 export const HERO_GRID_WIDGETS: HeroGridEntry[] = Array.from(
   { length: HERO_GRID_CARD_COUNT },

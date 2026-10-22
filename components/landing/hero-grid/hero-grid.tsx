@@ -6,29 +6,23 @@ import { HERO_GRID_WIDGETS } from './widgets'
 
 /**
  * Camera-fly timeline (M2). The camera hops from widget to widget, LANDING each
- * one centred on a fixed focus point, holding briefly, then flying to the next.
+ * one centred on a fixed focus point, holding, then flying to the next.
  *
- * Each landing is computed, not hand-authored: we measure the target card's
- * centre in the grid's local space and solve for the grid transform
- * (`translate3d(tx,ty,0) scale(zoom)`) that places that centre on FOCUS. So the
- * camera always lands squarely on a widget regardless of the grid layout.
+ * Each landing is computed: we measure the target card's centre in the grid's
+ * local space and solve for the grid transform (`translate3d(tx,ty,0)
+ * scale(zoom)`) that places that centre on FOCUS — so the camera always lands
+ * squarely on a widget.
  *
- * VISIT is the choreography — the order of widgets, how tight the zoom is, and
- * how long to rest on each. Add entries for more movement between widgets.
+ * The ORDER traces a DOUBLE DIAMOND (buildShots, in the effect): two
+ * concentric diamonds visited N→E→S→W. Because the anchors sit on the axes,
+ * every hop is a 45°-ish diagonal and every turn is 90°, so no move is
+ * horizontal or vertical, none reverses the one before it, and the loop closes
+ * cleanly on itself.
  */
-const VISIT: Array<{ card: number; zoom: number; hold: number }> = [
-  { card: 2, zoom: 1.34, hold: 2.6 },
-  { card: 9, zoom: 1.3, hold: 2.4 },
-  { card: 5, zoom: 1.36, hold: 2.6 },
-  { card: 14, zoom: 1.32, hold: 2.4 },
-  { card: 7, zoom: 1.34, hold: 2.6 },
-  { card: 17, zoom: 1.3, hold: 2.4 },
-  { card: 11, zoom: 1.36, hold: 2.6 },
-  { card: 4, zoom: 1.32, hold: 2.4 },
-  { card: 15, zoom: 1.34, hold: 2.6 },
-  { card: 8, zoom: 1.3, hold: 2.4 },
-]
 
+/** Landing zoom (grid scale) and seconds to rest on each widget. */
+const ZOOM = 1.32
+const HOLD = 2.5
 /** Seconds to fly between two widgets. */
 const TRAVEL = 3.2
 /** Plane-local point (offset from grid centre) that a landed widget centres on;
@@ -85,30 +79,92 @@ export function HeroGrid() {
     let raf = 0
     const start = performance.now()
 
-    // Solve each VISIT entry into a shot that lands the target card on FOCUS.
-    // Card centres are measured in the grid's own (untransformed) coordinate
-    // space; grid and cards share an offsetParent, so the subtraction cancels
-    // it out. Measured lazily on the first frame once the grid has laid out.
+    // Measure card centres in the grid's own (untransformed) space — grid and
+    // cards share an offsetParent, so the subtraction cancels it out. Then walk
+    // a path where every hop is diagonal and never reverses the previous hop,
+    // and turn each stop into a shot that lands that card on FOCUS. Built lazily
+    // on the first frame, once the grid has laid out.
     let shots: Shot[] | null = null
     let total = 0
 
     const buildShots = (): Shot[] | null => {
       const cards = grid.children
-      if (!cards.length || !grid.offsetWidth) return null
+      const n = cards.length
+      if (!n || !grid.offsetWidth) return null
       const gcx = grid.offsetLeft + grid.offsetWidth / 2
       const gcy = grid.offsetTop + grid.offsetHeight / 2
-      return VISIT.map(({ card, zoom, hold }) => {
-        const el = cards[Math.min(card, cards.length - 1)] as HTMLElement
-        const ox = el.offsetLeft + el.offsetWidth / 2 - gcx
-        const oy = el.offsetTop + el.offsetHeight / 2 - gcy
-        return {
-          tx: FOCUS.x - zoom * ox,
-          ty: FOCUS.y - zoom * oy,
-          scale: zoom,
-          travel: TRAVEL,
-          hold,
-        }
+      const pos = Array.from(cards, (el) => {
+        const c = el as HTMLElement
+        return { ox: c.offsetLeft + c.offsetWidth / 2 - gcx, oy: c.offsetTop + c.offsetHeight / 2 - gcy }
       })
+
+      // Double-diamond circuit. Two concentric diamonds (outer then inner),
+      // each visited N → E → S → W. Every anchor sits on an axis, so every hop
+      // between them is a 45°-ish DIAGONAL and every turn is 90° — no move is
+      // horizontal or vertical, none reverses the one before it, and the loop
+      // closes on itself. We just land on the real card nearest each anchor.
+      const halfW = grid.offsetWidth / 2
+      const halfH = grid.offsetHeight / 2
+      const rOuter = Math.min(halfW, halfH) * 0.66
+      const rInner = rOuter * 0.6
+      const anchors = [
+        { x: 0, y: -rOuter }, // outer N
+        { x: rOuter, y: 0 }, //  outer E
+        { x: 0, y: rOuter }, //  outer S
+        { x: -rOuter, y: 0 }, // outer W
+        { x: 0, y: -rInner }, // inner N
+        { x: rInner, y: 0 }, //  inner E
+        { x: 0, y: rInner }, //  inner S
+        { x: -rInner, y: 0 }, // inner W
+      ]
+
+      // Diagonal-ness of a vector: shorter axis over longer (1 = perfect 45°).
+      const ratioOf = (dx: number, dy: number) => {
+        const ax = Math.abs(dx)
+        const ay = Math.abs(dy)
+        return Math.min(ax, ay) / (Math.max(ax, ay) || 1)
+      }
+      const K = 7 // candidate cards per anchor
+      const order: number[] = []
+      const used = new Set<number>()
+      anchors.forEach((a, ai) => {
+        const isLast = ai === anchors.length - 1
+        // The K unused cards nearest this anchor.
+        const cand = pos
+          .map((p, i) => ({ i, dd: (p.ox - a.x) ** 2 + (p.oy - a.y) ** 2 }))
+          .filter((c) => !used.has(c.i))
+          .sort((x, y) => x.dd - y.dd)
+          .slice(0, K)
+        if (!cand.length) return
+        let pick = cand[0].i
+        if (order.length > 0) {
+          // Favour the candidate whose hop FROM the previous card is the most
+          // diagonal (and, on the last card, whose wrap back to the first is
+          // diagonal too) — nudging the real cards onto the ideal diamond so no
+          // hop drifts toward horizontal/vertical.
+          const prev = pos[order[order.length - 1]]
+          const first = pos[order[0]]
+          let bestScore = -Infinity
+          for (const c of cand) {
+            let score = ratioOf(pos[c.i].ox - prev.ox, pos[c.i].oy - prev.oy) * 2 - c.dd / 2e7
+            if (isLast) score += ratioOf(first.ox - pos[c.i].ox, first.oy - pos[c.i].oy) * 2
+            if (score > bestScore) {
+              bestScore = score
+              pick = c.i
+            }
+          }
+        }
+        used.add(pick)
+        order.push(pick)
+      })
+
+      return order.map((i) => ({
+        tx: FOCUS.x - ZOOM * pos[i].ox,
+        ty: FOCUS.y - ZOOM * pos[i].oy,
+        scale: ZOOM,
+        travel: TRAVEL,
+        hold: HOLD,
+      }))
     }
 
     const frame = (now: number) => {
