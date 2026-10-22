@@ -17,7 +17,12 @@
   --rot-z: 14deg;           /* angle — tweak freely */
   --depth: 0px;             /* Framer "Depth" = translateZ */
   --perspective: 500px;     /* Framer "Perspective" */
-  --scale: 0.88;            /* overall size of the field */
+  --scale: 0.76;            /* overall size of the field */
+
+  /* Panning animation (M2): the grid drifts across the tilted plane. */
+  --pan-duration: 30s;
+  --pan-x: 150px;
+  --pan-y: 70px;
 
   /* Large cards; the field overfills the viewport and recedes to the far
      (upper-left) corner, which the left mask fades into the text area. */
@@ -49,17 +54,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Left-weighted gradient mask: fade the grid out toward the left (so the hero
-     copy reads on clean darkness), with a soft top/right/bottom vignette so the
-     clipped far edges don't hard-crop. The two layers intersect (mask-composite
-     intersect) so the darkest point is the top-left. */
+  /* Two masks intersected: a left-weighted fade (so the hero copy reads on clean
+     darkness) AND a soft vignette so the grid fades out on every edge instead of
+     hard-cropping at the viewport box. */
   -webkit-mask-image:
     linear-gradient(100deg, transparent var(--mask-fade-start), #000 var(--mask-fade-end)),
-    radial-gradient(135% 130% at 62% 50%, #000 70%, transparent 100%);
+    radial-gradient(118% 118% at 60% 46%, #000 38%, transparent 90%);
   -webkit-mask-composite: source-in;
   mask-image:
     linear-gradient(100deg, transparent var(--mask-fade-start), #000 var(--mask-fade-end)),
-    radial-gradient(135% 130% at 62% 50%, #000 70%, transparent 100%);
+    radial-gradient(118% 118% at 60% 46%, #000 38%, transparent 90%);
   mask-composite: intersect;
 }
 
@@ -84,6 +88,20 @@
   grid-auto-rows: var(--row-h);
   grid-auto-flow: row dense;
   gap: var(--card-gap);
+  /* Pan across the tilted plane (the "camera fly"). The grid sits inside the
+     3D plane, so translating it here drifts the cards along the surface. It
+     eases back and forth so the loop is seamless and never reveals an edge. */
+  animation: heroGridPan var(--pan-duration) ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes heroGridPan {
+  from {
+    transform: translate3d(calc(var(--pan-x) * -0.5), calc(var(--pan-y) * -0.5), 0);
+  }
+  to {
+    transform: translate3d(calc(var(--pan-x) * 0.5), calc(var(--pan-y) * 0.5), 0);
+  }
 }
 
 .card {
@@ -104,9 +122,13 @@
   grid-row: span 2;
 }
 
-/* Reduced motion: M1 is already static. The grid stays put; this is here so
-   later milestones that add the camera-fly loop inherit the opt-out. */
+/* Reduced motion: stop the pan and leave the grid static. */
 @media (prefers-reduced-motion: reduce) {
+  .grid {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
   .plane {
     will-change: auto;
   }
