@@ -12,9 +12,16 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
   min-height: 100vh;
-  background: var(--bg);
+  /* Transparent so the global CharcoalWave shader shows through in the hero.
+     Every section below restores an opaque charcoal backdrop, so the shader is
+     only ever visible behind the hero. */
+  background: transparent;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  /* The hero grid is a full-bleed 100vw layer; clip horizontally so it can
+     never add a horizontal scrollbar. `clip` (not `hidden`) keeps the page's
+     normal vertical scrolling and sticky/fixed behaviour intact. */
+  overflow-x: clip;
 }
 
 /* The dashboard locks body scrolling; public pages need it back */
@@ -137,9 +144,50 @@
 
 /* ── Hero ── */
 .hero {
+  position: relative;
   max-width: calc(var(--measure) + var(--gutter) * 2);
   margin: 0 auto;
   padding: clamp(96px, 14vh, 150px) var(--gutter) 0;
+}
+
+/* Left gradient mask (owner's original spec): the hero fades into darkness on
+   the left so the headline (#fff), muted subhead, CTAs and proof chips stay
+   WCAG-AA legible. It sits ABOVE the grid but BELOW the copy and the Explainer
+   showcase (both z-index 2), so it only darkens the empty left/background area,
+   never the content. Tune the stops to move the fade. */
+.hero::before {
+  content: "";
+  position: absolute;
+  /* Full-bleed to the viewport edges (the hero has gutter padding + a max-width,
+     so inset:0 starts the fade ~100px in). */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: 1;
+  /* Horizontal fade kept to the LEFT: solid behind the copy, fully clear across
+     the right half so the widgets aren't dimmed. */
+  background: linear-gradient(
+    90deg,
+    rgb(6 8 12 / 0.92) 0%,
+    rgb(6 8 12 / 0.9) 32%,
+    rgb(6 8 12 / 0.5) 44%,
+    rgb(6 8 12 / 0) 52%
+  );
+  pointer-events: none;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 2;
+  /* Hold the copy to a left-hand column so the tilted widget grid reads in the
+     space beside and behind it, rather than the copy spanning the full width. */
+  max-width: 35vw;
+}
+
+.heroCopy .heroTitle {
+  max-width: none;
 }
 
 .heroMark {
@@ -149,7 +197,7 @@
 .heroTitle {
   max-width: 15.5em;
   margin: 0;
-  font-size: clamp(36px, 4.6vw, 58px);
+  font-size: clamp(29px, 5vw, 44px);
   font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.028em;
@@ -251,6 +299,8 @@
 }
 
 .heroStage {
+  position: relative;
+  z-index: 2;
   margin-top: clamp(48px, 7vw, 88px);
   padding: clamp(28px, 6vw, 96px) clamp(16px, 6vw, 100px);
   border-radius: 16px;
@@ -326,6 +376,12 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+}
+
+/* Opaque charcoal backdrop for everything below the hero. Full page width so
+   the shader never leaks through section gutters. */
+.belowHero {
+  background: var(--bg);
 }
 
 /* ── Sections ── */
@@ -603,6 +659,10 @@
 
 /* Footer */
 .footer {
+  background: var(--bg);
+}
+
+.footerInner {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

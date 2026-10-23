@@ -15,7 +15,7 @@ import {
 } from '@/components/icons'
 import { WidgetHeader, Button } from '@cleartab/ui'
 import recorderStyles from '@/components/widgets/recorder-widget.module.css'
-import styles from './hero-demo.module.css'
+import styles from './explainer1.module.css'
 import { cn } from '@/lib/utils'
 
 // ── VIRTUAL MOUSE CURSOR ─────────────────────────────────────────────
@@ -66,7 +66,7 @@ const BASE_WAVE_HEIGHTS = [
   8, 16, 24, 30, 26, 14, 10, 12, 20, 26, 16, 10,
 ]
 
-export function HeroDemo() {
+export function Explainer1() {
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -653,4 +653,4 @@ export function HeroDemo() {
   )
 }
 
-export default HeroDemo
+export default Explainer1

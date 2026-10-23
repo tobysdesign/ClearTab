@@ -1,0 +1,120 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   Camera-fly hero background — Milestone 1 (static tilted widget grid).
+
+   Structure:  .viewport (camera: perspective) → .plane (tilt) → .grid (cards)
+
+   All tunables live as custom properties on .viewport so later milestones and
+   quick visual tweaks never touch the transform maths below.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.viewport {
+  /* ── Tunables ── */
+  /* Camera — mirrors the owner's Framer 3D transform panel one-to-one:
+     Rotate X/Y/Z, Depth (= translateZ), Perspective (per-node), Origin 50/50,
+     Scale, Preserve-3d. */
+  --rot-x: 10deg;           /* angle — tweak freely */
+  --rot-y: -22deg;          /* angle — tweak freely */
+  --rot-z: 14deg;           /* angle — tweak freely */
+  --depth: 0px;             /* Framer "Depth" = translateZ */
+  --perspective: 500px;     /* Framer "Perspective" */
+  --scale: 0.76;            /* overall size of the field */
+
+  /* Large cards; the field overfills the viewport and recedes to the far
+     (upper-left) corner, which the left mask fades into the text area. */
+  --card-w: 320px;          /* fixed card width */
+  --card-gap: 120px;        /* gap — tweak freely */
+  --row-h: 320px;           /* = card width, so the lattice pitch is square (clean diagonals) */
+  --card-radius: 16px;
+  --cols: 8;                /* grid columns */
+
+  /* Left gradient mask: the grid fades out toward the left so the hero copy
+     sits on clean darkness (replaces the old blur scrim). Tweak the stops to
+     move the fade. */
+  --mask-fade-start: 16%;   /* fully faded out left of here */
+  --mask-fade-end: 64%;     /* fully solid grid right of here */
+
+  --card-opacity: 1;
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  /* Centre the plane in the visible fold rather than the (much taller) hero. */
+  height: 100vh;
+  transform: translateX(-50%);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  /* Perspective lives on the plane (per-node, like Framer) — see .plane. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Two masks intersected: a left-weighted fade (so the hero copy reads on clean
+     darkness) AND a soft vignette so the grid fades out on every edge instead of
+     hard-cropping at the viewport box. */
+  -webkit-mask-image:
+    linear-gradient(100deg, transparent var(--mask-fade-start), #000 var(--mask-fade-end)),
+    radial-gradient(118% 118% at 60% 46%, #000 38%, transparent 90%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(100deg, transparent var(--mask-fade-start), #000 var(--mask-fade-end)),
+    radial-gradient(118% 118% at 60% 46%, #000 38%, transparent 90%);
+  mask-composite: intersect;
+}
+
+/* Framer composes a 3D node as: perspective() → translateZ(depth) → rotate
+   X/Y/Z → scale, around a centre origin, with preserve-3d on. This mirrors it. */
+.plane {
+  transform-origin: 50% 50%;
+  transform:
+    perspective(var(--perspective))
+    translateZ(var(--depth))
+    rotateX(var(--rot-x))
+    rotateY(var(--rot-y))
+    rotateZ(var(--rot-z))
+    scale(var(--scale));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), var(--card-w));
+  grid-auto-rows: var(--row-h);
+  grid-auto-flow: row dense;
+  gap: var(--card-gap);
+  /* The camera-fly loop (JS, see hero-grid.tsx) writes this transform each
+     frame to slide/zoom the grid across the tilted plane. */
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.card {
+  width: var(--card-w);
+  grid-row: span 1;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  opacity: var(--card-opacity);
+  /* Opaque backing so the widgets' own semi-transparent surfaces read solid
+     (the shader no longer shows through them). */
+  background: #131313;
+  /* Grid items stretch to their track height, giving the demo widgets a
+     definite box to fill (they size themselves to 100%). */
+  isolation: isolate;
+  box-shadow:
+    0 24px 48px -16px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Reduced motion: stop the pan and leave the grid static. */
+@media (prefers-reduced-motion: reduce) {
+  .grid {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+  .plane {
+    will-change: auto;
+  }
+}
