@@ -25,7 +25,7 @@
   --card-gap: 120px;        /* gap — tweak freely */
   --row-h: 320px;           /* = card width, so the lattice pitch is square (clean diagonals) */
   --card-radius: 16px;
-  --cols: 6;                /* grid columns */
+  --cols: 8;                /* grid columns */
 
   /* Left gradient mask: the grid fades out toward the left so the hero copy
      sits on clean darkness (replaces the old blur scrim). Tweak the stops to

@@ -98,17 +98,22 @@ export function HeroGrid() {
       // none reverses the one before it, and the loop closes on itself.
       const halfW = grid.offsetWidth / 2
       const halfH = grid.offsetHeight / 2
-      const step = Math.min(halfW / 2, halfH) * 0.82 // diagonal leg size (keeps legs ~45°)
+      // A WIDE grid (8 cols × 4 rows) lets two FULL-HEIGHT diamonds use ~45° legs,
+      // so the peaks reach the top row and the valleys the bottom while every
+      // turn stays a clean ~90° (no reverse). Equal h/v extents = 45° legs.
+      const step = Math.min(halfW / 2, halfH) * 0.92
+      const hStep = step // half the width of each diamond
+      const vStep = step // half the height of each diamond
       const cs = step * 0.16 // small centre offset so the two centre passes don't coincide
       const anchors = [
-        { x: -2 * step, y: 0 }, //    W_L  far left
-        { x: -step, y: -step }, //    N_L  upper-left peak
-        { x: -cs, y: 0 }, //          C    centre, first pass
-        { x: step, y: -step }, //     N_R  upper-right peak
-        { x: 2 * step, y: 0 }, //     E_R  far right
-        { x: step, y: step }, //      S_R  lower-right valley
-        { x: cs, y: 0 }, //           C    centre, second pass
-        { x: -step, y: step }, //     S_L  lower-left valley
+        { x: -2 * hStep, y: 0 }, //    W_L  far left
+        { x: -hStep, y: -vStep }, //   N_L  upper-left peak
+        { x: -cs, y: 0 }, //           C    centre, first pass
+        { x: hStep, y: -vStep }, //    N_R  upper-right peak
+        { x: 2 * hStep, y: 0 }, //     E_R  far right
+        { x: hStep, y: vStep }, //     S_R  lower-right valley
+        { x: cs, y: 0 }, //            C    centre, second pass
+        { x: -hStep, y: vStep }, //    S_L  lower-left valley
       ]
 
       // Snap each anchor to the nearest distinct card centre, so the camera

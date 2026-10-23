@@ -158,14 +158,20 @@
 .hero::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Full-bleed to the viewport edges (the hero has gutter padding + a max-width,
+     so inset:0 starts the fade ~100px in). */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   z-index: 1;
   background: linear-gradient(
     100deg,
     rgb(6 8 12 / 0.9) 0%,
-    rgb(6 8 12 / 0.82) 34%,
-    rgb(6 8 12 / 0.4) 52%,
-    rgb(6 8 12 / 0) 68%
+    rgb(6 8 12 / 0.82) 30%,
+    rgb(6 8 12 / 0.4) 48%,
+    rgb(6 8 12 / 0) 64%
   );
   pointer-events: none;
 }
