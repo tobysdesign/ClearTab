@@ -17,22 +17,22 @@
     font-size: 14px;
 }
 
-/* Account indicator dots: shown bottom-right of an event card.
-   Count = the account's position (primary = none, 2nd account = 2, 3rd = 3, …). */
-.accountDots {
-    position: absolute;
-    right: 10px;
-    bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+/* Connected-account indicator (Figma node 184-1192): events from a non-primary account get a
+   tinted card — an opaque mauve wash + border — instead of the old abstract dots. The two-class
+   selector (always paired with .eventCard) keeps it ahead of the base .widget-list-item fill.
+   Colours are exposed as custom properties so a per-account palette can override them later. */
+.eventCardConnected {
+    --event-tint-bg: #2a242b;
+    --event-tint-border: #3a3548;
 }
 
-.accountDot {
-    width: 5px;
-    height: 5px;
-    border-radius: 999px;
-    background-color: rgba(251, 113, 133, 0.55);
+.eventCard.eventCardConnected {
+    background-color: var(--event-tint-bg);
+    border-color: var(--event-tint-border);
+}
+
+.eventCard.eventCardConnected:hover {
+    background-color: #332b34;
 }
 
 .daySection {

@@ -53,7 +53,9 @@ function EventCard({ event, isCurrent, dots }: { event: CalendarEvent; isCurrent
     <motion.div
       className={cn('widget-list-item widget-list-item--schedule', styles.eventCard, {
         [styles.eventCardCurrent]: isCurrent,
-        [styles.eventCardDefault]: !isCurrent
+        [styles.eventCardDefault]: !isCurrent,
+        // Events from a connected (non-primary) account get a tinted card instead of dots
+        [styles.eventCardConnected]: dots > 0,
       })}
       whileHover={{ x: 2 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
@@ -62,14 +64,6 @@ function EventCard({ event, isCurrent, dots }: { event: CalendarEvent; isCurrent
       <div className={styles.eventTime}>
         {event.allDay ? 'All day' : `${format(startTime, 'p')} – ${format(endTime, 'p')}`}
       </div>
-      {/* Account indicator: Nth connected account shows N dots (primary shows none) */}
-      {dots > 0 && (
-        <div className={styles.accountDots} aria-hidden="true">
-          {Array.from({ length: dots }).map((_, i) => (
-            <span key={i} className={styles.accountDot} />
-          ))}
-        </div>
-      )}
     </motion.div>
   )
 }
