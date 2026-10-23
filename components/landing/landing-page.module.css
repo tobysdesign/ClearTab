@@ -183,7 +183,7 @@
   z-index: 2;
   /* Hold the copy to a left-hand column so the tilted widget grid reads in the
      space beside and behind it, rather than the copy spanning the full width. */
-  max-width: clamp(380px, 46vw, 620px);
+  max-width: 35vw;
 }
 
 .heroCopy .heroTitle {
@@ -197,7 +197,7 @@
 .heroTitle {
   max-width: 15.5em;
   margin: 0;
-  font-size: clamp(36px, 4.6vw, 58px);
+  font-size: clamp(29px, 5vw, 44px);
   font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.028em;

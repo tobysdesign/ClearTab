@@ -33,7 +33,7 @@
   --mask-fade-start: 16%;   /* fully faded out left of here */
   --mask-fade-end: 64%;     /* fully solid grid right of here */
 
-  --card-opacity: 0.94;
+  --card-opacity: 1;
 
   position: absolute;
   top: 0;
@@ -95,6 +95,9 @@
   border-radius: var(--card-radius);
   overflow: hidden;
   opacity: var(--card-opacity);
+  /* Opaque backing so the widgets' own semi-transparent surfaces read solid
+     (the shader no longer shows through them). */
+  background: #131313;
   /* Grid items stretch to their track height, giving the demo widgets a
      definite box to fill (they size themselves to 100%). */
   isolation: isolate;
