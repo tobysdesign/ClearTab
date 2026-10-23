@@ -20,19 +20,20 @@ import { HERO_GRID_WIDGETS } from './widgets'
  * cleanly on itself.
  */
 
-/** Landing zoom (grid scale) and seconds to rest on each widget. */
-const ZOOM = 1.32
+/** Grid scale when landed/zoomed in on a widget, and the (lower) scale the
+ *  camera dips to mid-flight so it zooms out while travelling. */
+const ZOOM_HOLD = 1.5
+const ZOOM_TRAVEL = 1.0
+/** Seconds to rest on each widget / to fly between two. */
 const HOLD = 2.5
-/** Seconds to fly between two widgets. */
 const TRAVEL = 3.2
 /** Plane-local point (offset from grid centre) that a landed widget centres on;
  *  positive x sits it right of the hero copy. */
 const FOCUS = { x: 150, y: 10 }
 
-interface Shot {
-  tx: number
-  ty: number
-  scale: number
+interface Stop {
+  ox: number // widget centre in the grid's local space
+  oy: number
   travel: number
   hold: number
 }
@@ -84,10 +85,10 @@ export function HeroGrid() {
     // a path where every hop is diagonal and never reverses the previous hop,
     // and turn each stop into a shot that lands that card on FOCUS. Built lazily
     // on the first frame, once the grid has laid out.
-    let shots: Shot[] | null = null
+    let shots: Stop[] | null = null
     let total = 0
 
-    const buildShots = (): Shot[] | null => {
+    const buildShots = (): Stop[] | null => {
       const cards = grid.children
       const n = cards.length
       if (!n || !grid.offsetWidth) return null
@@ -142,9 +143,8 @@ export function HeroGrid() {
         }
         used.add(best)
         return {
-          tx: FOCUS.x - ZOOM * pos[best].ox,
-          ty: FOCUS.y - ZOOM * pos[best].oy,
-          scale: ZOOM,
+          ox: pos[best].ox,
+          oy: pos[best].oy,
           travel: TRAVEL,
           hold: HOLD,
         }
@@ -158,28 +158,35 @@ export function HeroGrid() {
       }
       if (shots && total > 0) {
         let t = ((now - start) / 1000) % total
-        let tx = shots[0].tx
-        let ty = shots[0].ty
-        let scale = shots[0].scale
+        // The point the camera is looking at (a widget centre in grid space)
+        // and the current zoom. Hold = parked on a widget, zoomed in; travel =
+        // pan between widgets while the zoom dips out and back in.
+        let lx = shots[0].ox
+        let ly = shots[0].oy
+        let scale = ZOOM_HOLD
         for (let i = 0; i < shots.length; i++) {
           const to = shots[i]
           const from = shots[(i - 1 + shots.length) % shots.length]
           if (t < to.travel) {
             const e = easeInOut(t / to.travel)
-            tx = from.tx + (to.tx - from.tx) * e
-            ty = from.ty + (to.ty - from.ty) * e
-            scale = from.scale + (to.scale - from.scale) * e
+            lx = from.ox + (to.ox - from.ox) * e
+            ly = from.oy + (to.oy - from.oy) * e
+            // Zoom out mid-flight (sin peaks at e=0.5) and back in on arrival.
+            scale = ZOOM_HOLD - (ZOOM_HOLD - ZOOM_TRAVEL) * Math.sin(Math.PI * e)
             break
           }
           t -= to.travel
           if (t < to.hold) {
-            tx = to.tx
-            ty = to.ty
-            scale = to.scale
+            lx = to.ox
+            ly = to.oy
+            scale = ZOOM_HOLD
             break
           }
           t -= to.hold
         }
+        // Keep the look-at point pinned to FOCUS at whatever the current zoom is.
+        const tx = FOCUS.x - scale * lx
+        const ty = FOCUS.y - scale * ly
         grid.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`
       }
       raf = requestAnimationFrame(frame)
