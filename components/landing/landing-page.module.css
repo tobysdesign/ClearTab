@@ -166,12 +166,14 @@
   width: 100vw;
   transform: translateX(-50%);
   z-index: 1;
+  /* Horizontal fade kept to the LEFT: solid behind the copy, fully clear across
+     the right half so the widgets aren't dimmed. */
   background: linear-gradient(
-    100deg,
-    rgb(6 8 12 / 0.9) 0%,
-    rgb(6 8 12 / 0.82) 30%,
-    rgb(6 8 12 / 0.4) 48%,
-    rgb(6 8 12 / 0) 64%
+    90deg,
+    rgb(6 8 12 / 0.92) 0%,
+    rgb(6 8 12 / 0.9) 32%,
+    rgb(6 8 12 / 0.5) 44%,
+    rgb(6 8 12 / 0) 52%
   );
   pointer-events: none;
 }
