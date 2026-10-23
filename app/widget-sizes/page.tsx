@@ -103,7 +103,8 @@ export default function WidgetSizesPage() {
 
   return (
     <AuthContext.Provider value={DEMO_AUTH}>
-      <div style={{ minHeight: "100vh", background: "#000", padding: 24, color: "#fff" }}>
+      {/* The app locks body scroll (globals.css body overflow:hidden), so this dev page scrolls internally. */}
+      <div style={{ height: "100vh", overflowY: "auto", background: "#000", padding: 24, color: "#fff" }}>
         <h1 style={{ fontSize: 16, fontWeight: 500, marginBottom: 20 }}>Widget size buckets</h1>
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
           {WIDGETS.map(([name, render]) => (
