@@ -46,7 +46,9 @@
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
+  /* Fade the overflow edge instead of an ellipsis */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
   font-size: 14px;
   font-weight: 500;
   color: #c4c4c4;
@@ -105,8 +107,10 @@
 
 .itemTitle {
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  /* Fade the overflow edge instead of an ellipsis */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
   flex: 1;
 }
 
@@ -149,7 +153,9 @@
   width: 100%;
   overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
+  /* Fade the overflow edge instead of an ellipsis */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
 }
 
 /* Deleting state */

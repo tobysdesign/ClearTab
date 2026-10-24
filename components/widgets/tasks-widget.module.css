@@ -25,7 +25,9 @@
     color: #c4c4c4;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* Fade the overflow edge instead of an ellipsis */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
     flex: 1;
     min-width: 0;
     cursor: pointer;
@@ -220,7 +222,9 @@
     /* box model */
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    /* Fade the overflow edge instead of an ellipsis */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
     position: relative;
 
     /* typography */
