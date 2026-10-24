@@ -222,6 +222,9 @@
     /* box model */
     white-space: nowrap;
     overflow: hidden;
+    /* Fill the row so the fade sits at the card edge, not at the end of the text. */
+    flex: 1;
+    min-width: 0;
     /* Fade the overflow edge instead of an ellipsis */
     -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
     mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
