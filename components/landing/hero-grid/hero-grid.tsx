@@ -62,8 +62,7 @@ const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t 
  */
 export function HeroGrid() {
   // The camera-fly loop writes the grid transform each frame; the plane holds
-  // the resting camera pose (perspective + tilt) from CSS.
-  const planeRef = useRef<HTMLDivElement>(null)
+  // the resting camera pose (perspective + tilt) from CSS, so it needs no ref.
   const gridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -198,7 +197,7 @@ export function HeroGrid() {
 
   return (
     <div className={styles.viewport} aria-hidden="true">
-      <div ref={planeRef} className={styles.plane}>
+      <div className={styles.plane}>
         <div ref={gridRef} className={styles.grid}>
           {HERO_GRID_WIDGETS.map(({ id, Widget, rows }) => (
             <div
