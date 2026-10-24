@@ -45,6 +45,11 @@
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
+  /* Fade the whole field in after a short beat so the dynamic (ssr:false) widget
+     cards finish mounting first — hides the brief flash of empty #131313 card
+     backings on load. */
+  opacity: 0;
+  animation: heroGridReveal 0.9s ease 0.4s forwards;
   /* Perspective lives on the plane (per-node, like Framer) — see .plane. */
   display: flex;
   align-items: center;
@@ -107,6 +112,11 @@
 }
 
 
+@keyframes heroGridReveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Reduced motion: stop the pan and leave the grid static. */
 @media (prefers-reduced-motion: reduce) {
   .grid {
@@ -116,5 +126,10 @@
   }
   .plane {
     will-change: auto;
+  }
+  /* Still reveal, but without the fade (appears once mounted). */
+  .viewport {
+    animation: none;
+    opacity: 1;
   }
 }
