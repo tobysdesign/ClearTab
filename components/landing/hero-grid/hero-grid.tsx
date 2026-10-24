@@ -31,6 +31,16 @@ const TRAVEL = 3.2
  *  positive x sits it right of the hero copy. */
 const FOCUS = { x: 150, y: 10 }
 
+/** Within a TRAVEL the camera zooms out, pans, then zooms back in — kept MOSTLY
+ *  SEPARATE so it doesn't pan and zoom at once. These split the travel's
+ *  normalized time (0→1): the zoom-out finishes by ZOOM_OUT_END, the zoom-in
+ *  starts at ZOOM_IN_START, and the pan runs between PAN_START and PAN_END (which
+ *  sit just inside the zoom edges, so the two overlap only a hair at the seams). */
+const ZOOM_OUT_END = 0.3
+const ZOOM_IN_START = 0.7
+const PAN_START = 0.24
+const PAN_END = 0.78
+
 interface Stop {
   ox: number // widget centre in the grid's local space
   oy: number
@@ -39,6 +49,7 @@ interface Stop {
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
 /**
  * Camera-fly hero background.
@@ -167,11 +178,19 @@ export function HeroGrid() {
           const to = shots[i]
           const from = shots[(i - 1 + shots.length) % shots.length]
           if (t < to.travel) {
-            const e = easeInOut(t / to.travel)
+            const p = t / to.travel
+            // Zoom and pan kept mostly separate: zoom OUT over the first stretch
+            // (camera still parked on the current widget), PAN across while held
+            // out, then zoom IN on arrival — rather than doing both at once.
+            let zoomOut
+            if (p < ZOOM_OUT_END) zoomOut = easeInOut(p / ZOOM_OUT_END)
+            else if (p > ZOOM_IN_START) zoomOut = easeInOut((1 - p) / (1 - ZOOM_IN_START))
+            else zoomOut = 1
+            scale = ZOOM_HOLD - (ZOOM_HOLD - ZOOM_TRAVEL) * zoomOut
+            // Pan concentrated in the middle, (almost) still while zooming.
+            const e = easeInOut(clamp((p - PAN_START) / (PAN_END - PAN_START), 0, 1))
             lx = from.ox + (to.ox - from.ox) * e
             ly = from.oy + (to.oy - from.oy) * e
-            // Zoom out mid-flight (sin peaks at e=0.5) and back in on arrival.
-            scale = ZOOM_HOLD - (ZOOM_HOLD - ZOOM_TRAVEL) * Math.sin(Math.PI * e)
             break
           }
           t -= to.travel
