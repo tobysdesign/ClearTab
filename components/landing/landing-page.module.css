@@ -190,6 +190,24 @@
   max-width: none;
 }
 
+/* Mobile/tablet: the 35vw column collapses to ~130px on a phone, cramming the
+   headline to one word per line. Give the copy full width, and darken the whole
+   backdrop so it stays legible over the now full-width grid area. */
+@media (max-width: 900px) {
+  .heroCopy {
+    max-width: none;
+  }
+
+  .hero::before {
+    background: linear-gradient(
+      90deg,
+      rgb(6 8 12 / 0.93) 0%,
+      rgb(6 8 12 / 0.9) 68%,
+      rgb(6 8 12 / 0.82) 100%
+    );
+  }
+}
+
 .heroMark {
   margin-bottom: 26px;
 }
