@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './hero-grid.module.css'
 import { HERO_GRID_WIDGETS } from './widgets'
 
@@ -46,6 +46,7 @@ interface Stop {
   oy: number
   travel: number
   hold: number
+  card: number // index of the card this shot lands on
 }
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
@@ -75,6 +76,11 @@ export function HeroGrid() {
   // The camera-fly loop writes the grid transform each frame; the plane holds
   // the resting camera pose (perspective + tilt) from CSS, so it needs no ref.
   const gridRef = useRef<HTMLDivElement>(null)
+  // Which card the camera is currently holding on (zoomed in) — that card plays
+  // its richer "active" animation; null while travelling between widgets. Driven
+  // from the rAF loop, but only updated on change (not per frame).
+  const [activeCard, setActiveCard] = useState<number | null>(null)
+  const activeRef = useRef<number | null>(null)
 
   useEffect(() => {
     const grid = gridRef.current
@@ -157,6 +163,7 @@ export function HeroGrid() {
           oy: pos[best].oy,
           travel: TRAVEL,
           hold: HOLD,
+          card: best,
         }
       })
     }
@@ -174,6 +181,7 @@ export function HeroGrid() {
         let lx = shots[0].ox
         let ly = shots[0].oy
         let scale = ZOOM_HOLD
+        let activeNow: number | null = null
         for (let i = 0; i < shots.length; i++) {
           const to = shots[i]
           const from = shots[(i - 1 + shots.length) % shots.length]
@@ -198,6 +206,7 @@ export function HeroGrid() {
             lx = to.ox
             ly = to.oy
             scale = ZOOM_HOLD
+            activeNow = to.card
             break
           }
           t -= to.hold
@@ -206,6 +215,11 @@ export function HeroGrid() {
         const tx = FOCUS.x - scale * lx
         const ty = FOCUS.y - scale * ly
         grid.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) scale(${scale.toFixed(4)})`
+        // Flip the active card only when it changes (hold enter/exit), never per frame.
+        if (activeNow !== activeRef.current) {
+          activeRef.current = activeNow
+          setActiveCard(activeNow)
+        }
       }
       raf = requestAnimationFrame(frame)
     }
@@ -218,13 +232,14 @@ export function HeroGrid() {
     <div className={styles.viewport} aria-hidden="true">
       <div className={styles.plane}>
         <div ref={gridRef} className={styles.grid}>
-          {HERO_GRID_WIDGETS.map(({ id, Widget, rows }) => (
+          {HERO_GRID_WIDGETS.map(({ id, Widget, rows }, i) => (
             <div
               key={id}
               className={styles.card}
               data-rows={rows}
+              data-active={i === activeCard ? 'true' : undefined}
             >
-              <Widget active={false} />
+              <Widget active={i === activeCard} />
             </div>
           ))}
         </div>

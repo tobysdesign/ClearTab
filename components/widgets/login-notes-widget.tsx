@@ -61,13 +61,20 @@ const mockNotes: Note[] = [
 ];
 
 // Typewriter component for animating note title and content in sequence
-function TypewriterText({ title, content, className }: { title: string; content: string; className?: string }) {
+function TypewriterText({ title, content, className, active = true }: { title: string; content: string; className?: string; active?: boolean }) {
   const [phase, setPhase] = useState<'typing_title' | 'typing_content' | 'pause' | 'erasing_content' | 'erasing_title'>('typing_title');
   const [currentTitle, setCurrentTitle] = useState("");
   const [currentContent, setCurrentContent] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
+    // Rest on the finished note while the camera is away; only type when active.
+    if (!active) {
+      if (currentTitle !== title) setCurrentTitle(title);
+      if (currentContent !== content) setCurrentContent(content);
+      return;
+    }
+
     const typeSpeed = 30 + Math.random() * 50; // Variable typing speed
     const eraseSpeed = 20; // Faster erasing
 
@@ -112,7 +119,7 @@ function TypewriterText({ title, content, className }: { title: string; content:
         setPhase('typing_title');
       }
     }
-  }, [currentTitle, currentContent, phase, title, content]);
+  }, [active, currentTitle, currentContent, phase, title, content]);
 
   // Update isTyping based on phase
   useEffect(() => {
@@ -253,7 +260,7 @@ function ResizablePanels({
 }
 
 // Static component that mimics the notes widget appearance without API calls
-export function LoginNotesWidget() {
+export function LoginNotesWidget({ active = false }: { active?: boolean } = {}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [panelWidth, setPanelWidth] = useState(300);
 
@@ -268,7 +275,7 @@ export function LoginNotesWidget() {
     .map((op: any) => op.insert)
     .join("");
 
-  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent });
+  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent, active });
 
   return (
     <WidgetContainer>

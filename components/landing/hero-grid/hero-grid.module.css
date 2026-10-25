@@ -109,6 +109,17 @@
   box-shadow:
     0 24px 48px -16px rgba(0, 0, 0, 0.55),
     0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: filter 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* The camera has landed on this card: a gentle "wake" — brighten slightly and add
+   a faint rim — on top of whatever the widget itself plays while active. */
+.card[data-active="true"] {
+  filter: brightness(1.08) saturate(1.05);
+  box-shadow:
+    0 28px 56px -14px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 

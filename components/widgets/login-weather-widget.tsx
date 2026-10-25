@@ -36,16 +36,19 @@ const weatherData = [
   }
 ]
 
-export function LoginWeatherWidget() {
+export function LoginWeatherWidget({ active = false }: { active?: boolean } = {}) {
   const [cards, setCards] = useState(weatherData)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // A piece of state to hold the card we're removing, to add it back later
   const [exitingCard, setExitingCard] = useState<typeof weatherData[0] | null>(null);
 
+  // Quiet until the camera lands on it (active): only then does it cycle through
+  // the forecast stack. Keeps 32 hero cards from all shuffling at once.
   useEffect(() => {
+    if (!active) return
     const interval = setInterval(() => {
-      // Simulate clicking the top card every 2.5 seconds for more engaging demo
+      // Advance the stack while focused
       if (!exitingCard) {
         const topCard = cards[cards.length - 1]; // Get the last card (top card)
         setExitingCard(topCard); // Store the card that is leaving
@@ -54,7 +57,7 @@ export function LoginWeatherWidget() {
     }, 2500) // Every 2.5 seconds
 
     return () => clearInterval(interval)
-  }, [exitingCard, cards])
+  }, [active, exitingCard, cards])
 
   const handleExitComplete = () => {
     if (!exitingCard) return;
