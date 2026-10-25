@@ -90,3 +90,65 @@ export function FormatNote({ active = false }: { active?: boolean }) {
     </>
   )
 }
+
+// Phase timeline: 0 plain, 1 selected, 2 toolbar(✨), 3 modal+thinking, 4 response, 5 hold.
+const AI_DURATIONS = [600, 500, 500, 900, 800, 1300]
+
+export function AiNote({ active = false }: { active?: boolean }) {
+  const phase = usePhases(active, AI_DURATIONS)
+  const selected = phase >= 1 && phase <= 2
+  const toolbar = phase === 2
+  const modalOpen = phase >= 3
+  const thinking = phase === 3
+  const responded = phase >= 4
+
+  return (
+    <div className={styles.aiWrap}>
+      <div className={notesStyles.notesEditorHeader}>
+        <div className={notesStyles.notesHeaderContent}>
+          <div className={notesStyles.notesTitleContainer}>
+            <div className={notesStyles.notesTitleInput}>Weekly sync</div>
+          </div>
+        </div>
+      </div>
+      <div className={notesStyles.notesEditorScroll}>
+        <div className={cn(notesStyles.notesEditorContainer, styles.beatBody)}>
+          <div className={styles.aiText}>
+            {/* Bubble toolbar with the AI (✨) control active */}
+            <div className={cn(styles.bubbleToolbar, styles.bubbleToolbarAi, toolbar && styles.bubbleToolbarShown)} aria-hidden>
+              <span className={styles.bubbleBtn}>B</span>
+              <span className={cn(styles.bubbleBtn, styles.bubbleBtnItalic)}>i</span>
+              <span className={styles.bubbleDivider} />
+              <span className={cn(styles.bubbleBtn, styles.bubbleBtnActive)}>✨</span>
+            </div>
+
+            Catch-up with Sam. Email Priya the invoice and{' '}
+            <span className={cn(styles.aiPhrase, selected && styles.aiPhraseSelected)}>
+              book flights for Mum&rsquo;s birthday
+            </span>
+            .
+          </div>
+        </div>
+      </div>
+
+      {/* Compact mock of the app's AI chat modal, sliding up over the note */}
+      <div className={cn(styles.aiModal, modalOpen && styles.aiModalOpen)} aria-hidden>
+        <div className={styles.aiModalHeader}>
+          <span className={styles.aiModalSpark}>✨</span>
+          <span className={styles.aiModalTitle}>AI</span>
+        </div>
+        <div className={styles.aiQuote}>book flights for Mum&rsquo;s birthday</div>
+        {thinking && (
+          <div className={styles.aiThinking}>
+            <span className={styles.aiDot} />
+            <span className={cn(styles.aiDot, styles.aiDot2)} />
+            <span className={cn(styles.aiDot, styles.aiDot3)} />
+          </div>
+        )}
+        {responded && (
+          <div className={styles.aiReply}>I spotted 2 to-dos in that — want me to add them as tasks?</div>
+        )}
+      </div>
+    </div>
+  )
+}

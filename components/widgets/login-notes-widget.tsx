@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
-import { FormatNote } from "./login-notes-beats";
+import { FormatNote, AiNote } from "./login-notes-beats";
 
 type NotesBeat = "write" | "format" | "ai";
 
@@ -278,9 +278,8 @@ export function LoginNotesWidget({ active = false, beat = "write" }: { active?: 
     .map((op: any) => op.insert)
     .join("");
 
-  // The write typewriter runs for the write beat (and the ai beat, until its mock
-  // modal is built); the format beat renders its own scripted editor instead.
-  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent, active: active && beat !== "format" });
+  // Only the write beat types; the format and ai beats render their own scripted editors.
+  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent, active: active && beat === "write" });
 
   return (
     <WidgetContainer>
@@ -333,6 +332,8 @@ export function LoginNotesWidget({ active = false, beat = "write" }: { active?: 
           <div className={notesStyles.notesContentPanel}>
             {beat === "format" ? (
               <FormatNote active={active} />
+            ) : beat === "ai" ? (
+              <AiNote active={active} />
             ) : (
               <>
                 <div className={notesStyles.notesEditorHeader}>
