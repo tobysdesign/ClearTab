@@ -232,14 +232,14 @@ export function HeroGrid() {
     <div className={styles.viewport} aria-hidden="true">
       <div className={styles.plane}>
         <div ref={gridRef} className={styles.grid}>
-          {HERO_GRID_WIDGETS.map(({ id, Widget, rows }, i) => (
+          {HERO_GRID_WIDGETS.map(({ id, Widget, rows, beat }, i) => (
             <div
               key={id}
               className={styles.card}
               data-rows={rows}
               data-active={i === activeCard ? 'true' : undefined}
             >
-              <Widget active={i === activeCard} />
+              <Widget active={i === activeCard} beat={beat} />
             </div>
           ))}
         </div>

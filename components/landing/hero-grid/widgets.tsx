@@ -20,9 +20,14 @@
 import type { ComponentType } from 'react'
 import dynamic from 'next/dynamic'
 
-/** Props a future (M3) demo widget may accept. Current login widgets ignore them. */
+/** Which scripted beat a Notes card showcases while the camera is on it. */
+export type NotesBeat = 'write' | 'format' | 'ai'
+
+/** Props a hero demo widget may accept. Login widgets ignore what they don't use. */
 export interface HeroWidgetProps {
   active?: boolean
+  /** Notes only: which capability this card demonstrates. */
+  beat?: NotesBeat
 }
 
 type HeroWidget = ComponentType<HeroWidgetProps>
@@ -66,6 +71,8 @@ export interface HeroGridEntry {
   Widget: HeroWidget
   /** Row span (1 = short, 2 = tall). Column span is always 1 for M1. */
   rows: 1 | 2
+  /** Notes cards only: the beat this instance plays (write / format / ai). */
+  beat?: NotesBeat
 }
 
 /**
@@ -92,10 +99,18 @@ const PATTERN: Array<{ Widget: HeroWidget; rows: 1 | 2 }> = [
  *  the viewport behind the hero copy without any empty edge. */
 export const HERO_GRID_CARD_COUNT = 32
 
-export const HERO_GRID_WIDGETS: HeroGridEntry[] = Array.from(
-  { length: HERO_GRID_CARD_COUNT },
-  (_, i) => {
+// Notes cards cycle through the three beats so each capability shows in the grid.
+const NOTES_BEATS: NotesBeat[] = ['write', 'format', 'ai']
+
+export const HERO_GRID_WIDGETS: HeroGridEntry[] = (() => {
+  let notesSeen = 0
+  return Array.from({ length: HERO_GRID_CARD_COUNT }, (_, i) => {
     const { Widget, rows } = PATTERN[i % PATTERN.length]
-    return { id: `cell-${i}`, Widget, rows }
-  },
-)
+    const entry: HeroGridEntry = { id: `cell-${i}`, Widget, rows }
+    if (Widget === NotesWidget) {
+      entry.beat = NOTES_BEATS[notesSeen % NOTES_BEATS.length]
+      notesSeen++
+    }
+    return entry
+  })
+})()

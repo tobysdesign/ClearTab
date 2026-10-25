@@ -9,6 +9,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClientOnly } from "@/components/ui/safe-motion";
 import notesStyles from "./notes-widget.module.css";
 import { NoteListItem } from "./note-list-item";
+import { FormatNote } from "./login-notes-beats";
+
+type NotesBeat = "write" | "format" | "ai";
 
 // Mock notes data
 const mockNotes: Note[] = [
@@ -260,7 +263,7 @@ function ResizablePanels({
 }
 
 // Static component that mimics the notes widget appearance without API calls
-export function LoginNotesWidget({ active = false }: { active?: boolean } = {}) {
+export function LoginNotesWidget({ active = false, beat = "write" }: { active?: boolean; beat?: NotesBeat } = {}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [panelWidth, setPanelWidth] = useState(300);
 
@@ -275,7 +278,9 @@ export function LoginNotesWidget({ active = false }: { active?: boolean } = {}) 
     .map((op: any) => op.insert)
     .join("");
 
-  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent, active });
+  // The write typewriter runs for the write beat (and the ai beat, until its mock
+  // modal is built); the format beat renders its own scripted editor instead.
+  const { currentTitle, renderContent } = TypewriterText({ title, content, className: notesStyles.typewriterContent, active: active && beat !== "format" });
 
   return (
     <WidgetContainer>
@@ -323,26 +328,32 @@ export function LoginNotesWidget({ active = false }: { active?: boolean } = {}) 
           </div>
         </div>
 
-        {/* Note Editor */}
+        {/* Note Editor — the write/ai beats type; the format beat scripts its own */}
         <div className={notesStyles.notesEditorPanel}>
           <div className={notesStyles.notesContentPanel}>
-            <div className={notesStyles.notesEditorHeader}>
-              <div className={notesStyles.notesHeaderContent}>
-                 <div className={notesStyles.notesTitleContainer}>
-                   <textarea
-                     value={currentTitle}
-                     readOnly
-                     className={notesStyles.notesTitleInput}
-                     rows={1}
-                   />
+            {beat === "format" ? (
+              <FormatNote active={active} />
+            ) : (
+              <>
+                <div className={notesStyles.notesEditorHeader}>
+                  <div className={notesStyles.notesHeaderContent}>
+                     <div className={notesStyles.notesTitleContainer}>
+                       <textarea
+                         value={currentTitle}
+                         readOnly
+                         className={notesStyles.notesTitleInput}
+                         rows={1}
+                       />
+                     </div>
+                  </div>
+                </div>
+                 <div className={notesStyles.notesEditorScroll}>
+                   <div className={notesStyles.notesEditorContainer}>
+                     {renderContent()}
+                   </div>
                  </div>
-              </div>
-            </div>
-             <div className={notesStyles.notesEditorScroll}>
-               <div className={notesStyles.notesEditorContainer}>
-                 {renderContent()}
-               </div>
-             </div>
+              </>
+            )}
           </div>
         </div>
       </ResizablePanels>

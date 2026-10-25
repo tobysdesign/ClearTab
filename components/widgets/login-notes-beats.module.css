@@ -1,0 +1,121 @@
+/* Scripted hero Notes "beat" demos. Transform/opacity-driven; cheap enough to
+   run on the one card the camera is holding on. */
+
+.beatBody {
+  padding-top: 6px;
+}
+
+.lines {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 6px 8px;
+  transition: background-color 0.35s ease;
+}
+
+/* The "selection" highlight behind the lines */
+.linesSelected {
+  background-color: rgba(197, 123, 147, 0.2);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c4c4c4;
+  transition: gap 0.35s ease, padding-left 0.35s ease;
+}
+
+.lineBulleted {
+  gap: 10px;
+  padding-left: 4px;
+}
+
+.bullet {
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #c57b93;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bulletShown {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.lineText {
+  white-space: nowrap;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 1.4em), transparent);
+}
+
+/* ── Floating bubble toolbar ────────────────────────────────────────────── */
+.bubbleToolbar {
+  position: absolute;
+  top: -34px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 9px;
+  background: #1c1c20;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transform: translate(-50%, 6px) scale(0.92);
+  transform-origin: center bottom;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.bubbleToolbarShown {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.bubbleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9a9a9a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bubbleBtnItalic {
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+
+.bubbleBtnActive {
+  background-color: rgba(197, 123, 147, 0.25);
+  color: #f0d4de;
+}
+
+/* The list-icon glyph: three short rows */
+.bubbleBtnList {
+  gap: 3px;
+}
+
+.listGlyphRow {
+  width: 12px;
+  height: 1.5px;
+  border-radius: 1px;
+  background-color: currentColor;
+}
