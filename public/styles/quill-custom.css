@@ -13,6 +13,52 @@
     /* Add slight border for better definition */
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     z-index: 9999 !important;
+
+    /* Spring show/hide. quill-editor.tsx bakes the arrow gap into `top`, so the
+       transform is ours to animate. We keep the pill in the layout even when
+       "hidden" (display stays block, see below) so the transition runs both ways
+       instead of snapping. The back-easing curve gives the scale a spring overshoot. */
+    transform: none !important; /* neutralise Quill's translateY gap */
+    transform-origin: top center; /* pill below the selection grows from its top */
+    transition:
+        opacity 150ms ease,
+        transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0s;
+    will-change: transform, opacity;
+}
+
+/* Pill above the selection (the default): grow from the bottom, toward the text. */
+.ql-bubble .ql-tooltip.ql-flip {
+    transform: none !important;
+    transform-origin: bottom center;
+}
+
+/* Resting-out state: stay laid out (not display:none) so opacity/transform can
+   animate; delay the visibility flip until the out-transition has finished. */
+.ql-bubble .ql-tooltip.ql-hidden {
+    display: block !important;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0 !important;
+    transform: translateY(-8px) scale(0.9) !important;
+    transition:
+        opacity 130ms ease,
+        transform 150ms ease-in,
+        visibility 0s linear 150ms;
+}
+.ql-bubble .ql-tooltip.ql-flip.ql-hidden {
+    transform: translateY(8px) scale(0.9) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ql-bubble .ql-tooltip,
+    .ql-bubble .ql-tooltip.ql-hidden {
+        transition: opacity 120ms ease, visibility 0s !important;
+        transform: none !important;
+    }
+    .ql-bubble .ql-tooltip.ql-hidden {
+        transition: opacity 120ms ease, visibility 0s linear 120ms !important;
+    }
 }
 
 /* Force toolbar to stay in one line */
@@ -46,12 +92,59 @@
 .ql-bubble {
     z-index: 20;
 }
+
+/* Icon buttons: even, comfortable tap targets with the glyph centred. */
 .ql-bubble .ql-toolbar button {
     background: none !important;
     border: none !important;
     cursor: pointer !important;
-    display: inline-block !important;
-    height: 22px !important;
-    padding: 3px 0px !important;
-    width: 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 26px !important;
+    width: 26px !important;
+    padding: 4px !important;
+    border-radius: 7px !important;
+    transition: background-color 0.15s ease !important;
+}
+
+.ql-bubble .ql-toolbar button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Quill floats the button and its svg left; with flex centring we don't want that. */
+.ql-bubble .ql-toolbar button,
+.ql-bubble .ql-toolbar button svg {
+    float: none !important;
+}
+
+/* Even rhythm between groups + symmetric padding inside the pill. */
+.ql-bubble .ql-toolbar .ql-formats {
+    margin: 0 4px 0 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+.ql-bubble .ql-toolbar .ql-formats:first-child {
+    margin-left: 0 !important;
+}
+.ql-bubble .ql-toolbar .ql-formats:last-child {
+    margin-right: 0 !important;
+}
+
+/* The pill itself: vertical centring and breathing room around the row. */
+.ql-bubble .ql-tooltip .ql-toolbar {
+    align-items: center !important;
+    padding: 6px 12px !important;
+}
+
+/* Text buttons ("Ask AI", "+ Task") keep horizontal room and sit on the same
+   row as the icons (the generic 4px button padding above is too tight for text). */
+.ql-bubble .ql-toolbar button.ql-askAi,
+.ql-bubble .ql-toolbar button.ql-createTask {
+    width: auto !important;
+    padding: 4px 10px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
 }

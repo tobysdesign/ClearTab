@@ -32,6 +32,9 @@ export function QuillEditor({
 }: QuillEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
+  // The bubble toolbar is moved into a wrapper on document.body (see init), so
+  // React won't remove it with the editor — track it and clean it up ourselves.
+  const tooltipRootRef = useRef<HTMLElement | null>(null);
   const [selectedText, setSelectedText] = useState<string>("");
 
   // Store callbacks in refs to avoid reinitializing Quill on every callback change
@@ -115,6 +118,77 @@ export function QuillEditor({
       }
     }
 
+    // Float the bubble toolbar above the whole page.
+    // Quill positions the bubble assuming it can stretch across document.body
+    // (its default bounds), but the tooltip actually lives inside .ql-container,
+    // which sits inside the note panel's overflow:auto scroll area and the
+    // overflow:hidden dashboard wrappers. In a narrow note panel the full-width
+    // pill is wider than the panel, so those ancestors clip it (the "Ask AI" / "B"
+    // side gets chopped and "+ Task" wraps). Re-parenting the tooltip to <body>
+    // and positioning it fixed removes every clipping ancestor and lets us clamp
+    // it to the viewport instead.
+    const tooltip: any = (quill as any)?.theme?.tooltip;
+    if (tooltip?.root) {
+      const root: HTMLElement = tooltip.root;
+      // Every bubble style (Quill's own quill.bubble.css and our quill-custom.css)
+      // is scoped under `.ql-bubble`, which normally lives on .ql-container. Moving
+      // the tooltip straight onto <body> would drop it out of that scope and strip
+      // all its styling (the pill, icon sizing, colours). Re-create the scope with a
+      // zero-size `.ql-bubble` wrapper on <body> so every selector still matches.
+      const wrapper = document.createElement("div");
+      wrapper.className = "ql-bubble";
+      wrapper.appendChild(root);
+      document.body.appendChild(wrapper);
+      tooltipRootRef.current = wrapper;
+      root.style.position = "fixed";
+      const arrow = root.querySelector(".ql-tooltip-arrow") as HTMLElement | null;
+      const MARGIN = 10; // keep this far from the viewport edges
+
+      tooltip.position = function (reference: {
+        left: number;
+        top: number;
+        bottom: number;
+        width: number;
+      }) {
+        // `reference` is relative to .ql-container; convert to viewport coords.
+        const containerRect = quill.container.getBoundingClientRect();
+        const rootW = root.offsetWidth;
+        const rootH = root.offsetHeight;
+        const anchorX = containerRect.left + reference.left + reference.width / 2;
+        const selTop = containerRect.top + reference.top;
+        const selBottom = containerRect.top + reference.bottom;
+
+        // Horizontal: centre on the selection, then clamp inside the viewport.
+        const centredLeft = anchorX - rootW / 2;
+        const maxLeft = window.innerWidth - rootW - MARGIN;
+        const left = Math.max(MARGIN, Math.min(centredLeft, maxLeft));
+        const shift = left - centredLeft; // >0 pushed right, <0 pushed left
+        root.style.left = `${left}px`;
+
+        // Vertical: prefer ABOVE the selection so the pill doesn't cover the
+        // text just below it; drop below only when there isn't room up top.
+        // `ql-flip` makes the arrow point down (pill above); the GAP is baked
+        // into `top` because the CSS neutralises Quill's translateY gap so the
+        // transform is free for the show/hide spring.
+        const GAP = 10;
+        let top = selTop - rootH - GAP;
+        const above = top >= MARGIN;
+        if (!above) {
+          top = selBottom + GAP;
+        }
+        root.classList.toggle("ql-flip", above);
+        root.style.top = `${top}px`;
+        root.style.marginTop = ""; // neutralise Quill's scroll-offset hack
+
+        // Keep the arrow pointing at the selection after a horizontal clamp.
+        if (arrow) {
+          arrow.style.marginLeft =
+            shift !== 0 ? `${-shift - arrow.offsetWidth / 2}px` : "";
+        }
+        return shift;
+      };
+    }
+
     if (tabIndex !== undefined) {
       const editableArea = editorRef.current.querySelector(".ql-editor");
       if (editableArea) {
@@ -170,6 +244,12 @@ export function QuillEditor({
     // Handle blur event is not standard in Quill, removed invalid listener
 
     return () => {
+      // The bubble toolbar lives in a wrapper on <body>, so it survives the editor
+      // being unmounted — remove the wrapper explicitly to avoid orphaned pills.
+      if (tooltipRootRef.current) {
+        tooltipRootRef.current.remove();
+        tooltipRootRef.current = null;
+      }
       if (quillRef.current) {
         quillRef.current = null;
       }
