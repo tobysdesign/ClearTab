@@ -9,7 +9,7 @@
        (the container owns the input background, border and hover/focus state). */
     background-color: transparent;
     border: none;
-    border-radius: 0.375rem;
+    border-radius: 8px;
     color: white;
 }
 
@@ -22,13 +22,17 @@
     padding: 8px 12px; /* match the other modal inputs; keep text off the border */
     color: white;
     min-height: 120px;
-    max-height: none; /* Allow unlimited growth */
+    /* Scroll a long description inside the box instead of growing the popover. */
+    max-height: 240px;
+    overflow-y: auto;
 }
 
 .taskEditorBase :global(.ql-editor.ql-blank::before) {
-    color: rgba(255, 255, 255, 0.5);
+    /* Match the other inputs' placeholder: same colour, aligned with the text
+       (the editor's 12px left padding), not hugging the border. */
+    color: #999;
     font-style: normal;
-left:0;
+    left: 12px;
 }
 
 .taskEditorBase :global(.ql-toolbar) {
