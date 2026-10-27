@@ -83,7 +83,8 @@
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.025em;
-  color: white;
+  /* Match every other modal/popover header title (#f4f4f5), not pure white. */
+  color: #f4f4f5;
 }
 
 .description {

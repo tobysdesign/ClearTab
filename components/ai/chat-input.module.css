@@ -1,21 +1,22 @@
 /* Composer adapted from Beautiful UI (MIT, (c) 2026 Shane Levine) */
 
-/* Same field treatment as the settings inputs (settings-shared .inputGroup):
-   a dark well with a faint border that brightens on focus, no light fill */
+/* Shared popup/modal input treatment: a #202022 field on the dark frame, with a
+   #2D2D2E border that lifts to #4B4B4D on hover/focus (background unchanged). */
 .composer {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 14px;
-  background: rgba(18, 18, 18, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  background: #202022;
+  border: 1px solid #2D2D2E;
   border-radius: 14px;
   cursor: text;
   transition: border-color 150ms ease;
 }
 
+.composer:hover,
 .composer:focus-within {
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: #4B4B4D;
 }
 
 .input {

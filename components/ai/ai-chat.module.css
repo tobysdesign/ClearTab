@@ -189,9 +189,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  /* No margin gap below: the messages fade in under the header instead (see
+     .messagesArea mask). A faded hairline divider replaces the hard border. */
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.12), transparent) 1;
 }
 
 .modalTitle {
@@ -232,7 +234,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin-bottom: 12px;
+  /* Reach the panel's right edge (cancel .main's 20px pad) so the scrollbar sits
+     flush against the window; the message column keeps its inset via the scroller's
+     own right padding (chat-messages .container). No vertical gap: content fades in
+     under the header and out above the composer via the mask. */
+  margin-right: -20px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
 }
 
 /* Shown while follow-up questions are about a note selection */
@@ -249,7 +257,11 @@
 
 .contextLabel {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: var(--form-label-size);
+  font-weight: var(--form-label-weight);
+  letter-spacing: var(--form-label-letter-spacing);
+  text-transform: var(--form-label-transform);
+  color: var(--form-label-color);
 }
 
 .contextText {

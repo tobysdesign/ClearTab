@@ -70,6 +70,8 @@
   font-size: 1.125rem;
   font-weight: 600;
   line-height: 1;
+  /* Match every other modal/popover header title. */
+  color: #f4f4f5;
 }
 
 .description {
