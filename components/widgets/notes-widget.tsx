@@ -1329,6 +1329,7 @@ export function NotesWidget() {
                         className={notesStyles.notesTitleInput}
                         placeholder="Untitled note"
                         rows={1}
+                        wrap="off"
                         value={displayTitle}
                         onChange={(e) => {
                           handleTitleChange(e);

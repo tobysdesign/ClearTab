@@ -344,6 +344,7 @@ export function LoginNotesWidget({ active = false, beat = "write" }: { active?: 
                          readOnly
                          className={notesStyles.notesTitleInput}
                          rows={1}
+                         wrap="off"
                        />
                      </div>
                   </div>

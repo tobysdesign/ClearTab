@@ -265,15 +265,25 @@
     outline: none;
     resize: none;
 
+    /* Single line: a long title scrolls sideways instead of wrapping to a
+       second row (which pushed the editor down). The caret stays in view. */
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+
     /* typography */
     font-weight: 400;
     font-size: 14px;
     line-height: 22px;
     color: #d2d2d2;
-    word-break: break-words;
 
     /* visual */
     background-color: transparent;
+}
+
+.notesTitleInput::-webkit-scrollbar {
+    display: none;
 }
 
 .notesTitleInput::placeholder {
