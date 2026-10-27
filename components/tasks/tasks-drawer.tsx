@@ -32,7 +32,14 @@ export function TasksDrawer() {
   const lastPointerElRef = React.useRef<HTMLElement | null>(null);
   React.useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
-      if (e.target instanceof HTMLElement) lastPointerElRef.current = e.target;
+      if (!(e.target instanceof HTMLElement)) return;
+      // Anchor to the task CARD (or the add button), not the exact text node
+      // clicked, so the popover opens in a consistent spot regardless of the
+      // task's title length.
+      lastPointerElRef.current =
+        e.target.closest<HTMLElement>('[class*="taskRow"]') ??
+        e.target.closest<HTMLElement>('[aria-label="Add task"], [aria-label="Add Task"]') ??
+        e.target;
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);

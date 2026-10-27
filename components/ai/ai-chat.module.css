@@ -254,6 +254,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Breathing room between the chat content and the composer below it. */
+  margin-bottom: 48px;
   /* Reach the panel's right edge (cancel .main's 20px pad) so the scrollbar sits
      flush against the window; the message column keeps its inset via the scroller's
      own right padding (chat-messages .container). No vertical gap: content fades in
