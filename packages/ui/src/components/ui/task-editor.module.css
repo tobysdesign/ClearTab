@@ -5,7 +5,9 @@
 .taskEditorBase {
     width: 100%;
     min-height: 120px;
-    background-color: rgba(255, 255, 255, 0.05);
+    /* Transparent so the #202022 well from the .taskEditor container shows through
+       (the container owns the input background, border and hover/focus state). */
+    background-color: transparent;
     border: none;
     border-radius: 0.375rem;
     color: white;
@@ -17,7 +19,7 @@
 }
 
 .taskEditorBase :global(.ql-editor) {
-    padding: 0;
+    padding: 8px 12px; /* match the other modal inputs; keep text off the border */
     color: white;
     min-height: 120px;
     max-height: none; /* Allow unlimited growth */
@@ -41,7 +43,7 @@ left:0;
 
 .taskEditorBase:focus {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.1);
+    /* Focus is shown by the .taskEditor container's border, not a fill change. */
 }
 
 .taskEditorLoading {
