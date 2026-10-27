@@ -16,6 +16,9 @@
   display: flex;
   align-items: stretch;
   min-height: 0;
+  /* A consistent, notes-like height so the chat has presence instead of
+     collapsing to its message count; the columns scroll inside it. */
+  height: min(560px, 72vh);
 }
 
 /* Conversations sidebar */
@@ -28,6 +31,21 @@
   padding: 16px 12px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* Widget name labelling the conversations panel (like "Notes" over the list). */
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  padding: 0 4px 10px;
+}
+
+.sidebarTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f4f4f5;
 }
 
 .newChatButton {
@@ -230,7 +248,9 @@
 }
 
 .messagesArea {
-  max-height: min(520px, 60vh);
+  /* Fill the main column (its height comes from .layout) and scroll inside. */
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;

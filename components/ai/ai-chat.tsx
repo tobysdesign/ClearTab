@@ -85,6 +85,12 @@ export function AiChat() {
     setInputValue(`#${command} ${rest}`)
   }, [inputValue, setInputValue])
 
+  // Mirror the notes layout: the widget name ("AI Chat") labels the left
+  // conversations panel, and the specific conversation's title sits above the
+  // chat on the right (like a note title above its content).
+  const activeThread = threads.find(thread => thread.id === activeThreadId)
+  const chatTitle = activeThread?.title || 'New chat'
+
   // Same dock-anchored panel as Settings/Layout/Shortcuts (which also handles
   // Escape, click-outside and one-panel-at-a-time).
   return (
@@ -97,6 +103,9 @@ export function AiChat() {
       <div className={styles.layout}>
         {sidebarOpen && (
           <aside className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <h2 className={styles.sidebarTitle}>AI Chat</h2>
+            </div>
             <button type="button" className={styles.newChatButton} onClick={newThread}>
               <AddIcon size={14} />
               <span>New chat</span>
@@ -144,7 +153,7 @@ export function AiChat() {
                   {sidebarOpen ? 'Hide conversations' : 'Show conversations'} <TooltipShortcut>⌘B</TooltipShortcut>
                 </TooltipContent>
               </Tooltip>
-              <h2 className={styles.modalTitle}>AI Chat</h2>
+              <h2 className={styles.modalTitle}>{chatTitle}</h2>
             </div>
             <button type="button" onClick={closeChat} className={styles.closeButton}>
               <span>Close</span>
