@@ -1,15 +1,8 @@
 'use client'
 
 import React from "react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
+import { DockPanel, SimpleDropdown, SimpleDropdownItem, Button } from "@cleartab/ui";
 import { EditTaskForm } from "@/components/widgets/edit-task-form";
-import { SimpleDropdown, SimpleDropdownItem } from "@cleartab/ui";
-import { Button } from "@cleartab/ui";
 import { useTaskModal } from "@/hooks/use-task-modal";
 import styles from "./tasks-drawer.module.css";
 import footerStyles from "../ui/modal-actions.module.css";
@@ -33,6 +26,32 @@ export function TasksDrawer() {
     (activeTaskId && !activeTaskId.startsWith("draft-"))
   );
 
+  // Grow the popover from whatever the user clicked (a task row, an add button),
+  // so it's contextual to where the task sits. We record the last pressed element
+  // and snapshot it when the modal opens (kept stable while open).
+  const lastPointerElRef = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.target instanceof HTMLElement) lastPointerElRef.current = e.target;
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, []);
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+  // The description editor is a Quill instance that's slow to build. We render the
+  // content on first open and DockPanel's keepMounted keeps it warm, so every open
+  // after the first is instant. One EditTaskForm (stable key) re-targets each task.
+  const [hasOpened, setHasOpened] = React.useState(false);
+  const wasOpenRef = React.useRef(false);
+  React.useEffect(() => {
+    if (isOpen && !wasOpenRef.current) {
+      setAnchorEl(lastPointerElRef.current);
+      setHasOpened(true);
+    }
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
+
   // Cmd/Ctrl+Enter finishes (the editor uses plain Enter for newlines)
   React.useEffect(() => {
     if (!isOpen) return;
@@ -47,26 +66,20 @@ export function TasksDrawer() {
   }, [isOpen, handleModalClose]);
 
   return (
-    <div className={styles.drawerContainer}>
-      <Drawer
-        open={isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleModalClose();
-          }
-        }}
-      >
-        <DrawerContent direction="right" overlayVariant="settings" className={styles.panel}>
+    <DockPanel
+      isOpen={isOpen}
+      onClose={handleModalClose}
+      anchorEl={anchorEl}
+      keepMounted
+      preferredPlacement="bottom"
+      className={styles.taskPopover}
+    >
+      {hasOpened && (
+        <>
           <div className={styles.header}>
-            <DrawerTitle className={styles.title}>
+            <h2 className={styles.title}>
               {isEditing ? "Edit task" : "New task"}
-            </DrawerTitle>
-            <DrawerDescription className="sr-only">
-              {isEditing
-                ? "Edit the selected task details"
-                : "Create a new task with title, description, and due date"}
-            </DrawerDescription>
-
+            </h2>
             <div className={styles.headerActions}>
               {/* Edit mode keeps the actions menu (Delete) in the header */}
               {isEditing && (
@@ -105,8 +118,8 @@ export function TasksDrawer() {
               <kbd className={footerStyles.kbd}>⌘⏎</kbd>
             </Button>
           </div>
-        </DrawerContent>
-      </Drawer>
-    </div>
+        </>
+      )}
+    </DockPanel>
   );
 }

@@ -16,14 +16,22 @@ interface DockPanelProps {
    * the panel opens, rather than a React ref, so it works for triggers mounted
    * anywhere in the tree -- including ones decoupled from this panel's own
    * render tree (e.g. Settings, which opens via a global custom event, or a
-   * button inside a dashboard widget). */
-  anchorSelector: string
+   * button inside a dashboard widget). Optional when `anchorEl` is given. */
+  anchorSelector?: string
+  /** A specific element to grow from, taking precedence over `anchorSelector`.
+   * Use when the trigger varies per open (e.g. the task modal, which opens from
+   * any task row or add button) so the panel is contextual to what was clicked. */
+  anchorEl?: HTMLElement | null
   children: React.ReactNode
   className?: string
   /** Side the panel prefers to open on. It auto-flips to another side when the
    * preferred one would overflow the viewport. Defaults to 'top' -- the panel
    * grows upward from a dock button sitting at the bottom of the screen. */
   preferredPlacement?: Placement
+  /** Keep `children` mounted while closed (hidden) instead of unmounting them.
+   * Used when the content is expensive to build (e.g. a Quill editor) so opening
+   * is instant after the first time. Defaults to false (unmount on close). */
+  keepMounted?: boolean
 }
 
 /** Broadcast whenever any DockPanel opens, so every other open one closes --
@@ -80,14 +88,27 @@ export function DockPanel({
   isOpen,
   onClose,
   anchorSelector,
+  anchorEl,
   children,
   className,
   preferredPlacement = 'top',
+  keepMounted = false,
 }: DockPanelProps) {
+  // The element the panel grows from: an explicit element wins, else the selector
+  // (looked up fresh each time so it works for triggers anywhere in the tree).
+  const resolveAnchor = React.useCallback(
+    (): Element | null => anchorEl ?? (anchorSelector ? document.querySelector(anchorSelector) : null),
+    [anchorEl, anchorSelector],
+  )
   const [anchorRect, setAnchorRect] = React.useState<DOMRect | null>(null)
   const [viewport, setViewport] = React.useState({ w: 0, h: 0 })
   const [panelSize, setPanelSize] = React.useState({ w: 0, h: 0 })
   const [placement, setPlacement] = React.useState<Placement>(preferredPlacement)
+  // keepMounted renders the panel even while closed; portaling it on the first
+  // client render (which the server didn't produce) is a hydration mismatch, so
+  // we only mount the portal after the first commit.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
   const panelRef = React.useRef<HTMLDivElement>(null)
   const panelId = React.useId()
   const onCloseRef = React.useRef(onClose)
@@ -103,7 +124,7 @@ export function DockPanel({
   React.useLayoutEffect(() => {
     if (!isOpen) return
     const update = () => {
-      const el = document.querySelector(anchorSelector)
+      const el = resolveAnchor()
       if (!el) return
       const a = el.getBoundingClientRect()
       const vw = window.innerWidth
@@ -121,7 +142,7 @@ export function DockPanel({
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [isOpen, anchorSelector, preferredPlacement])
+  }, [isOpen, resolveAnchor, preferredPlacement])
 
   // Re-measure once the panel is actually in the DOM (the effect above runs
   // before it mounts, so panelRef is null on the first pass).
@@ -152,7 +173,7 @@ export function DockPanel({
       if (inside) return
       // Our own trigger: leave it to its click handler, so re-clicking the
       // button doesn't close-then-reopen the panel.
-      const anchor = document.querySelector(anchorSelector)
+      const anchor = resolveAnchor()
       if (anchor && e.target instanceof Node && anchor.contains(e.target)) return
       onCloseRef.current()
     }
@@ -164,9 +185,9 @@ export function DockPanel({
       window.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('pointerdown', handlePointerDown)
     }
-  }, [isOpen, anchorSelector, panelId])
+  }, [isOpen, resolveAnchor, panelId])
 
-  if (typeof document === 'undefined') return null
+  if (typeof document === 'undefined' || !mounted) return null
 
   // Derive the positioner placement, the tail, and the scale-in origin from the
   // chosen side. For top/bottom the panel is centered on the viewport (matching
@@ -229,20 +250,58 @@ export function DockPanel({
     }
   }
 
+  /* A cosmetic scrim that slightly dims the content behind the panel. It never
+     captures pointer events (see .scrim), so the panel stays a non-blocking
+     popover: clicking outside still closes it. */
+  const scrim = (
+    <motion.div
+      key="dock-scrim"
+      className={styles.scrim}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+    />
+  )
+
+  const transition = { duration: 0.18, ease: [0.16, 1, 0.3, 1] as const }
+
+  // keepMounted: the panel stays in the DOM while closed (just hidden), so its
+  // children -- an expensive editor, say -- aren't rebuilt on every open. The
+  // scrim still mounts/unmounts (it's cheap and has no state).
+  if (keepMounted) {
+    return createPortal(
+      <>
+        <AnimatePresence>{isOpen && anchorRect && scrim}</AnimatePresence>
+        {/* Plain div for positioning (see note in the non-keepMounted branch). */}
+        <div
+          className={styles.panelPositioner}
+          style={{ ...positionerStyle, ...(isOpen ? null : { pointerEvents: 'none' }) }}
+          aria-hidden={!isOpen}
+        >
+          <motion.div
+            className={styles.panelMotion}
+            style={{ transformOrigin }}
+            initial={false}
+            animate={isOpen ? { opacity: 1, scale: 1, x: 0, y: 0 } : { opacity: 0, scale: 0.92, ...initialOffset }}
+            transition={transition}
+            onPointerDown={() => { pointerInsideRef.current = true }}
+          >
+            <div ref={panelRef} className={cn(styles.panel, className)}>
+              {children}
+            </div>
+            <div className={cn(styles.tail, tailClass)} style={tailStyle} />
+          </motion.div>
+        </div>
+      </>,
+      document.body,
+    )
+  }
+
   return createPortal(
     <AnimatePresence>
       {isOpen && anchorRect && [
-        /* A cosmetic scrim that slightly dims the content behind the panel. It
-           never captures pointer events (see .scrim), so the panel stays a
-           non-blocking popover: clicking outside still closes it. */
-        <motion.div
-          key="dock-scrim"
-          className={styles.scrim}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-        />,
+        scrim,
         /* Plain div for positioning, not a motion component: framer-motion owns
            the `transform` CSS property entirely once scale is animated on an
            element, which would silently overwrite the transform set here. */
@@ -253,7 +312,7 @@ export function DockPanel({
             initial={{ opacity: 0, scale: 0.92, ...initialOffset }}
             animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, ...initialOffset }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            transition={transition}
             onPointerDown={() => { pointerInsideRef.current = true }}
           >
             <div ref={panelRef} className={cn(styles.panel, className)}>

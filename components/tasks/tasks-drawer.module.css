@@ -16,6 +16,14 @@
     box-sizing: border-box;
 }
 
+/* The task modal as a real DockPanel popover (background/border/shadow come from
+   DockPanel's own .panel); we only set the width and inner padding. */
+.taskPopover {
+    width: 440px;
+    max-width: calc(100vw - 48px);
+    padding: 20px;
+}
+
 .header {
     display: flex;
     align-items: center;
