@@ -114,6 +114,19 @@
     align-content: flex-end;
 }
 
+/* Days-only view (no months/weeks column): the day number is normally tucked under
+   the grid's LEFT column, which reads as two centres next to the grid's own centre.
+   With a single column there's no composite to align to, so centre everything on one
+   axis — the lone remaining (pink) dot centres under the grid and the number sits
+   directly beneath it. */
+.body[data-units="1"] .daysColumn {
+    align-items: center;
+}
+
+.body[data-units="1"] .daysDots {
+    justify-content: center;
+}
+
 /* Compact (small sizes): only the remaining dots, all sitting on the bottom row */
 .body[data-compact="true"] .dots {
     align-content: flex-end;

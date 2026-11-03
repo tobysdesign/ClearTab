@@ -278,6 +278,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
         data-rows={layout.rows}
         data-compact={layout.compact}
         data-stacked={layout.stacked}
+        data-units={units.length}
         role="img"
         aria-label={`${spoken || "0 days"} until ${title}`}
       >
