@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { cookies } from 'next/headers';
+import { and, eq } from 'drizzle-orm';
 import { auth } from "@/auth";
 import { dbMinimal } from "@/lib/db-minimal";
 import { connectedAccounts, user as userTable } from "@/shared/schema-tables";
 import { googleApiService } from "@/lib/google-api-service";
+import { OAUTH_STATE_COOKIE, oauthNonceMatches } from "@/lib/auth/oauth-state";
 
 type ConnectedAccountInsert = {
   userId: string;
@@ -38,6 +40,7 @@ export async function GET(request: NextRequest) {
     let nextUrl = '/settings';
     let isPrimary = false;
     let stateUserId: string | null = null;
+    let stateNonce: string | null = null;
     if (state) {
       try {
         const parsedState = JSON.parse(state);
@@ -47,6 +50,7 @@ export async function GET(request: NextRequest) {
         }
         isPrimary = parsedState.isPrimary === true;
         stateUserId = parsedState.userId || null;
+        stateNonce = typeof parsedState.nonce === 'string' ? parsedState.nonce : null;
       } catch (e) {
         console.warn('Failed to parse OAuth state:', e);
       }
@@ -144,11 +148,31 @@ export async function GET(request: NextRequest) {
       }
 
       // Handle SECONDARY account connection (uses connected_accounts table)
-      // Check if this account is already connected
+
+      // CSRF check: the nonce echoed in state must match the cookie planted when this
+      // flow was started (google-link-url). Blocks a forged callback from linking an
+      // attacker's Google account into a logged-in victim's session.
+      const cookieStore = await cookies();
+      const cookieNonce = cookieStore.get(OAUTH_STATE_COOKIE)?.value;
+      if (!oauthNonceMatches(stateNonce, cookieNonce)) {
+        console.error('OAuth state nonce mismatch on account link; rejecting.');
+        const errorUrl = '/settings?error=invalid_state';
+        const res = NextResponse.redirect(new URL(errorUrl, request.url));
+        res.cookies.delete(OAUTH_STATE_COOKIE);
+        return res;
+      }
+
+      // Look up by (user, Google account) so each user links their OWN calendars
+      // independently — two different users may link the same shared Google account,
+      // and one user re-linking updates only their own row. Previously the lookup was
+      // by providerAccountId alone, which let one user's link clobber another's tokens.
       const [existingAccount] = await dbMinimal
         .select()
         .from(connectedAccounts)
-        .where(eq(connectedAccounts.providerAccountId, userInfo))
+        .where(and(
+          eq(connectedAccounts.userId, userId),
+          eq(connectedAccounts.providerAccountId, userInfo),
+        ))
         .limit(1);
 
       if (existingAccount) {
@@ -164,9 +188,9 @@ export async function GET(request: NextRequest) {
           } as Partial<ConnectedAccountInsert>)
           .where(eq(connectedAccounts.id, existingAccount.id));
 
-        console.log(`Updated existing Google account: ${userInfo}`);
+        console.log(`Updated existing Google account for user ${userId}: ${userInfo}`);
       } else {
-        // Create new connected account
+        // Create new connected account for this user
         await dbMinimal
           .insert(connectedAccounts)
           .values({
@@ -180,12 +204,14 @@ export async function GET(request: NextRequest) {
               : null,
           } as ConnectedAccountInsert);
 
-        console.log(`Connected new Google account: ${userInfo}`);
+        console.log(`Connected new Google account for user ${userId}: ${userInfo}`);
       }
 
       // Redirect to success page
       const successUrl = `${nextUrl}?success=account_connected`;
-      return NextResponse.redirect(new URL(successUrl, request.url));
+      const res = NextResponse.redirect(new URL(successUrl, request.url));
+      res.cookies.delete(OAUTH_STATE_COOKIE);
+      return res;
 
     } catch (error) {
       console.error('Error processing OAuth callback:', error);

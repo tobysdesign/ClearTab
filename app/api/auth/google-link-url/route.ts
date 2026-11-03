@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from "@/auth";
+import { OAUTH_STATE_COOKIE, newOAuthNonce, oauthStateCookieOptions } from "@/lib/auth/oauth-state";
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,6 +31,9 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // CSRF nonce: planted in a cookie and echoed in state; verified in the callback.
+    const nonce = newOAuthNonce();
+
     // Build OAuth URL
     const params = new URLSearchParams({
       client_id: googleClientId,
@@ -38,16 +42,18 @@ export async function GET(request: NextRequest) {
       scope: 'openid email profile https://www.googleapis.com/auth/calendar.readonly',
       access_type: 'offline',
       prompt: 'consent',
-      state: JSON.stringify({ nextUrl }), // Include next URL in state
+      state: JSON.stringify({ nextUrl, nonce }),
     });
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       authUrl,
       message: 'Authorization URL generated successfully'
     });
+    response.cookies.set(OAUTH_STATE_COOKIE, nonce, oauthStateCookieOptions);
+    return response;
   } catch (error) {
     console.error('Error getting Google link URL:', error);
     return NextResponse.json({

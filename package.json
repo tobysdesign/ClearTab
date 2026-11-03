@@ -16,7 +16,6 @@
     "package-extension": "node scripts/build-chrome-extension.mjs --zip",
     "generate-icons": "node scripts/generate-icons.js",
     "analyze": "ANALYZE=true pnpm build",
-    "create-user": "tsx -r dotenv/config scripts/create-user.ts",
     "test:unit": "vitest run"
   },
   "dependencies": {
