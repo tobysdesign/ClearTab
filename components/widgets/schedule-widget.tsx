@@ -15,6 +15,7 @@ import { isExtensionEnvironment } from '@/lib/extension-utils'
 import styles from './schedule-widget.module.css'
 import { useWidgetHeight } from '@/hooks/use-widget-height'
 import { useCalendarVisibility } from '@/hooks/use-calendar-visibility'
+import { ScheduleCalendarFilter, type ScheduleCalendar } from './schedule-calendar-filter'
 
 // Interfaces
 interface CalendarEvent {
@@ -155,7 +156,7 @@ function DaySection({
 
 export function ScheduleWidget() {
   // Use auth
-  const { loading, signIn } = useAuth()
+  const { user, loading, signIn } = useAuth()
   const { isVisible } = useCalendarVisibility()
   const { ref, isMini, height } = useWidgetHeight()
 
@@ -290,7 +291,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
 
   // Connected accounts, in order, so each event's card can show its account's dot count:
   // primary = position 1 (no dots), each connected account = position 2, 3, … (that many dots).
-  const { data: connectedAccounts } = useQuery<Array<{ id: string }>>({
+  const { data: connectedAccounts } = useQuery<Array<{ id: string; email?: string }>>({
     queryKey: ['calendar-accounts'],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
@@ -308,6 +309,21 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
     })
     return map
   }, [connectedAccounts])
+
+  // All linked calendars (primary + connected accounts) for the header filter pill. Keys match
+  // the useCalendarVisibility store so the checkboxes drive the same filter Settings uses.
+  const calendars = useMemo<ScheduleCalendar[]>(() => {
+    if (!user?.id) return []
+    const primary: ScheduleCalendar = {
+      key: `primary-${user.id}`,
+      label: user.name || user.email?.split('@')[0] || 'Primary',
+      isPrimary: true,
+    }
+    const connected = (connectedAccounts ?? [])
+      .filter((acc) => acc?.id)
+      .map((acc) => ({ key: acc.id, label: acc.email?.split('@')[0] || 'Calendar' }))
+    return [primary, ...connected]
+  }, [user?.id, user?.name, user?.email, connectedAccounts])
 
   // Destructure events, needsReconnection, and optional message from data
   const events = data?.events || [];
@@ -554,6 +570,7 @@ function getInitialCachedSchedule(): ScheduleQueryResult | undefined {
                   {/* Header matching other widgets' positioning */}
                   <div className={styles.sidebarHeader}>
                     <h2 className="widget-title">Schedule</h2>
+                    {calendars.length > 1 && <ScheduleCalendarFilter calendars={calendars} />}
                   </div>
 
                   <div className={styles.sidebarContent}>
