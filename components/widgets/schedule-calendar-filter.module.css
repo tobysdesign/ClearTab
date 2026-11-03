@@ -8,8 +8,8 @@
     border-radius: 12px;
     background-color: rgba(255, 255, 255, 0.03);
     color: rgba(255, 255, 255, 0.55);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 300;
     line-height: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -30,6 +30,44 @@
     flex-direction: column;
     gap: 2px;
     min-width: 180px;
+}
+
+.menuLabel {
+    padding: 4px 10px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* "Add account" action, styled like a row but acting as a button (mirrors Settings) */
+.addRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 10px;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0 0 6px 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.addRow:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.addRow:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .row {

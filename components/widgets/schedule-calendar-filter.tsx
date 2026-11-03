@@ -1,8 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { SimpleDropdown, Checkbox } from '@cleartab/ui'
+import { AddIcon } from '@/components/icons'
 import { useCalendarVisibility } from '@/hooks/use-calendar-visibility'
+import { apiFetch } from '@/lib/api-fetch'
+import { IS_EXTENSION, siteUrl } from '@/lib/platform'
 import styles from './schedule-calendar-filter.module.css'
 
 export interface ScheduleCalendar {
@@ -15,12 +18,38 @@ export interface ScheduleCalendar {
 
 /**
  * Shows under the Schedule heading when more than one calendar is linked: a pill
- * ("N calendars") that opens a checkbox list for toggling each calendar's visibility.
- * Checkboxes write to the same useCalendarVisibility store the Settings switches use,
- * so the agenda filters in real time.
+ * ("N calendars") that opens a checkbox list for toggling each calendar's visibility,
+ * plus an "Add account" action mirroring the one in Settings. Checkboxes write to the
+ * same useCalendarVisibility store the Settings switches use, so the agenda filters live.
  */
 export function ScheduleCalendarFilter({ calendars }: { calendars: ScheduleCalendar[] }) {
   const { isVisible, setVisible } = useCalendarVisibility()
+  const [isAdding, setIsAdding] = useState(false)
+
+  // Mirror of the Settings "Add account" flow: the extension opens the website (linking
+  // needs the website session); the web app resolves the Google auth URL and redirects.
+  const handleAddAccount = useCallback(async () => {
+    if (isAdding) return
+    if (IS_EXTENSION) {
+      window.open(siteUrl('/settings'), '_blank', 'noopener')
+      return
+    }
+    setIsAdding(true)
+    try {
+      const res = await apiFetch('/api/auth/google-link-url?next=/settings', { credentials: 'include' })
+      const payload = await res.json().catch(() => ({} as Record<string, unknown>))
+      const authUrl = [payload.authUrl, payload.url, payload.authorizationUrl].find(
+        (v): v is string => typeof v === 'string' && v.length > 0,
+      )
+      if (!res.ok || !authUrl) {
+        throw new Error(typeof payload.message === 'string' ? payload.message : 'Failed to get authorization URL')
+      }
+      window.location.href = authUrl
+    } catch (err) {
+      console.error('Failed to start account linking', err)
+      setIsAdding(false)
+    }
+  }, [isAdding])
 
   if (calendars.length <= 1) return null
 
@@ -36,6 +65,7 @@ export function ScheduleCalendarFilter({ calendars }: { calendars: ScheduleCalen
       }
     >
       <div className={styles.menu} role="group" aria-label="Calendars">
+        <div className={styles.menuLabel}>Visible:</div>
         {calendars.map((cal) => {
           const checked = isVisible(cal.key)
           return (
@@ -50,6 +80,15 @@ export function ScheduleCalendarFilter({ calendars }: { calendars: ScheduleCalen
             </label>
           )
         })}
+        <button
+          type="button"
+          className={styles.addRow}
+          onClick={handleAddAccount}
+          disabled={isAdding}
+        >
+          <AddIcon size={14} aria-hidden />
+          <span className={styles.rowLabel}>Add account</span>
+        </button>
       </div>
     </SimpleDropdown>
   )
