@@ -67,8 +67,9 @@
     display: flex;
     gap: 3px;
     align-items: baseline;
-    line-height: 0;
+    line-height: 1.2em;
     white-space: nowrap;
+    flex-wrap: nowrap;
 }
 
 .number {
