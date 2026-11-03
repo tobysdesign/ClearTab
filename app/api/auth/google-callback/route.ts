@@ -56,24 +56,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-
-    let userId: string | null = null;
-
-    if (devBypass) {
-      console.log('🔧 Development mode: Bypassing auth for OAuth callback');
-      userId = '00000000-0000-4000-8000-000000000000';
-    } else {
-      const session = await auth();
-      if (!session?.user?.id) {
-        console.error('User not authenticated during OAuth callback');
-        const errorUrl = '/settings?error=not_authenticated';
-        return NextResponse.redirect(new URL(errorUrl, request.url));
-      }
-
-      userId = session.user.id;
+    const session = await auth();
+    if (!session?.user?.id) {
+      console.error('User not authenticated during OAuth callback');
+      const errorUrl = '/settings?error=not_authenticated';
+      return NextResponse.redirect(new URL(errorUrl, request.url));
     }
+    const userId = session.user.id;
 
     // Exchange authorization code for tokens
     const googleClientId = process.env.GOOGLE_CLIENT_ID;

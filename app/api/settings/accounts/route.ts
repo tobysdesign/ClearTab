@@ -8,23 +8,11 @@ import type { ConnectedAccountWithEmail } from '@/shared/types';
 
 export async function GET(_request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-
-    let userId: string | null = null;
-
-    if (devBypass) {
-      console.log('🔧 Development mode: Bypassing auth for accounts API');
-      userId = '00000000-0000-4000-8000-000000000000';
-    } else {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in GET /api/settings/accounts");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     // Fetch connected accounts from database
     const accounts = await dbMinimal
@@ -108,23 +96,11 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-
-    let userId: string | null = null;
-
-    if (devBypass) {
-      console.log('🔧 Development mode: Bypassing auth for account deletion');
-      userId = '00000000-0000-4000-8000-000000000000';
-    } else {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in DELETE /api/settings/accounts");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     // Verify the account belongs to the current user before deleting
     const [existingAccount] = await dbMinimal

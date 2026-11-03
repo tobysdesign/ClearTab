@@ -11,14 +11,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const session = await getApiSession();
-    
-    // Development bypass
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-    let userId = session?.user?.id;
-
-    if (!userId && devBypass) {
-        userId = '00000000-0000-4000-8000-000000000000';
-    } else if (!userId) {
+    const userId = session?.user?.id;
+    if (!userId) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 

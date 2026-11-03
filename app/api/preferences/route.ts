@@ -9,21 +9,11 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    // Development bypass for testing
-    const devBypass =
-      process.env.DEV_BYPASS_AUTH === "true" &&
-      process.env.NODE_ENV === "development";
-    const defaultUserId = "00000000-0000-4000-8000-000000000000";
-
-    let userId = defaultUserId;
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     const [prefs] = await dbMinimal
       .select()
@@ -48,21 +38,11 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass =
-      process.env.DEV_BYPASS_AUTH === "true" &&
-      process.env.NODE_ENV === "development";
-    const defaultUserId = "00000000-0000-4000-8000-000000000000";
-
-    let userId = defaultUserId;
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     const body = await request.json();
     console.log("🔍 API saving for user:", userId.slice(0, 8));

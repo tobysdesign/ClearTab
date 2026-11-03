@@ -4,15 +4,9 @@ import { OAUTH_STATE_COOKIE, newOAuthNonce, oauthStateCookieOptions } from "@/li
 
 export async function GET(request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-
-    if (!devBypass) {
-      const session = await auth();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in GET /api/auth/google-link-url");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
 
     // Get the next URL from query params for redirect after auth

@@ -9,20 +9,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-    const defaultUserId = '00000000-0000-4000-8000-000000000000';
-
-    let userId = defaultUserId;
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in GET /api/tasks");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     // Check if fetching a single task by ID
     const { searchParams } = new URL(request.url);
@@ -61,20 +52,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-    const defaultUserId = '00000000-0000-4000-8000-000000000000';
-
-    let userId = defaultUserId;
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in POST /api/tasks");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     const body = await request.json();
     const { title, content, dueDate, isHighPriority, isCompleted, description, priority } = body;
@@ -112,40 +94,20 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    console.log('PUT /api/tasks - Starting request processing');
-
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
+    }
+    const userId = session.user.id;
 
     const body = await request.json();
-    console.log('PUT /api/tasks - Request body:', body);
-
     const { id, title, content, dueDate, isHighPriority, isCompleted, description, priority } = body;
 
     if (!id) {
-      console.log('PUT /api/tasks - No ID provided');
       return NextResponse.json(
         { error: "Task ID is required" },
         { status: 400 },
       );
-    }
-
-    console.log('PUT /api/tasks - Task ID:', id);
-
-
-    // Regular database operation
-    let userId = '00000000-0000-4000-8000-000000000000';
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.log('PUT /api/tasks - No user ID found, unauthorized');
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-      userId = session.user.id;
-      console.log('PUT /api/tasks - User found:', userId);
-    } else {
-      console.log('PUT /api/tasks - Using dev bypass with default user');
     }
 
     const updateData: any = {
@@ -174,34 +136,19 @@ export async function PUT(request: NextRequest) {
     }
     if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
 
-    console.log('PUT /api/tasks - Final update data prepared:', {
-      id,
-      title: updateData.title,
-      contentLength: updateData.content ? JSON.stringify(updateData.content).length : 'N/A',
-      isCompleted: updateData.isCompleted,
-      isHighPriority: updateData.isHighPriority
-    });
-    
-    console.log('PUT /api/tasks - Update data:', updateData);
-
     const [updatedTask] = await dbMinimal
       .update(tasks)
       .set(updateData)
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .returning();
 
-    console.log('PUT /api/tasks - Database result success:', !!updatedTask, updatedTask?.id);
-
     if (!updatedTask) {
-      console.log('PUT /api/tasks - Task not found');
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    console.log('PUT /api/tasks - Success, returning task');
     return NextResponse.json({ data: updatedTask });
   } catch (error) {
     console.error("PUT /api/tasks - Error:", error);
-    console.error("PUT /api/tasks - Error stack:", error.stack);
     return NextResponse.json(
       { error: "Failed to update task" },
       { status: 500 },
@@ -211,20 +158,11 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Development bypass for testing
-    const devBypass = process.env.DEV_BYPASS_AUTH === 'true' && process.env.NODE_ENV === 'development';
-    const defaultUserId = '00000000-0000-4000-8000-000000000000';
-
-    let userId = defaultUserId;
-
-    if (!devBypass) {
-      const session = await getApiSession();
-      if (!session?.user?.id) {
-        console.error("❌ Session or user ID missing in DELETE /api/tasks");
-        return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
-      }
-      userId = session.user.id;
+    const session = await getApiSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized - No User ID" }, { status: 401 });
     }
+    const userId = session.user.id;
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
