@@ -362,6 +362,15 @@
     height: 72%;
 }
 
+/* The day grid clips its contents (overflow:hidden) to keep the cluster tidy, which
+   cuts off the hover/idle dot animation as dots scale/translate past the edge. Let the
+   grid root spill in the views where the animation runs. Higher specificity than the
+   grid's own rule, so no !important needed. */
+.wideDots > div,
+.daysOnly > div:first-child {
+    overflow: visible;
+}
+
 .wideValue {
     flex-shrink: 0;
     font-size: 64px;
