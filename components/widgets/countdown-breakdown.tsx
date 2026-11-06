@@ -73,10 +73,9 @@ const MONTH_DOTS = 11;
 const WEEK_DOTS = 4;
 const DAY_DOTS = 7;
 
-// When only the days column remains, below this many days left we drop the grey "done"
-// dots and show just the remaining pink dots. Days-only is always ≤6, so 7 = always on;
-// lower it (e.g. 4) to keep the full week grid for longer countdowns.
-const REMAINING_ONLY_BELOW_DAYS = 7;
+// Below this many total days left, drop the grey "done" dots and show only the remaining
+// pink dots (across whatever units are shown).
+const REMAINING_ONLY_BELOW_DAYS = 30;
 
 // Design sizes (px)
 const DOT = 24.73;
@@ -149,7 +148,7 @@ function minRowWidth(units: Unit[]) {
 
 // Full grids if they fit at design size; otherwise only the remaining dots.
 // Too narrow for even the columns -> stack the numbers vertically, drop the dots.
-function chooseLayout(width: number, height: number, units: Unit[]) {
+function chooseLayout(width: number, height: number, units: Unit[], daysLeft: number) {
   // Use the days-only view (one dot per day + the total + "Days until <title>") whenever
   // the widget is short (< 180px tall), regardless of width, or too narrow for the
   // side-by-side months/weeks/days breakdown. The full breakdown needs more height than
@@ -165,10 +164,9 @@ function chooseLayout(width: number, height: number, units: Unit[]) {
       showUntil: true,
     };
   }
-  // Days-only (no months/weeks remain): show just the remaining pink dots rather than a
-  // full week with the past days greyed out.
-  const daysOnly = units.length === 1;
-  let compact = daysOnly && units[0].value < REMAINING_ONLY_BELOW_DAYS;
+  // Short countdowns (under REMAINING_ONLY_BELOW_DAYS): show just the remaining pink dots
+  // rather than full grids with the past days greyed out.
+  let compact = daysLeft < REMAINING_ONLY_BELOW_DAYS;
   let best = bestRows(width, height, units, compact);
   if (!compact && best.dot < DOT - 0.1) {
     compact = true;
@@ -294,7 +292,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     const measure = () => {
       const { clientWidth, clientHeight } = el;
       if (!clientWidth || !clientHeight) return;
-      const next = chooseLayout(clientWidth, clientHeight, units);
+      const next = chooseLayout(clientWidth, clientHeight, units, daysLeft);
       setLayout((prev) =>
         prev.rows === next.rows &&
         prev.compact === next.compact &&
@@ -312,7 +310,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     return () => observer.disconnect();
     // units only change with which columns are shown
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unitKeys, months, weeks, days]);
+  }, [unitKeys, months, weeks, days, daysLeft]);
 
   // The dot size is the one value CSS can't derive, so it's passed as a custom property
   useLayoutEffect(() => {
