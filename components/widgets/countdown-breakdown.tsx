@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { addDays, addMonths, differenceInDays, startOfDay } from "@/lib/date-utils";
 import styles from "./countdown-breakdown.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
@@ -242,6 +242,7 @@ function Dots({ unit, rows, compact }: { unit: Unit; rows: Rows; compact: boolea
     <div
       className={`${styles.dots} ${styles[`${unit.key}Dots`]}`}
       data-cols={cols}
+      style={{ "--cols": cols } as CSSProperties}
       aria-hidden="true"
     >
       {Array.from({ length: total }, (_, i) => {
@@ -267,7 +268,12 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
   ];
   // Drop leading zero units ("1 Week + 3 Days", "3 Days"); days always shows
   const firstShown = allUnits.findIndex((unit) => unit.value > 0 || unit.key === "days");
-  const units = allUnits.slice(firstShown);
+  // Short countdowns: collapse to a single days column — one pink dot per remaining day
+  // (7 days -> 7 dots, "7 Days") instead of a months/weeks/days breakdown like "1 Week + 0 Days".
+  const units: Unit[] =
+    daysLeft > 0 && daysLeft < REMAINING_ONLY_BELOW_DAYS
+      ? [{ key: "days", value: daysLeft, total: daysLeft, singular: "Day", plural: "Days", spoken: "day" }]
+      : allUnits.slice(firstShown);
   const unitKeys = units.map((unit) => unit.key).join(",");
 
   const spoken = units
