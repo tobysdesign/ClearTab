@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays, addMonths, differenceInDays, startOfDay } from "@/lib/date-utils";
 import styles from "./countdown-breakdown.module.css";
 import countdownStyles from "./countdown-widget-main.module.css";
@@ -72,6 +72,11 @@ function DaysDotGrid({ count, gap = 6 }: { count: number; gap?: number }) {
 const MONTH_DOTS = 11;
 const WEEK_DOTS = 4;
 const DAY_DOTS = 7;
+
+// When only the days column remains, below this many days left we drop the grey "done"
+// dots and show just the remaining pink dots. Days-only is always ≤6, so 7 = always on;
+// lower it (e.g. 4) to keep the full week grid for longer countdowns.
+const REMAINING_ONLY_BELOW_DAYS = 7;
 
 // Design sizes (px)
 const DOT = 24.73;
@@ -160,15 +165,75 @@ function chooseLayout(width: number, height: number, units: Unit[]) {
       showUntil: true,
     };
   }
-  let compact = false;
-  let best = bestRows(width, height, units, false);
-  if (best.dot < DOT - 0.1) {
+  // Days-only (no months/weeks remain): show just the remaining pink dots rather than a
+  // full week with the past days greyed out.
+  const daysOnly = units.length === 1;
+  let compact = daysOnly && units[0].value < REMAINING_ONLY_BELOW_DAYS;
+  let best = bestRows(width, height, units, compact);
+  if (!compact && best.dot < DOT - 0.1) {
     compact = true;
     best = bestRows(width, height, units, true);
   }
   const used =
     best.rows * best.dot + (best.rows - 1) * DOT_GAP + LABEL_HEIGHT + COLUMN_GAP + BODY_GAP + TITLE_HEIGHT;
   return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT };
+}
+
+// ── Playful dot animations ────────────────────────────────────────────────
+// A random variant plays on hover and ~once a minute, rippling out from a random
+// dot with a little per-dot variance so no two runs look the same. Transform/opacity
+// only (compositor-friendly); WAAPI with the default fill reverts cleanly, so there's
+// no state to tear down. Respects prefers-reduced-motion.
+const DOT_ANIM_VARIANTS = ["ripple", "wave", "pop", "jitter", "breathe"] as const;
+type DotAnimVariant = (typeof DOT_ANIM_VARIANTS)[number];
+const DOT_ANIM_EASE = "cubic-bezier(0.22, 1, 0.36, 1)"; // ease-out-quint
+
+function dotKeyframes(variant: DotAnimVariant): Keyframe[] {
+  const j3 = () => `${(Math.random() * 2 - 1) * 3}px`;
+  switch (variant) {
+    case "ripple":
+      return [{ transform: "scale(1)" }, { transform: "scale(1.4)" }, { transform: "scale(1)" }];
+    case "wave":
+      return [{ transform: "translateY(0)" }, { transform: "translateY(-7px)" }, { transform: "translateY(0)" }];
+    case "pop":
+      return [
+        { transform: "scale(1)", offset: 0 },
+        { transform: "scale(1.5)", offset: 0.4 },
+        { transform: "scale(0.9)", offset: 0.7 },
+        { transform: "scale(1)", offset: 1 },
+      ];
+    case "jitter":
+      return [
+        { transform: "translate(0,0)" },
+        { transform: `translate(${j3()}, ${j3()})` },
+        { transform: `translate(${j3()}, ${j3()})` },
+        { transform: `translate(${j3()}, ${j3()})` },
+        { transform: "translate(0,0)" },
+      ];
+    case "breathe":
+      return [
+        { transform: "scale(1)", opacity: 1 },
+        { transform: "scale(1.18)", opacity: 0.8 },
+        { transform: "scale(1)", opacity: 1 },
+      ];
+  }
+}
+
+function playDotAnimation(container: HTMLElement) {
+  const dots = Array.from(container.querySelectorAll<HTMLElement>("[data-filled]"));
+  if (!dots.length) return;
+  const variant = DOT_ANIM_VARIANTS[Math.floor(Math.random() * DOT_ANIM_VARIANTS.length)];
+  const origin = Math.floor(Math.random() * dots.length); // ripple out from a random dot
+  const perDot = variant === "breathe" ? 0 : 65; // breathe pulses together
+  const baseDur = variant === "jitter" ? 480 : variant === "breathe" ? 900 : 640;
+  for (let i = 0; i < dots.length; i++) {
+    const order = Math.abs(i - origin);
+    dots[i].animate(dotKeyframes(variant), {
+      duration: baseDur + Math.random() * 160,
+      delay: order * perDot + Math.random() * 40,
+      easing: DOT_ANIM_EASE,
+    });
+  }
 }
 
 function Dots({ unit, rows, compact }: { unit: Unit; rows: Rows; compact: boolean }) {
@@ -181,9 +246,16 @@ function Dots({ unit, rows, compact }: { unit: Unit; rows: Rows; compact: boolea
       data-cols={cols}
       aria-hidden="true"
     >
-      {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={i >= firstFilled ? styles.dotFilled : styles.dot} />
-      ))}
+      {Array.from({ length: total }, (_, i) => {
+        const filled = i >= firstFilled;
+        return (
+          <span
+            key={i}
+            className={filled ? styles.dotFilled : styles.dot}
+            {...(filled ? { "data-filled": "" } : {})}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -247,11 +319,29 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     ref.current?.style.setProperty("--dot", `${layout.dot}px`);
   }, [layout.dot]);
 
+  // Play a random dot animation on hover and, as ambient life, roughly once a minute.
+  // Cooldown prevents a hover from retriggering mid-run; reduced-motion opts out.
+  const lastPlayRef = useRef(0);
+  const playDots = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const now = Date.now();
+    if (now - lastPlayRef.current < 1500) return;
+    lastPlayRef.current = now;
+    playDotAnimation(el);
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(playDots, 60_000);
+    return () => window.clearInterval(id);
+  }, [playDots]);
+
   // Too narrow for the side-by-side breakdown: show the total days left as a single
   // number with a dot grid on top (chosen over stacking the months/weeks/days).
   if (layout.stacked) {
     return (
-      <div ref={ref} className={styles.breakdown}>
+      <div ref={ref} className={styles.breakdown} onMouseEnter={playDots}>
         <div
           className={styles.daysOnly}
           role="img"
@@ -272,7 +362,7 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
   }
 
   return (
-    <div ref={ref} className={styles.breakdown}>
+    <div ref={ref} className={styles.breakdown} onMouseEnter={playDots}>
       <div
         className={styles.body}
         data-rows={layout.rows}
