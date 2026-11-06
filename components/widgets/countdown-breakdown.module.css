@@ -340,3 +340,48 @@
     line-height: 22px;
     color: var(--widget-text-light);
 }
+
+/* ── Wide containers: dots | big number | "Days until <title>" on one row ── */
+.wide {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 5%, 44px);
+    width: 100%;
+    height: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
+}
+
+.wideDots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Centre the dot rows so the lone remaining dot sits under the cluster */
+.wideDots .dots {
+    justify-content: center;
+}
+
+.wideValue {
+    flex-shrink: 0;
+    font-size: 64px;
+    font-weight: 100;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-feature-settings: "dlig" 1;
+    color: #c4c4c4;
+}
+
+.wideCaption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 6px;
+    margin: 0;
+    max-width: 45%;
+    text-align: left;
+}

@@ -77,6 +77,10 @@ const DAY_DOTS = 7;
 // pink dots (across whatever units are shown).
 const REMAINING_ONLY_BELOW_DAYS = 30;
 
+// Above this width-to-height ratio, the single-column (days-only) view switches to a
+// horizontal layout: dots | big number | "Days until <title>".
+const WIDE_RATIO = 1.5;
+
 // Design sizes (px)
 const DOT = 24.73;
 const DOT_GAP = 4;
@@ -162,6 +166,7 @@ function chooseLayout(width: number, height: number, units: Unit[], daysLeft: nu
       stacked: true,
       daysHorizontal,
       showUntil: true,
+      wide: false,
     };
   }
   // Short countdowns (under REMAINING_ONLY_BELOW_DAYS): show just the remaining pink dots
@@ -174,7 +179,9 @@ function chooseLayout(width: number, height: number, units: Unit[], daysLeft: nu
   }
   const used =
     best.rows * best.dot + (best.rows - 1) * DOT_GAP + LABEL_HEIGHT + COLUMN_GAP + BODY_GAP + TITLE_HEIGHT;
-  return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT };
+  // Wide, single-column (days-only) containers get the horizontal dots | number | caption layout
+  const wide = units.length === 1 && width >= height * WIDE_RATIO;
+  return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT, wide };
 }
 
 // ── Playful dot animations ────────────────────────────────────────────────
@@ -282,13 +289,14 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
     .join(", ");
 
   const ref = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; stacked: boolean; daysHorizontal: boolean; showUntil: boolean }>({
+  const [layout, setLayout] = useState<{ rows: Rows; dot: number; compact: boolean; stacked: boolean; daysHorizontal: boolean; showUntil: boolean; wide: boolean }>({
     rows: 4,
     dot: DOT,
     compact: false,
     stacked: false,
     daysHorizontal: false,
     showUntil: true,
+    wide: false,
   });
 
   // Measure before paint (and on resize) so the first frame already has the final layout
@@ -305,7 +313,8 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
         prev.stacked === next.stacked &&
         prev.daysHorizontal === next.daysHorizontal &&
         Math.abs(prev.dot - next.dot) < 0.1 &&
-        prev.showUntil === next.showUntil
+        prev.showUntil === next.showUntil &&
+        prev.wide === next.wide
           ? prev
           : next,
       );
@@ -360,6 +369,31 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
               <span className={styles.title}>{title}</span>
             </p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Wide containers: dots | big number | "Days until <title>" on one row
+  if (layout.wide) {
+    const unit = units[0];
+    return (
+      <div ref={ref} className={styles.breakdown} onMouseEnter={playDots}>
+        <div
+          className={styles.wide}
+          role="img"
+          aria-label={`${daysLeft} day${daysLeft === 1 ? "" : "s"} until ${title}`}
+        >
+          <div className={styles.wideDots}>
+            <Dots unit={unit} rows={layout.rows} compact={layout.compact} />
+          </div>
+          <span className={styles.wideValue} aria-hidden="true">
+            {daysLeft}
+          </span>
+          <p className={styles.wideCaption} aria-hidden="true">
+            <span className={styles.untilLabel}>{daysLeft === 1 ? "Day" : "Days"} until</span>
+            <span className={styles.title}>{title}</span>
+          </p>
         </div>
       </div>
     );
