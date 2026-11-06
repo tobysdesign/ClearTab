@@ -16,6 +16,7 @@ function DaysDotGrid({ count, gap = 6 }: { count: number; gap?: number }) {
       while (el.children.length < n) {
         const d = document.createElement("div");
         d.className = countdownStyles.dot;
+        d.setAttribute("data-filled", ""); // targeted by the hover/idle dot animation
         el.appendChild(d);
       }
       while (el.children.length > n) el.lastChild?.remove();
@@ -376,7 +377,6 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
 
   // Wide containers: dots | big number | "Days until <title>" on one row
   if (layout.wide) {
-    const unit = units[0];
     return (
       <div ref={ref} className={styles.breakdown} onMouseEnter={playDots}>
         <div
@@ -385,7 +385,8 @@ export function CountdownBreakdown({ daysLeft, title }: { daysLeft: number; titl
           aria-label={`${daysLeft} day${daysLeft === 1 ? "" : "s"} until ${title}`}
         >
           <div className={styles.wideDots}>
-            <Dots unit={unit} rows={layout.rows} compact={layout.compact} />
+            {/* Auto-sizing grid: one pink dot per remaining day, grown to fill the box */}
+            <DaysDotGrid count={daysLeft} />
           </div>
           <span className={styles.wideValue} aria-hidden="true">
             {daysLeft}

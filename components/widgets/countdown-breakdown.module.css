@@ -354,16 +354,12 @@
     box-sizing: border-box;
 }
 
+/* A sized box the auto-grid fills — so the dots grow with the widget instead of
+   staying at the fixed design size. */
 .wideDots {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-/* Centre the dot rows so the lone remaining dot sits under the cluster */
-.wideDots .dots {
-    justify-content: center;
+    flex: 0 0 auto;
+    width: clamp(72px, 28%, 240px);
+    height: 72%;
 }
 
 .wideValue {
