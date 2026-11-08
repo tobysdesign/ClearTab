@@ -1313,9 +1313,8 @@ export function NotesWidget() {
                       </Button>
                     </div>
                   )}
-                  {/* Title section: label + input - Tab Index 1 */}
+                  {/* First line = heading. Enter drops into the body (Apple Notes pattern). */}
                   <div className={notesStyles.notesTitleSection}>
-                    <span className={notesStyles.notesSectionLabel}>Title</span>
                     <div className={notesStyles.notesTitleContainer}>
                       <textarea
                         ref={(el) => {
@@ -1327,7 +1326,7 @@ export function NotesWidget() {
                         }}
                         tabIndex={3}
                         className={notesStyles.notesTitleInput}
-                        placeholder="Untitled note"
+                        placeholder="New note"
                         rows={1}
                         wrap="off"
                         value={displayTitle}
@@ -1336,6 +1335,35 @@ export function NotesWidget() {
                           const target = e.target as HTMLTextAreaElement;
                           target.style.height = "auto";
                           target.style.height = target.scrollHeight + "px";
+                        }}
+                        onKeyDown={(e) => {
+                          // Return moves from the heading into the note body (Apple Notes).
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            // Scope the lookup to this note's panel so it never grabs
+                            // another widget's editor.
+                            const panel = (e.currentTarget as HTMLElement).closest(
+                              '[class*="notesContentPanel"]',
+                            );
+                            const editor = (panel ?? document).querySelector(
+                              ".ql-editor",
+                            ) as HTMLElement | null;
+                            if (!editor) return;
+                            // Place the caret at the start of the body. A bare
+                            // editor.focus() is swallowed by Quill; committing a collapsed
+                            // selection range is what actually moves focus into it.
+                            const focusBody = () => {
+                              const sel = window.getSelection();
+                              const range = document.createRange();
+                              range.selectNodeContents(editor);
+                              range.collapse(true);
+                              sel?.removeAllRanges();
+                              sel?.addRange(range);
+                              editor.focus();
+                            };
+                            // Defer one frame past the title's blur-save re-render.
+                            requestAnimationFrame(focusBody);
+                          }
                         }}
                         onBlur={handleTitleBlur}
                       />
@@ -1438,15 +1466,6 @@ export function NotesWidget() {
                 </div>
               )}
 
-              {/* Contents section label */}
-              <span
-                className={cn(
-                  notesStyles.notesSectionLabel,
-                  notesStyles.notesContentsLabel,
-                )}
-              >
-                Contents
-              </span>
               {/* Content Editor - Scrollable - Tab Index 2 */}
               <div
                 className={cn(

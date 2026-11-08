@@ -6,6 +6,9 @@ import countdownStyles from "./countdown-widget-main.module.css";
 // Days-only dot grid for the narrow counter: one pink dot per remaining day (capped so
 // a long countdown stays a tidy grid), auto-sized to fill its box like the main dot grid.
 const MAX_DAY_DOTS = 49;
+// Dots grow to fill their box but never past this, so a big (wide/tall) widget shows a
+// tidy dot cluster rather than a few comically large circles.
+const MAX_DOT_SIZE = 44;
 function DaysDotGrid({ count, gap = 6 }: { count: number; gap?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -38,7 +41,7 @@ function DaysDotGrid({ count, gap = 6 }: { count: number; gap?: number }) {
       if (!W || !H) return;
       ensure();
       const { cols, size } = bestGrid(W, H, n, gap);
-      const s = Math.max(2, size);
+      const s = Math.max(2, Math.min(size, MAX_DOT_SIZE));
       el.style.gap = `${gap}px`;
       el.style.gridTemplateColumns = `repeat(${cols}, ${s}px)`;
       el.style.setProperty("--dot-size", `${s}px`);
@@ -79,8 +82,11 @@ const DAY_DOTS = 7;
 const REMAINING_ONLY_BELOW_DAYS = 30;
 
 // Above this width-to-height ratio, the single-column (days-only) view switches to a
-// horizontal layout: dots | big number | "Days until <title>".
+// horizontal layout: dots | big number | "Days until <title>". Only when the box is
+// also short (below WIDE_MAX_HEIGHT): a tall box reads better with the vertical fill
+// layout (dots grow to fill the top, number + caption below) than a stretched row.
 const WIDE_RATIO = 1.5;
+const WIDE_MAX_HEIGHT = 240;
 
 // Design sizes (px)
 const DOT = 24.73;
@@ -154,10 +160,25 @@ function minRowWidth(units: Unit[]) {
 // Full grids if they fit at design size; otherwise only the remaining dots.
 // Too narrow for even the columns -> stack the numbers vertically, drop the dots.
 function chooseLayout(width: number, height: number, units: Unit[], daysLeft: number) {
-  // Use the days-only view (one dot per day + the total + "Days until <title>") whenever
-  // the widget is short (< 180px tall), regardless of width, or too narrow for the
-  // side-by-side months/weeks/days breakdown. The full breakdown needs more height than
-  // that to read cleanly.
+  // A single days-only countdown (< 30 days) always uses the auto-filling dot grid so the
+  // dots grow to fill the box instead of floating at the fixed design size. It goes
+  // horizontal (dots | number | caption) only when the box is wide AND short; any taller
+  // box uses the vertical fill layout (dots fill the top, number + caption beneath).
+  if (units.length === 1) {
+    const wide = width >= height * WIDE_RATIO && height < WIDE_MAX_HEIGHT;
+    return {
+      rows: 1 as Rows,
+      dot: DOT,
+      compact: true,
+      stacked: !wide,
+      daysHorizontal: false,
+      showUntil: true,
+      wide,
+    };
+  }
+  // Multi-unit breakdown. Use the days-only total view whenever the widget is short
+  // (< 180px tall) or too narrow for the side-by-side months/weeks/days columns, which
+  // need more room to read cleanly.
   if (height < 180 || width < minRowWidth(units)) {
     const daysHorizontal = height < 170;
     return {
@@ -180,9 +201,7 @@ function chooseLayout(width: number, height: number, units: Unit[], daysLeft: nu
   }
   const used =
     best.rows * best.dot + (best.rows - 1) * DOT_GAP + LABEL_HEIGHT + COLUMN_GAP + BODY_GAP + TITLE_HEIGHT;
-  // Wide, single-column (days-only) containers get the horizontal dots | number | caption layout
-  const wide = units.length === 1 && width >= height * WIDE_RATIO;
-  return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT, wide };
+  return { ...best, compact, stacked: false, daysHorizontal: false, showUntil: height - used >= UNTIL_HEIGHT, wide: false };
 }
 
 // ── Playful dot animations ────────────────────────────────────────────────
