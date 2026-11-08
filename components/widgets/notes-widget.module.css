@@ -198,8 +198,8 @@
     /* layout */
     flex-shrink: 0;
 
-    /* box model */
-    padding: 14px 18px 14px 10px;
+    /* box model — tight bottom so the heading flows straight into the body below */
+    padding: 14px 18px 2px 10px;
 }
 
 .notesHeaderContent {
@@ -221,15 +221,15 @@
     flex-direction: column;
 }
 
-/* Section labels ("Title", "Contents") — driven by the shared form-label token */
+/* Section labels ("TITLE", "NOTE") — tiny uppercase caps above each field */
 .notesSectionLabel {
     display: block;
     color: var(--form-label-color);
-    font-size: var(--form-label-size);
+    font-size: 9px;
     font-weight: var(--form-label-weight);
-    letter-spacing: var(--form-label-letter-spacing);
-    text-transform: var(--form-label-transform);
-    margin-bottom: 0px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
     margin-left: 10px;
     line-height: 13px;
 }
@@ -248,12 +248,12 @@
     display: flex;
     align-items: end;
 
-    /* input well */
-    min-height: 32px;
-    padding: 4px 16px;
-    background:rgba(0, 0, 0, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    /* Borderless: the title reads as plain text on the card, aligned under its label */
+    min-height: 0;
+    padding: 2px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     box-sizing: border-box;
 }
 
@@ -390,12 +390,13 @@
 .notesEditorScroll {
     /* layout */
     flex: 1;
-    /* content well — left-aligned with the title well, inset from the panel edges */
+    /* Borderless: the note body reads as plain text on the card, left-aligned under its
+       label (same 10px inset as the title). */
     margin: 0 10px 10px 10px;
-    padding: 14px 16px;
-    background: rgba(0, 0, 0, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    padding: 2px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     overflow-y: auto;
     overflow-x: visible;
     cursor: text;

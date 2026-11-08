@@ -45,18 +45,20 @@ const SIZES: Array<[string, number, number]> = [
   ["short-med2", 320, 150],
   ["mini", 320, 90],
   ["wide-short", 520, 150],
+  ["wide-tall", 520, 420],
+  ["wide-tall2", 660, 360],
 ];
 
 // The breakdown is the part that overflows at narrow width; render it directly
 // with 3 units (months+weeks+days) to reproduce the real-data case.
-function BreakdownBox() {
+function BreakdownBox({ daysLeft = 430 }: { daysLeft?: number }) {
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
       <div style={{ height: 60, display: "flex", alignItems: "center", padding: "0 24px", color: "#d2d2d2", fontSize: 14 }}>
         Counter
       </div>
       <div style={{ flex: 1, minHeight: 0, position: "relative", padding: "0 24px 24px", overflow: "hidden" }}>
-        <CountdownBreakdown daysLeft={430} title="Toby" />
+        <CountdownBreakdown daysLeft={daysLeft} title="Toby" />
       </div>
     </div>
   );
@@ -64,6 +66,7 @@ function BreakdownBox() {
 
 const WIDGETS: Array<[string, () => React.ReactNode]> = [
   ["Counter (3-unit breakdown)", () => <BreakdownBox />],
+  ["Counter (days-only, <30)", () => <BreakdownBox daysLeft={12} />],
   ["Counter", () => <CountdownWidget />],
   ["Schedule", () => <ScheduleWidget />],
   ["Tasks", () => <TasksWidget searchQuery="" />],

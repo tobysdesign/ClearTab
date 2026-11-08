@@ -300,43 +300,41 @@ export function WeatherWidgetNew() {
                         </div>
                       </>
                     ) : (
-                      // Header: place + day. Body: big temp with High/Low
-                      // underneath on the left; icon + condition on the right
+                      // Left column leads with the big temp, then place + day,
+                      // then High/Low and the (left-aligned, wrapping) condition.
+                      // The icon sits to the right.
                       <div className={styles.dayCard}>
-                        <div className={styles.dayHeader}>
-                          <span className={styles.place}>
-                            {placeName(day.location)}
-                          </span>
-                          <span className={styles.date}>{day.label}</span>
-                        </div>
-                        <div className={styles.dayBody}>
-                          <div className={styles.dayMain}>
-                            <div className={styles.bigTemp}>
-                              {day.temperature}°
+                        <div className={styles.dayMain}>
+                          <div className={styles.bigTemp}>
+                            {day.temperature}°
+                          </div>
+                          <div className={styles.dayHeader}>
+                            <span className={styles.place}>
+                              {placeName(day.location)}
+                            </span>
+                            <span className={styles.date}>{day.label}</span>
+                          </div>
+                          <div className={styles.hiLo}>
+                            <div className={styles.hiLoItem}>
+                              <span className={styles.hiLoValue}>
+                                {day.high}°
+                              </span>
+                              <span className={styles.hiLoLabel}>High</span>
                             </div>
-                            <div className={styles.hiLo}>
-                              <div className={styles.hiLoItem}>
-                                <span className={styles.hiLoValue}>
-                                  {day.high}°
-                                </span>
-                                <span className={styles.hiLoLabel}>High</span>
-                              </div>
-                              <div className={styles.hiLoItem}>
-                                <span className={styles.hiLoValue}>
-                                  {day.low}°
-                                </span>
-                                <span className={styles.hiLoLabel}>Low</span>
-                              </div>
+                            <div className={styles.hiLoItem}>
+                              <span className={styles.hiLoValue}>
+                                {day.low}°
+                              </span>
+                              <span className={styles.hiLoLabel}>Low</span>
                             </div>
                           </div>
-                          <div className={styles.daySide}>
-                            <div className={styles.weatherIconContainer}>
-                              {getWeatherIcon(day.condition)}
-                            </div>
-                            {/* Condition sits with the icon it describes */}
-                            <div className={styles.conditionText}>
-                              {day.condition}
-                            </div>
+                          <div className={styles.conditionText}>
+                            {day.condition}
+                          </div>
+                        </div>
+                        <div className={styles.daySide}>
+                          <div className={styles.weatherIconContainer}>
+                            {getWeatherIcon(day.condition)}
                           </div>
                         </div>
                       </div>
