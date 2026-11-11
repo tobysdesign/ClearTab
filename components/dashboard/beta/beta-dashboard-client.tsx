@@ -20,6 +20,7 @@ import { type ReactNode } from 'react'
 import { BrandedLoader, Tooltip, TooltipTrigger, TooltipContent } from '@cleartab/ui'
 import {
   useBetaWidgets,
+  PRESET_DEFAULT_DOCK,
   type BetaPresetLayout,
   type CustomLayoutState,
   type WidgetVisibilityState,
@@ -98,6 +99,17 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
     return 'bottom'
   })
   const [dropZones, setDropZones] = useState<DropZone[]>([])
+
+  // Selecting a preset also moves the dock to that preset's default position (Focus → side,
+  // the rest → bottom). Persist it the same way a manual dock move does.
+  const selectPreset = useCallback((layout: BetaPresetLayout) => {
+    setPresetLayout(layout)
+    if (layout !== 'custom') {
+      const dock = PRESET_DEFAULT_DOCK[layout]
+      setPosition(dock)
+      try { window.localStorage.setItem('dock-position', dock) } catch {}
+    }
+  }, [setPresetLayout])
 
   // The dock is fit-content, so measure it rather than hardcoding a width. `dockLength` is the
   // icon run, `dockThickness` the bar's depth; both drive centring at every edge.
@@ -461,7 +473,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 editMode={editingEnabled && editMode}
                 onToggleEdit={() => setEditMode((prev) => !prev)}
                 presetLayout={presetLayout}
-                setPresetLayout={setPresetLayout}
+                setPresetLayout={selectPreset}
                 widgets={widgets}
                 toggleWidget={toggleWidget}
                 activeCount={activeCount}

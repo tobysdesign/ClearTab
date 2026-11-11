@@ -40,6 +40,27 @@ export const DEFAULT_WIDGET_STATE: WidgetVisibilityState = {
   countdown: true,
 }
 
+// A preset is a starting point: selecting it applies this default visibility, which the
+// user can then toggle freely. "Focus" (taskmaster) starts with just Notes + Tasks; every
+// preset's tree still contains all widgets, so any one toggled on has a slot.
+export const PRESET_DEFAULT_VISIBILITY: Record<Exclude<BetaPresetLayout, 'custom'>, WidgetVisibilityState> = {
+  notetaker: DEFAULT_WIDGET_STATE,
+  even: DEFAULT_WIDGET_STATE,
+  taskmaster: { notes: true, tasks: true, schedule: false, weather: false, recorder: false, countdown: false },
+  minimal: DEFAULT_WIDGET_STATE,
+}
+
+export type DockPosition = 'top' | 'left' | 'right' | 'bottom'
+
+// Each preset also starts the dock in a default position. Focus puts it on the side so the
+// Tasks | Notes columns get the full height; the rest keep it along the bottom.
+export const PRESET_DEFAULT_DOCK: Record<Exclude<BetaPresetLayout, 'custom'>, DockPosition> = {
+  notetaker: 'bottom',
+  even: 'bottom',
+  taskmaster: 'left',
+  minimal: 'bottom',
+}
+
 export interface LayoutPresetMeta {
   id: BetaPresetLayout
   name: string
@@ -58,9 +79,9 @@ export const LAYOUT_PRESET_METADATA: Record<BetaPresetLayout, LayoutPresetMeta> 
     description: 'Notes & Tasks balanced top row, 4 utilities evenly split below',
   },
   taskmaster: {
-    name: 'Taskmaster',
+    name: 'Focus',
     id: 'taskmaster',
-    description: 'Tasks tall on left, Notes top right, utilities grid below',
+    description: 'Tasks left, Notes wide right. Utilities hidden by default — toggle any on',
   },
   minimal: {
     name: 'Minimal',
@@ -192,6 +213,11 @@ export function useBetaWidgets() {
 
   const setPresetLayout = useCallback((layout: BetaPresetLayout) => {
     setPresetLayoutState(layout)
+    // Selecting a named preset resets widget visibility to that preset's default
+    // starting point; 'custom' keeps whatever is currently toggled.
+    if (layout !== 'custom') {
+      setWidgets(PRESET_DEFAULT_VISIBILITY[layout])
+    }
   }, [])
 
   const toggleWidget = useCallback((id: WidgetId) => {
