@@ -21,6 +21,7 @@ import { BrandedLoader, Tooltip, TooltipTrigger, TooltipContent } from '@clearta
 import {
   useBetaWidgets,
   PRESET_DEFAULT_DOCK,
+  awayFromDock,
   type BetaPresetLayout,
   type CustomLayoutState,
   type WidgetVisibilityState,
@@ -470,6 +471,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                 setShowSettings={setShowSettings}
                 setShowSearch={setShowSearch}
                 isVertical={isVertical}
+                position={position}
                 editMode={editingEnabled && editMode}
                 onToggleEdit={() => setEditMode((prev) => !prev)}
                 presetLayout={presetLayout}
@@ -492,7 +494,7 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
                     <DraggableGlyphIcon size={32} className={betaStyles.dockDragIcon} />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent side={awayFromDock(position)}>
                   Drag to reposition the dock (top, right, bottom, left).
                 </TooltipContent>
               </Tooltip>

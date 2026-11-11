@@ -61,6 +61,19 @@ export const PRESET_DEFAULT_DOCK: Record<Exclude<BetaPresetLayout, 'custom'>, Do
   minimal: 'bottom',
 }
 
+// The side a dock overlay (tooltip/popover) should open toward: away from the edge the
+// dock sits on, which is also the direction with the most room. Keeps every dock icon's
+// overlay pointing the same way and auto-follows wherever the dock is moved.
+export type OverlaySide = 'top' | 'right' | 'bottom' | 'left'
+export function awayFromDock(position: DockPosition): OverlaySide {
+  switch (position) {
+    case 'left': return 'right'
+    case 'right': return 'left'
+    case 'top': return 'bottom'
+    case 'bottom': return 'top'
+  }
+}
+
 export interface LayoutPresetMeta {
   id: BetaPresetLayout
   name: string

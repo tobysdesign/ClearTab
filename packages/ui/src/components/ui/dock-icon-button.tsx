@@ -14,6 +14,8 @@ interface DockIconButtonProps {
   shortcut?: string
   'aria-expanded'?: boolean
   'aria-haspopup'?: React.AriaAttributes['aria-haspopup']
+  /** Which side the tooltip opens toward; defaults to "top". Set it away from the dock. */
+  tooltipSide?: 'top' | 'right' | 'bottom' | 'left'
 }
 
 export function DockIconButton({
@@ -25,6 +27,7 @@ export function DockIconButton({
   'data-testid': dataTestId,
   'aria-expanded': ariaExpanded,
   'aria-haspopup': ariaHasPopup,
+  tooltipSide,
 }: DockIconButtonProps) {
   const btn = (
     <button
@@ -44,7 +47,7 @@ export function DockIconButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{btn}</TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side={tooltipSide}>
         <span>{title}</span>
         {shortcut ? <TooltipShortcut>{shortcut}</TooltipShortcut> : null}
       </TooltipContent>

@@ -14,6 +14,8 @@ export interface AiShaderButtonProps {
   onClick: () => void;
   className?: string;
   tooltip?: string;
+  /** Which side the tooltip opens toward; defaults to "top". Set it away from the dock. */
+  tooltipSide?: "top" | "right" | "bottom" | "left";
   shortcut?: string;
   /** Liquid-glass base (button body) colour. */
   baseColor?: string;
@@ -200,6 +202,7 @@ export function AiShaderButton({
   onClick,
   className,
   tooltip,
+  tooltipSide,
   shortcut,
   baseColor = "#0b0b0d",
   glassColor = "#ff3346",
@@ -445,7 +448,7 @@ export function AiShaderButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side={tooltipSide}>
         <span>{tooltip}</span>
         {shortcut ? <TooltipShortcut>{shortcut}</TooltipShortcut> : null}
       </TooltipContent>
