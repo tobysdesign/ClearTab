@@ -73,9 +73,16 @@ export function minimalToTree(): PanelNode {
     maxPx: [null, 104],
     children: [
       splitNode('row', [75, 25], [widgetNode('notes'), widgetNode('tasks')]),
-      splitNode('row', [50, 50], [
-        splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
-        splitNode('row', [50, 50], [widgetNode('countdown'), widgetNode('recorder')]),
+      // Schedule + Weather + Countdown share the left 75% (a third each); Voice note
+      // takes the right 25%. Making the 3rd/4th divider a single-handle 75% split (like
+      // the Notes|Tasks one above) lines the countdown's right edge up with Notes' — a
+      // nested [[s|w]|[c|r]] would push it ~half a handle to the right at every width.
+      splitNode('row', [75, 25], [
+        splitNode('row', [200 / 3, 100 / 3], [
+          splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
+          widgetNode('countdown'),
+        ]),
+        widgetNode('recorder'),
       ]),
     ],
   }
