@@ -5,7 +5,15 @@ export type PanelDirection = 'row' | 'column'
 
 export type PanelNode =
   | { type: 'widget'; id: WidgetId }
-  | { type: 'split'; direction: PanelDirection; sizes: [number, number]; children: [PanelNode, PanelNode] }
+  | {
+      type: 'split'
+      direction: PanelDirection
+      sizes: [number, number]
+      children: [PanelNode, PanelNode]
+      // Optional fixed pixel cap per child (height in a column split), so a panel can be
+      // pinned to a short strip regardless of viewport — e.g. Minimal's mini utility row.
+      maxPx?: [number | null, number | null]
+    }
 
 export type DropZone = 'center' | 'top' | 'bottom' | 'left' | 'right'
 
@@ -56,13 +64,21 @@ export function minimalToTree(): PanelNode {
   // Notes (3/4) + Tasks (1/4) fill most of the height; the four utilities sit in a slim
   // bottom row as mini widgets. Notes at 75% puts its divider in line with the boundary
   // before the 4th utility (each utility is 1/4 width), so the vertical lines align.
-  return splitNode('column', [85, 15], [
-    splitNode('row', [75, 25], [widgetNode('notes'), widgetNode('tasks')]),
-    splitNode('row', [50, 50], [
-      splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
-      splitNode('row', [50, 50], [widgetNode('countdown'), widgetNode('recorder')]),
-    ]),
-  ])
+  // The bottom row is capped at 104px so it stays under the 120px "mini" threshold on
+  // tall screens too, where a 15% share would otherwise render the utilities full-size.
+  return {
+    type: 'split',
+    direction: 'column',
+    sizes: [85, 15],
+    maxPx: [null, 104],
+    children: [
+      splitNode('row', [75, 25], [widgetNode('notes'), widgetNode('tasks')]),
+      splitNode('row', [50, 50], [
+        splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
+        splitNode('row', [50, 50], [widgetNode('countdown'), widgetNode('recorder')]),
+      ]),
+    ],
+  }
 }
 
 export function presetToTree(preset: 'notetaker' | 'even' | 'taskmaster' | 'minimal'): PanelNode {

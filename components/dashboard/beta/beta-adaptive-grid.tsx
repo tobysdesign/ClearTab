@@ -107,8 +107,9 @@ function AdaptivePanel({
   minSize,
   minHeightPx = MIN_WIDGET_HEIGHT_PX,
   minWidthUnits = 1,
+  maxHeightPx,
   ...rest
-}: React.ComponentProps<typeof Panel> & { minHeightPx?: number; minWidthUnits?: number }) {
+}: React.ComponentProps<typeof Panel> & { minHeightPx?: number; minWidthUnits?: number; maxHeightPx?: number }) {
   const group = React.useContext(GroupBoxContext)
   const defaultMin =
     group?.dir === 'horizontal'
@@ -122,17 +123,28 @@ function AdaptivePanel({
     const minWidthPx = minWidthUnits * vw * MIN_WIDGET_WIDTH_FRACTION
     effectiveMin = Math.min(100, (minWidthPx / group.width) * 100)
   }
+  // A fixed pixel height cap (vertical groups only), expressed as a percentage of the
+  // measured group — mirrors the minHeightPx floor. Never drops below effectiveMin.
+  let maxSize: number | undefined
+  if (maxHeightPx !== undefined && group?.dir === 'vertical' && group.height > 0) {
+    maxSize = Math.min(100, Math.max(effectiveMin, (maxHeightPx / group.height) * 100))
+  }
   // The measured minimum can exceed the preset/saved default in small windows;
   // react-resizable-panels rejects defaultSize < minSize, so lift the default to it
-  const defaultSize =
+  // (and keep it within the cap so a capped panel opens at its cap, not larger).
+  let defaultSize =
     rest.defaultSize !== undefined && effectiveMin !== undefined
       ? Math.max(rest.defaultSize, effectiveMin)
       : rest.defaultSize
+  if (maxSize !== undefined && defaultSize !== undefined) {
+    defaultSize = Math.min(defaultSize, maxSize)
+  }
   return (
     <Panel
       minSize={effectiveMin}
       {...rest}
       defaultSize={defaultSize}
+      maxSize={maxSize}
       style={{ ...rest.style, overflow: 'visible' }}
     />
   )
@@ -246,14 +258,14 @@ export function BetaAdaptiveGrid({
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>
-        <AdaptivePanel defaultSize={node.sizes[0]} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[0]} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} maxHeightPx={node.maxPx?.[0] ?? undefined} className={styles.widgetPanel}>
           {renderPanelNode(node.children[0])}
         </AdaptivePanel>
         <PanelResizeHandle
           hitAreaMargins={RESIZE_HIT_MARGINS}
           className={node.direction === 'row' ? styles.resizeHandleHorizontal : styles.resizeHandleVertical}
         />
-        <AdaptivePanel defaultSize={node.sizes[1]} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[1]} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} maxHeightPx={node.maxPx?.[1] ?? undefined} className={styles.widgetPanel}>
           {renderPanelNode(node.children[1])}
         </AdaptivePanel>
       </AdaptivePanelGroup>
