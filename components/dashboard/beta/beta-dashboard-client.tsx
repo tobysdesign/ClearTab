@@ -110,6 +110,8 @@ export function BetaDashboardClient({ notes, tasks, layoutOverride }: BetaDashbo
       setPosition(dock)
       try { window.localStorage.setItem('dock-position', dock) } catch {}
     }
+    // Let widgets react to the preset (e.g. the notes sidebar collapses under Minimal)
+    window.dispatchEvent(new CustomEvent('cleartab-preset-change', { detail: { preset: layout } }))
   }, [setPresetLayout])
 
   // The dock is fit-content, so measure it rather than hardcoding a width. `dockLength` is the
