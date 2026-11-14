@@ -5,15 +5,7 @@ export type PanelDirection = 'row' | 'column'
 
 export type PanelNode =
   | { type: 'widget'; id: WidgetId }
-  | {
-      type: 'split'
-      direction: PanelDirection
-      sizes: [number, number]
-      children: [PanelNode, PanelNode]
-      // Optional fixed pixel cap per child (height in a column split), so a panel can be
-      // pinned to a short strip regardless of viewport — e.g. Minimal's mini utility row.
-      maxPx?: [number | null, number | null]
-    }
+  | { type: 'split'; direction: PanelDirection; sizes: [number, number]; children: [PanelNode, PanelNode] }
 
 export type DropZone = 'center' | 'top' | 'bottom' | 'left' | 'right'
 
@@ -64,13 +56,12 @@ export function minimalToTree(): PanelNode {
   // Notes (3/4) + Tasks (1/4) fill most of the height; the four utilities sit in a slim
   // bottom row as mini widgets. Notes at 75% puts its divider in line with the boundary
   // before the 4th utility (each utility is 1/4 width), so the vertical lines align.
-  // The bottom row is capped at 104px so it stays under the 120px "mini" threshold on
-  // tall screens too, where a 15% share would otherwise render the utilities full-size.
+  // The bottom row defaults to a slim share so the utilities render as mini widgets, but
+  // it stays freely resizable (no hard cap — a cap blocked dragging the strip larger).
   return {
     type: 'split',
     direction: 'column',
-    sizes: [85, 15],
-    maxPx: [null, 104],
+    sizes: [87, 13],
     children: [
       splitNode('row', [75, 25], [widgetNode('notes'), widgetNode('tasks')]),
       // Schedule + Weather + Countdown share the left 75% (a third each); Voice note
