@@ -8,9 +8,10 @@ import styles from './settings-trigger.module.css'
 
 interface SettingsTriggerProps {
   className?: string
+  tooltipSide?: 'top' | 'right' | 'bottom' | 'left'
 }
 
-export function SettingsTrigger({ className }: SettingsTriggerProps) {
+export function SettingsTrigger({ className, tooltipSide }: SettingsTriggerProps) {
   const handleClick = () => {
     // Dispatch custom event to open settings (or close them if already open)
     const event = new CustomEvent('openSettings', {
@@ -25,7 +26,8 @@ export function SettingsTrigger({ className }: SettingsTriggerProps) {
       className={cn(styles.settingsTrigger, className)}
       data-testid="settings-trigger"
       title="Settings"
-      shortcut="⌘," 
+      shortcut="⌘,"
+      tooltipSide={tooltipSide}
     >
       <SettingsGlyphIcon size={32} className={styles.settingsIcon} />
       <span className="sr-only">Open Settings</span>

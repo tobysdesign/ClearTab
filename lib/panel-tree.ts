@@ -5,7 +5,16 @@ export type PanelDirection = 'row' | 'column'
 
 export type PanelNode =
   | { type: 'widget'; id: WidgetId }
-  | { type: 'split'; direction: PanelDirection; sizes: [number, number]; children: [PanelNode, PanelNode] }
+  | {
+      type: 'split'
+      direction: PanelDirection
+      sizes: [number, number]
+      children: [PanelNode, PanelNode]
+      // Optional fixed pixel height per child (column splits only): pins that panel to a
+      // constant height at any viewport, the other child fills the rest. Used for
+      // Minimal's fixed mini utility bar. A pinned panel is not drag-resizable.
+      fixedHeightPx?: [number | null, number | null]
+    }
 
 export type DropZone = 'center' | 'top' | 'bottom' | 'left' | 'right'
 
@@ -31,10 +40,14 @@ export function notetakerToTree(): PanelNode {
   ])
 }
 
+// Focus layout: Tasks (left) + Notes (right). The utilities are present in the tree but
+// hidden by this preset's default visibility, so with them off the tree collapses to a
+// clean Tasks (33%) | Notes (67%). Toggle any utility on and it appears as a slim row
+// beneath Notes.
 export function taskmasterToTree(): PanelNode {
-  return splitNode('row', [48, 52], [
+  return splitNode('row', [33, 67], [
     widgetNode('tasks'),
-    splitNode('column', [34, 66], [widgetNode('notes'), utilityGrid()]),
+    splitNode('column', [72, 28], [widgetNode('notes'), utilityGrid()]),
   ])
 }
 
@@ -49,13 +62,31 @@ export function evenToTree(): PanelNode {
 }
 
 export function minimalToTree(): PanelNode {
-  return splitNode('column', [75, 25], [
-    splitNode('row', [50, 50], [widgetNode('notes'), widgetNode('tasks')]),
-    splitNode('row', [50, 50], [
-      splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
-      splitNode('row', [50, 50], [widgetNode('countdown'), widgetNode('recorder')]),
-    ]),
-  ])
+  // Notes (3/4) + Tasks (1/4) fill most of the height; the four utilities sit in a slim
+  // bottom row as mini widgets. Notes at 75% puts its divider in line with the boundary
+  // before the 4th utility (each utility is 1/4 width), so the vertical lines align.
+  // The utility bar is pinned to a fixed 64px so the four utilities always render as mini
+  // widgets (64px < the 120px mini threshold) and Notes/Tasks fill the remaining height.
+  return {
+    type: 'split',
+    direction: 'column',
+    sizes: [90, 10],
+    fixedHeightPx: [null, 64],
+    children: [
+      splitNode('row', [75, 25], [widgetNode('notes'), widgetNode('tasks')]),
+      // Schedule + Weather + Countdown share the left 75% (a third each); Voice note
+      // takes the right 25%. Making the 3rd/4th divider a single-handle 75% split (like
+      // the Notes|Tasks one above) lines the countdown's right edge up with Notes' — a
+      // nested [[s|w]|[c|r]] would push it ~half a handle to the right at every width.
+      splitNode('row', [75, 25], [
+        splitNode('row', [200 / 3, 100 / 3], [
+          splitNode('row', [50, 50], [widgetNode('schedule'), widgetNode('weather')]),
+          widgetNode('countdown'),
+        ]),
+        widgetNode('recorder'),
+      ]),
+    ],
+  }
 }
 
 export function presetToTree(preset: 'notetaker' | 'even' | 'taskmaster' | 'minimal'): PanelNode {

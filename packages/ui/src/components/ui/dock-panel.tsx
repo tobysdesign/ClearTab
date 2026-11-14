@@ -47,6 +47,20 @@ const VIEWPORT_PAD = 16
  * as attached, even when the trigger is near the viewport edge. */
 const TAIL_INSET = 16
 
+/** The side a dock panel should grow toward by default: away from the edge the
+ * dock sits on (the roomy side), read from the shared `dock-position` setting.
+ * So a left dock opens panels to the right, a bottom dock opens them upward, etc.
+ * A caller can still override this with an explicit `preferredPlacement`. */
+function dockAwayPlacement(): Placement {
+  const pos = typeof window !== 'undefined' ? window.localStorage.getItem('dock-position') : null
+  switch (pos) {
+    case 'left': return 'right'
+    case 'right': return 'left'
+    case 'top': return 'bottom'
+    default: return 'top' // 'bottom' or unset: grow upward
+  }
+}
+
 /** Pick the first side (preferred first) on which the panel fits inside the
  * viewport. Falls back to the preferred side when nothing fits outright. */
 function choosePlacement(
@@ -91,9 +105,11 @@ export function DockPanel({
   anchorEl,
   children,
   className,
-  preferredPlacement = 'top',
+  preferredPlacement,
   keepMounted = false,
 }: DockPanelProps) {
+  // Grow away from the dock by default; an explicit prop always wins.
+  const effectivePlacement = preferredPlacement ?? dockAwayPlacement()
   // The element the panel grows from: an explicit element wins, else the selector
   // (looked up fresh each time so it works for triggers anywhere in the tree).
   const resolveAnchor = React.useCallback(
@@ -103,7 +119,7 @@ export function DockPanel({
   const [anchorRect, setAnchorRect] = React.useState<DOMRect | null>(null)
   const [viewport, setViewport] = React.useState({ w: 0, h: 0 })
   const [panelSize, setPanelSize] = React.useState({ w: 0, h: 0 })
-  const [placement, setPlacement] = React.useState<Placement>(preferredPlacement)
+  const [placement, setPlacement] = React.useState<Placement>(effectivePlacement)
   // keepMounted renders the panel even while closed; portaling it on the first
   // client render (which the server didn't produce) is a hydration mismatch, so
   // we only mount the portal after the first commit.
@@ -136,13 +152,13 @@ export function DockPanel({
         const pw = panel.offsetWidth
         const ph = panel.offsetHeight
         setPanelSize({ w: pw, h: ph })
-        setPlacement(choosePlacement(a, vw, vh, pw, ph, preferredPlacement))
+        setPlacement(choosePlacement(a, vw, vh, pw, ph, effectivePlacement))
       }
     }
     update()
     window.addEventListener('resize', update)
     return () => window.removeEventListener('resize', update)
-  }, [isOpen, resolveAnchor, preferredPlacement])
+  }, [isOpen, resolveAnchor, effectivePlacement])
 
   // Re-measure once the panel is actually in the DOM (the effect above runs
   // before it mounts, so panelRef is null on the first pass).
@@ -153,8 +169,8 @@ export function DockPanel({
     const pw = panel.offsetWidth
     const ph = panel.offsetHeight
     setPanelSize({ w: pw, h: ph })
-    setPlacement(choosePlacement(anchorRect, viewport.w, viewport.h, pw, ph, preferredPlacement))
-  }, [isOpen, anchorRect, viewport.w, viewport.h, preferredPlacement])
+    setPlacement(choosePlacement(anchorRect, viewport.w, viewport.h, pw, ph, effectivePlacement))
+  }, [isOpen, anchorRect, viewport.w, viewport.h, effectivePlacement])
 
   React.useEffect(() => {
     if (!isOpen) return

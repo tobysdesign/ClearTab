@@ -11,7 +11,8 @@ import { SettingsTrigger } from '@/components/settings/settings-trigger'
 import { cn } from '@/lib/utils'
 import { useChatContext } from '@/hooks/use-chat-context'
 import { PresetFlank, WidgetFlank } from './dock-edit-panels'
-import type { BetaPresetLayout, WidgetId, WidgetVisibilityState } from '@/hooks/use-beta-widgets'
+import { awayFromDock } from '@/hooks/use-beta-widgets'
+import type { BetaPresetLayout, DockPosition, WidgetId, WidgetVisibilityState } from '@/hooks/use-beta-widgets'
 import styles from '../dock-content.module.css'
 
 interface BetaDockContentProps {
@@ -22,6 +23,8 @@ interface BetaDockContentProps {
   setShowSettings: (show: boolean) => void
   setShowSearch: (show: boolean) => void
   isVertical: boolean
+  /** Where the dock sits; dock overlays (tooltips) open away from this edge. */
+  position: DockPosition
   /** Edit mode is live: show the flanking preset + widget panels and highlight the trigger. */
   editMode: boolean
   /** Toggle edit mode (no-op on surfaces where editing is disabled). */
@@ -42,6 +45,7 @@ export function BetaDockContent({
   setShowSettings: _setShowSettings,
   setShowSearch: _setShowSearch,
   isVertical,
+  position,
   editMode,
   onToggleEdit,
   presetLayout,
@@ -53,6 +57,8 @@ export function BetaDockContent({
 }: BetaDockContentProps) {
   const { isChatOpen, openChat, closeChat } = useChatContext()
   const orientation = isVertical ? 'vertical' : 'horizontal'
+  // Dock tooltips open away from the edge the dock sits on (the roomy side)
+  const tooltipSide = awayFromDock(position)
 
   const handleToggleChat = () => {
     if (isChatOpen) {
@@ -89,6 +95,7 @@ export function BetaDockContent({
             title="Edit layout"
             shortcut="⌘L"
             data-testid="layout-trigger"
+            tooltipSide={tooltipSide}
           >
             <LayoutGlyphIcon size={32} />
           </DockIconButton>
@@ -102,6 +109,7 @@ export function BetaDockContent({
               data-testid="ai-chat-trigger"
               onClick={handleToggleChat}
               tooltip={isChatOpen ? 'Close AI chat' : 'Open AI chat'}
+              tooltipSide={tooltipSide}
               shortcut="⌘K"
               className={cn(isChatOpen && styles.aiButtonActive)}
             />
@@ -125,6 +133,7 @@ export function BetaDockContent({
                     onClick={() => setSearchQuery('')}
                     title="Clear search"
                     shortcut="Esc"
+                    tooltipSide={tooltipSide}
                   >
                     <CloseIcon size={16} />
                   </DockIconButton>
@@ -132,13 +141,14 @@ export function BetaDockContent({
               </div>
             )}
 
-            <SettingsTrigger />
+            <SettingsTrigger tooltipSide={tooltipSide} />
 
             <DockIconButton
               onClick={onOpenShortcuts}
               title="Keyboard shortcuts"
               shortcut="⌘/"
               data-testid="shortcuts-trigger"
+              tooltipSide={tooltipSide}
             >
               <ShortcutsGlyphIcon size={32} />
             </DockIconButton>

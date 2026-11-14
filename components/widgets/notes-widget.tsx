@@ -72,6 +72,23 @@ interface ResizablePanelsProps {
   stackedView?: "list" | "editor";
 }
 
+// Rail width the list collapses to when `collapsed` is set (under the 100px threshold
+// that switches the list to its mini chip view).
+const COLLAPSED_RAIL_WIDTH = 56;
+
+// The Minimal preset starts with the notes sidebar collapsed to its mini rail. The preset
+// is a dashboard-level setting; read it from the shared store and track live changes (the
+// dashboard dispatches `cleartab-preset-change` when a preset is selected).
+const PRESET_LAYOUT_KEY = "cleartab-preset-layout-v4";
+function presetWantsCollapsedSidebar(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(PRESET_LAYOUT_KEY) === "minimal";
+  } catch {
+    return false;
+  }
+}
+
 function ResizablePanels({
   children,
   defaultWidth = 300,
@@ -82,11 +99,15 @@ function ResizablePanels({
   onWidthChange,
   stackedView,
 }: ResizablePanelsProps) {
-  const [currentWidth, setCurrentWidth] = useState(defaultWidth);
+  const [currentWidth, setCurrentWidth] = useState(collapsed ? COLLAPSED_RAIL_WIDTH : defaultWidth);
   const [containerWidth, setContainerWidth] = useState(0);
   const isResizing = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const collapseTriggered = useRef(false);
+  // Read the latest `collapsed` from inside the ResizeObserver, whose effect doesn't
+  // re-subscribe on every prop change.
+  const collapsedRef = useRef(collapsed);
+  collapsedRef.current = collapsed;
   // Animate width only for collapse/expand; automatic resizes (mount, window,
   // dashboard layout) snap, or every animation frame counts as a layout shift
   const [animateWidth, setAnimateWidth] = useState(false);
@@ -112,28 +133,36 @@ function ResizablePanels({
   useLayoutEffect(() => {
     const width = containerRef.current?.clientWidth ?? 0;
     if (width <= 0) return;
-    const proportional = proportionalWidthFor(width);
     setContainerWidth(width);
-    setCurrentWidth(proportional);
-    onWidthChange?.(proportional);
+    const next = collapsed ? COLLAPSED_RAIL_WIDTH : proportionalWidthFor(width);
+    setCurrentWidth(next);
+    onWidthChange?.(next);
     // Mount only; the ResizeObserver below handles later size changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!collapsed) {
-      // Set proportional width: 1/3 of container width, but respect right panel minimum
-      if (containerWidth > 0) {
-        const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4);
-        const proportionalWidth = Math.max(
-          minWidth,
-          Math.min(containerWidth / 3, maxAllowedWidth),
-        );
-        setCurrentWidth(proportionalWidth);
-      } else {
-        setCurrentWidth(defaultWidth);
-      }
+    if (collapsed) {
+      // Force the list to the collapsed rail (mini chip view)
+      setCurrentWidth(COLLAPSED_RAIL_WIDTH);
+      onWidthChange?.(COLLAPSED_RAIL_WIDTH);
+      return;
     }
+    // Set proportional width: 1/3 of container width, but respect right panel minimum
+    if (containerWidth > 0) {
+      const maxAllowedWidth = Math.min(maxWidth, containerWidth * 0.4);
+      const proportionalWidth = Math.max(
+        minWidth,
+        Math.min(containerWidth / 3, maxAllowedWidth),
+      );
+      setCurrentWidth(proportionalWidth);
+      onWidthChange?.(proportionalWidth);
+    } else {
+      setCurrentWidth(defaultWidth);
+      onWidthChange?.(defaultWidth);
+    }
+    // onWidthChange is stable (setState); excluded to avoid resubscribe churn
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed, defaultWidth, containerWidth, minWidth, maxWidth]);
 
   // Track container width changes for proportional resizing
@@ -149,8 +178,9 @@ function ResizablePanels({
         flushSync(() => {
           setContainerWidth(newContainerWidth);
 
-          // Update currentWidth proportionally if not currently resizing
-          if (!isResizing.current && newContainerWidth > 0) {
+          // Update currentWidth proportionally if not currently resizing and not
+          // held collapsed (collapsed keeps the fixed rail width)
+          if (!isResizing.current && !collapsedRef.current && newContainerWidth > 0) {
             const proportionalWidth = proportionalWidthFor(newContainerWidth);
             setCurrentWidth(proportionalWidth);
             onWidthChange?.(proportionalWidth);
@@ -304,7 +334,8 @@ export function NotesWidget() {
     content: EMPTY_QUILL_CONTENT,
   }));
   const [displayTitle, setDisplayTitle] = useState<string>("");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Collapsed by default under the Minimal preset; the user can still toggle/drag it.
+  const [isCollapsed, setIsCollapsed] = useState(presetWantsCollapsedSidebar);
   const [panelWidth, setPanelWidth] = useState(300);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -315,6 +346,16 @@ export function NotesWidget() {
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
   const [highlightedNoteId, setHighlightedNoteId] = useState<string | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Follow the dashboard preset: collapse the sidebar under Minimal, expand otherwise.
+  useEffect(() => {
+    const onPresetChange = (e: Event) => {
+      const preset = (e as CustomEvent<{ preset?: string }>).detail?.preset;
+      setIsCollapsed(preset === "minimal");
+    };
+    window.addEventListener("cleartab-preset-change", onPresetChange);
+    return () => window.removeEventListener("cleartab-preset-change", onPresetChange);
+  }, []);
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const lastSavedContent = useRef<string>(JSON.stringify(EMPTY_QUILL_CONTENT));
   const lastSavedTitle = useRef<string>("");

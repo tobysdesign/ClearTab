@@ -107,8 +107,9 @@ function AdaptivePanel({
   minSize,
   minHeightPx = MIN_WIDGET_HEIGHT_PX,
   minWidthUnits = 1,
+  fixedHeightPx,
   ...rest
-}: React.ComponentProps<typeof Panel> & { minHeightPx?: number; minWidthUnits?: number }) {
+}: React.ComponentProps<typeof Panel> & { minHeightPx?: number; minWidthUnits?: number; fixedHeightPx?: number }) {
   const group = React.useContext(GroupBoxContext)
   const defaultMin =
     group?.dir === 'horizontal'
@@ -122,17 +123,30 @@ function AdaptivePanel({
     const minWidthPx = minWidthUnits * vw * MIN_WIDGET_WIDTH_FRACTION
     effectiveMin = Math.min(100, (minWidthPx / group.width) * 100)
   }
+  // A fixed pixel height (vertical groups): pin min = max to that height as a % of the
+  // measured group, so the panel stays constant and its sibling fills the rest.
+  let maxSize: number | undefined
+  if (fixedHeightPx !== undefined && group?.dir === 'vertical' && group.height > 0) {
+    const pct = Math.min(100, (fixedHeightPx / group.height) * 100)
+    effectiveMin = pct
+    maxSize = pct
+  }
   // The measured minimum can exceed the preset/saved default in small windows;
-  // react-resizable-panels rejects defaultSize < minSize, so lift the default to it
-  const defaultSize =
+  // react-resizable-panels rejects defaultSize < minSize, so lift the default to it,
+  // and keep it within a fixed max so a pinned panel opens at its set height.
+  let defaultSize =
     rest.defaultSize !== undefined && effectiveMin !== undefined
       ? Math.max(rest.defaultSize, effectiveMin)
       : rest.defaultSize
+  if (maxSize !== undefined && defaultSize !== undefined) {
+    defaultSize = Math.min(defaultSize, maxSize)
+  }
   return (
     <Panel
       minSize={effectiveMin}
       {...rest}
       defaultSize={defaultSize}
+      maxSize={maxSize}
       style={{ ...rest.style, overflow: 'visible' }}
     />
   )
@@ -246,14 +260,17 @@ export function BetaAdaptiveGrid({
     }
     return (
       <AdaptivePanelGroup direction={node.direction === 'row' ? 'horizontal' : 'vertical'} className={styles.panelGroupFull}>
-        <AdaptivePanel defaultSize={node.sizes[0]} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[0]} minHeightPx={nodeMinHeightPx(node.children[0])} minWidthUnits={nodeMinWidthUnits(node.children[0])} fixedHeightPx={node.fixedHeightPx?.[0] ?? undefined} className={styles.widgetPanel}>
           {renderPanelNode(node.children[0])}
         </AdaptivePanel>
         <PanelResizeHandle
+          // A split with a pinned (fixed-height) child can't be resized, so the handle is
+          // inert — disable it rather than leave a draggable-looking line that does nothing.
+          disabled={!!node.fixedHeightPx && (node.fixedHeightPx[0] != null || node.fixedHeightPx[1] != null)}
           hitAreaMargins={RESIZE_HIT_MARGINS}
           className={node.direction === 'row' ? styles.resizeHandleHorizontal : styles.resizeHandleVertical}
         />
-        <AdaptivePanel defaultSize={node.sizes[1]} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} className={styles.widgetPanel}>
+        <AdaptivePanel defaultSize={node.sizes[1]} minHeightPx={nodeMinHeightPx(node.children[1])} minWidthUnits={nodeMinWidthUnits(node.children[1])} fixedHeightPx={node.fixedHeightPx?.[1] ?? undefined} className={styles.widgetPanel}>
           {renderPanelNode(node.children[1])}
         </AdaptivePanel>
       </AdaptivePanelGroup>
